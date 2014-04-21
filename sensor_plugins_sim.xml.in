@@ -1,0 +1,17 @@
+<PLUGIN>
+	<SENSOR_PLUGIN>
+		<MODULE path = "/usr/lib/sensord/libaccel_sim.so"/>
+		<MODULE path = "/usr/lib/sensord/libgyro_sim.so"/>
+		<MODULE path = "/usr/lib/sensord/liblight_sim.so"/>
+		<MODULE path = "/usr/lib/sensord/libproxi_sim.so"/>
+		<MODULE path = "/usr/lib/sensord/libgyro_sim.so"/>
+	</SENSOR_PLUGIN>
+
+	<PROCESSOR_PLUGIN>
+		<MODULE path = "/usr/lib/sensord/libaccel_sim_processor.so"/>
+		<MODULE path = "/usr/lib/sensord/libgyro_sim_processor.so"/>
+		<MODULE path = "/usr/lib/sensord/liblight_sim_processor.so"/>
+		<MODULE path = "/usr/lib/sensord/libproxi_sim_processor.so"/>
+		<MODULE path = "/usr/lib/sensord/libgyro_sim_processor.so"/>
+	</PROCESSOR_PLUGIN>
+</PLUGIN>
