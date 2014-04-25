@@ -72,12 +72,12 @@ rm -rf %{buildroot}
 %make_install
 
 mkdir -p %{buildroot}/usr/share/license
-mkdir -p %{buildroot}%{_libdir}/systemd/system/sockets.target.wants
-mkdir -p %{buildroot}%{_libdir}/systemd/system/multi-user.target.wants
-install -m 0644 %SOURCE1 %{buildroot}%{_libdir}/systemd/system/
-install -m 0644 %SOURCE2 %{buildroot}%{_libdir}/systemd/system/
-ln -s ../sensord.socket  %{buildroot}%{_libdir}/systemd/system/sockets.target.wants/sensord.socket
-ln -s ../sensord.service  %{buildroot}%{_libdir}/systemd/system/multi-user.target.wants/sensord.service
+mkdir -p %{buildroot}%{_unitdir}/sockets.target.wants
+mkdir -p %{buildroot}%{_unitdir}/multi-user.target.wants
+install -m 0644 %SOURCE1 %{buildroot}%{_unitdir}
+install -m 0644 %SOURCE2 %{buildroot}%{_unitdir}
+ln -s ../sensord.socket  %{buildroot}%{_unitdir}/sockets.target.wants/sensord.socket
+ln -s ../sensord.service  %{buildroot}%{_unitdir}/multi-user.target.wants/sensord.service
 
 %post -p /sbin/ldconfig
 systemctl daemon-reload
@@ -90,10 +90,10 @@ systemctl daemon-reload
 %{_bindir}/sensord
 %attr(0644,root,root)/usr/etc/sensor_plugins.xml
 %attr(0644,root,root)/usr/etc/sensors.xml
-%{_libdir}/systemd/system/sensord.service
-%{_libdir}/systemd/system/sensord.socket
-%{_libdir}/systemd/system/multi-user.target.wants/sensord.service
-%{_libdir}/systemd/system/sockets.target.wants/sensord.socket
+%{_unitdir}/sensord.service
+%{_unitdir}/sensord.socket
+%{_unitdir}/multi-user.target.wants/sensord.service
+%{_unitdir}/sockets.target.wants/sensord.socket
 %license LICENSE.APLv2
 %{_datadir}/license/sensord
 
