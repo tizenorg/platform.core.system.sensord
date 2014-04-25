@@ -1,0 +1,8 @@
+Code-Review-1: Mikko Ylinen <mikko.ylinen@intel.com>
+Code-Review+2: Maciej Wereski <m.wereski@partner.samsung.com>
+Verified+1: Kibak Yoon <kibak.yoon@samsung.com>
+Submitted-by: Mikko Ylinen <mikko.ylinen@intel.com>
+Submitted-at: Fri, 25 Apr 2014 03:20:51 -0700
+Reviewed-on: https://review.tizen.org/gerrit/20038
+Project: platform/core/system/sensord
+Branch: refs/heads/tizen
