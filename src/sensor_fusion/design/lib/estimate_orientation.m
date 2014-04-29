@@ -293,9 +293,9 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 			P = (eye(6) - (K(:,j) * H(j,:))) * P;
 		end
 
-		Bx = Bx + x(4,i);
-		By = By + x(5,i);
-		Bz = Bz + x(6,i);
+		Bx = x(4,i);
+		By = x(5,i);
+		Bz = x(6,i);
 	end
 
 	OR_aid(1,:) = roll * RAD2DEG;
