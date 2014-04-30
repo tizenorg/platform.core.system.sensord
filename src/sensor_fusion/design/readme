@@ -1,0 +1,21 @@
+Important Information for developers who would like to contribute:-
+---------------------------------------------------------------------------------
+
+1. GNU Octave version 3.8.0 or above  with GUI support is needed for executing
+   all sensor fusion code in this directory.
+
+2. The folder 'documents' contains the high level design for sensor fusion.
+   Please update any design changes in the documents along with the code changes.
+   (The .pptx documents could be opened and edited using LibreOffice Impress)
+
+3. The folder 'results' contains the output plots for the results for various
+   virtual sensors simulated using Octave.
+
+4. The folder 'lib' contains all the library files that that will be called by
+   the sf_xxx functions.
+
+5. The folder 'data' contains sample data taken from various sensors used on a
+   mobile phone target.
+
+6. Each sf_xxx file will individually simulate a virtual sensor that is developed
+   based on sensor fusion.
