@@ -206,8 +206,8 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 		quat_aid(i,:) = rot_mat2quat(Rot_m);
 
 		euler = quat2euler(quat_aid(i,:));
-		roll(i) = euler(1);
-		pitch(i) = euler(2);
+		roll(i) = euler(2);
+		pitch(i) = euler(1);
 		yaw(i) = euler(3);
 
 		if i <= MOVING_AVERAGE_WINDOW_LENGTH
@@ -303,13 +303,13 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 	OR_aid(3,:) = yaw * RAD2DEG;
 
 	euler = quat2euler(quat_driv);
-	OR_driv(1,:) = euler(:,1)' * RAD2DEG;
-	OR_driv(2,:) = euler(:,2)' * RAD2DEG;
+	OR_driv(1,:) = euler(:,2)' * RAD2DEG;
+	OR_driv(2,:) = euler(:,1)' * RAD2DEG;
 	OR_driv(3,:) = -euler(:,3)' * RAD2DEG;
 
 	euler = quat2euler(quat_error);
-	OR_err(1,:) = euler(:,1)' * RAD2DEG;
-	OR_err(2,:) = euler(:,2)' * RAD2DEG;
+	OR_err(1,:) = euler(:,2)' * RAD2DEG;
+	OR_err(2,:) = euler(:,1)' * RAD2DEG;
 	OR_err(3,:) = euler(:,3)' * RAD2DEG;
 
 	if PLOT_SCALED_SENSOR_COMPARISON_DATA == 1
@@ -321,7 +321,7 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 		p1 = plot(1:BUFFER_SIZE,acc_x(1,1:BUFFER_SIZE),'r');
 		hold on;
 		grid on;
-		p2 = plot(1:BUFFER_SIZE,gyr_x(1,1:BUFFER_SIZE),'b');
+		p2 = plot(1:BUFFER_SIZE,filt_Gx(1,1:BUFFER_SIZE),'b');
 		hold on;
 		grid on;
 		p3 = plot(1:BUFFER_SIZE,mag_x(1,1:BUFFER_SIZE),'k');
@@ -331,7 +331,7 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 		p1 = plot(1:BUFFER_SIZE,acc_y(1,1:BUFFER_SIZE),'r');
 		hold on;
 		grid on;
-		p2 = plot(1:BUFFER_SIZE,gyr_y(1,1:BUFFER_SIZE),'b');
+		p2 = plot(1:BUFFER_SIZE,filt_Gy(1,1:BUFFER_SIZE),'b');
 		hold on;
 		grid on;
 		p3 = plot(1:BUFFER_SIZE,mag_y(1,1:BUFFER_SIZE),'k');
@@ -341,7 +341,7 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 		p1 = plot(1:BUFFER_SIZE,acc_z(1,1:BUFFER_SIZE),'r');
 		hold on;
 		grid on;
-		p2 = plot(1:BUFFER_SIZE,gyr_z(1,1:BUFFER_SIZE),'b');
+		p2 = plot(1:BUFFER_SIZE,filt_Gz(1,1:BUFFER_SIZE),'b');
 		hold on;
 		grid on;
 		p3 = plot(1:BUFFER_SIZE,mag_z(1,1:BUFFER_SIZE),'k');
