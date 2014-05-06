@@ -1,5 +1,5 @@
 function euler = quat2euler(q)
-% Quat2Euler
+% quat2euler
 %
 % Copyright (c) 2014 Samsung Electronics Co., Ltd.
 %

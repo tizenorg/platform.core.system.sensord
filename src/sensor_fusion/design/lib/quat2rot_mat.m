@@ -1,5 +1,5 @@
 function R = quat2rot_mat(q)
-% Quat2RotMat
+% quat2rot_mat
 %
 % Copyright (c) 2014 Samsung Electronics Co., Ltd.
 %
