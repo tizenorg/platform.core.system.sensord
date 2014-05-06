@@ -1,5 +1,5 @@
 function ab = quat_prod(a, b)
-% QuatProd
+% quat_prod
 %
 % Copyright (c) 2014 Samsung Electronics Co., Ltd.
 %

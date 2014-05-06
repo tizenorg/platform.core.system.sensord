@@ -52,16 +52,16 @@ OR_err = zeros(3,BUFFER_SIZE);
 % Sensor Data simulating orientation motions
 
 % get accel x,y,z axis data from stored file
-Accel_data(1,:) = (((dlmread("data/100ms/roll_pitch_yaw/accel.txt")(:,1))') - Bias_Ax)(1:BUFFER_SIZE);
-Accel_data(2,:) = (((dlmread("data/100ms/roll_pitch_yaw/accel.txt")(:,2))') - Bias_Ay)(1:BUFFER_SIZE);
-Accel_data(3,:) = (((dlmread("data/100ms/roll_pitch_yaw/accel.txt")(:,3))') - Bias_Az)(1:BUFFER_SIZE);
-Accel_data(4,:) = ((dlmread("data/100ms/roll_pitch_yaw/accel.txt")(:,4))')(1:BUFFER_SIZE);
+Accel_data(1,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/accel.txt")(:,1))') - Bias_Ax)(1:BUFFER_SIZE);
+Accel_data(2,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/accel.txt")(:,2))') - Bias_Ay)(1:BUFFER_SIZE);
+Accel_data(3,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/accel.txt")(:,3))') - Bias_Az)(1:BUFFER_SIZE);
+Accel_data(4,:) = ((dlmread("data/100ms/orientation/roll_pitch_yaw/accel.txt")(:,4))')(1:BUFFER_SIZE);
 
 % get gyro x,y,z axis data from stored file
-Gyro_data(1,:) = (((dlmread("data/100ms/roll_pitch_yaw/gyro.txt")(:,1))') - Bias_Gx)(1:BUFFER_SIZE);
-Gyro_data(2,:) = (((dlmread("data/100ms/roll_pitch_yaw/gyro.txt")(:,2))') - Bias_Gy)(1:BUFFER_SIZE);
-Gyro_data(3,:) = (((dlmread("data/100ms/roll_pitch_yaw/gyro.txt")(:,3))') - Bias_Gz)(1:BUFFER_SIZE);
-Gyro_data(4,:) = ((dlmread("data/100ms/roll_pitch_yaw/gyro.txt")(:,4))')(1:BUFFER_SIZE);
+Gyro_data(1,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/gyro.txt")(:,1))') - Bias_Gx)(1:BUFFER_SIZE);
+Gyro_data(2,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/gyro.txt")(:,2))') - Bias_Gy)(1:BUFFER_SIZE);
+Gyro_data(3,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/gyro.txt")(:,3))') - Bias_Gz)(1:BUFFER_SIZE);
+Gyro_data(4,:) = ((dlmread("data/100ms/orientation/roll_pitch_yaw/gyro.txt")(:,4))')(1:BUFFER_SIZE);
 
 scale_Gyro = 575;
 Gyro_data(1,:) = Gyro_data(1,:)/scale_Gyro;
@@ -69,10 +69,10 @@ Gyro_data(2,:) = Gyro_data(2,:)/scale_Gyro;
 Gyro_data(3,:) = Gyro_data(3,:)/scale_Gyro;
 
 % get magnetometer x,y,z axis data from stored file
-Mag_data(1,:) = (((dlmread("data/100ms/roll_pitch_yaw/magnetic.txt")(:,1))'))(1:BUFFER_SIZE);
-Mag_data(2,:) = (((dlmread("data/100ms/roll_pitch_yaw/magnetic.txt")(:,2))'))(1:BUFFER_SIZE);
-Mag_data(3,:) = (((dlmread("data/100ms/roll_pitch_yaw/magnetic.txt")(:,3))'))(1:BUFFER_SIZE);
-Mag_data(4,:) = ((dlmread("data/100ms/roll_pitch_yaw/magnetic.txt")(:,4))')(1:BUFFER_SIZE);
+Mag_data(1,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,1))'))(1:BUFFER_SIZE);
+Mag_data(2,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,2))'))(1:BUFFER_SIZE);
+Mag_data(3,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,3))'))(1:BUFFER_SIZE);
+Mag_data(4,:) = ((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,4))')(1:BUFFER_SIZE);
 
 % estimate orientation
 [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data, Mag_data);
