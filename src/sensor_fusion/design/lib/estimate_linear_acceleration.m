@@ -1,4 +1,4 @@
-% estimate_gravity
+% estimate_linear_acceleration
 %
 % Copyright (c) 2014 Samsung Electronics Co., Ltd.
 %
@@ -14,32 +14,23 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-% Gravitational Force Estimation function
+% Linear Acceleration Estimation function
 %
-% - Orientation Estimation using estimate_orientation function
-% - Project the orientation on the device reference axes to obtain
-%   gravitational force on specific reference axes
+% - Gravity estimation using the estimate_gravity function
+% - compute linear acceleration based gravitational force computed for each axes
 
-
-function [Gravity]  = estimate_gravity(Accel_data, Gyro_data, Mag_data)
+function [Linear_Acceleration]  = estimate_linear_acceleration(Accel_data, Gyro_data, Mag_data)
 
 GRAVITY = 9.80665;
 
 BUFFER_SIZE = size(Accel_data,2);
 
-OR_driv = zeros(3,BUFFER_SIZE);
-OR_aid = zeros(3,BUFFER_SIZE);
-OR_err = zeros(3,BUFFER_SIZE);
-
 Gravity = zeros(3,BUFFER_SIZE);
+Linear_Acceleration = zeros(3,BUFFER_SIZE);
 
 % estimate orientation
-[OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data, Mag_data);
+Gravity  = estimate_gravity(Accel_data, Gyro_data, Mag_data);
 
-Gx = GRAVITY * sind(OR_driv(1,:));
-Gy = GRAVITY * sind(OR_driv(2,:));
-Gz = GRAVITY * cosd(OR_driv(2,:)) .* cosd(OR_driv(1,:));
-
-Gravity = [Gx; Gy; Gz];
+Linear_Acceleration = Accel_data(1:3,:) - [Gravity(2,:); Gravity(1,:); Gravity(3,:);];
 
 end
