@@ -92,6 +92,8 @@ hold on;
 grid on;
 UA = Accel_data(3,:);
 p3 = plot(1:length(UA),UA(1,1:length(UA)),'r');
+title(['Accelerometer Raw Data']);
+legend([p1 p2 p3],'x-axis', 'y-axis', 'z-axis');
 
 % Gravity Plot Results
 subplot(2,1,2)
