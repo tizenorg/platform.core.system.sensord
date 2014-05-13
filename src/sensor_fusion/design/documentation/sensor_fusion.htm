@@ -1,0 +1,124 @@
+<html>
+<head><title>Sensor Fusion for Tizen Sensor Framework</title></head>
+
+<h1>Introduction</h1>
+
+<p>Sensor Fusion is the process of combining the accelerometer,
+gyroscope, geo-magnetic sensor, GPS data and barometer in order to generate
+accurate virtual sensor outputs such as Orientation, Gravity, Linear
+Acceleration, Altitude, Pedometer, etc. Sensor Fusion is used for extracting
+individual virtual sensor components from composite sensor data and/or
+combining multiple sensor data to create new sensor component data while
+compensating for individual sensor errors. Ideally the following errors would
+have to be corrected during sensor fusion:-</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Bias: Any non-zero sensor
+output when the input is zero</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Scale factor error: error
+resulting from aging or manufacturing tolerances</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Nonlinearity: Present in
+most sensors to some degree</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Scale factor sign asymmetry:
+Often mismatched push-pull amplifiers</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Dead zone: usually due to
+mechanical lock-in</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Quantization error: inherent
+in all digitized systems</p>
+
+<h1>Sensors Used for Sensor Fusion</h1>
+
+<p>Accelerometer Sensor :- Accelerometer data is a combination of linear
+acceleration and gravity components. Applications would be interested in using
+linear acceleration and gravity sensor data separately. Sensor fusion could be
+used to separate linear acceleration and gravity components.  Additionally,
+accelerometer is used for correcting the roll and pitch orientation measurements
+generated from the gyroscope. Using the same, corrected tilt measurement (roll
+and pitch) is generated. </p>
+
+<p>Gyroscope Sensor :- It is ideal to determine the orientation of the device,
+but has the problem of long term drift in the measured sensor values. Sensor
+Fusion could be used to combine Accelerometer, Gyroscope and Geomagnetic (Compass)
+sensor data to produce corrected orientation data without drift.</p>
+
+<p>Geo-Magnetic Sensor :- Provides the direction the device is pointed in relation
+to the earth's magnetic field. Could be used along with gyroscope angular rotation
+along Z axis to produce correct yaw measurement. Geo-Magnetic sensor along with
+GPS latitude-longitude measurements could be used to accurately estimate
+heading of the device.</p>
+
+<p>Barometer Sensor :- Measures atmospheric pressure. Height of the device from
+sea level could be measured based on change in atmospheric pressure at that height.
+Sensor Fusion could also be used to combine the altitude from the GPS data with
+height measured from the Barometer measurements and produce corrected altitude
+measurements. </p>
+
+<p>GPS Data :- Provides exact position in terms of latitude, longitude coordinates
+and altitude for the phone. Can be used along with barometer for producing
+corrected altitude measurements. Could be used along with Geo-magnetic sensor
+to determine the heading of a device.</p>
+
+<h1>Orientation Estimation</h1>
+
+
+<p><center><img src="./block_diagram_orientation_estimation.png"
+width="50%" height="50%"></center></p>
+
+<h2>Driving System</h2>
+
+<p>The gyroscope output data consists for angular rates for pitch, roll and yaw.
+Gyroscope angular rates are corrected for bias (both static bias and bias correction
+from Kalman filter) and noise using low pass filter. The Gyroscope angular rates are
+converted to Quaternions after scaling.</p>
+
+<h2>Aiding System</h2>
+
+<p>The accelerometer and geomagnetic sensor data are corrected
+for noise and compensated for static bias. Accelerometer is used to compute
+tilt (pitch and roll). The geomagnetic sensor along with the computed tilt data
+is used compute yaw. The computed Euler angles (pitch, roll and yaw) are
+converted to quaternions.</p>
+
+<h2>Noise Covariance Computation</h2>
+
+<p>The process noise covariance (Q) is calculated by computing
+covariance of windowed block of driving system data. The measurement noise
+covariance (R) is calculated by computing covariance of windowed block of aiding
+system data. The process and measurement covariance computed are to be used in
+Kalman filtering.</p>
+
+<h2>Kalman Filtering</h2>
+
+<p><center><img src="./kalman_filter_stages.png"></center></p>
+
+<p>To ensure linear Kalman filtering the following error state equation is used:</p>
+
+<p><img src="./state_equation.png"></p>
+
+<p>,where the first term is the quaternion representation of the Euler angles
+error and the next three terms are the error in knowledge of bias errors.</p>
+
+<h1>References</h1>
+
+<p>[1] Gebre-Egziabher, H., Rhayward, R. C. &amp; Powell, J. D. Design
+of Multi-Sensor Attitude Determination Systems. IEEE Transactions on
+Aerospace and Electronic Systems, (Volume: 40, Issue: 2), 627 - 649 (2004)</p>
+
+<p>[2] Abyarjoo1, F., Barreto1, A., Cofino1, J. &amp; Ortega, F. R., Implementing
+a Sensor Fusion Algorithm for 3D Orientation Detection with Inertial/Magnetic
+Sensors. The International Joint Conferences on CISSE (2012)</p>
+
+<p>[3] Marcard, T. V., Design and Implementation of an attitude estimation system to
+control orthopedic components. Chalmers University. Master thesis published on
+the university link http://publications.lib.chalmers.se/records/fulltext/125985.pdf(2010)</p>
+
+<p>[4] Welch, G., Bishop, G. An introduction to the Kalman Filter: SIGGRAPH (2001)</p>
+
+<p>[5] Grewal, M. S., Weill, L. R., Andrews, A. P., Global Positioning Systems,
+Inertial Navigation, and Integration (John Wiley &amp; Sons., 2001)</p>
+
+</html>
