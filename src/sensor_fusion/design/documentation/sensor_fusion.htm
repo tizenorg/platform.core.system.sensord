@@ -64,9 +64,8 @@ to determine the heading of a device.</p>
 
 <h1>Orientation Estimation</h1>
 
-
 <p><center><img src="./block_diagram_orientation_estimation.png"
-width="50%" height="50%"></center></p>
+width="60%" height="60%"></center></p>
 
 <h2>Driving System</h2>
 
@@ -101,6 +100,48 @@ Kalman filtering.</p>
 
 <p>,where the first term is the quaternion representation of the Euler angles
 error and the next three terms are the error in knowledge of bias errors.</p>
+
+<h1>Determination of Gravity</h1>
+<p>When a device is subjected to motion in Euclidean space, the 3D accelerometer
+data generated from the device is a combination of linear acceleration and gravity
+components which are a measure of linear and rotational motion respectively.The
+gravity measurements in 3D space are derived from the orientation (pitch, roll
+and yaw) measurements that is output from the Kalman filter. The process to compute
+gravity and linear acceleration is shown in figure below.
+
+<p><center><img src="./block_diagram_gravity_and_linear_acceleration.png"
+width="40%" height="40%"></center></p>
+
+<p>Gravity virtual sensor data provides the measure of the direction in which the
+Earth’s gravitational force is observed in the device’s frame of reference. The
+orientation of the device decides the measure of the influence of Earth’s gravitational
+force on the 3-axes of the device. The following equations are used for projecting
+the tilt(pitch, roll) of the device on the Earth’s gravity axis to determine earth’s
+gravitational effect on the devices reference axis.</p>
+
+<p>GRx = Earth’s Gravity * sin(pitch)</p>
+<p>GRy = Earth’s Gravity * sin(roll)</p>
+<p>GRz = Earth’s Gravity * cos(pitch) * cos(roll)</p>
+
+<p><center><img src="./orientation_effect_on_gravity.png"></center></p>
+
+<p>When the device tilt values (pitch,roll) are changed from (0,0) to (0,&Pi;/2),
+phone is rotated around x-axis, the y-axis gets aligned to earth's gravitational field
+after rotation instead of the z-axis.  When this rotation is applied to the equations
+given above, the values (GRx,GRy,GRz) are converted from (0,0,G) to (0,G,0) due to the
+shift in the axis which experiences the gravitational field (G is measure of Earth's
+gravity).</p>
+
+<h1>Determination of Linear Acceleration</h1>
+
+<p>Linear Acceleration virtual sensor data provides the measure of the acceleration of
+a device after removing the Gravity components on the 3-axes. Accurate linear
+acceleration data are calculated by subtracting gravity components from the 3-axes
+calibrated accelerometer data.</p>
+
+<p>LAx = Ax – GRy</p>
+<p>LAy = Ay – GRx</p>
+<p>LAz = Az – GRz</p>
 
 <h1>References</h1>
 
