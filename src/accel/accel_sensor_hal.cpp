@@ -20,27 +20,16 @@
 #include <fstream>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <dirent.h>
 #include <linux/input.h>
 #include <cconfig.h>
 #include <accel_sensor_hal.h>
+#include <sys/poll.h>
+#include <iio_common.h>
+
 
 using std::ifstream;
 using config::CConfig;
-
-#define NODE_NAME "name"
-#define NODE_INPUT "input"
-#define NODE_ENABLE "enable"
-#define NODE_POLL_DELAY "poll_delay"
-#define NODE_ACCEL_POLL_DELAY "accel_poll_delay"
-#define SENSOR_NODE "/sys/class/sensors/"
-#define SENSORHUB_NODE "/sys/class/sensors/ssp_sensor/"
-#define INPUT_DEVICE_NODE "/sys/class/input/"
-#define DEV_INPUT_NODE "/dev/input/event/"
-#define CALIBRATION_NODE "/sys/class/sensors/accelerometer_sensor/calibration"
-#define CALIBRATION_FILE "/csa/sensor/accel_cal_data"
-#define CALIBRATION_DIR	"/csa/sensor"
 
 #define INITIAL_VALUE -1
 #define INITIAL_TIME 0
@@ -58,14 +47,12 @@ using config::CConfig;
 #define ELEMENT_RAW_DATA_UNIT	"RAW_DATA_UNIT"
 #define ELEMENT_RESOLUTION		"RESOLUTION"
 #define ATTR_VALUE				"value"
-
-#define INPUT_NAME	"accelerometer_sensor"
+#define SCAN_EL_DIR				"scan_elements/"
 
 accel_sensor_hal::accel_sensor_hal()
 : m_x(INITIAL_VALUE)
 , m_y(INITIAL_VALUE)
 , m_z(INITIAL_VALUE)
-, m_node_handle(INITIAL_VALUE)
 , m_polling_interval(POLL_1HZ_MS)
 , m_fired_time(INITIAL_TIME)
 , m_sensorhub_supported(false)
@@ -111,25 +98,16 @@ accel_sensor_hal::accel_sensor_hal()
 	m_raw_data_unit = (float)(raw_data_unit);
 	INFO("m_raw_data_unit = %f", m_raw_data_unit);
 
-	if ((m_node_handle = open(m_resource.c_str(), O_RDWR)) < 0) {
-		ERR("Failed to open handle(%d)", m_node_handle);
-		throw ENXIO;
-	}
-
-	int clockId = CLOCK_MONOTONIC;
-
-	if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
-		ERR("Fail to set monotonic timestamp for %s", m_resource.c_str());
-		throw ENXIO;
-	}
-
 	INFO("accel_sensor_hal is created!");
 }
 
 accel_sensor_hal::~accel_sensor_hal()
 {
-	close(m_node_handle);
-	m_node_handle = INITIAL_VALUE;
+	enable_resource(false);
+	if (m_data != NULL)
+		delete []m_data;
+	if (m_fp_buffer > 0)
+		close(m_fp_buffer);
 
 	INFO("accel_sensor_hal is destroyed!");
 }
@@ -146,82 +124,51 @@ sensor_type_t accel_sensor_hal::get_type(void)
 
 long accel_sensor_hal::set_command(const unsigned int cmd, long value)
 {
-	FILE *fp;
-
 	AUTOLOCK(m_mutex);
-
 	switch (cmd) {
 	case ACCELEROMETER_PROPERTY_SET_CALIBRATION :
-		if (calibration(CAL_SET)) {
-			INFO("acc_sensor_calibration OK");
-			return 0;
-		}
-
-		ERR("acc_sensor_calibration FAIL");
+		ERR("Accel sensor calibration not supported\n");
 		return -1;
 	case ACCELEROMETER_PROPERTY_CHECK_CALIBRATION_STATUS :
-		if (calibration(CAL_CHECK)) {
-			INFO("acc_sensor_calibration check OK");
-			return 0;
-		}
-
-		ERR("acc_sensor_calibration check FAIL");
+		ERR("Accel sensor calibration check not supported\n");
 		return -1;
 	default:
-		ERR("Invalid property_cmd");
+		ERR("Invalid property_cmd\n");
 		break;
 	}
-
 	return -1;
 }
 
-bool accel_sensor_hal::enable_resource(string &resource_node, bool enable)
+bool accel_sensor_hal::enable_resource(bool enable)
 {
-	int prev_status, status;
-	FILE *fp = NULL;
-	fp = fopen(resource_node.c_str(), "r");
+	string temp;
 
-	if (!fp) {
-		ERR("Fail to open a resource file: %s", resource_node.c_str());
-		return false;
+	if (enable)
+	{
+		temp = m_accel_dir + string(SCAN_EL_DIR) + string(CHANNEL_NAME_X) + string("_en");
+		update_sysfs_num(temp.c_str(), 1);
+		temp = m_accel_dir + string(SCAN_EL_DIR) + string(CHANNEL_NAME_Y) + string("_en");
+		update_sysfs_num(temp.c_str(), 1);
+		temp = m_accel_dir + string(SCAN_EL_DIR) + string(CHANNEL_NAME_Z) + string("_en");
+		update_sysfs_num(temp.c_str(), 1);
+		temp = m_accel_dir + string(SCAN_EL_DIR) + string(CHANNEL_NAME_TIME) + string("_en");
+		update_sysfs_num(temp.c_str(), 1);
+		setup_trigger(INPUT_TRIG_NAME, true);
+		setup_buffer(1);
 	}
-
-	if (fscanf(fp, "%d", &prev_status) < 0) {
-		ERR("Failed to get data from %s", resource_node.c_str());
-		fclose(fp);
-		return false;
+	else
+	{
+		temp = m_accel_dir + string(SCAN_EL_DIR) + string(CHANNEL_NAME_X) + string("_en");
+		update_sysfs_num(temp.c_str(), 0);
+		temp = m_accel_dir + string(SCAN_EL_DIR) + string(CHANNEL_NAME_Y) + string("_en");
+		update_sysfs_num(temp.c_str(), 0);
+		temp = m_accel_dir + string(SCAN_EL_DIR) + string(CHANNEL_NAME_Z) + string("_en");
+		update_sysfs_num(temp.c_str(), 0);
+		temp = m_accel_dir + string(SCAN_EL_DIR) + string(CHANNEL_NAME_TIME) + string("_en");
+		update_sysfs_num(temp.c_str(), 0);
+		setup_buffer(0);
+		setup_trigger("NULL", false);
 	}
-
-	fclose(fp);
-
-	if (enable) {
-		if (m_sensorhub_supported)
-			status = prev_status | (1 << SENSORHUB_ACCELEROMETER_ENABLE_BIT);
-		else
-			status = 1;
-	} else {
-		if (m_sensorhub_supported)
-			status = prev_status ^ (1 << SENSORHUB_ACCELEROMETER_ENABLE_BIT);
-		else
-			status = 0;
-	}
-
-	fp = fopen(resource_node.c_str(), "w");
-
-	if (!fp) {
-		ERR("Failed to open a resource file: %s", resource_node.c_str());
-		return false;
-	}
-
-	if (fprintf(fp, "%d", status) < 0) {
-		ERR("Failed to enable a resource file: %s", resource_node.c_str());
-		fclose(fp);
-		return false;
-	}
-
-	if (fp)
-		fclose(fp);
-
 	return true;
 }
 
@@ -229,7 +176,7 @@ bool accel_sensor_hal::enable(void)
 {
 	AUTOLOCK(m_mutex);
 
-	enable_resource(m_enable_resource, true);
+	enable_resource(true);
 	set_interval(m_polling_interval);
 
 	m_fired_time = 0;
@@ -241,147 +188,61 @@ bool accel_sensor_hal::disable(void)
 {
 	AUTOLOCK(m_mutex);
 
-	enable_resource(m_enable_resource, false);
+	enable_resource(false);
 	INFO("Accel sensor real stopping");
 	return true;
 }
 
-bool accel_sensor_hal::set_interval(unsigned long val)
+bool accel_sensor_hal::set_interval(unsigned long ms_interval)
 {
-	unsigned long long polling_interval_ns;
-	FILE *fp = NULL;
-
-	AUTOLOCK(m_mutex);
-
-	polling_interval_ns = ((unsigned long long)(val) * MS_TO_SEC * MS_TO_SEC);
-	fp = fopen(m_polling_resource.c_str(), "w");
-
-	if (!fp) {
-		ERR("Failed to open a resource file: %s", m_polling_resource.c_str());
-		return false;
+	int freq, i;
+	freq = int(1000 / ms_interval);
+	for (i=0; i < m_sample_freq_count; i++)
+	{
+		if (freq == m_sample_freq[i])
+		{
+			if (update_sysfs_num(m_freq_resource.c_str(), freq, true) == 0)
+			{
+				INFO("Interval is changed from %lums to %lums]", m_polling_interval, ms_interval);
+				return true;
+			}
+			else
+			{
+				ERR("Failed to set data %lu\n", ms_interval);
+				return false;
+			}
+		}
 	}
-
-	if (fprintf(fp, "%llu", polling_interval_ns) < 0) {
-		ERR("Failed to set data %llu", polling_interval_ns);
-		fclose(fp);
-		return false;
-	}
-
-	if (fp)
-		fclose(fp);
-
-	INFO("Interval is changed from %dms to %dms]", m_polling_interval, val);
-	m_polling_interval = val;
-	return true;
+	DBG("The interval not supported: %lu\n", ms_interval);
+	ERR("Failed to set data %lu\n", ms_interval);
+	return false;
 }
 
 bool accel_sensor_hal::update_value(bool wait)
 {
-	const int TIMEOUT = 1;
-	int accel_raw[3] = {0,};
-	bool x, y, z;
-	int read_input_cnt = 0;
-	const int INPUT_MAX_BEFORE_SYN = 10;
-	unsigned long long fired_time = 0;
-	bool syn = false;
-	x = y = z = false;
+	int i;
+	struct pollfd pfd;
+	ssize_t read_size;
+	const int TIMEOUT = 1000;
 
-	struct timeval tv;
-	fd_set readfds, exceptfds;
+	pfd.fd = m_fp_buffer;
+	pfd.events = POLLIN;
+	if (wait)
+		poll(&pfd, 1, TIMEOUT);
+	else
+		poll(&pfd, 1, 0);
 
-	FD_ZERO(&readfds);
-	FD_ZERO(&exceptfds);
-	FD_SET(m_node_handle, &readfds);
-	FD_SET(m_node_handle, &exceptfds);
-
-	if (wait) {
-		tv.tv_sec = TIMEOUT;
-		tv.tv_usec = 0;
-	} else {
-		tv.tv_sec = 0;
-		tv.tv_usec = 0;
-	}
-
-	int ret;
-	ret = select(m_node_handle + 1, &readfds, NULL, &exceptfds, &tv);
-
-	if (ret == -1) {
-		ERR("select error:%s m_node_handle:%d", strerror(errno), m_node_handle);
-		return false;
-	} else if (!ret) {
-		DBG("select timeout: %d seconds elapsed", tv.tv_sec);
+	read_size = read(m_fp_buffer, m_data, ACCEL_RINGBUF_LEN * m_scan_size);
+	if (read_size <= 0)
+	{
+		ERR("Nothing could be read\n");
 		return false;
 	}
-
-	if (FD_ISSET(m_node_handle, &exceptfds)) {
-		ERR("select exception occurred!");
-		return false;
+	else
+	{
+		for (i = 0; i < (read_size / m_scan_size); i++)
+			decode_data();
 	}
-
-	if (FD_ISSET(m_node_handle, &readfds)) {
-		struct input_event accel_input;
-		DBG("accel event detection!");
-
-		while ((syn == false) && (read_input_cnt < INPUT_MAX_BEFORE_SYN)) {
-			int len = read(m_node_handle, &accel_input, sizeof(accel_input));
-
-			if (len != sizeof(accel_input)) {
-				ERR("accel_file read fail, read_len = %d", len);
-				return false;
-			}
-
-			++read_input_cnt;
-
-			if (accel_input.type == EV_REL) {
-				switch (accel_input.code) {
-				case REL_X:
-					accel_raw[0] = (int)accel_input.value;
-					x = true;
-					break;
-				case REL_Y:
-					accel_raw[1] = (int)accel_input.value;
-					y = true;
-					break;
-				case REL_Z:
-					accel_raw[2] = (int)accel_input.value;
-					z = true;
-					break;
-				default:
-					ERR("accel_input event[type = %d, code = %d] is unknown.", accel_input.type, accel_input.code);
-					return false;
-					break;
-				}
-			} else if (accel_input.type == EV_SYN) {
-				syn = true;
-				fired_time = sensor_hal::get_timestamp(&accel_input.time);
-			} else {
-				ERR("accel_input event[type = %d, code = %d] is unknown.", accel_input.type, accel_input.code);
-				return false;
-			}
-		}
-	} else {
-		ERR("select nothing to read!!!");
-		return false;
-	}
-
-	if (syn == false) {
-		ERR("EV_SYN didn't come until %d inputs had come", read_input_cnt);
-		return false;
-	}
-
-	AUTOLOCK(m_value_mutex);
-
-	if (x)
-		m_x = accel_raw[0];
-
-	if (y)
-		m_y = accel_raw[1];
-
-	if (z)
-		m_z = accel_raw[2];
-
-	m_fired_time = fired_time;
-	DBG("m_x = %d, m_y = %d, m_z = %d, time = %lluus", m_x, m_y, m_z, m_fired_time);
 	return true;
 }
 
@@ -429,193 +290,238 @@ bool accel_sensor_hal::get_properties(sensor_properties_t &properties)
 	return true;
 }
 
-bool accel_sensor_hal::calibration(int cmd)
-{
-	if (cmd == CAL_CHECK) {
-		struct calibration_data {
-			short x;
-			short y;
-			short z;
-		};
-		struct calibration_data cal_data;
-
-		if (access(CALIBRATION_FILE, F_OK) == 0) {
-			FILE *fp = NULL;
-			fp = fopen(CALIBRATION_FILE, "r");
-
-			if (!fp) {
-				ERR("cannot open calibration file");
-				return false;
-			}
-
-			size_t read_cnt;
-			read_cnt = fread(&cal_data, sizeof(cal_data), 1, fp);
-
-			if (read_cnt != 1) {
-				ERR("cal_data read fail, read_cnt = %d", read_cnt);
-				fclose(fp);
-				return false;
-			}
-
-			fclose(fp);
-			INFO("x = [%d] y = [%d] z = [%d]", cal_data.x, cal_data.y, cal_data.z);
-
-			if (cal_data.x == 0 && cal_data.y == 0 && cal_data.z == 0) {
-				DBG("cal_data values is zero");
-				return false;
-			} else
-				return true;
-		} else {
-			INFO("cannot access calibration file");
-			return false;
-		}
-	} else if (cmd == CAL_SET) {
-		if (mkdir(CALIBRATION_DIR, 0755) != 0)
-			INFO("mkdir fail");
-
-		FILE *fp;
-		fp = fopen(CALIBRATION_NODE, "w");
-
-		if (!fp) {
-			ERR("Failed to open a calibration file");
-			return false;
-		}
-
-		if (fprintf(fp, "%d", cmd) < 0) {
-			ERR("Failed to set calibration");
-			fclose(fp);
-			return false;
-		}
-
-		fclose(fp);
-		return true;
-	} else if (cmd == CAL_MKDIR) {
-		if (mkdir(CALIBRATION_DIR, 0755) != 0) {
-			ERR("mkdir fail");
-			return false;
-		}
-
-		return true;
-	}
-
-	ERR("Non supported calibration cmd = %d", cmd);
-	return false;
-}
-
 bool accel_sensor_hal::is_sensorhub_supported(void)
 {
-	DIR *main_dir = NULL;
-	main_dir = opendir(SENSORHUB_NODE);
-
-	if (!main_dir) {
-		INFO("Sensor Hub is not supported");
-		return false;
-	}
-
-	INFO("It supports sensor hub");
-	closedir(main_dir);
-	return true;
+	return false;
 }
 
 bool accel_sensor_hal::check_hw_node(void)
 {
 	string name_node;
 	string hw_name;
+	string file_name;
+	string temp;
 	DIR *main_dir = NULL;
 	struct dirent *dir_entry = NULL;
 	bool find_node = false;
+	bool find_trigger = false;
 
 	INFO("======================start check_hw_node=============================");
 
 	m_sensorhub_supported = is_sensorhub_supported();
-	main_dir = opendir(SENSOR_NODE);
+	main_dir = opendir(IIO_DIR);
 
 	if (!main_dir) {
-		ERR("Directory open failed to collect data");
+		ERR("Could not open IIO directory\n");
 		return false;
 	}
 
-	while ((!find_node) && (dir_entry = readdir(main_dir))) {
-		if ((strncasecmp(dir_entry->d_name , ".", 1 ) != 0) && (strncasecmp(dir_entry->d_name , "..", 2 ) != 0) && (dir_entry->d_ino != 0)) {
-			name_node = string(SENSOR_NODE) + string(dir_entry->d_name) + string("/") + string(NODE_NAME);
+	m_channels = (struct channel_parameters*) malloc (sizeof(struct channel_parameters)*NO_OF_CHANNELS);
 
-			ifstream infile(name_node.c_str());
+	while (!(find_node && find_trigger) && (dir_entry = readdir(main_dir)))
+	{
+		if ((strncasecmp(dir_entry->d_name , ".", 1 ) != 0) && (strncasecmp(dir_entry->d_name , "..", 2 ) != 0) && (dir_entry->d_ino != 0))
+		{
+			file_name = string(IIO_DIR) + string(dir_entry->d_name) + string("/name");
+			ifstream infile(file_name.c_str());
 
 			if (!infile)
 				continue;
 
 			infile >> hw_name;
 
-			if (CConfig::get_instance().is_supported(SENSOR_TYPE_ACCEL, hw_name) == true) {
-				m_name = m_model_id = hw_name;
-				INFO("m_model_id = %s", m_model_id.c_str());
-				find_node = true;
-				calibration(CAL_MKDIR);
-				break;
-			}
-		}
-	}
-
-	closedir(main_dir);
-
-	if (find_node) {
-		main_dir = opendir(INPUT_DEVICE_NODE);
-
-		if (!main_dir) {
-			ERR("Directory open failed to collect data");
-			return false;
-		}
-
-		find_node = false;
-
-		while ((!find_node) && (dir_entry = readdir(main_dir))) {
-			if (strncasecmp(dir_entry->d_name, NODE_INPUT, 5) == 0) {
-				name_node = string(INPUT_DEVICE_NODE) + string(dir_entry->d_name) + string("/") + string(NODE_NAME);
-				ifstream infile(name_node.c_str());
-
-				if (!infile)
-					continue;
-
-				infile >> hw_name;
-
-				if (hw_name == string(INPUT_NAME)) {
-					INFO("name_node = %s", name_node.c_str());
-					DBG("Find H/W  for accel_sensor");
-
+			if (strncmp(dir_entry->d_name, "iio:device", 10) == 0)
+			{
+				if (hw_name == string(INPUT_DEV_NAME))
+				{
+					m_accel_dir = string(IIO_DIR) + string(dir_entry->d_name) + string("/");
+					m_buffer_access = string("/dev/") + string(dir_entry->d_name);
+					m_name = m_model_id = hw_name;
 					find_node = true;
-					string dir_name;
-					dir_name = string(dir_entry->d_name);
-					unsigned found = dir_name.find_first_not_of(NODE_INPUT);
-					m_resource = string(DEV_INPUT_NODE) + dir_name.substr(found);
-
-					if (m_sensorhub_supported) {
-						m_enable_resource = string(SENSORHUB_NODE) + string(NODE_ENABLE);
-						m_polling_resource = string(SENSORHUB_NODE) + string(NODE_ACCEL_POLL_DELAY);
-					} else {
-						m_enable_resource = string(INPUT_DEVICE_NODE) + string(dir_entry->d_name) + string("/") + string(NODE_ENABLE);
-						m_polling_resource = string(INPUT_DEVICE_NODE) + string(dir_entry->d_name) + string("/") + string(NODE_POLL_DELAY);
-					}
-
-					break;
+					DBG("m_accel_dir:%s\n", m_accel_dir.c_str());
+					DBG("m_buffer_access:%s\n", m_buffer_access.c_str());
+					DBG("m_name:%s\n", m_name.c_str());
 				}
 			}
+			if (strncmp(dir_entry->d_name, "trigger", 7) == 0)
+			{
+				if (hw_name == string(INPUT_TRIG_NAME))
+				{
+					m_accel_trig_dir = string(IIO_DIR) + string(dir_entry->d_name) + string("/");
+					find_trigger = true;
+					DBG("m_accel_trig_dir:%s\n", m_accel_trig_dir.c_str());
+				}
+			}
+			if (find_node && find_trigger)
+				break;
 		}
+	}
+	closedir(main_dir);
 
-		closedir(main_dir);
+	if (find_node && find_trigger)
+	{
+		if (setup_channels() == true)
+			INFO("IIO channel setup successful");
+		else
+		{
+			ERR("IIO channel setup failed");
+			return false;
+		}
+	}
+	return (find_node && find_trigger);
+}
+
+bool accel_sensor_hal::setup_channels(void)
+{
+	int freq, i;
+	double sf;
+	string temp;
+
+	enable_resource(true);
+
+	if (add_channel_to_array(m_accel_dir.c_str(), CHANNEL_NAME_X, &m_channels[0]) < 0)
+	{
+		ERR("Failed to add channel x to channel array");
+		return false;
+	}
+	if (add_channel_to_array(m_accel_dir.c_str(), CHANNEL_NAME_Y, &m_channels[1]) < 0)
+	{
+		ERR("Failed to add channel y to channel array");
+		return false;
+	}
+	if (add_channel_to_array(m_accel_dir.c_str(), CHANNEL_NAME_Z, &m_channels[2]) < 0)
+	{
+		ERR("Failed to add channel z to channel array");
+		return false;
+	}
+	if (add_channel_to_array(m_accel_dir.c_str(), CHANNEL_NAME_TIME, &m_channels[3]) < 0)
+	{
+		ERR("Failed to add channel time_stamp to channel array");
+		return false;
+	}
+	sort_channels_by_index(m_channels, NO_OF_CHANNELS);
+
+	m_scan_size = get_channel_array_size(m_channels, NO_OF_CHANNELS);
+	if (m_scan_size == 0)
+	{
+		ERR("Channel array size is zero");
+		return false;
+	}
+	m_data = new (std::nothrow) char[m_scan_size * ACCEL_RINGBUF_LEN];
+
+	if (m_data == NULL)
+	{
+		ERR("Couldn't create data buffer\n");
+		return false;
 	}
 
-	if (find_node) {
-		INFO("m_resource = %s", m_resource.c_str());
-		INFO("m_enable_resource = %s", m_enable_resource.c_str());
-		INFO("m_polling_resource = %s", m_polling_resource.c_str());
+	m_fp_buffer = open(m_buffer_access.c_str(), O_RDONLY | O_NONBLOCK);
+	if (m_fp_buffer == -1)
+	{
+		ERR("Failed to open ring buffer(%s)\n", m_buffer_access.c_str());
+		return false;
 	}
 
-	return find_node;
+	m_freq_resource = m_accel_dir + string(ACCEL_FREQ);
+	temp = m_accel_dir + string(ACCEL_FREQ_AVLBL);
+	FILE *fp = NULL;
+	fp = fopen(temp.c_str(), "r");
+	if (!fp)
+	{
+		ERR("Fail to open available frequencies file:%s\n", temp.c_str());
+		return false;
+	}
+
+	for (i = 0; i < MAX_FREQ_COUNT; i++)
+		m_sample_freq[i] = 0;
+	i = 0;
+	while (fscanf(fp, "%d", &freq) > 0)
+		m_sample_freq[i++] = freq;
+	m_sample_freq_count = i;
+
+	temp = m_accel_dir + string(ACCEL_SCALE_AVLBL);
+	fp = fopen(temp.c_str(), "r");
+	if (!fp)
+	{
+		ERR("Fail to open available scale factors file:%s\n", temp.c_str());
+		return false;
+	}
+	for (i = 0; i < MAX_SCALING_COUNT; i++)
+		m_scale_factor[i] = 0;
+	i = 0;
+	while (fscanf(fp, "%lf", &sf) > 0)
+		m_scale_factor[i++] = sf;
+	m_scale_factor_count = i;
+
+	return true;
+}
+
+void accel_sensor_hal::decode_data(void)
+{
+	AUTOLOCK(m_value_mutex);
+
+	m_x = convert_bytes_to_int(*(unsigned short int *)(m_data + m_channels[0].buf_index), &m_channels[0]);
+	m_y = convert_bytes_to_int(*(unsigned short int *)(m_data + m_channels[1].buf_index), &m_channels[1]);
+	m_z = convert_bytes_to_int(*(unsigned short int *)(m_data + m_channels[2].buf_index), &m_channels[2]);
+
+	long long int val = *(long long int *)(m_data + m_channels[3].buf_index);
+	if ((val >> m_channels[3].valid_bits) & 1)
+		val = (val & m_channels[3].mask) | ~m_channels[3].mask;
+
+	m_fired_time = (unsigned long long int)(val);
+	INFO("m_x = %d, m_y = %d, m_z = %d, time = %lluus", m_x, m_y, m_z, m_fired_time);
+}
+
+bool accel_sensor_hal::setup_trigger(char* trig_name, bool verify)
+{
+	string temp;
+	int ret;
+
+	temp = m_accel_dir + string("trigger/current_trigger");
+	update_sysfs_string(temp.c_str(), trig_name, verify);
+	if (ret < 0)
+	{
+		ERR("failed to write to current_trigger\n");
+		return false;
+	}
+	INFO("current_trigger setup successfully\n");
+	return true;
+}
+
+bool accel_sensor_hal::setup_buffer(int enable)
+{
+	string temp;
+	int ret;
+	temp = m_accel_dir + string("buffer/length");
+	INFO("Buffer Length Setup: %s", temp.c_str());
+	ret = update_sysfs_num(temp.c_str(), ACCEL_RINGBUF_LEN, true);
+	if (ret < 0)
+	{
+		ERR("failed to write to buffer/length\n");
+		return false;
+	}
+	INFO("buffer/length setup successfully\n");
+
+	temp = m_accel_dir + string("buffer/enable");
+	INFO("Buffer Enable: %s", temp.c_str());
+	ret = update_sysfs_num(temp.c_str(), enable, true);
+	if (ret < 0)
+	{
+		ERR("failed to write to buffer/enable\n");
+		return false;
+	}
+	if (enable)
+		INFO("buffer enabled\n");
+	else
+		INFO("buffer disabled\n");
+
+	return true;
 }
 
 extern "C" void *create(void)
 {
 	accel_sensor_hal *inst;
+	INFO("creating accel_sensor_hal instance");
 
 	try {
 		inst = new accel_sensor_hal();
