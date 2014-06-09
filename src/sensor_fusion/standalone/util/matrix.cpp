@@ -17,7 +17,7 @@
  *
  */
 
-#include "matrix.h"
+#include <matrix.h>
 
 matrix::matrix(void)
 {

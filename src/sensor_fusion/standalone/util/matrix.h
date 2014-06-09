@@ -22,9 +22,9 @@
 
 class matrix {
 public:
-	int rows;
-	int cols;
-	float **mat;
+	int m_rows;
+	int m_cols;
+	float **m_mat;
 
 	matrix(void);
 	matrix(const int rows, const int cols);
