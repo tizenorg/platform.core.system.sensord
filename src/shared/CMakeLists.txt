@@ -51,6 +51,7 @@ add_library(sensord-server SHARED
 	physical_sensor.cpp
 	virtual_sensor.cpp
 	sensor_fusion.cpp
+	iio_common.cpp
 )
 
 add_library(sensord-share SHARED
@@ -89,6 +90,7 @@ install(FILES
 	cbase_lock.h
 	cmutex.h
 	common.h
+	iio_common.h
 	DESTINATION include/${PROJECT_NAME}
 )
 
