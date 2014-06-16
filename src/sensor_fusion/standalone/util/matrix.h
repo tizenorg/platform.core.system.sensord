@@ -20,6 +20,9 @@
 #ifndef _MATRIX_H
 #define _MATRIX_H
 
+#include <iostream>
+using namespace std;
+
 template <typename TYPE>
 class matrix {
 public:
@@ -29,23 +32,35 @@ public:
 
 	matrix(void);
 	matrix(const int rows, const int cols);
-	matrix(const int rows, const int cols, TYPE **mat_data);
+	matrix(const int rows, const int cols, TYPE *mat_data);
 	matrix(const matrix<TYPE>& m);
 	~matrix();
 
 	matrix<TYPE> operator =(const matrix<TYPE>& m);
 
-	friend matrix<TYPE> operator +(const matrix<TYPE> m1, const matrix<TYPE> m2);
-	friend matrix<TYPE> operator +(const matrix<TYPE> m, const TYPE val);
-	friend matrix<TYPE> operator -(const matrix<TYPE> m1, const matrix<TYPE> m2);
-	friend matrix<TYPE> operator -(const matrix<TYPE> m, const TYPE val);
-	friend matrix<TYPE> operator *(const matrix<TYPE> m1, const matrix<TYPE> m2);
-	friend matrix<TYPE> operator *(const matrix<TYPE> m, const TYPE val);
-	friend matrix<TYPE> operator /(const matrix<TYPE> m1, const matrix<TYPE> m2);
-	friend bool operator ==(const matrix<TYPE> m1, const matrix<TYPE> m2);
-	friend bool operator !=(const matrix<TYPE> m1, const matrix<TYPE> m2);
-
-	friend matrix<TYPE> transpose(const matrix<TYPE> m);
+	template<typename T> friend ostream& operator << (ostream& dout,
+			matrix<T>& m);
+	template<typename T> friend matrix<T> operator +(const matrix<T> m1,
+			const matrix<T> m2);
+	template<typename T> friend matrix<T> operator +(const matrix<T> m,
+			const T val);
+	template<typename T> friend matrix<T> operator -(const matrix<T> m1,
+			const matrix<T> m2);
+	template<typename T> friend matrix<T> operator -(const matrix<T> m,
+			const T val);
+	template<typename T> friend matrix<T> operator *(const matrix<T> m1,
+			const matrix<T> m2);
+	template<typename T> friend matrix<T> operator *(const matrix<T> m,
+			const T val);
+	template<typename T> friend matrix<T> operator /(const matrix<T> m1,
+			const matrix<T> m2);
+	template<typename T> friend bool operator ==(const matrix<T> m1,
+			const matrix<T> m2);
+	template<typename T> friend bool operator !=(const matrix<T> m1,
+			const matrix<T> m2);
+	template<typename T> friend matrix<T> transpose(const matrix<T> m);
 };
+
+#include "matrix.cpp"
 
 #endif  //_MATRIX_H
