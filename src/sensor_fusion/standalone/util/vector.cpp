@@ -17,106 +17,233 @@
  *
  */
 
-#include <vector.h>
+#if defined (_VECTOR_H) && defined (_MATRIX_H)
 
 template <typename TYPE>
 vector<TYPE>::vector(void)
 {
-
+	m_vec = NULL;
 }
 
 template <typename TYPE>
 vector<TYPE>::vector(const int size)
 {
-
+	m_size = size;
+	m_vec = NULL;
+	m_vec = new TYPE [m_size];
 }
 
 template <typename TYPE>
 vector<TYPE>::vector(const int size, TYPE *vec_data)
 {
+	m_size = size;
+	m_vec = NULL;
+	m_vec = new TYPE [m_size];
 
+	for (int j = 0; j < m_size; j++)
+		m_vec[j] = *vec_data++;
 }
 
 template <typename TYPE>
 vector<TYPE>::vector(const vector<TYPE>& v)
 {
+	m_size = v.m_size;
+	m_vec = NULL;
+	m_vec = new TYPE [m_size];
 
+	for (int q = 0; q < m_size; q++)
+		m_vec[q] = v.m_vec[q];
 }
 
 template <typename TYPE>
 vector<TYPE>::~vector()
 {
-
+	delete[] m_vec;
 }
 
 template <typename TYPE>
 vector<TYPE> vector<TYPE>::operator =(const vector<TYPE>& v)
 {
+	if (this == &v)
+	{
+		return *this;
+	}
 
+	delete[] m_vec;
+	m_size = v.m_size;
+	m_vec = new TYPE [m_size];
+
+	for (int q = 0; q < m_size; q++)
+		m_vec[q] = v.m_vec[q];
+
+	return *this;
 }
 
 template <typename TYPE>
-vector<TYPE> operator +(const vector<TYPE> v1, const vector<TYPE> v2)
+ostream& operator <<(ostream& dout, vector<TYPE>& v)
 {
+	for (int j = 0; j < v.m_size; j++)
+	{
+		dout << v.m_vec[j] << "\t";
+	}
 
+	dout << endl;
+
+	return dout;
 }
 
-template <typename TYPE>
-vector<TYPE> operator +(const vector<TYPE> v, const TYPE val)
+template <typename T>
+vector<T> operator +(const vector<T> v1, const vector<T> v2)
 {
+	assert(v1.m_size == v2.m_size);
 
+	vector<T> v3(v1.m_size);
+
+	for (int j = 0; j < v1.m_size; j++)
+		v3.m_vec[j] = v1.m_vec[j] + v2.m_vec[j];
+
+	return v3;
 }
 
-template <typename TYPE>
-vector<TYPE> operator -(const vector<TYPE> v1, const vector<TYPE> v2)
+template <typename T>
+vector<T> operator +(const vector<T> v, const T val)
 {
+	vector<T> v1(v.m_size);
 
+	for (int j = 0; j < v.m_size; j++)
+		v1.m_vec[j] = v.m_vec[j] + val;
+
+	return v1;
 }
 
-template <typename TYPE>
-vector<TYPE> operator -(const vector<TYPE> v, const TYPE val)
+template <typename T>
+vector<T> operator -(const vector<T> v1, const vector<T> v2)
 {
+	assert(v1.m_size == v2.m_size);
 
+	vector<T> v3(v1.m_size);
+
+	for (int j = 0; j < v1.m_size; j++)
+		v3.m_vec[j] = v1.m_vec[j] - v2.m_vec[j];
+
+	return v3;
 }
 
-template <typename TYPE>
-matrix<TYPE> operator *(const matrix<TYPE> m, const vector<TYPE> v)
+template <typename T>
+vector<T> operator -(const vector<T> v, const T val)
 {
+	vector<T> v1(v.m_size);
 
+	for (int j = 0; j < v.m_size; j++)
+		v1.m_vec[j] = v.m_vec[j] - val;
+
+	return v1;
 }
 
-template <typename TYPE>
-TYPE operator *(const vector<TYPE> v, const matrix<TYPE> m)
+template <typename T>
+matrix<T> operator *(const matrix<T> m, const vector<T> v)
 {
+	assert(m.m_rows == v.m_size);
+	assert(m.m_cols == 1);
 
+	matrix<T> m1(m.m_rows, v.m_size);
+
+	for (int i = 0; i < m1.m_rows; i++)
+	{
+		for (int j = 0; j < m1.m_cols; j++)
+		{
+			m1.m_mat[i][j] = m.m_mat[i][0] * v.m_vec[j];
+		}
+	}
+
+	return m1;
 }
 
-template <typename TYPE>
-vector<TYPE> operator *(const vector<TYPE> v, const TYPE val)
+template <typename T>
+vector<T> operator *(const vector<T> v, const matrix<T> m)
 {
+	assert(m.m_rows == v.m_size);
+	assert(m.m_cols != 1);
 
+	vector<T> v1(m.m_cols);
+
+	for (int j = 0; j < m.m_cols; j++)
+	{
+		v1.m_vec[j] = 0;
+		for (int k = 0; k < m.m_rows; k++)
+			v1.m_vec[j] += v.m_vec[k] * m.m_mat[k][j];
+	}
+
+	return v1;
 }
 
-template <typename TYPE>
-vector<TYPE> operator /(const vector<TYPE> v1, const vector<TYPE> v2)
+template <typename T>
+vector<T> operator *(const vector<T> v, const T val)
 {
+	vector<T> v1(v.m_size);
 
+	for (int j = 0; j < v.m_size; j++)
+		v1.m_vec[j] = v.m_vec[j] * val;
+
+	return v1;
 }
 
-template <typename TYPE>
-bool operator ==(const vector<TYPE> v1, const vector<TYPE> v2)
+template <typename T>
+vector<T> operator /(const vector<T> v, const T val)
 {
+	vector<T> v1(v.m_size);
 
+	for (int j = 0; j < v.m_size; j++)
+		v1.m_vec[j] = v.m_vec[j] / val;
+
+	return v1;
 }
 
-template <typename TYPE>
-bool operator !=(const vector<TYPE> v1, const vector<TYPE> v2)
+template <typename T>
+bool operator ==(const vector<T> v1, const vector<T> v2)
 {
+	if (v1.m_size == v2.m_size)
+	{
+		for (int i = 0; i < v1.m_size; i++)
+			if (v1.m_vec[i] != v2.m_vec[i])
+				return false;
+	}
+	else
+		return false;
 
+	return true;
 }
 
-template <typename TYPE>
-matrix<TYPE> vector<TYPE>::transpose(const vector<TYPE> v)
+template <typename T>
+bool operator !=(const vector<T> v1, const vector<T> v2)
 {
-
+	return (!(v1 == v2));
 }
+
+template <typename T>
+matrix<T> transpose(const vector<T> v)
+{
+	matrix<T> m(v.m_size, 1);
+
+	for (int i = 0; i < v.m_size; i++)
+		m.m_mat[i][0] = v.m_vec[i];
+
+	return m;
+}
+
+template <typename T>
+T mul(const vector<T> v, const matrix<T> m)
+{
+	assert(m.m_rows == v.m_size);
+	assert(m.m_cols == 1);
+
+	T result = (T) 0;
+
+	for (int k = 0; k < v.m_size; k++)
+		result += v.m_vec[k] * m.m_mat[k][0];
+
+	return result;
+}
+
+#endif
+

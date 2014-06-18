@@ -20,7 +20,7 @@
 #ifndef _VECTOR_H
 #define _VECTOR_H
 
-#include <matrix.h>
+#include "matrix.h"
 
 template <typename TYPE>
 class vector {
@@ -36,18 +36,33 @@ public:
 
 	vector<TYPE> operator =(const vector<TYPE>& v);
 
-	friend vector<TYPE> operator +(const vector<TYPE> v1, const vector<TYPE> v2);
-	friend vector<TYPE> operator +(const vector<TYPE> v, const TYPE val);
-	friend vector<TYPE> operator -(const vector<TYPE> v1, const vector<TYPE> v2);
-	friend vector<TYPE> operator -(const vector<TYPE> v, const TYPE val);
-	friend matrix<TYPE> operator *(const matrix<TYPE> v1, const vector<TYPE> v2);
-	friend TYPE operator *(const vector<TYPE> v, const matrix<TYPE> m);
-	friend vector<TYPE> operator *(const vector<TYPE> v, const TYPE val);
-	friend vector<TYPE> operator /(const vector<TYPE> v1, const vector<TYPE> v2);
-	friend bool operator ==(const vector<TYPE> v1, const vector<TYPE> v2);
-	friend bool operator !=(const vector<TYPE> v1, const vector<TYPE> v2);
+	template<typename T> friend ostream& operator << (ostream& dout,
+			vector<T>& v);
+	template<typename T> friend vector<T> operator +(const vector<T> v1,
+			const vector<T> v2);
+	template<typename T> friend vector<T> operator +(const vector<T> v,
+			const T val);
+	template<typename T> friend vector<T> operator -(const vector<T> v1,
+			const vector<T> v2);
+	template<typename T> friend vector<T> operator -(const vector<T> v,
+			const T val);
+	template<typename T> friend matrix<T> operator *(const matrix<T> v1,
+			const vector<T> v2);
+	template<typename T> friend vector<T> operator *(const vector<T> v,
+			const matrix<T> m);
+	template<typename T> friend vector<T> operator *(const vector<T> v,
+			const T val);
+	template<typename T> friend vector<T> operator /(const vector<T> v1,
+			const T val);
+	template<typename T> friend bool operator ==(const vector<T> v1,
+			const vector<T> v2);
+	template<typename T> friend bool operator !=(const vector<T> v1,
+			const vector<T> v2);
 
-	friend matrix<TYPE> transpose(const vector<TYPE> v);
+	template<typename T> friend T mul(const vector<T> v, const matrix<T> m);
+	template<typename T> friend matrix<T> transpose(const vector<T> v);
 };
 
-#endif  //_VECTOR_H
+#include "vector.cpp"
+
+#endif /* _VECTOR_H */
