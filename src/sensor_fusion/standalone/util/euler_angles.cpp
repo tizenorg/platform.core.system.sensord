@@ -60,6 +60,8 @@ template <typename TYPE>
 euler_angles<TYPE> euler_angles<TYPE>::operator =(const euler_angles<TYPE>& e)
 {
 	m_ang = e.m_ang;
+
+	return *this;
 }
 
 template <typename T>

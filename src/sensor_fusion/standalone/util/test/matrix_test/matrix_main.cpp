@@ -92,11 +92,11 @@ int main()
 	float x = 4.0;
 	float x1 = -2.5;
 	cout<< "\n\n\nScalar subtraction\n";
-	m3 = m11 - x;
+	m13 = m11 - x;
 	m6 = m10 - x1;
 	cout<< "\nNumber Subtracted:" << x;
 	cout<< "\n\n" << m11;
-	cout<< "\nResult:\n\n" << m3;
+	cout<< "\nResult:\n\n" << m13;
 	cout<< "\nNumber Subtracted:" << x1;
 	cout<< "\n\n" << m10;
 	cout<< "\nResult:\n\n" << m6;

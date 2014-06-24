@@ -72,9 +72,12 @@ matrix<TYPE>::matrix(const int rows, const int cols, TYPE *mat_data)
 template <typename TYPE>
 matrix<TYPE>::~matrix()
 {
-	for (int i = 0; i < m_rows; i++)
-		delete[] m_mat[i];
-	delete[] m_mat;
+	if (m_mat != NULL)
+	{
+		for (int i = 0; i < m_rows; i++)
+			delete[] m_mat[i];
+		delete[] m_mat;
+	}
 }
 
 template <typename TYPE>
@@ -85,16 +88,18 @@ matrix<TYPE> matrix<TYPE>::operator =(const matrix<TYPE>& m)
 		return *this;
 	}
 
-	for (int i = 0; i < m_rows; i++)
-		delete[] m_mat[i];
-	delete[] m_mat;
+	if (m_mat == NULL)
+	{
+		m_rows = m.m_rows;
+		m_cols = m.m_cols;
+		m_mat = new TYPE *[m_rows];
 
-	m_rows = m.m_rows;
-	m_cols = m.m_cols;
-	m_mat = new TYPE *[m_rows];
+		for (int i = 0; i < m_rows; i++)
+			m_mat[i] = new TYPE [m_cols];
+	}
 
-	for (int i = 0; i < m_rows; i++)
-		m_mat[i] = new TYPE [m_cols];
+	assert(m_rows == m.m_rows);
+	assert(m_cols == m.m_cols);
 
 	for (int p = 0; p < m_rows; p++)
 		for (int q = 0; q < m_cols; q++)
