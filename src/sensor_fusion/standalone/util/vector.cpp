@@ -58,7 +58,8 @@ vector<TYPE>::vector(const vector<TYPE>& v)
 template <typename TYPE>
 vector<TYPE>::~vector()
 {
-	delete[] m_vec;
+	if (m_vec != NULL)
+		delete[] m_vec;
 }
 
 template <typename TYPE>
@@ -69,12 +70,26 @@ vector<TYPE> vector<TYPE>::operator =(const vector<TYPE>& v)
 		return *this;
 	}
 
-	delete[] m_vec;
-	m_size = v.m_size;
-	m_vec = new TYPE [m_size];
+	if (m_vec == NULL)
+	{
+		m_size = v.m_size;
+		m_vec = new TYPE [m_size];
+	}
+	else
+	{
+		if (m_size != v.m_size)
+		{
+			delete[] m_vec;
+
+			m_size = v.m_size;
+			m_vec = new TYPE [m_size];
+		}
+	}
+
 
 	for (int q = 0; q < m_size; q++)
 		m_vec[q] = v.m_vec[q];
+
 
 	return *this;
 }

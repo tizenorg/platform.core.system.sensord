@@ -58,6 +58,8 @@ template <typename TYPE>
 quaternion<TYPE> quaternion<TYPE>::operator =(const quaternion<TYPE>& q)
 {
 	m_quat = q.m_quat;
+
+	return *this;
 }
 
 template <typename T>

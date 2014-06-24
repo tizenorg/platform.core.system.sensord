@@ -147,5 +147,10 @@ int main()
 	cout << "\n\nv15:\n\n" << v15;
 	cout << "\n\n\nv15 != v15 :";
 	cout << (v15 != v15);
+
+	cout<< "\n\nAssignment\n";
+	v3 = v1;
+	cout<< "Input \n" << v1;
+	cout<< "\nOutput:\n" << v3 << endl;
 }
 
