@@ -25,16 +25,16 @@ int main()
 
 	vector<float> v1(3, arr1);
 
-	sensor_data<float> sd1(2.0, 3.0, 4.0);
+	sensor_data<float> sd1(2.0, 3.0, 4.0, 140737488355328);
 	sensor_data<float> sd2(1.04, -4.678, -2.34);
-	sensor_data<float> sd3(0.054, 1.097, 4.456);
-	sensor_data<float> sd10(v1);
+	sensor_data<float> sd3(0.054, 1.097, 4.456, 140737488355328);
+	sensor_data<float> sd10(v1, 140737488355328);
 
 	cout << "Constructor tests\n";
 	cout << "input\t" << v1 << "\n";
-	cout << "output\t" << sd10.m_data << "\n\n";
+	cout << "output\t" << sd10.m_data << "\t" << sd10.m_time_stamp << "\n\n";
 	cout << "input\t" << v1 << "\n";
-	cout << "output\t" << sd2.m_data<< "\n\n";
+	cout << "output\t" << sd2.m_data << "\t" << sd2.m_time_stamp << "\n\n";
 
 	cout<< "Addition:\n";
 	sensor_data<float> sd4 = sd1 + sd2;
