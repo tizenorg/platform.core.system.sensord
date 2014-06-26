@@ -24,29 +24,34 @@
 #define SENSOR_DATA_SIZE 3
 
 template <typename TYPE>
-sensor_data<TYPE>::sensor_data() : m_data(SENSOR_DATA_SIZE)
+sensor_data<TYPE>::sensor_data() : m_data(SENSOR_DATA_SIZE), m_time_stamp(0)
 {
 }
 
 template <typename TYPE>
-sensor_data<TYPE>::sensor_data(const TYPE x, const TYPE y, const TYPE z)
+sensor_data<TYPE>::sensor_data(const TYPE x, const TYPE y,
+		const TYPE z, const unsigned long long time_stamp = 0)
 {
 	TYPE vec_data[SENSOR_DATA_SIZE] = {x, y, z};
 
 	vector<TYPE> v(SENSOR_DATA_SIZE, vec_data);
 	m_data = v;
+	m_time_stamp = time_stamp;
 }
 
 template <typename TYPE>
-sensor_data<TYPE>::sensor_data(const vector<TYPE> v)
+sensor_data<TYPE>::sensor_data(const vector<TYPE> v,
+		const unsigned long long time_stamp = 0)
 {
 	m_data = v;
+	m_time_stamp = time_stamp;
 }
 
 template <typename TYPE>
 sensor_data<TYPE>::sensor_data(const sensor_data<TYPE>& s)
 {
 	m_data = s.m_data;
+	m_time_stamp = s.m_time_stamp;
 }
 
 template <typename TYPE>
@@ -58,6 +63,7 @@ template <typename TYPE>
 sensor_data<TYPE> sensor_data<TYPE>::operator =(const sensor_data<TYPE>& s)
 {
 	m_data = s.m_data;
+	m_time_stamp = s.m_time_stamp;
 
 	return *this;
 }
@@ -83,7 +89,7 @@ sensor_data<T> normalize(sensor_data<T> data)
 	y /= val;
 	z /= val;
 
-	sensor_data<T> s(x, y, z);
+	sensor_data<T> s(x, y, z, data.m_time_stamp);
 
 	return s;
 }
@@ -97,7 +103,7 @@ sensor_data<T> scale_data(sensor_data<T> data, T scaling_factor)
 	y = data.m_data.m_vec[1] / scaling_factor;
 	z = data.m_data.m_vec[2] / scaling_factor;
 
-	sensor_data<T> s(x, y, z);
+	sensor_data<T> s(x, y, z, data.m_time_stamp);
 
 	return s;
 }
