@@ -58,6 +58,8 @@ template <typename TYPE>
 sensor_data<TYPE> sensor_data<TYPE>::operator =(const sensor_data<TYPE>& s)
 {
 	m_data = s.m_data;
+
+	return *this;
 }
 
 template <typename T>
