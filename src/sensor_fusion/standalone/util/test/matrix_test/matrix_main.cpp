@@ -30,6 +30,7 @@ int main()
 	float arr3[3][3] = {{20.2, 40.5, 10.0}, {3.6, 52.0, 5.5}, {1.0, 45.5, 66.6}};
 	float arr4[3][3] = {{2.24, 0.5, 0.023}, {3.675, 5.32, 0.556}, {1.023, 45.75, 621.6}};
 	float arr8[3][3] = {{4.75, 0.65, 0.123}, {0.075, 5.302, 0.56}, {1.113, 0.475, 2.362}};
+	float arr52[3][1] = {{1.0}, {3.0}, {4.0}};
 
 	matrix<float> m1(2, 2, (float *) arr0);
 	matrix<float> m2(2, 2, (float *) arr1);
@@ -43,6 +44,7 @@ int main()
 	matrix<float> m20(1, 3, (float *) arr11);
 	matrix<float> m21(3, 1, (float *) arr12);
 	matrix<float> m22(2, 3, (float *) arr15);
+	matrix<float> m51(3, 1, (float *) arr52);
 
 	cout<<"Addition\n";
 	m6 = m10 + m15;
@@ -143,4 +145,9 @@ int main()
 	m3 = m12;
 	cout<< "Input \n" << m12;
 	cout<< "\nOutput:\n" << m3 << endl;
+
+	matrix<float> m111 = cross(m21, m51);
+	cout<< "\n\n\nCross Product:";
+	cout << "\n\n" << m21 << "\n\n" << m51;
+	cout << "\nResult:\n\n" << m111;
 }

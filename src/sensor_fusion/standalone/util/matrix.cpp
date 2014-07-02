@@ -268,4 +268,17 @@ matrix<T> transpose(const matrix<T> m)
 	return m1;
 }
 
+
+template <typename T>
+matrix<T> cross(const matrix<T> m1, const matrix<T> m2)
+{
+	matrix<T> m3(3,1);
+
+	m3.m_mat[0][0] = ((m1.m_mat[1][0] * m2.m_mat[2][0]) - (m1.m_mat[2][0] * m2.m_mat[1][0]));
+	m3.m_mat[1][0] = ((m1.m_mat[2][0] * m2.m_mat[0][0]) - (m1.m_mat[0][0] * m2.m_mat[2][0]));
+	m3.m_mat[2][0] = ((m1.m_mat[0][0] * m2.m_mat[1][0]) - (m1.m_mat[1][0] * m2.m_mat[0][0]));
+
+	return m3;
+}
+
 #endif //_MATRIX_H
