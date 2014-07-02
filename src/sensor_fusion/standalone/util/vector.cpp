@@ -30,7 +30,7 @@ vector<TYPE>::vector(const int size)
 {
 	m_size = size;
 	m_vec = NULL;
-	m_vec = new TYPE [m_size];
+	m_vec = new TYPE [m_size]();
 }
 
 template <typename TYPE>
