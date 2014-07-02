@@ -152,5 +152,11 @@ int main()
 	v3 = v1;
 	cout<< "Input \n" << v1;
 	cout<< "\nOutput:\n" << v3 << endl;
+
+
+	vector<float> v111 = cross(v21, v22);
+	cout<< "\n\n\nCross Product:";
+	cout << "\n\n" << v21 << "\n\n" << v22;
+	cout << "\nResult:\n\n" << v111;
 }
 
