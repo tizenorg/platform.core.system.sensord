@@ -44,7 +44,10 @@ int main()
 	matrix<float> m21(3, 1, (float *) arr12);
 	matrix<float> m22(2, 3, (float *) arr15);
 
-	cout<<"Addition\n";
+	cout<< "Constructor Test\n";
+	cout<< "\n" << m6;
+
+	cout<<"\n\nAddition\n";
 	m6 = m10 + m15;
 	m13 = m11 + m11;
 	cout<< "\n" << m10 <<"\n"<< m15;
