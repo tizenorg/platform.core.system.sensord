@@ -22,7 +22,7 @@
 #include <gyro_sensor.h>
 #include <sensor_plugin_loader.h>
 
-#define INTIAL_VALUE -1
+#define INITIAL_VALUE -1
 #define MS_TO_US 1000
 #define DPS_TO_MDPS 1000
 #define RAW_DATA_TO_DPS_UNIT(X) ((float)(X)/((float)DPS_TO_MDPS))
