@@ -62,6 +62,22 @@ quaternion<TYPE> quaternion<TYPE>::operator =(const quaternion<TYPE>& q)
 	return *this;
 }
 
+template <typename TYPE>
+void quaternion<TYPE>::quat_normalize()
+{
+	TYPE w, x, y, z;
+	TYPE val;
+
+	w = m_quat.m_vec[0] * m_quat.m_vec[0];
+	x = m_quat.m_vec[1] * m_quat.m_vec[1];
+	y = m_quat.m_vec[2] * m_quat.m_vec[2];
+	z = m_quat.m_vec[3] * m_quat.m_vec[3];
+
+	val = sqrt(w + x + y + z);
+
+	m_quat = m_quat / val;
+}
+
 template <typename T>
 quaternion<T> operator *(const quaternion<T> q, const T val)
 {
@@ -99,24 +115,6 @@ template <typename T>
 quaternion<T> operator +(const quaternion<T> q1, const quaternion<T> q2)
 {
 	return (q1.m_quat + q2.m_quat);
-}
-
-template <typename T>
-quaternion<T> quat_normalize(const quaternion<T> q)
-{
-	T w, x, y, z;
-	T val;
-
-	w = q.m_quat.m_vec[0] * q.m_quat.m_vec[0];
-	x = q.m_quat.m_vec[1] * q.m_quat.m_vec[1];
-	y = q.m_quat.m_vec[2] * q.m_quat.m_vec[2];
-	z = q.m_quat.m_vec[3] * q.m_quat.m_vec[3];
-
-	val = sqrt(w + x + y + z);
-
-	quaternion<T> q1(q.m_quat / val);
-
-	return (q1);
 }
 
 template <typename T>

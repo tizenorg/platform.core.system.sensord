@@ -34,6 +34,7 @@ public:
 	~quaternion();
 
 	quaternion<TYPE> operator =(const quaternion<TYPE>& q);
+	void quat_normalize();
 
 	template<typename T> friend quaternion<T> operator *(const quaternion<T> q,
 			const T val);
@@ -42,7 +43,6 @@ public:
 	template<typename T> friend quaternion<T> operator +(const quaternion<T> q1,
 			const quaternion<T> q2);
 
-	template<typename T> friend quaternion<T> quat_normalize(const quaternion<T> q);
 	template<typename T> friend quaternion<T> quat_conj(const quaternion<T> q);
 };
 
