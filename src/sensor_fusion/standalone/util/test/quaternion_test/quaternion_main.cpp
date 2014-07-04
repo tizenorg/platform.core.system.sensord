@@ -60,9 +60,9 @@ int main()
 	cout << "output\t" << q7.m_quat << "\n\n";
 
 	cout << "Quaternion Normalization\n";
-	quaternion<float> q8 = quat_normalize(q1);
 	cout << "input\t" << q1.m_quat << "\n";
-	cout << "output\t" << q8.m_quat << "\n\n";
+	q1.quat_normalize();
+	cout << "output\t" << q1.m_quat << "\n\n";
 
 	cout << "Quaternion Conjugate\n";
 	quaternion<float> q9 = quat_conj(q1);
