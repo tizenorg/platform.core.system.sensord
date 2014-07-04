@@ -260,6 +260,16 @@ T mul(const vector<T> v, const matrix<T> m)
 	return result;
 }
 
+
+template <typename T>
+void insert_end(vector<T>& v, T val)
+{
+	for (int i = 0; i < (v.m_size - 1); i++)
+		v.m_vec[i] = v.m_vec[i+1];
+
+	v.m_vec[v.m_size-1] = val;
+}
+
 template <typename T>
 vector<T> cross(const vector<T> v1, const vector<T> v2)
 {
@@ -272,5 +282,27 @@ vector<T> cross(const vector<T> v1, const vector<T> v2)
 	return v3;
 }
 
+template <typename T>
+T var(const vector<T> v)
+{
+	T val = 0;
+	T mean, var, diff;
+
+	for (int i = 0; i < v.m_size; i++)
+		val += v.m_vec[i];
+
+	mean = val / v.m_size;
+
+	val = 0;
+	for (int i = 0; i < v.m_size; i++)
+	{
+		diff = (v.m_vec[i] - mean);
+		val += diff * diff;
+	}
+
+	var = val / (v.m_size - 1);
+
+	return var;
+}
 #endif
 

@@ -29,6 +29,7 @@ int main()
 	float arr0[5] = {2344.98,345.24,456.12,98.33,144.67};
 	float arr1[6] = {1.234,4.5,6.8987,3.33,5.66,77.695};
 	float arr43[6] = {2.3454,-0.0384,-8.90,3.455,6.785,21.345};
+	float arr5[5] = {0.2,-0.4,0.6,-0.8,1.0};
 
 	vector<float> v1(5, arr0);
 	vector<float> v2(5, arr8);
@@ -42,6 +43,7 @@ int main()
 	vector<float> v6(3);
 	vector<float> v13(5);
 	vector<float> v95(6);
+	vector<float> v35(5, arr5);
 
 	float arr57[3][3] = {{2.24, 0.5, 0.023}, {3.675, 5.32, 0.556}, {1.023, 45.75, 621.6}};
 	matrix<float> m12(3, 3, (float *) arr57);
@@ -161,5 +163,15 @@ int main()
 	cout<< "\n\n\nCross Product:";
 	cout << "\n\n" << v21 << "\n\n" << v22;
 	cout << "\nResult:\n\n" << v111;
+
+	cout <<  "\n\n\nQueue insert function:";
+	cout << "\nInput:\n\n" << v111;
+	insert_end(v111, (float) 0.9191919);
+	cout << "\nResult:\n\n" << v111;
+
+	cout <<  "\n\n\nVariance:";
+	cout << "\nInput:\n\n" << v35;
+	val = var(v35);
+	cout << "\nResult:\n\n" << val;
 }
 
