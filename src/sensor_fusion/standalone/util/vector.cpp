@@ -247,6 +247,17 @@ matrix<T> transpose(const vector<T> v)
 }
 
 template <typename T>
+vector<T> transpose(const matrix<T> m)
+{
+	vector<T> v(m.m_rows);
+
+	for (int i = 0; i < m.m_rows; i++)
+		v.m_vec[i] = m.m_mat[i][0];
+
+	return v;
+}
+
+template <typename T>
 T mul(const vector<T> v, const matrix<T> m)
 {
 	assert(m.m_rows == v.m_size);
