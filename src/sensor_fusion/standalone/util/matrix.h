@@ -60,7 +60,9 @@ public:
 	template<typename T> friend bool operator !=(const matrix<T> m1,
 			const matrix<T> m2);
 
-	template<typename T> friend matrix<T> transpose(const matrix<T> m);
+	template<typename T> friend matrix<T> tran(const matrix<T> m);
+	template <typename T> friend matrix<T> mul(const matrix<T> m1,
+			const matrix<T> m2);
 };
 
 #include "matrix.cpp"

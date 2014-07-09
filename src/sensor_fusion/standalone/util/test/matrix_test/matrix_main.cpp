@@ -30,6 +30,7 @@ int main()
 	float arr3[3][3] = {{20.2, 40.5, 10.0}, {3.6, 52.0, 5.5}, {1.0, 45.5, 66.6}};
 	float arr4[3][3] = {{2.24, 0.5, 0.023}, {3.675, 5.32, 0.556}, {1.023, 45.75, 621.6}};
 	float arr8[3][3] = {{4.75, 0.65, 0.123}, {0.075, 5.302, 0.56}, {1.113, 0.475, 2.362}};
+	float arr9[3][3] = {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
 
 	matrix<float> m1(2, 2, (float *) arr0);
 	matrix<float> m2(2, 2, (float *) arr1);
@@ -43,6 +44,7 @@ int main()
 	matrix<float> m20(1, 3, (float *) arr11);
 	matrix<float> m21(3, 1, (float *) arr12);
 	matrix<float> m22(2, 3, (float *) arr15);
+	matrix<float> m9(3, 3, (float *) arr9);
 
 	cout<< "Constructor Test\n";
 	cout<< "\n" << m6;
@@ -71,6 +73,9 @@ int main()
 	cout<< "\nProduct:\n" << m3 << endl;
 	cout<< "\n" << m20 << "\n" << m21;
 	cout<< "\nProduct:\n" << m7 << endl;
+	cout<< "\n" << m9 << "\n" << m21;
+	m21 = mul(m9, m21);
+	cout<< "\nProduct:\n" << m21 << endl;
 
 	cout<< "\n\n\nDivision\n";
 	m3 = m1 / (float)2.5;
@@ -116,7 +121,7 @@ int main()
 	cout<< "\n\n" << m12;
 	cout<< "\nResult:\n\n" << m6;
 
-	m6 = transpose(m15);
+	m6 = tran(m15);
 	cout<< "\n\n\nTranspose:";
 	cout << "\n\n" << m15;
 	cout << "\nResult:\n\n" << m6;

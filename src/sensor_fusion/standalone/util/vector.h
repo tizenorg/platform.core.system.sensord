@@ -62,6 +62,7 @@ public:
 	template<typename T> friend T mul(const vector<T> v, const matrix<T> m);
 	template<typename T> friend void insert_end(vector<T>& v, T val);
 	template<typename T> friend matrix<T> transpose(const vector<T> v);
+	template <typename T> friend vector<T> transpose(const matrix<T> m);
 	template<typename T> friend vector<T> cross(const vector<T> v1,
 			const vector<T> v2);
 	template <typename T> friend T var(const vector<T> v);
