@@ -132,6 +132,10 @@ int main()
 	cout << "\nResult:\n\n";
 	matrix<float> m101 = (transpose(v20));
 	cout << m101;
+	cout << "\n\n" << m101;
+	cout << "\nResult:\n\n";
+	v20 = (tran(m101));
+	cout << v20;
 
 	cout << "\n\nv1:\n\n" << v1;
 	cout << "\n\nv2:\n\n" << v2;

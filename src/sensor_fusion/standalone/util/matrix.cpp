@@ -268,4 +268,23 @@ matrix<T> transpose(const matrix<T> m)
 	return m1;
 }
 
+
+template <typename T>
+matrix<T> mul(const matrix<T> m1, const matrix<T> m2)
+{
+	assert(m2.m_cols == 1);
+	assert(m1.m_cols == m2.m_rows);
+
+	matrix<T> m3(m1.m_rows, 1);
+
+	for (int i = 0; i < m1.m_rows; i++)
+	{
+			m3.m_mat[i][0] = 0;
+			for (int k = 0; k < m2.m_rows; k++)
+				m3.m_mat[i][0] += m1.m_mat[i][k] * m2.m_mat[k][0];
+	}
+
+	return m3;
+}
+
 #endif //_MATRIX_H
