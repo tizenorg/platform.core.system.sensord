@@ -98,61 +98,49 @@ quaternion<T> rot_mat2quat(rotation_matrix<T> rm)
 {
 	T q0, q1, q2, q3;
 
-	q0 = (rm.m_rot_mat.m_mat[0][0] + rm.m_rot_mat.m_mat[1][1] +
-			rm.m_rot_mat.m_mat[2][2] + (T) 1) / (T) QUAT_LEN;
-	q1 = (rm.m_rot_mat.m_mat[0][0] - rm.m_rot_mat.m_mat[1][1] -
-			rm.m_rot_mat.m_mat[2][2] + (T) 1) / (T) QUAT_LEN;
-	q2 = (-rm.m_rot_mat.m_mat[0][0] + rm.m_rot_mat.m_mat[1][1] -
-			rm.m_rot_mat.m_mat[2][2] + (T) 1) / (T) QUAT_LEN;
-	q3 = (-rm.m_rot_mat.m_mat[0][0] - rm.m_rot_mat.m_mat[1][1] +
-			rm.m_rot_mat.m_mat[2][2] + (T) 1) / (T) QUAT_LEN;
+	T diag_sum = rm.m_rot_mat.m_mat[0][0] + rm.m_rot_mat.m_mat[1][1] + rm.m_rot_mat.m_mat[2][2];
 
-	if(q0 < (T) 0)
-		q0 = (T) 0;
-	if(q1 < (T) 0)
-		q1 = (T) 0;
-	if(q2 < (T) 0)
-		q2 = (T) 0;
-	if(q3 < (T) 0)
-		q3 = (T) 0;
-
-	q0 = sqrt(q0);
-	q1 = sqrt(q1);
-	q2 = sqrt(q2);
-	q3 = sqrt(q3);
-
-	if (q0 >= q1 && q0 >= q2 && q0 >= q3)
+	if ( diag_sum > 0 )
 	{
-		q0 *= (T) 1;
-		q1 *= get_sign(rm.m_rot_mat.m_mat[2][1] - rm.m_rot_mat.m_mat[1][2]);
-		q2 *= get_sign(rm.m_rot_mat.m_mat[0][2] - rm.m_rot_mat.m_mat[2][0]);
-		q3 *= get_sign(rm.m_rot_mat.m_mat[1][0] - rm.m_rot_mat.m_mat[0][1]);
+		T val = (T) 0.5 / sqrt(diag_sum + (T) 1.0);
+		q0 = (T) 0.25 / val;
+		q1 = ( rm.m_rot_mat.m_mat[2][1] - rm.m_rot_mat.m_mat[1][2] ) * val;
+		q2 = ( rm.m_rot_mat.m_mat[0][2] - rm.m_rot_mat.m_mat[2][0] ) * val;
+		q3 = ( rm.m_rot_mat.m_mat[1][0] - rm.m_rot_mat.m_mat[0][1] ) * val;
 	}
-	else if (q1 >= q0 && q1 >= q2 && q1 >= q3)
+	else
 	{
-		q0 *= get_sign(rm.m_rot_mat.m_mat[2][1] - rm.m_rot_mat.m_mat[1][2]);
-		q1 *= (T) 1;
-		q2 *= get_sign(rm.m_rot_mat.m_mat[1][0] + rm.m_rot_mat.m_mat[0][1]);
-		q3 *= get_sign(rm.m_rot_mat.m_mat[0][2] + rm.m_rot_mat.m_mat[2][0]);
-	}
-	else if (q2 >= q0 && q2 >= q1 && q2 >= q3)
-	{
-		q0 *= get_sign(rm.m_rot_mat.m_mat[0][2] - rm.m_rot_mat.m_mat[2][0]);
-		q1 *= get_sign(rm.m_rot_mat.m_mat[1][0] + rm.m_rot_mat.m_mat[0][1]);
-		q2 *= (T) 1;
-		q3 *= get_sign(rm.m_rot_mat.m_mat[2][1] + rm.m_rot_mat.m_mat[1][2]);
-	}
-	else if(q3 >= q0 && q3 >= q1 && q3 >= q2)
-	{
-		q0 *= get_sign(rm.m_rot_mat.m_mat[1][0] - rm.m_rot_mat.m_mat[0][1]);
-		q1 *= get_sign(rm.m_rot_mat.m_mat[2][0] + rm.m_rot_mat.m_mat[0][2]);
-		q2 *= get_sign(rm.m_rot_mat.m_mat[2][1] + rm.m_rot_mat.m_mat[1][2]);
-		q3 *= (T) 1;
+		if ( rm.m_rot_mat.m_mat[0][0] > rm.m_rot_mat.m_mat[1][1] && rm.m_rot_mat.m_mat[0][0] > rm.m_rot_mat.m_mat[2][2] )
+		{
+			T val = (T) 2.0 * sqrt( 1.0 + rm.m_rot_mat.m_mat[0][0] - rm.m_rot_mat.m_mat[1][1] - rm.m_rot_mat.m_mat[2][2]);
+			q0 = (rm.m_rot_mat.m_mat[2][1] - rm.m_rot_mat.m_mat[1][2] ) / val;
+			q1 = (T) 0.25 * val;
+			q2 = (rm.m_rot_mat.m_mat[0][1] + rm.m_rot_mat.m_mat[1][0] ) / val;
+			q3 = (rm.m_rot_mat.m_mat[0][2] + rm.m_rot_mat.m_mat[2][0] ) / val;
+		}
+		else if (rm.m_rot_mat.m_mat[1][1] > rm.m_rot_mat.m_mat[2][2])
+		{
+			T val = (T) 2.0 * sqrt( 1.0 + rm.m_rot_mat.m_mat[1][1] - rm.m_rot_mat.m_mat[0][0] - rm.m_rot_mat.m_mat[2][2]);
+			q0 = (rm.m_rot_mat.m_mat[0][2] - rm.m_rot_mat.m_mat[2][0] ) / val;
+			q1 = (rm.m_rot_mat.m_mat[0][1] + rm.m_rot_mat.m_mat[1][0] ) / val;
+			q2 = (T) 0.25 * val;
+			q3 = (rm.m_rot_mat.m_mat[1][2] + rm.m_rot_mat.m_mat[2][1] ) / val;
+		}
+		else
+		{
+			T val = (T) 2.0 * sqrt( 1.0 + rm.m_rot_mat.m_mat[2][2] - rm.m_rot_mat.m_mat[0][0] - rm.m_rot_mat.m_mat[1][1] );
+			q0 = (rm.m_rot_mat.m_mat[1][0] - rm.m_rot_mat.m_mat[0][1] ) / val;
+			q1 = (rm.m_rot_mat.m_mat[0][2] + rm.m_rot_mat.m_mat[2][0] ) / val;
+			q2 = (rm.m_rot_mat.m_mat[1][2] + rm.m_rot_mat.m_mat[2][1] ) / val;
+			q3 = (T) 0.25 * val;
+		}
 	}
 
-	quaternion<T> q(-q0, q1, q2, q3);
+	quaternion<T> q(q0, q1, q2, q3);
 
-	return quat_normalize(q);
+	q.quat_normalize();
+
+	return q;
 }
 
 #endif /* _ROTATION_MATRIX_H */
