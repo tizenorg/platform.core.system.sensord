@@ -25,27 +25,30 @@
 using namespace std;
 
 #define ORIENTATION_DATA_PATH "../../../../design/data/100ms/orientation/roll_pitch_yaw/"
-#define ORIENTATION_DATA_SIZE 100
+#define ORIENTATION_DATA_SIZE 1095
 
 int main()
 {
 	int data_available = ORIENTATION_DATA_SIZE;
-	ifstream accel_file, gyro_file, magnetic_file;
+	ifstream accel_in, gyro_in, mag_in;
+	ofstream orien_file;
 	string line_accel, line_gyro, line_magnetic;
 	float sdata[3];
 	unsigned long long time_stamp;
 	euler_angles<float> orientation;
 	orientation_filter<float> orien_filter;
 
-	accel_file.open(((string)ORIENTATION_DATA_PATH + (string)"accel.txt").c_str());
-	gyro_file.open(((string)ORIENTATION_DATA_PATH + (string)"gyro.txt").c_str());
-	magnetic_file.open(((string)ORIENTATION_DATA_PATH + (string)"magnetic.txt").c_str());
+	accel_in.open(((string)ORIENTATION_DATA_PATH + (string)"accel.txt").c_str());
+	gyro_in.open(((string)ORIENTATION_DATA_PATH + (string)"gyro.txt").c_str());
+	mag_in.open(((string)ORIENTATION_DATA_PATH + (string)"magnetic.txt").c_str());
+
+	orien_file.open(((string)"orientation.txt").c_str());
 
 	char *token = NULL;
 
 	while (data_available-- > 0)
 	{
-		getline(accel_file, line_accel);
+		getline(accel_in, line_accel);
 		sdata[0] = strtof(line_accel.c_str(), &token);
 		sdata[1] = strtof(token, &token);
 		sdata[2] = strtof(token, &token);
@@ -54,7 +57,7 @@ int main()
 
 		cout << "Accel Data\t" << accel_data.m_data << "\t Time Stamp\t" << accel_data.m_time_stamp << "\n\n";
 
-		getline(gyro_file, line_gyro);
+		getline(gyro_in, line_gyro);
 		sdata[0] = strtof(line_gyro.c_str(), &token);
 		sdata[1] = strtof(token, &token);
 		sdata[2] = strtof(token, &token);
@@ -63,7 +66,7 @@ int main()
 
 		cout << "Gyro Data\t" << gyro_data.m_data << "\t Time Stamp\t" << gyro_data.m_time_stamp << "\n\n";
 
-		getline(magnetic_file, line_magnetic);
+		getline(mag_in, line_magnetic);
 		sdata[0] = strtof(line_magnetic.c_str(), &token);
 		sdata[1] = strtof(token, &token);
 		sdata[2] = strtof(token, &token);
@@ -74,7 +77,15 @@ int main()
 
 		orientation = orien_filter.get_orientation(accel_data, gyro_data, magnetic_data);
 
+		orien_file << orientation.m_ang;
+
+		cout << "Orientation Data\t" << orientation.m_ang << "\n\n";
 	}
+
+	accel_in.close();
+	gyro_in.close();
+	mag_in.close();
+	orien_file.close();
 
 	return 0;
 }
