@@ -30,23 +30,28 @@
 template <typename TYPE>
 class orientation_filter {
 public:
-	sensor_data<TYPE> filt_accel[2];
-	sensor_data<TYPE> filt_gyro[2];
-	sensor_data<TYPE> filt_magnetic[2];
-	matrix<TYPE> transition_matrix;
-	matrix<TYPE> prediction_covariance;
-	vector<TYPE> state_new;
-	vector<TYPE> state_old;
-	vector<TYPE> state_error;
-	vector<TYPE> bias_correction;
-	quaternion<TYPE> quat_diff;
-	quaternion<TYPE> quat_sum;
-	quaternion<TYPE> quat_aid;
-	quaternion<TYPE> quat_driv;
-	quaternion<TYPE> quat_error;
-	euler_angles<TYPE> euler_error;
-	rotation_matrix<TYPE> rot_matrix;
-	euler_angles<TYPE> orientation;
+	sensor_data<TYPE> m_filt_accel[2];
+	sensor_data<TYPE> m_filt_gyro[2];
+	sensor_data<TYPE> m_filt_magnetic[2];
+	vector<TYPE> m_var_gyr_x;
+	vector<TYPE> m_var_gyr_y;
+	vector<TYPE> m_var_gyr_z;
+	vector<TYPE> m_var_roll;
+	vector<TYPE> m_var_pitch;
+	vector<TYPE> m_var_yaw;
+	matrix<TYPE> m_driv_cov;
+	matrix<TYPE> m_aid_cov;
+	matrix<TYPE> m_tran_mat;
+	matrix<TYPE> m_measure_mat;
+	matrix<TYPE> m_pred_cov;
+	vector<TYPE> m_state_new;
+	vector<TYPE> m_state_old;
+	vector<TYPE> m_state_error;
+	vector<TYPE> m_bias_correction;
+	quaternion<TYPE> m_quat_aid;
+	quaternion<TYPE> m_quat_driv;
+	rotation_matrix<TYPE> m_rot_matrix;
+	euler_angles<TYPE> m_orientation;
 
 	orientation_filter();
 	~orientation_filter();
@@ -54,17 +59,9 @@ public:
 	inline void filter_sensor_data(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
 	inline void orientation_triad_algorithm();
-	inline void compute_aiding_var();
-	inline void compute_driving_var();
-	inline void compute_process_covar();
-	inline void compute_measurement_covar();
-	inline void compute_prediction_covar();
-	inline void compute_quat_diff();
-	inline void compute_quat_sum();
-	inline void update_quat_sum();
+	inline void compute_covariance();
 	inline void time_update();
 	inline void measurement_update();
-	inline euler_angles<TYPE> get_corrected_orientation();
 
 	euler_angles<TYPE> get_orientation(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
