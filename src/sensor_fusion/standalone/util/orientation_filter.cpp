@@ -263,6 +263,8 @@ inline void orientation_filter<TYPE>::time_update()
 
 	m_orientation = orientation.m_ang * (TYPE) DRIVING_SYSTEM_PHASE_COMPENSATION;
 
+	m_rot_matrix = quat2rot_mat(m_quat_driv);
+
 	quat_error = m_quat_aid * m_quat_driv;
 
 	euler_error = (quat2euler(quat_error)).m_ang / (TYPE) PI;
@@ -336,6 +338,15 @@ euler_angles<TYPE> orientation_filter<TYPE>::get_orientation(const sensor_data<T
 	measurement_update();
 
 	return m_orientation;
+}
+
+template <typename TYPE>
+rotation_matrix<TYPE> orientation_filter<TYPE>::get_rotation_matrix(const sensor_data<TYPE> accel,
+		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
+{
+	get_orientation(accel, gyro, magnetic);
+
+	return m_rot_matrix;
 }
 
 #endif  //_ORIENTATION_FILTER_H
