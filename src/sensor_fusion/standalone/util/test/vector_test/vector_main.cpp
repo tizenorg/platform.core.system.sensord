@@ -48,7 +48,10 @@ int main()
 	float arr67[3][1] = {{2.0}, {3.0}, {4.0}};
 	matrix<float> m32(3, 1, (float *) arr67);
 
-	cout<< "Addition\n";
+	cout<< "Constructor Test\n";
+	cout<< "\n" << v3;
+
+	cout<< "\n\nAddition\n";
 	v3 = v21 + v22;
 	v95 = v15 + v20;
 	cout<< "\n" << v21 << "\n" << v22;
@@ -152,5 +155,11 @@ int main()
 	v3 = v1;
 	cout<< "Input \n" << v1;
 	cout<< "\nOutput:\n" << v3 << endl;
+
+
+	vector<float> v111 = cross(v21, v22);
+	cout<< "\n\n\nCross Product:";
+	cout << "\n\n" << v21 << "\n\n" << v22;
+	cout << "\nResult:\n\n" << v111;
 }
 

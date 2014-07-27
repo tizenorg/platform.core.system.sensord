@@ -51,8 +51,8 @@ public:
 	orientation_filter();
 	~orientation_filter();
 
-	inline void filter_sensor_data(sensor_data<TYPE> accel,
-			sensor_data<TYPE> gyro, sensor_data<TYPE> magnetic);
+	inline void filter_sensor_data(const sensor_data<TYPE> accel,
+			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
 	inline void orientation_triad_algorithm();
 	inline void compute_aiding_var();
 	inline void compute_driving_var();
@@ -66,8 +66,8 @@ public:
 	inline void measurement_update();
 	inline euler_angles<TYPE> get_corrected_orientation();
 
-	euler_angles<TYPE> get_orientation(sensor_data<TYPE> accel,
-			sensor_data<TYPE> gyro, sensor_data<TYPE> magnetic);
+	euler_angles<TYPE> get_orientation(const sensor_data<TYPE> accel,
+			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
 };
 
 #include "orientation_filter.cpp"

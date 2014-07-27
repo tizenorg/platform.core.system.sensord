@@ -30,7 +30,7 @@ vector<TYPE>::vector(const int size)
 {
 	m_size = size;
 	m_vec = NULL;
-	m_vec = new TYPE [m_size];
+	m_vec = new TYPE [m_size]();
 }
 
 template <typename TYPE>
@@ -258,6 +258,18 @@ T mul(const vector<T> v, const matrix<T> m)
 		result += v.m_vec[k] * m.m_mat[k][0];
 
 	return result;
+}
+
+template <typename T>
+vector<T> cross(const vector<T> v1, const vector<T> v2)
+{
+	vector<T> v3(v1.m_size);
+
+	v3.m_vec[0] = ((v1.m_vec[1] * v2.m_vec[2]) - (v1.m_vec[2] * v2.m_vec[1]));
+	v3.m_vec[1] = ((v1.m_vec[2] * v2.m_vec[0]) - (v1.m_vec[0] * v2.m_vec[2]));
+	v3.m_vec[2] = ((v1.m_vec[0] * v2.m_vec[1]) - (v1.m_vec[1] * v2.m_vec[0]));
+
+	return v3;
 }
 
 #endif

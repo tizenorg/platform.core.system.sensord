@@ -41,7 +41,7 @@ public:
 	template<typename T> friend sensor_data<T> operator +(sensor_data<T> data1,
 			sensor_data<T> data2);
 
-	template<typename T> friend sensor_data<T> normalize(sensor_data<T> data);
+	template<typename T> friend void normalize(sensor_data<T>& data);
 	template<typename T> friend sensor_data<T> scale_data(sensor_data<T> data,
 			T scaling_factor);
 };

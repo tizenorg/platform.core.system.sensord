@@ -75,7 +75,7 @@ sensor_data<T> operator +(sensor_data<T> data1, sensor_data<T> data2)
 }
 
 template <typename T>
-sensor_data<T> normalize(sensor_data<T> data)
+void normalize(sensor_data<T>& data)
 {
 	T x, y, z;
 
@@ -85,13 +85,9 @@ sensor_data<T> normalize(sensor_data<T> data)
 
 	T val = sqrt(x*x + y*y + z*z);
 
-	x /= val;
-	y /= val;
-	z /= val;
-
-	sensor_data<T> s(x, y, z, data.m_time_stamp);
-
-	return s;
+	data.m_data.m_vec[0] = x / val;
+	data.m_data.m_vec[1] = y / val;
+	data.m_data.m_vec[2] = z / val;
 }
 
 template <typename T>
