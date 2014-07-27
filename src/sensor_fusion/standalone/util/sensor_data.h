@@ -26,10 +26,13 @@ template <typename TYPE>
 class sensor_data {
 public:
 	vector<TYPE> m_data;
+	unsigned long long m_time_stamp;
 
 	sensor_data();
-	sensor_data(const TYPE x, const TYPE y, const TYPE z);
-	sensor_data(const vector<TYPE> v);
+	sensor_data(const TYPE x, const TYPE y, const TYPE z,
+			const unsigned long long time_stamp);
+	sensor_data(const vector<TYPE> v,
+			const unsigned long long time_stamp);
 	sensor_data(const sensor_data<TYPE>& s);
 	~sensor_data();
 
