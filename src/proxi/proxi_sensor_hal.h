@@ -23,17 +23,24 @@
 #include <sensor_hal.h>
 #include <string>
 
+#define IIO_DIR			"/sys/bus/iio/devices/"
+#define NAME_NODE		"/name"
+#define EVENT_DIR		"/events"
+#define EVENT_EN_NODE	"/in_proximity_thresh_either_en"
+#define DEV_DIR			"/dev/"
+
+#define IIO_DEV_BASE_NAME	"iio:device"
+#define IIO_DEV_STR_LEN		10
+
+#define PROXIMITY_NODE_STATE_NEAR	1
+#define PROXIMITY_NODE_STATE_FAR	2
+#define PROXIMITY_TYPE				8
+
 using std::string;
 
 class proxi_sensor_hal : public sensor_hal
 {
 public:
-	enum proxi_node_state_event_t {
-		PROXIMITY_NODE_STATE_NEAR = 0,
-		PROXIMITY_NODE_STATE_FAR = 1,
-		PROXIMITY_NODE_STATE_UNKNOWN = 2,
-	};
-
 	proxi_sensor_hal();
 	virtual ~proxi_sensor_hal();
 	string get_model_id(void);
@@ -56,12 +63,16 @@ private:
 	string m_vendor;
 	string m_chip_name;
 
-	string m_resource;
+	string m_proxi_dir;
+
 	string m_enable_resource;
+	string m_event_resource;
 
 	cmutex m_value_mutex;
 
-	bool enable_resource(string &resource_node, bool enable);
+	int m_event_fd;
+
+	bool enable_resource(int enable);
 	bool update_value(bool wait);
 	bool is_sensorhub_supported(void);
 };
