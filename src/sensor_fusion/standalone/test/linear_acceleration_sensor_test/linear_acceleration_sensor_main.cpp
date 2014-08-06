@@ -17,32 +17,32 @@
  *
  */
 
-#include "../../../gravity_sensor.h"
+#include "../../linear_acceleration_sensor.h"
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 using namespace std;
 
-#define GRAVITY_DATA_PATH "../../../../design/data/100ms/gravity/throw/"
-#define GRAVITY_DATA_SIZE 135
+#define LA_DATA_PATH "../../../design/data/100ms/linear_acceleration/move_x_y_z/"
+#define LA_DATA_SIZE 170
 
 int main()
 {
-	int data_available = GRAVITY_DATA_SIZE;
+	int data_available = LA_DATA_SIZE;
 	ifstream accel_in, gyro_in, mag_in;
-	ofstream gravity_file;
+	ofstream la_file;
 	string line_accel, line_gyro, line_magnetic;
 	float sdata[3];
 	unsigned long long time_stamp;
-	sensor_data<float> gravity;
-	gravity_sensor grav_sensor;
+	sensor_data<float> lin_accel;
+	linear_acceleration_sensor la_sensor;
 
-	accel_in.open(((string)GRAVITY_DATA_PATH + (string)"accel.txt").c_str());
-	gyro_in.open(((string)GRAVITY_DATA_PATH + (string)"gyro.txt").c_str());
-	mag_in.open(((string)GRAVITY_DATA_PATH + (string)"magnetic.txt").c_str());
+	accel_in.open(((string)LA_DATA_PATH + (string)"accel.txt").c_str());
+	gyro_in.open(((string)LA_DATA_PATH + (string)"gyro.txt").c_str());
+	mag_in.open(((string)LA_DATA_PATH + (string)"magnetic.txt").c_str());
 
-	gravity_file.open(((string)"gravity.txt").c_str());
+	la_file.open(((string)"linear_acceleration.txt").c_str());
 
 	char *token = NULL;
 
@@ -75,17 +75,17 @@ int main()
 
 		cout << "Magnetic Data\t" << magnetic_data.m_data << "\t Time Stamp\t" << magnetic_data.m_time_stamp << "\n\n";
 
-		gravity = grav_sensor.get_gravity(accel_data, gyro_data, magnetic_data);
+		lin_accel = la_sensor.get_linear_acceleration(accel_data, gyro_data, magnetic_data);
 
-		gravity_file << gravity.m_data;
+		la_file << lin_accel.m_data;
 
-		cout << "Gravity Data\t" << gravity.m_data << "\n\n";
+		cout << "Linear Acceleration Data\t" << lin_accel.m_data << "\n\n";
 	}
 
 	accel_in.close();
 	gyro_in.close();
 	mag_in.close();
-	gravity_file.close();
+	la_file.close();
 
 	return 0;
 }

@@ -17,7 +17,7 @@
  *
  */
 
-#include "../../sensor_data.h"
+#include "../../../sensor_data.h"
 
 int main()
 {
@@ -45,12 +45,12 @@ int main()
 	cout<< "\nSum:\n" << sd9.m_data << endl;
 
 	cout<< "\n\n\nNormalization:\n";
-	sensor_data<float> sd6 = normalize(sd3);
 	cout<< "\n" << sd3.m_data;
-	cout<< "\nResult:\n" << sd6.m_data << endl;
-	sensor_data<float> sd7 = normalize(sd2);
+	normalize(sd3);
+	cout<< "\nResult:\n" << sd3.m_data << endl;
 	cout<< "\n" << sd2.m_data;
-	cout<< "\nResult:\n" << sd7.m_data << endl;
+	normalize(sd2);
+	cout<< "\nResult:\n" << sd2.m_data << endl;
 
 	float xx = 2.5;
 	cout<<"\n\n\nScale data:\n";

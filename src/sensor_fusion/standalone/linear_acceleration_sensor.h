@@ -20,7 +20,7 @@
 #ifndef _LINEAR_ACCELERATION_SENSOR_H
 #define _LINEAR_ACCELERATION_SENSOR_H
 
-#include "./util/compute_gravity.h"
+#include "../compute_gravity.h"
 
 class linear_acceleration_sensor
 {

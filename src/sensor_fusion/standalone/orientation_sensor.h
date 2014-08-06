@@ -20,7 +20,7 @@
 #ifndef _ORIENTATION_SENSOR_H
 #define _ORIENTATION_SENSOR_H
 
-#include "./util/orientation_filter.h"
+#include "../orientation_filter.h"
 
 class orientation_sensor
 {

@@ -20,7 +20,7 @@
 #ifndef _GRAVITY_SENSOR_H
 #define _GRAVITY_SENSOR_H
 
-#include "./util/compute_gravity.h"
+#include "../compute_gravity.h"
 
 class gravity_sensor
 {

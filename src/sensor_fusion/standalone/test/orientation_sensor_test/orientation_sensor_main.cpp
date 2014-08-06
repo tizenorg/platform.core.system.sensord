@@ -17,14 +17,14 @@
  *
  */
 
-#include "../../../orientation_sensor.h"
+#include "../../orientation_sensor.h"
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 using namespace std;
 
-#define ORIENTATION_DATA_PATH "../../../../design/data/100ms/orientation/roll_pitch_yaw/"
+#define ORIENTATION_DATA_PATH "../../../design/data/100ms/orientation/roll_pitch_yaw/"
 #define ORIENTATION_DATA_SIZE 1095
 
 int main()
