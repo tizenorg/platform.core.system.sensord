@@ -22,8 +22,19 @@
 
 #include <sensor_hal.h>
 #include <string>
+#include <fstream>
+
+#define IIO_DIR			"/sys/bus/iio/devices/"
+#define X_RAW_VAL_NODE	"/in_magn_x_raw"
+#define Y_RAW_VAL_NODE	"/in_magn_y_raw"
+#define Z_RAW_VAL_NODE	"/in_magn_z_raw"
+#define X_SCALE_NODE	"/in_magn_x_scale"
+#define Y_SCALE_NODE	"/in_magn_y_scale"
+#define Z_SCALE_NODE	"/in_magn_z_scale"
+#define NAME_NODE		"/name"
 
 using std::string;
+using std::ifstream;
 
 class geo_sensor_hal : public sensor_hal
 {
@@ -41,14 +52,13 @@ public:
 	bool check_hw_node(void);
 
 private:
-	long a_x;
-	long a_y;
-	long a_z;
 	double m_x;
 	double m_y;
 	double m_z;
-	int m_hdst;
-	int m_node_handle;
+	double m_x_scale;
+	double m_y_scale;
+	double m_z_scale;
+
 	unsigned long m_polling_interval;
 	unsigned long long m_fired_time;
 	bool m_sensorhub_supported;
@@ -58,14 +68,34 @@ private:
 	string m_vendor;
 	string m_chip_name;
 
-	string m_resource;
-	string m_enable_resource;
-	string m_polling_resource;
+	string m_x_node;
+	string m_y_node;
+	string m_z_node;
+	string m_x_scale_node;
+	string m_y_scale_node;
+	string m_z_scale_node;
 
 	cmutex m_value_mutex;
 
 	bool enable_resource(string &resource_node, bool enable);
-	bool update_value(bool wait);
+	bool update_value(void);
 	bool is_sensorhub_supported(void);
+	bool init_resources(void);
+
+	template <typename value_t>
+	bool read_node_value(string node_path, value_t &value)
+	{
+		ifstream handle;
+		handle.open(node_path.c_str());
+		if (!handle)
+		{
+			ERR("Failed to open handle(%s)", node_path.c_str());
+			return false;
+		}
+		handle >> value;
+		handle.close();
+
+		return true;
+	}
 };
 #endif /*_GEO_SENSOR_HAL_H_*/
