@@ -34,13 +34,13 @@ sensor_data<TYPE>::sensor_data(const TYPE x, const TYPE y,
 {
 	TYPE vec_data[SENSOR_DATA_SIZE] = {x, y, z};
 
-	vector<TYPE> v(SENSOR_DATA_SIZE, vec_data);
+	vect<TYPE> v(SENSOR_DATA_SIZE, vec_data);
 	m_data = v;
 	m_time_stamp = time_stamp;
 }
 
 template <typename TYPE>
-sensor_data<TYPE>::sensor_data(const vector<TYPE> v,
+sensor_data<TYPE>::sensor_data(const vect<TYPE> v,
 		const unsigned long long time_stamp = 0)
 {
 	m_data = v;

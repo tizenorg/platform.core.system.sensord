@@ -24,8 +24,8 @@ int main()
 	float arr0[4] = {2344.98, 345.24, 456.12, 98.33};
 	float arr1[4] = {0.056, 0.34, -0.0076, 0.001};
 
-	vector<float> v0(4, arr0);
-	vector<float> v1(4, arr1);
+	vect<float> v0(4, arr0);
+	vect<float> v1(4, arr1);
 
 	quaternion<float> q0(v0);
 	quaternion<float> q1(v1);

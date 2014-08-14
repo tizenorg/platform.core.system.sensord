@@ -25,11 +25,11 @@
 template <typename TYPE>
 class quaternion {
 public:
-	vector<TYPE> m_quat;
+	vect<TYPE> m_quat;
 
 	quaternion();
 	quaternion(const TYPE w, const TYPE x, const TYPE y, const TYPE z);
-	quaternion(const vector<TYPE> v);
+	quaternion(const vect<TYPE> v);
 	quaternion(const quaternion<TYPE>& q);
 	~quaternion();
 

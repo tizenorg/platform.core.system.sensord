@@ -20,13 +20,13 @@
 #if defined (_VECTOR_H) && defined (_MATRIX_H)
 
 template <typename TYPE>
-vector<TYPE>::vector(void)
+vect<TYPE>::vect(void)
 {
 	m_vec = NULL;
 }
 
 template <typename TYPE>
-vector<TYPE>::vector(const int size)
+vect<TYPE>::vect(const int size)
 {
 	m_size = size;
 	m_vec = NULL;
@@ -34,7 +34,7 @@ vector<TYPE>::vector(const int size)
 }
 
 template <typename TYPE>
-vector<TYPE>::vector(const int size, TYPE *vec_data)
+vect<TYPE>::vect(const int size, TYPE *vec_data)
 {
 	m_size = size;
 	m_vec = NULL;
@@ -45,7 +45,7 @@ vector<TYPE>::vector(const int size, TYPE *vec_data)
 }
 
 template <typename TYPE>
-vector<TYPE>::vector(const vector<TYPE>& v)
+vect<TYPE>::vect(const vect<TYPE>& v)
 {
 	m_size = v.m_size;
 	m_vec = NULL;
@@ -56,14 +56,14 @@ vector<TYPE>::vector(const vector<TYPE>& v)
 }
 
 template <typename TYPE>
-vector<TYPE>::~vector()
+vect<TYPE>::~vect()
 {
 	if (m_vec != NULL)
 		delete[] m_vec;
 }
 
 template <typename TYPE>
-vector<TYPE> vector<TYPE>::operator =(const vector<TYPE>& v)
+vect<TYPE> vect<TYPE>::operator =(const vect<TYPE>& v)
 {
 	if (this == &v)
 	{
@@ -95,7 +95,7 @@ vector<TYPE> vector<TYPE>::operator =(const vector<TYPE>& v)
 }
 
 template <typename TYPE>
-ostream& operator <<(ostream& dout, vector<TYPE>& v)
+ostream& operator <<(ostream& dout, vect<TYPE>& v)
 {
 	for (int j = 0; j < v.m_size; j++)
 	{
@@ -108,11 +108,11 @@ ostream& operator <<(ostream& dout, vector<TYPE>& v)
 }
 
 template <typename T>
-vector<T> operator +(const vector<T> v1, const vector<T> v2)
+vect<T> operator +(const vect<T> v1, const vect<T> v2)
 {
 	assert(v1.m_size == v2.m_size);
 
-	vector<T> v3(v1.m_size);
+	vect<T> v3(v1.m_size);
 
 	for (int j = 0; j < v1.m_size; j++)
 		v3.m_vec[j] = v1.m_vec[j] + v2.m_vec[j];
@@ -121,9 +121,9 @@ vector<T> operator +(const vector<T> v1, const vector<T> v2)
 }
 
 template <typename T>
-vector<T> operator +(const vector<T> v, const T val)
+vect<T> operator +(const vect<T> v, const T val)
 {
-	vector<T> v1(v.m_size);
+	vect<T> v1(v.m_size);
 
 	for (int j = 0; j < v.m_size; j++)
 		v1.m_vec[j] = v.m_vec[j] + val;
@@ -132,11 +132,11 @@ vector<T> operator +(const vector<T> v, const T val)
 }
 
 template <typename T>
-vector<T> operator -(const vector<T> v1, const vector<T> v2)
+vect<T> operator -(const vect<T> v1, const vect<T> v2)
 {
 	assert(v1.m_size == v2.m_size);
 
-	vector<T> v3(v1.m_size);
+	vect<T> v3(v1.m_size);
 
 	for (int j = 0; j < v1.m_size; j++)
 		v3.m_vec[j] = v1.m_vec[j] - v2.m_vec[j];
@@ -145,9 +145,9 @@ vector<T> operator -(const vector<T> v1, const vector<T> v2)
 }
 
 template <typename T>
-vector<T> operator -(const vector<T> v, const T val)
+vect<T> operator -(const vect<T> v, const T val)
 {
-	vector<T> v1(v.m_size);
+	vect<T> v1(v.m_size);
 
 	for (int j = 0; j < v.m_size; j++)
 		v1.m_vec[j] = v.m_vec[j] - val;
@@ -156,7 +156,7 @@ vector<T> operator -(const vector<T> v, const T val)
 }
 
 template <typename T>
-matrix<T> operator *(const matrix<T> m, const vector<T> v)
+matrix<T> operator *(const matrix<T> m, const vect<T> v)
 {
 	assert(m.m_rows == v.m_size);
 	assert(m.m_cols == 1);
@@ -175,12 +175,12 @@ matrix<T> operator *(const matrix<T> m, const vector<T> v)
 }
 
 template <typename T>
-vector<T> operator *(const vector<T> v, const matrix<T> m)
+vect<T> operator *(const vect<T> v, const matrix<T> m)
 {
 	assert(m.m_rows == v.m_size);
 	assert(m.m_cols != 1);
 
-	vector<T> v1(m.m_cols);
+	vect<T> v1(m.m_cols);
 
 	for (int j = 0; j < m.m_cols; j++)
 	{
@@ -193,9 +193,9 @@ vector<T> operator *(const vector<T> v, const matrix<T> m)
 }
 
 template <typename T>
-vector<T> operator *(const vector<T> v, const T val)
+vect<T> operator *(const vect<T> v, const T val)
 {
-	vector<T> v1(v.m_size);
+	vect<T> v1(v.m_size);
 
 	for (int j = 0; j < v.m_size; j++)
 		v1.m_vec[j] = v.m_vec[j] * val;
@@ -204,9 +204,9 @@ vector<T> operator *(const vector<T> v, const T val)
 }
 
 template <typename T>
-vector<T> operator /(const vector<T> v, const T val)
+vect<T> operator /(const vect<T> v, const T val)
 {
-	vector<T> v1(v.m_size);
+	vect<T> v1(v.m_size);
 
 	for (int j = 0; j < v.m_size; j++)
 		v1.m_vec[j] = v.m_vec[j] / val;
@@ -215,7 +215,7 @@ vector<T> operator /(const vector<T> v, const T val)
 }
 
 template <typename T>
-bool operator ==(const vector<T> v1, const vector<T> v2)
+bool operator ==(const vect<T> v1, const vect<T> v2)
 {
 	if (v1.m_size == v2.m_size)
 	{
@@ -230,13 +230,13 @@ bool operator ==(const vector<T> v1, const vector<T> v2)
 }
 
 template <typename T>
-bool operator !=(const vector<T> v1, const vector<T> v2)
+bool operator !=(const vect<T> v1, const vect<T> v2)
 {
 	return (!(v1 == v2));
 }
 
 template <typename T>
-matrix<T> transpose(const vector<T> v)
+matrix<T> transpose(const vect<T> v)
 {
 	matrix<T> m(v.m_size, 1);
 
@@ -247,9 +247,9 @@ matrix<T> transpose(const vector<T> v)
 }
 
 template <typename T>
-vector<T> transpose(const matrix<T> m)
+vect<T> transpose(const matrix<T> m)
 {
-	vector<T> v(m.m_rows);
+	vect<T> v(m.m_rows);
 
 	for (int i = 0; i < m.m_rows; i++)
 		v.m_vec[i] = m.m_mat[i][0];
@@ -258,7 +258,7 @@ vector<T> transpose(const matrix<T> m)
 }
 
 template <typename T>
-T mul(const vector<T> v, const matrix<T> m)
+T mul(const vect<T> v, const matrix<T> m)
 {
 	assert(m.m_rows == v.m_size);
 	assert(m.m_cols == 1);
@@ -273,7 +273,7 @@ T mul(const vector<T> v, const matrix<T> m)
 
 
 template <typename T>
-void insert_end(vector<T>& v, T val)
+void insert_end(vect<T>& v, T val)
 {
 	for (int i = 0; i < (v.m_size - 1); i++)
 		v.m_vec[i] = v.m_vec[i+1];
@@ -282,9 +282,9 @@ void insert_end(vector<T>& v, T val)
 }
 
 template <typename T>
-vector<T> cross(const vector<T> v1, const vector<T> v2)
+vect<T> cross(const vect<T> v1, const vect<T> v2)
 {
-	vector<T> v3(v1.m_size);
+	vect<T> v3(v1.m_size);
 
 	v3.m_vec[0] = ((v1.m_vec[1] * v2.m_vec[2]) - (v1.m_vec[2] * v2.m_vec[1]));
 	v3.m_vec[1] = ((v1.m_vec[2] * v2.m_vec[0]) - (v1.m_vec[0] * v2.m_vec[2]));
@@ -294,9 +294,9 @@ vector<T> cross(const vector<T> v1, const vector<T> v2)
 }
 
 template <typename T>
-bool is_initialized(const vector<T> v)
+bool is_initialized(const vect<T> v)
 {
-	vector<T> v1(v.m_size);
+	vect<T> v1(v.m_size);
 	bool retval;
 
 	retval = (v == v1) ? false : true;
@@ -305,7 +305,7 @@ bool is_initialized(const vector<T> v)
 }
 
 template <typename T>
-T var(const vector<T> v)
+T var(const vect<T> v)
 {
 	T val = 0;
 	T mean, var, diff;

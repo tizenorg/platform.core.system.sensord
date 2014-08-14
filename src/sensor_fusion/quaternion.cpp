@@ -33,12 +33,12 @@ quaternion<TYPE>::quaternion(const TYPE w, const TYPE x, const TYPE y, const TYP
 {
 	TYPE vec_data[QUAT_SIZE] = {w, x, y, z};
 
-	vector<TYPE> v(QUAT_SIZE, vec_data);
+	vect<TYPE> v(QUAT_SIZE, vec_data);
 	m_quat = v;
 }
 
 template <typename TYPE>
-quaternion<TYPE>::quaternion(const vector<TYPE> v)
+quaternion<TYPE>::quaternion(const vect<TYPE> v)
 {
 	m_quat = v;
 }

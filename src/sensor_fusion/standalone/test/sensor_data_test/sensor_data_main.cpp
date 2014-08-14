@@ -23,7 +23,7 @@ int main()
 {
 	float arr1[3] = {1.04, -4.678, -2.34};
 
-	vector<float> v1(3, arr1);
+	vect<float> v1(3, arr1);
 
 	sensor_data<float> sd1(2.0, 3.0, 4.0, 140737488355328);
 	sensor_data<float> sd2(1.04, -4.678, -2.34);
