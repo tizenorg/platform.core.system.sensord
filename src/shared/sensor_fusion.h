@@ -31,7 +31,6 @@ public:
 	sensor_fusion();
 	virtual ~sensor_fusion();
 
-	virtual void fuse(const sensor_event_t &event) = 0;
 	virtual bool is_data_ready(void);
 	virtual bool add_interval(int client_id, unsigned int interval);
 	virtual bool delete_interval(int client_id);
