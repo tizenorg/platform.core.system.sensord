@@ -31,7 +31,6 @@ using std::thread;
 csensor_event_dispatcher::csensor_event_dispatcher()
 : m_lcd_on(true)
 {
-	m_sensor_fusion = sensor_plugin_loader::get_instance().get_fusion();
 }
 
 csensor_event_dispatcher::~csensor_event_dispatcher() { }

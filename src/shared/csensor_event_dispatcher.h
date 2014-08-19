@@ -23,7 +23,6 @@
 #include <sf_common.h>
 #include <csensor_event_queue.h>
 #include <cclient_info_manager.h>
-#include <sensor_fusion.h>
 #include <csocket.h>
 #include <virtual_sensor.h>
 #include <vconf.h>
@@ -41,7 +40,6 @@ private:
 	event_type_last_event_map m_last_events;
 	virtual_sensors m_active_virtual_sensors;
 	cmutex m_active_virtual_sensors_mutex;
-	sensor_fusion *m_sensor_fusion;
 
 	csensor_event_dispatcher();
 	~csensor_event_dispatcher();

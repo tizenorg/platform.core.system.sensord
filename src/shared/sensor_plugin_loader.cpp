@@ -22,7 +22,6 @@
 #include <libxml/parser.h>
 #include <sensor_hal.h>
 #include <sensor_base.h>
-#include <sensor_fusion.h>
 #include <dlfcn.h>
 #include <common.h>
 
@@ -111,10 +110,7 @@ bool sensor_plugin_loader::insert_module(const char *node_name, const char *path
 		DBG("init [%s] module", module->get_name());
 		sensor_type_t sensor_type = module->get_type();
 
-		if (module->is_fusion())
-			m_fusions.push_back((sensor_fusion *) module);
-		else
-			m_sensors.insert(make_pair(sensor_type, module));
+		m_sensors.insert(make_pair(sensor_type, module));
 	}
 
 	return true;
@@ -286,19 +282,6 @@ vector<sensor_base *> sensor_plugin_loader::get_virtual_sensors(void)
 	}
 
 	return virtual_list;
-}
-
-sensor_fusion *sensor_plugin_loader::get_fusion(void)
-{
-	if (m_fusions.empty())
-		return NULL;
-
-	return m_fusions.front();
-}
-
-vector<sensor_fusion *> sensor_plugin_loader::get_fusions(void)
-{
-	return m_fusions;
 }
 
 bool sensor_plugin_loader::destroy()
