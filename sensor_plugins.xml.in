@@ -14,7 +14,6 @@
 		<MODULE path = "/usr/lib/sensord/libproxi_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/liblight_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libmotion_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/libsensor_fusion.so"/>
 		<MODULE path = "/usr/lib/sensord/libgravity_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/liblinear_accel_sensor.so"/>
 	</SENSOR>
