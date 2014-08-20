@@ -31,7 +31,6 @@ using std::thread;
 csensor_event_dispatcher::csensor_event_dispatcher()
 : m_lcd_on(true)
 {
-	m_sensor_fusion = sensor_plugin_loader::get_instance().get_fusion();
 }
 
 csensor_event_dispatcher::~csensor_event_dispatcher() { }
@@ -151,11 +150,6 @@ void csensor_event_dispatcher::dispatch_event(void)
 			sensor_event_t sensor_events[MAX_SENSOR_EVENT];
 			unsigned int event_cnt = 0;
 			sensor_events[event_cnt++] = *((sensor_event_t *)seed_event);
-
-			if (m_sensor_fusion) {
-				if (m_sensor_fusion->is_started())
-					m_sensor_fusion->fuse(*((sensor_event_t *)seed_event));
-			}
 
 			virtual_sensors v_sensors = get_active_virtual_sensors();
 			virtual_sensors::iterator it_v_sensor;
