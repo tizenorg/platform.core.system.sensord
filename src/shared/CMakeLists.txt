@@ -50,7 +50,6 @@ add_library(sensord-server SHARED
 	sensor_base.cpp
 	physical_sensor.cpp
 	virtual_sensor.cpp
-	sensor_fusion.cpp
 	iio_common.cpp
 )
 
@@ -72,7 +71,6 @@ install(TARGETS sensord-share DESTINATION lib)
 install(FILES sensord-server.pc DESTINATION lib/pkgconfig)
 install(FILES ${PROJECT_NAME}.pc DESTINATION lib/pkgconfig)
 install(FILES
-	sensor_fusion.h
 	crw_lock.h
 	worker_thread.h
 	cconfig.h
@@ -83,7 +81,6 @@ install(FILES
 	sensor_base.h
 	physical_sensor.h
 	virtual_sensor.h
-	sensor_fusion.h
 	sf_common.h
 	cpacket.h
 	csocket.h

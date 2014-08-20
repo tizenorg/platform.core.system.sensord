@@ -12,11 +12,11 @@ Source2:    sensord.socket
 %define gyro_state ON
 %define proxi_state OFF
 %define light_state OFF
-%define geo_state OFF
+%define geo_state ON
+%define orientation_state OFF
 %define gravity_state OFF
 %define linear_accel_state OFF
 %define motion_state OFF
-%define sensor_fusion_state ON
 
 BuildRequires:  cmake
 BuildRequires:  vconf-keys-devel
@@ -65,7 +65,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGYRO=%{gyro_state} -DPROXI=%{proxi_state} -DLIGHT=%{light_state} \
 	-DGEO=%{geo_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DMOTION=%{motion_state} \
-	-DSENSOR_FUSION=%{sensor_fusion_state}
+	-DORIENTATION=%{orientation_state}
 
 make %{?jobs:-j%jobs}
 
