@@ -36,10 +36,6 @@ extern "C"
  * @{
  */
 
-enum gravity_data_id {
-	GRAVITY_BASE_DATA_SET 				= (GRAVITY_SENSOR << 16) | 0x0001,
-};
-
 enum gravity_event_type {
 	GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME					= (GRAVITY_SENSOR << 16) | 0x0002,
 };
