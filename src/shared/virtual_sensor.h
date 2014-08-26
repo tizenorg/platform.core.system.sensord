@@ -29,6 +29,7 @@ public:
 	virtual ~virtual_sensor();
 
 	virtual void synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs) = 0;
+	virtual int get_sensor_data(const unsigned int event_type, sensor_data_t &data) = 0;
 	bool is_virtual(void);
 
 protected:

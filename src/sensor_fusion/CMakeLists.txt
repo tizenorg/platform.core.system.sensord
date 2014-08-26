@@ -35,7 +35,6 @@ add_definitions(-Iinclude)
 SET(SENSOR_FUSION_NAME sensor_fusion)
 
 add_library(${SENSOR_FUSION_NAME} SHARED
-		compute_gravity.cpp
 		euler_angles.cpp
 		matrix.cpp
 		orientation_filter.cpp
