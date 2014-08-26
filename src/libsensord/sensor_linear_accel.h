@@ -36,10 +36,6 @@ extern "C"
  * @{
  */
 
-enum linear_accel_data_id {
-	LINEAR_ACCEL_BASE_DATA_SET 				= (LINEAR_ACCEL_SENSOR << 16) | 0x0001,
-};
-
 enum linear_accel_event_type {
 	LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME					= (LINEAR_ACCEL_SENSOR << 16) | 0x0001,
 };
