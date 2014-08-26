@@ -25,6 +25,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <dlfcn.h>
+#include <sensor.h>
 #include <common.h>
 #include <sf_common.h>
 #include <virtual_sensor.h>
@@ -56,9 +57,11 @@ linear_accel_sensor::~linear_accel_sensor()
 bool linear_accel_sensor::init()
 {
 	m_gravity_sensor = sensor_plugin_loader::get_instance().get_sensor(GRAVITY_SENSOR);
+	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
 
-	if (!m_gravity_sensor) {
-		ERR("cannot load gravity sensor_hal[%s]", sensor_base::get_name());
+	if (!m_accel_sensor || !m_gravity_sensor) {
+		ERR("Failed to load sensors,  accel: 0x%x, gravity: 0x%x",
+			m_accel_sensor, m_gravity_sensor);
 		return false;
 	}
 
@@ -89,52 +92,58 @@ bool linear_accel_sensor::on_stop(void)
 	return true;
 }
 
-bool linear_accel_sensor::add_interval(int client_id, unsigned int interval, bool is_processor)
+bool linear_accel_sensor::add_interval(int client_id, unsigned int interval)
 {
-	m_gravity_sensor->add_interval((int)this , interval, true);
-	return sensor_base::add_interval(client_id, interval, is_processor);
+	AUTOLOCK(m_mutex);
+	m_gravity_sensor->add_interval(client_id, interval, true);
+	return sensor_base::add_interval(client_id, interval, true);
 }
 
-bool linear_accel_sensor::delete_interval(int client_id, bool is_processor)
+bool linear_accel_sensor::delete_interval(int client_id)
 {
-	m_gravity_sensor->delete_interval((int)this , true);
-	return sensor_base::delete_interval(client_id, is_processor);
+	AUTOLOCK(m_mutex);
+	m_gravity_sensor->delete_interval(client_id, true);
+	return sensor_base::delete_interval(client_id, true);
 }
 
 void linear_accel_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
 {
 	vector<sensor_event_t> gravity_event;
+	sensor_event_t lin_accel_event;
 	((virtual_sensor *)m_gravity_sensor)->synthesize(event, gravity_event);
 
 	if (!gravity_event.empty() && event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
 		AUTOLOCK(m_value_mutex);
 
-		m_time = gravity_event[0].data.timestamp;
-		gravity_event[0].event_type = LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME;
-		m_x = event.data.values[0] - gravity_event[0].data.values[0] * GRAVITY;
-		m_y = event.data.values[1] - gravity_event[0].data.values[1] * GRAVITY;
-		m_z = event.data.values[2] - gravity_event[0].data.values[2] * GRAVITY;
-
-		gravity_event[0].data.values[0] = m_x;
-		gravity_event[0].data.values[1] = m_y;
-		gravity_event[0].data.values[2] = m_z;
-		outs.push_back(gravity_event[0]);
-		return;
+		lin_accel_event.data.values_num = 3;
+		lin_accel_event.data.timestamp = gravity_event[0].data.timestamp;
+		lin_accel_event.event_type = LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME;
+		lin_accel_event.data.data_accuracy = SENSOR_ACCURACY_GOOD;
+		lin_accel_event.data.data_unit_idx = SENSOR_UNIT_METRE_PER_SECOND_SQUARED;
+		lin_accel_event.data.values[0] = event.data.values[0] - gravity_event[0].data.values[0];
+		lin_accel_event.data.values[1] = event.data.values[1] - gravity_event[0].data.values[1];
+		lin_accel_event.data.values[2] = event.data.values[2] - gravity_event[0].data.values[2];
+		outs.push_back(lin_accel_event);
 	}
+
+	return;
 }
 
-int linear_accel_sensor::get_sensor_data(const unsigned int data_id, sensor_data_t &data)
+int linear_accel_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &data)
 {
-	if (data_id != LINEAR_ACCEL_BASE_DATA_SET)
+	sensor_data_t gravity_data, accel_data;
+	((virtual_sensor *)m_gravity_sensor)->get_sensor_data(GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME, gravity_data);
+	m_accel_sensor->get_sensor_data(ACCELEROMETER_BASE_DATA_SET, accel_data);
+
+	if (event_type != LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME)
 		return -1;
 
-	AUTOLOCK(m_value_mutex);
 	data.data_accuracy = SENSOR_ACCURACY_GOOD;
 	data.data_unit_idx = SENSOR_UNIT_METRE_PER_SECOND_SQUARED;
-	data.time_stamp = m_time;
-	data.values[0] = m_x;
-	data.values[1] = m_y;
-	data.values[2] = m_z;
+	data.timestamp = gravity_data.timestamp;
+	data.values[0] = accel_data.values[0] - gravity_data.values[0];
+	data.values[1] = accel_data.values[1] - gravity_data.values[1];
+	data.values[2] = accel_data.values[2] - gravity_data.values[2];
 	data.values_num = 3;
 	return 0;
 }
@@ -156,7 +165,7 @@ extern "C" void *create(void)
 
 	try {
 		inst = new linear_accel_sensor();
-	} catch (int ErrNo) {
+	} catch (int err) {
 		ERR("Failed to create linear_accel_sensor class, errno : %d, errstr : %s", err, strerror(err));
 		return NULL;
 	}

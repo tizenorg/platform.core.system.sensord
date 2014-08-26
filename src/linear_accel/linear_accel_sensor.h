@@ -23,6 +23,7 @@
 #include <sensor.h>
 #include <vconf.h>
 #include <string>
+#include <virtual_sensor.h>
 
 using std::string;
 
@@ -42,12 +43,13 @@ public:
 
 	void synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs);
 
-	virtual bool add_interval(int client_id, unsigned int interval, bool is_processor = false);
-	virtual bool delete_interval(int client_id, bool is_processor = false);
+	bool add_interval(int client_id, unsigned int interval);
+	bool delete_interval(int client_id);
 
-	int get_sensor_data(const unsigned int data_id, sensor_data_t &data);
+	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
 	bool get_properties(const unsigned int type, sensor_properties_t &properties);
 private:
+	sensor_base *m_accel_sensor;
 	sensor_base *m_gravity_sensor;
 	cmutex m_value_mutex;
 
