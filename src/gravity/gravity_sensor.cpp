@@ -28,23 +28,21 @@
 #include <common.h>
 #include <sf_common.h>
 #include <sensor_base.h>
-#include <virtual_sensor.h>
 #include <gravity_sensor.h>
 #include <sensor_plugin_loader.h>
 
 #define INITIAL_VALUE -1
 #define INITIAL_TIME 0
-#define TIME_CONSTANT  0.18
 #define GRAVITY 9.80665
 
 #define SENSOR_NAME "GRAVITY_SENSOR"
 
 gravity_sensor::gravity_sensor()
-: m_accel_sensor(NULL)
+: m_orientation_sensor(NULL)
 , m_x(INITIAL_VALUE)
 , m_y(INITIAL_VALUE)
 , m_z(INITIAL_VALUE)
-, m_time(INITIAL_TIME)
+, m_timestamp(INITIAL_TIME)
 {
 	m_name = string(SENSOR_NAME);
 
@@ -58,10 +56,10 @@ gravity_sensor::~gravity_sensor()
 
 bool gravity_sensor::init()
 {
-	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
+	m_orientation_sensor = sensor_plugin_loader::get_instance().get_sensor(ORIENTATION_SENSOR);
 
-	if (!m_accel_sensor) {
-		ERR("cannot load accel sensor_hal[%s]", sensor_base::get_name());
+	if (!m_orientation_sensor) {
+		ERR("Failed to load orientation sensor: 0x%x", m_orientation_sensor);
 		return false;
 	}
 
@@ -78,8 +76,8 @@ bool gravity_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_accel_sensor->add_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_accel_sensor->start();
+	m_orientation_sensor->add_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_orientation_sensor->start();
 
 	activate();
 	return true;
@@ -89,109 +87,83 @@ bool gravity_sensor::on_stop(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_accel_sensor->delete_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_accel_sensor->stop();
+	m_orientation_sensor->delete_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_orientation_sensor->stop();
 
 	deactivate();
 	return true;
 }
 
-bool gravity_sensor::add_interval(int client_id, unsigned int interval, bool is_processor)
+bool gravity_sensor::add_interval(int client_id, unsigned int interval)
 {
-	m_accel_sensor->add_interval(client_id, interval, true);
+	AUTOLOCK(m_mutex);
+	m_orientation_sensor->add_interval(client_id , interval, true);
+
 	return sensor_base::add_interval(client_id, interval, true);
 }
 
-bool gravity_sensor::delete_interval(int client_id, bool is_processor)
+bool gravity_sensor::delete_interval(int client_id)
 {
-	m_accel_sensor->delete_interval(client_id, true);
+	AUTOLOCK(m_mutex);
+	m_orientation_sensor->delete_interval(client_id , true);
+
 	return sensor_base::delete_interval(client_id, true);
 }
 
 void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
 {
-	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
-		float x, y, z;
-		calibrate_gravity(event, x, y, z);
+	sensor_event_t gravity_event;
+	vector<sensor_event_t> orientation_event;
+	((virtual_sensor *)m_orientation_sensor)->synthesize(event, orientation_event);
 
-		sensor_event_t event;
-		event.event_type = GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME;
-		event.data.data_accuracy = SENSOR_ACCURACY_GOOD;
-		event.data.data_unit_idx = SENSOR_UNIT_METRE_PER_SECOND_SQUARED;
-		event.data.timestamp = m_time;
-		event.data.values_num = 3;
-		event.data.values[0] = x;
-		event.data.values[1] = y;
-		event.data.values[2] = z;
-		outs.push_back(event);
+	if (!orientation_event.empty()) {
+		AUTOLOCK(m_mutex);
 
-		AUTOLOCK(m_value_mutex);
-		m_x = x;
-		m_y = y;
-		m_z = z;
+		m_timestamp = orientation_event[0].data.timestamp;
+		gravity_event.data.values[0] = GRAVITY * sin(orientation_event[0].data.values[1]);
+		gravity_event.data.values[1] = GRAVITY * sin(orientation_event[0].data.values[0]);
+		gravity_event.data.values[2] = GRAVITY * cos(orientation_event[0].data.values[1] *
+										orientation_event[0].data.values[0]);
+		gravity_event.data.values_num = 3;
+		gravity_event.data.timestamp = m_timestamp;
+		gravity_event.data.data_accuracy = SENSOR_ACCURACY_GOOD;
+		gravity_event.data.data_unit_idx = SENSOR_UNIT_METRE_PER_SECOND_SQUARED;
 
+		outs.push_back(gravity_event);
 		return;
 	}
 }
 
-int gravity_sensor::get_sensor_data(const unsigned int data_id, sensor_data_t &data)
+int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &data)
 {
-	if (data_id != GRAVITY_BASE_DATA_SET)
+	sensor_data_t orientation_data;
+
+	if (event_type != GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME)
 		return -1;
 
-	AUTOLOCK(m_value_mutex);
+	m_orientation_sensor->get_sensor_data(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME, orientation_data);
 
 	data.data_accuracy = SENSOR_ACCURACY_GOOD;
 	data.data_unit_idx = SENSOR_UNIT_METRE_PER_SECOND_SQUARED;
-	data.time_stamp = m_time;
+	data.timestamp = orientation_data.timestamp;
+	data.values[0] = GRAVITY * sin(orientation_data.values[1]);
+	data.values[1] = GRAVITY * sin(orientation_data.values[0]);
+	data.values[2] = GRAVITY * cos(orientation_data.values[1] * orientation_data.values[0]);
 	data.values_num = 3;
-	data.values[0] = m_x;
-	data.values[1] = m_y;
-	data.values[2] = m_z;
 
 	return 0;
 }
 
 bool gravity_sensor::get_properties(const unsigned int type, sensor_properties_t &properties)
 {
-	m_accel_sensor->get_properties(type, properties);
-
-	if (type != GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME)
-		return true;
-
-	properties.sensor_min_range = properties.sensor_min_range / GRAVITY;
-	properties.sensor_max_range = properties.sensor_max_range / GRAVITY;
-	properties.sensor_resolution = properties.sensor_resolution / GRAVITY;
-	strncpy(properties.sensor_name, "Gravity Sensor", MAX_KEY_LENGTH);
+	properties.sensor_unit_idx = SENSOR_UNIT_DEGREE;
+	properties.sensor_min_range = -GRAVITY;
+	properties.sensor_max_range = GRAVITY;
+	properties.sensor_resolution = 1;
+	strncpy(properties.sensor_vendor, "Samsung", MAX_KEY_LENGTH);
+	strncpy(properties.sensor_name, SENSOR_NAME, MAX_KEY_LENGTH);
 
 	return true;
-}
-
-void gravity_sensor::calibrate_gravity(const sensor_event_t &raw, float &x, float &y, float &z)
-{
-	unsigned long long timestamp;
-	float dt;
-	float alpha;
-	float last_x = 0, last_y = 0, last_z = 0;
-
-	{
-		AUTOLOCK(m_value_mutex);
-		last_x = m_x;
-		last_y = m_y;
-		last_z = m_z;
-	}
-
-	timestamp = get_timestamp();
-	dt = (timestamp - m_time) / US_TO_SEC;
-	m_time = timestamp;
-	alpha = TIME_CONSTANT / (TIME_CONSTANT + dt);
-
-	if (dt > 1.0)
-		alpha = 0.0;
-
-	x = (alpha * last_x) + ((1 - alpha) * raw.data.values[0] / GRAVITY);
-	y = (alpha * last_y) + ((1 - alpha) * raw.data.values[1] / GRAVITY);
-	z = (alpha * last_z) + ((1 - alpha) * raw.data.values[2] / GRAVITY);
 }
 
 extern "C" void *create(void)
@@ -200,7 +172,7 @@ extern "C" void *create(void)
 
 	try {
 		inst = new gravity_sensor();
-	} catch (int ErrNo) {
+	} catch (int err) {
 		ERR("Failed to create gravity_sensor class, errno : %d, errstr : %s", err, strerror(err));
 		return NULL;
 	}
