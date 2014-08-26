@@ -25,7 +25,7 @@ sensor_data<float> linear_acceleration_sensor::get_linear_acceleration(const sen
 	sensor_data<float> gravity_data;
 	float la_x, la_y, la_z;
 
-	gravity_data = comp_grav.orientation2gravity(accel, gyro, magnetic);
+	gravity_data = grav_sensor.get_gravity(accel, gyro, magnetic);
 
 	la_x = accel.m_data.m_vec[0] - gravity_data.m_data.m_vec[1];
 	la_y = accel.m_data.m_vec[1] - gravity_data.m_data.m_vec[0];
