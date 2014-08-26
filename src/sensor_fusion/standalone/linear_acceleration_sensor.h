@@ -20,12 +20,12 @@
 #ifndef _LINEAR_ACCELERATION_SENSOR_H
 #define _LINEAR_ACCELERATION_SENSOR_H
 
-#include "../compute_gravity.h"
+#include "gravity_sensor.h"
 
 class linear_acceleration_sensor
 {
 public:
-	compute_gravity<float> comp_grav;
+	gravity_sensor grav_sensor;
 
 	sensor_data<float> get_linear_acceleration(const sensor_data<float> accel,
 				const sensor_data<float> gyro, const sensor_data<float> magnetic);

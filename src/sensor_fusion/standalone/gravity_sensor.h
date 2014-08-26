@@ -20,12 +20,12 @@
 #ifndef _GRAVITY_SENSOR_H
 #define _GRAVITY_SENSOR_H
 
-#include "../compute_gravity.h"
+#include "orientation_sensor.h"
 
 class gravity_sensor
 {
 public:
-	compute_gravity<float> comp_grav;
+	orientation_sensor orien_sensor;
 
 	sensor_data<float> get_gravity(const sensor_data<float> accel,
 				const sensor_data<float> gyro, const sensor_data<float> magnetic);
