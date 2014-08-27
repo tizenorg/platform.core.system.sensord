@@ -230,5 +230,16 @@
 			<TEMPERATURE_RESOLUTION value="0.002083"/>
 			<TEMPERATURE_OFFSET value="42.5"/>
 		</MODEL>
+
+		<MODEL id="LPS331">
+			<NAME value="LPS331"/>
+			<VENDOR value="ST Microelectronics"/>
+			<RAW_DATA_UNIT value="0.000244"/>
+			<MIN_RANGE value="260"/>
+			<MAX_RANGE value="1260"/>
+			<RESOLUTION value="1"/>
+			<TEMPERATURE_RESOLUTION value="0.002083"/>
+			<TEMPERATURE_OFFSET value="42.5"/>
+		</MODEL>
 	</PRESSURE>
 </SENSOR>
