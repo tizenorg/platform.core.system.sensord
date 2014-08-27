@@ -13,6 +13,7 @@ Source2:    sensord.socket
 %define proxi_state OFF
 %define light_state OFF
 %define geo_state OFF
+%define pressure_state ON
 %define gravity_state OFF
 %define linear_accel_state OFF
 %define motion_state OFF
@@ -62,7 +63,7 @@ Sensord library (devel)
 #CXXFLAGS+=" -fvisibility=hidden -fvisibility-inlines-hidden ";export CXXFLAGS
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGYRO=%{gyro_state} -DPROXI=%{proxi_state} -DLIGHT=%{light_state} \
-	-DGEO=%{geo_state} -DGRAVITY=%{gravity_state} \
+	-DGEO=%{geo_state} -DPRESSURE=%{pressure_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DMOTION=%{motion_state}
 
 make %{?jobs:-j%jobs}
