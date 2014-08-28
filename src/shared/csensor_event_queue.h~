@@ -39,7 +39,7 @@ class csensor_event_queue
 private:
 	static const unsigned int QUEUE_FULL_SIZE = 1000;
 
-	
+	//priority_queue<sensor_event_t *, vector<sensor_event_t *>, compare> m_queue;
 queue<void *> m_queue;
 
 	mutex m_mutex;

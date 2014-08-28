@@ -36,10 +36,10 @@ bool physical_sensor::push(sensor_event_t const &event)
 
 bool physical_sensor::push(sensorhub_event_t const &event)
 {
-
+INFO("Entering physical sensor\n");
 	csensor_event_queue::get_instance().push(event);
 	return true;
-
+INFO("Exiting physical sensor\n");
 }
 
 void physical_sensor::set_poller(working_func_t func, void *arg)

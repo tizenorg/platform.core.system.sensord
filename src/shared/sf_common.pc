@@ -1,0 +1,13 @@
+# Package Information for pkg-config
+
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include/sf_common
+
+Name: libsf_common
+Description: Commonly used code and defintions for the sensor framework.
+Version: 1.0
+Requires:
+Libs: -L${libdir} -lsensord-share
+Cflags: -I${includedir}

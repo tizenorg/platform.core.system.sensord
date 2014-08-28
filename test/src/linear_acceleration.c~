@@ -1,0 +1,60 @@
+
+#include <time.h>
+#include <glib.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sensor.h>
+#include <sensors.h>
+
+#define MICROSECONDS(tv)        ((tv.tv_sec * 1000000ll) + tv.tv_usec)
+
+static GMainLoop *mainloop;
+
+void test_directcall_cb( unsigned long long timestamp,
+                sensor_data_accuracy_e accuracy, float x, float y, float z, void *user_data)
+{
+	printf("linear acceleration [%6.6f] [%6.6f] [%6.6f]\n\n", x, y, z);
+}
+
+
+int main()
+{
+
+	sensor_type_e type = SENSOR_LINEAR_ACCELERATION;
+	sensor_h handle;
+	struct timeval sv;
+	unsigned long long time_old;
+
+
+	bool is_supported;
+
+	float max = 0, min = 0, res = 0;
+	mainloop = g_main_loop_new(NULL, FALSE);
+
+	sensor_create(&handle);
+
+	sensor_linear_acceleration_set_cb(handle, 100, test_directcall_cb, NULL);
+
+	if(sensor_start(handle, type) == SENSOR_ERROR_NONE)
+	{
+		printf("Success start \n");
+	}
+	else
+	{
+		printf("Error\n\n\n\n");
+		sensor_linear_acceleration_unset_cb(handle);
+		sensor_destroy(handle);
+		return -1;
+	}
+
+	g_main_loop_run(mainloop);
+	g_main_loop_unref(mainloop);
+
+	sensor_linear_acceleration_unset_cb(handle);
+
+	if(sensor_stop(handle, type) == SENSOR_ERROR_NONE)
+		printf("Success stop \n");
+
+	sensor_destroy(handle);
+	return 0;
+}

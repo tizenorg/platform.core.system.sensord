@@ -59,10 +59,26 @@ sensor_event_t *ev= (sensor_event_t *) event;
 
 	if (m_queue.size() >= QUEUE_FULL_SIZE) {
 		ERR("Queue is full");
-	} else{        
-
+	} else{                
+if(ev->event_type !=ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME || ev->event_type !=GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME)
 		m_queue.push(event);
+else{
+while(!m_queue.empty()){
+void *e = m_queue.front();
+aux_queue.push(e);
+	m_queue.pop();
+                         }
+m_queue.push(ev);
+while(!aux_queue.empty()){
+void *e = aux_queue.front();
+m_queue.push(e);
+	m_queue.pop();
+                         }
+       }
 
+void *y=m_queue.front();
+sensor_event_t *ti= (sensor_event_t *) y;
+INFO("%d\n",ti->event_type);
 }
 	if (wake)
 		m_cond_var.notify_one();
