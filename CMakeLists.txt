@@ -16,7 +16,6 @@ set(PROJECT_MAJOR_VERSION "0")
 set(PROJECT_MINOR_VERSION "2")
 set(PROJECT_RELEASE_VERSION "1")
 set(CMAKE_VERBOSE_MAKEFILE OFF)
-
 add_definitions(-Wall -O3 -omit-frame-pointer)
 add_definitions(-DUSE_DLOG_LOG)
 #add_definitions(-Wall -g -D_DEBUG)
@@ -50,4 +49,13 @@ ENDIF("${ARCH}" MATCHES "^arm.*")
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.APLv2 DESTINATION share/license RENAME sensord)
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.APLv2 DESTINATION share/license RENAME libsensord)
 
+IF("${TEST_SUITE}" STREQUAL "ON")
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.APLv2 DESTINATION share/license RENAME test)
+ENDIF()
+
 add_subdirectory(src)
+
+IF("${TEST_SUITE}" STREQUAL "ON")
+add_subdirectory(test)
+ENDIF()
+
