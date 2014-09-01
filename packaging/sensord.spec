@@ -17,6 +17,8 @@ Source2:    sensord.socket
 %define linear_accel_state OFF
 %define motion_state OFF
 
+%define build_test_suite OFF
+
 BuildRequires:  cmake
 BuildRequires:  vconf-keys-devel
 BuildRequires:  libattr-devel
@@ -54,6 +56,17 @@ Requires:   %{name} = %{version}-%{release}
 %description -n libsensord-devel
 Sensord library (devel)
 
+%if %{build_test_suite} == "ON"
+%package -n sensor-tc
+Summary:    Sensord library
+Group:      System/Sensor Framework
+Requires:   %{name} = %{version}-%{release}
+
+%description -n sensor-tc
+Sensor functional testing
+
+%endif
+
 %prep
 %setup -q
 
@@ -63,7 +76,8 @@ Sensord library (devel)
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGYRO=%{gyro_state} -DPROXI=%{proxi_state} -DLIGHT=%{light_state} \
 	-DGEO=%{geo_state} -DGRAVITY=%{gravity_state} \
-	-DLINEAR_ACCEL=%{linear_accel_state} -DMOTION=%{motion_state}
+	-DLINEAR_ACCEL=%{linear_accel_state} -DMOTION=%{motion_state} \
+        -DTEST_SUITE=%{build_test_suite}
 
 make %{?jobs:-j%jobs}
 
@@ -97,6 +111,8 @@ systemctl daemon-reload
 %license LICENSE.APLv2
 %{_datadir}/license/sensord
 
+
+
 %files -n libsensord
 %manifest libsensord.manifest
 %defattr(-,root,root,-)
@@ -115,3 +131,13 @@ systemctl daemon-reload
 %{_libdir}/pkgconfig/sensor.pc
 %{_libdir}/pkgconfig/sf_common.pc
 %{_libdir}/pkgconfig/sensord-server.pc
+
+
+%if %{build_test_suite} == "ON"
+%files -n sensor-tc
+%defattr(-,root,root,-)
+/usr/bin/accelerometer
+%license LICENSE.APLv2
+%{_datadir}/license/test
+%endif
+
