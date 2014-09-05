@@ -27,18 +27,21 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 
 add_executable(accelerometer src/accelerometer.c)
 add_executable(geomagnetic src/geomagnetic.c)
+add_executable(orientation src/orientation.c)
 
 SET_TARGET_PROPERTIES(accelerometer PROPERTIES LINKER_LANGUAGE C)
 SET_TARGET_PROPERTIES(geomagnetic PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(orientation PROPERTIES LINKER_LANGUAGE C)
 
 link_directories(../src/libsensord/)
 
 target_link_libraries(accelerometer glib-2.0 dlog sensor)
 target_link_libraries(geomagnetic glib-2.0 dlog sensor)
+target_link_libraries(orientation glib-2.0 dlog sensor)
 
 INSTALL(TARGETS accelerometer DESTINATION /usr/bin/)
 INSTALL(TARGETS geomagnetic DESTINATION /usr/bin/)
-
+INSTALL(TARGETS orientation DESTINATION /usr/bin/)
 
 
 
