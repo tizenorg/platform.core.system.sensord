@@ -135,6 +135,7 @@ systemctl daemon-reload
 %defattr(-,root,root,-)
 /usr/bin/accelerometer
 /usr/bin/geomagnetic
+/usr/bin/orientation
 %license LICENSE.APLv2
 %{_datadir}/license/test
 %endif
