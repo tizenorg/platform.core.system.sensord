@@ -137,6 +137,7 @@ systemctl daemon-reload
 /usr/bin/geomagnetic
 /usr/bin/orientation
 /usr/bin/gravity
+/usr/bin/linear_acceleration
 %license LICENSE.APLv2
 %{_datadir}/license/test
 %endif
