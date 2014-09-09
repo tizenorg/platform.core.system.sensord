@@ -138,6 +138,7 @@ systemctl daemon-reload
 /usr/bin/orientation
 /usr/bin/gravity
 /usr/bin/linear_acceleration
+/usr/bin/gyro
 %license LICENSE.APLv2
 %{_datadir}/license/test
 %endif
