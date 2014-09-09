@@ -77,7 +77,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGYRO=%{gyro_state} -DPROXI=%{proxi_state} -DLIGHT=%{light_state} \
 	-DGEO=%{geo_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DMOTION=%{motion_state} \
-        -DTEST_SUITE=%{build_test_suite}
+	-DTEST_SUITE=%{build_test_suite}
 
 make %{?jobs:-j%jobs}
 
@@ -111,8 +111,6 @@ systemctl daemon-reload
 %license LICENSE.APLv2
 %{_datadir}/license/sensord
 
-
-
 %files -n libsensord
 %manifest libsensord.manifest
 %defattr(-,root,root,-)
@@ -131,7 +129,6 @@ systemctl daemon-reload
 %{_libdir}/pkgconfig/sensor.pc
 %{_libdir}/pkgconfig/sf_common.pc
 %{_libdir}/pkgconfig/sensord-server.pc
-
 
 %if %{build_test_suite} == "ON"
 %files -n sensor-tc

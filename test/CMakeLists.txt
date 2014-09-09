@@ -37,4 +37,3 @@ INSTALL(TARGETS accelerometer DESTINATION /usr/bin/)
 
 
 
-
