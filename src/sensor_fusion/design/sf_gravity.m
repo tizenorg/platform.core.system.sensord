@@ -39,6 +39,14 @@ Bias_Gx = -5.3539;
 Bias_Gy = 0.24325;
 Bias_Gz = 2.3391;
 
+Bias_Mx = 0;
+Bias_My = 0;
+Bias_Mz = 0;
+
+Sign_Mx = 1;
+Sign_My = 1;
+Sign_Mz = 1;
+
 BUFFER_SIZE = 100;
 
 Accel_data = zeros(4,BUFFER_SIZE);
@@ -69,9 +77,9 @@ Gyro_data(2,:) = Gyro_data(2,:)/scale_Gyro;
 Gyro_data(3,:) = Gyro_data(3,:)/scale_Gyro;
 
 % get magnetometer x,y,z axis data from stored file
-Mag_data(1,:) = (((dlmread("data/100ms/gravity/single_roll_throw/magnetic.txt")(:,1))'))(1:BUFFER_SIZE);
-Mag_data(2,:) = (((dlmread("data/100ms/gravity/single_roll_throw/magnetic.txt")(:,2))'))(1:BUFFER_SIZE);
-Mag_data(3,:) = (((dlmread("data/100ms/gravity/single_roll_throw/magnetic.txt")(:,3))'))(1:BUFFER_SIZE);
+Mag_data(1,:) = (((dlmread("data/100ms/gravity/single_roll_throw/magnetic.txt")(:,1))') + Bias_Mx)(1:BUFFER_SIZE) * Sign_Mx;
+Mag_data(2,:) = (((dlmread("data/100ms/gravity/single_roll_throw/magnetic.txt")(:,2))') + Bias_My)(1:BUFFER_SIZE) * Sign_My;
+Mag_data(3,:) = (((dlmread("data/100ms/gravity/single_roll_throw/magnetic.txt")(:,3))') + Bias_Mz)(1:BUFFER_SIZE) * Sign_Mz;
 Mag_data(4,:) = ((dlmread("data/100ms/gravity/single_roll_throw/magnetic.txt")(:,4))')(1:BUFFER_SIZE);
 
 % estimate orientation
@@ -92,7 +100,7 @@ hold on;
 grid on;
 UA = Accel_data(3,:);
 p3 = plot(1:length(UA),UA(1,1:length(UA)),'r');
-title(['Accelerometer Raw Data']);
+title(['Raw Accelerometer Data']);
 legend([p1 p2 p3],'x-axis', 'y-axis', 'z-axis');
 
 % Gravity Plot Results

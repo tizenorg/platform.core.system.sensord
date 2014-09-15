@@ -25,6 +25,10 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 	LOW_PASS_FILTERING_ON = 0;
 	PLOT_SCALED_SENSOR_COMPARISON_DATA = 0;
 	PLOT_INDIVIDUAL_SENSOR_INPUT_DATA = 0;
+	MAGNETIC_ALIGNMENT_FACTOR = -1;
+	PITCH_PHASE_CORRECTION = -1;
+	ROLL_PHASE_CORRECTION = -1;
+	YAW_PHASE_CORRECTION = -1;
 
 	GRAVITY = 9.80665;
 	PI = 3.141593;
@@ -124,7 +128,7 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 	M_T(1) = 100000;
 
 	acc_e = [0.0;0.0;1.0]; % gravity vector in earth frame
-	mag_e = [0.0;1.0;0.0]; % magnetic field vector in earth frame
+	mag_e = [0.0;MAGNETIC_ALIGNMENT_FACTOR;0.0]; % magnetic field vector in earth frame
 
 	H = [eye(3) zeros(3,3); zeros(3,6)];
 	x = zeros(6,BUFFER_SIZE);
@@ -303,9 +307,9 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 	OR_aid(3,:) = yaw * RAD2DEG;
 
 	euler = quat2euler(quat_driv);
-	OR_driv(1,:) = euler(:,2)' * RAD2DEG;
-	OR_driv(2,:) = euler(:,1)' * RAD2DEG;
-	OR_driv(3,:) = -euler(:,3)' * RAD2DEG;
+	OR_driv(1,:) = ROLL_PHASE_CORRECTION * euler(:,2)' * RAD2DEG;
+	OR_driv(2,:) = PITCH_PHASE_CORRECTION * euler(:,1)' * RAD2DEG;
+	OR_driv(3,:) = YAW_PHASE_CORRECTION * euler(:,3)' * RAD2DEG;
 
 	euler = quat2euler(quat_error);
 	OR_err(1,:) = euler(:,2)' * RAD2DEG;
