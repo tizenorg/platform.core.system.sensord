@@ -39,6 +39,14 @@ Bias_Gx = -5.3539;
 Bias_Gy = 0.24325;
 Bias_Gz = 2.3391;
 
+Bias_Mx = 0;
+Bias_My = 0;
+Bias_Mz = 0;
+
+Sign_Mx = 1;
+Sign_My = 1;
+Sign_Mz = 1;
+
 BUFFER_SIZE = 1095;
 
 Accel_data = zeros(4,BUFFER_SIZE);
@@ -69,9 +77,9 @@ Gyro_data(2,:) = Gyro_data(2,:)/scale_Gyro;
 Gyro_data(3,:) = Gyro_data(3,:)/scale_Gyro;
 
 % get magnetometer x,y,z axis data from stored file
-Mag_data(1,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,1))'))(1:BUFFER_SIZE);
-Mag_data(2,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,2))'))(1:BUFFER_SIZE);
-Mag_data(3,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,3))'))(1:BUFFER_SIZE);
+Mag_data(1,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,1))') + Bias_Mx)(1:BUFFER_SIZE) * Sign_Mx;
+Mag_data(2,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,2))') + Bias_My)(1:BUFFER_SIZE) * Sign_My;
+Mag_data(3,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,3))') + Bias_Mz)(1:BUFFER_SIZE) * Sign_Mz;
 Mag_data(4,:) = ((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,4))')(1:BUFFER_SIZE);
 
 % estimate orientation
