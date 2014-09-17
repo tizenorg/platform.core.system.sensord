@@ -22,8 +22,17 @@
 
 #include <sensor_hal.h>
 #include <string>
+#include <fstream>
+
+#define IIO_DIR				"/sys/bus/iio/devices/"
+#define NAME_NODE			"/name"
+#define ILL_CLEAR_NODE		"/in_illuminance_clear_raw"
+
+#define IIO_DEV_BASE_NAME	"iio:device"
+#define IIO_DEV_STR_LEN		10
 
 using std::string;
+using std::ifstream;
 
 class light_sensor_hal : public sensor_hal
 {
@@ -42,9 +51,6 @@ public:
 
 private:
 	int m_adc;
-	int m_node_handle;
-	unsigned long m_polling_interval;
-	unsigned long long m_fired_time;
 	bool m_sensorhub_supported;
 
 	string m_model_id;
@@ -52,14 +58,27 @@ private:
 	string m_vendor;
 	string m_chip_name;
 
-	string m_resource;
-	string m_enable_resource;
-	string m_polling_resource;
-
 	cmutex m_value_mutex;
+	string m_clear_raw_node;
 
 	bool enable_resource(string &resource_node, bool enable);
-	bool update_value(bool wait);
+	bool update_value(void);
 	bool is_sensorhub_supported(void);
+
+	template <typename value_t>
+	bool read_node_value(string node_path, value_t &value)
+	{
+		ifstream handle;
+		handle.open(node_path.c_str());
+		if (!handle)
+		{
+			ERR("Failed to open handle(%s)", node_path.c_str());
+			return false;
+		}
+		handle >> value;
+		handle.close();
+
+		return true;
+	}
 };
 #endif /*_LIGHT_SENSOR_HAL_H_*/
