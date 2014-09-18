@@ -37,6 +37,7 @@ private:
 	static const unsigned int QUEUE_FULL_SIZE = 1000;
 
 	queue<void * > m_queue;
+	queue<void * > aux_queue;
 	mutex m_mutex;
 	condition_variable m_cond_var;
 
