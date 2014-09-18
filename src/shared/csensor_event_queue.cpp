@@ -19,6 +19,9 @@
 
 #include <csensor_event_queue.h>
 #include "common.h"
+#include <sensor_accel.h>
+
+bool prioritize_events = false;
 
 csensor_event_queue::csensor_event_queue()
 {
@@ -40,16 +43,42 @@ void csensor_event_queue::push(sensorhub_event_t const &event)
 
 void csensor_event_queue::push_internal(void *event)
 {
+	sensor_event_t *ev= (sensor_event_t *) event;
 	lock l(m_mutex);
 	bool wake = m_queue.empty();
-
+	
 	if (m_queue.size() >= QUEUE_FULL_SIZE) {
 		ERR("Queue is full");
-	} else
-		m_queue.push(event);
+	} else {
+		if(prioritize_events == false) {
+			m_queue.push(event);
+		}
 
+		else {	
+			if (ev->event_type != ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME)
+				m_queue.push(event);
+			else { 
+				while(!m_queue.empty()) { 
+				void *e = m_queue.front(); 
+				aux_queue.push(e); 
+				m_queue.pop(); 
+				} 
+
+				m_queue.push(ev); 
+				while(!aux_queue.empty()) { 
+				void *e = aux_queue.front(); 
+				m_queue.push(e); 
+				aux_queue.pop(); 
+                 		} 
+			}
+			
+		}
+	}
+		
 	if (wake)
 		m_cond_var.notify_one();
+
+		
 }
 
 void *csensor_event_queue::pop(void)
