@@ -17,7 +17,7 @@ Source2:    sensord.socket
 %define linear_accel_state OFF
 %define motion_state OFF
 
-%define build_test_suite OFF
+%define build_test_suite ON
 
 BuildRequires:  cmake
 BuildRequires:  vconf-keys-devel
@@ -139,6 +139,7 @@ systemctl daemon-reload
 /usr/bin/gravity
 /usr/bin/linear_acceleration
 /usr/bin/gyro
+/usr/bin/priority_test
 %license LICENSE.APLv2
 %{_datadir}/license/test
 %endif
