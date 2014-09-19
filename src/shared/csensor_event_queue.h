@@ -24,19 +24,38 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <sensor_accel.h>
 
 using std::queue;
 using std::mutex;
 using std::lock_guard;
 using std::unique_lock;
 using std::condition_variable;
-
+  
+static bool prioritize_events;
+ 
+ 
 class csensor_event_queue
 {
-private:
+	
+private:	
 	static const unsigned int QUEUE_FULL_SIZE = 1000;
-
-	queue<void * > m_queue;
+	struct compare
+	{
+	bool prioritize_events;
+	bool operator() (void* &v1,void *&v2)
+	{
+	sensor_event_t *e2= (sensor_event_t *)v2;
+	if(prioritize_events == false)
+	return false;
+	if(e2->event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME)
+	return true;
+	return false;
+	}
+	};
+	std::priority_queue<void*, std::vector<void*>, compare> m_queue;
+			
+	
 	mutex m_mutex;
 	condition_variable m_cond_var;
 
