@@ -27,10 +27,10 @@ class orientation_sensor
 public:
 	orientation_filter<float> orien_filter;
 
-	euler_angles<float> get_orientation(const sensor_data<float> accel,
-			const sensor_data<float> gyro, const sensor_data<float> magnetic);
-	rotation_matrix<float> get_rotation_matrix(const sensor_data<float> accel,
-			const sensor_data<float> gyro, const sensor_data<float> magnetic);
+	euler_angles<float> get_orientation(sensor_data<float> accel,
+			sensor_data<float> gyro, sensor_data<float> magnetic);
+	rotation_matrix<float> get_rotation_matrix(sensor_data<float> accel,
+			sensor_data<float> gyro, sensor_data<float> magnetic);
 };
 
 #include "orientation_sensor.cpp"

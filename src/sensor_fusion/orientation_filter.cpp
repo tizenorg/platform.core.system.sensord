@@ -42,18 +42,6 @@
 #define QWB_CONST	((2 * (ZIGMA_W * ZIGMA_W)) / TAU_W)
 #define F_CONST		(-1 / TAU_W)
 
-#define BIAS_AX		0.098586
-#define BIAS_AY		0.18385
-#define BIAS_AZ		(10.084 - GRAVITY)
-
-#define BIAS_GX		-5.3539
-#define BIAS_GY		0.24325
-#define BIAS_GZ		2.3391
-
-#define DRIVING_SYSTEM_PHASE_COMPENSATION	-1
-
-#define SCALE_GYRO		575
-
 #define ENABLE_LPF		false
 
 #define M3X3R	3
@@ -95,6 +83,11 @@ orientation_filter<TYPE>::orientation_filter()
 	m_state_new = vec1x6;
 	m_state_old = vec1x6;
 	m_state_error = vec1x6;
+
+	m_pitch_phase_compensation = 1;
+	m_roll_phase_compensation = 1;
+	m_yaw_phase_compensation = 1;
+	m_magnetic_alignment_factor = 1;
 }
 
 template <typename TYPE>
@@ -110,16 +103,8 @@ inline void orientation_filter<TYPE>::filter_sensor_data(const sensor_data<TYPE>
 	const TYPE iir_b[] = {0.98, 0};
 	const TYPE iir_a[] = {1.0000000, 0.02};
 
-	TYPE a_bias[] = {BIAS_AX, BIAS_AY, BIAS_AZ};
-	TYPE g_bias[] = {BIAS_GX, BIAS_GY, BIAS_GZ};
-
 	vect<TYPE> acc_data(V1x3S);
 	vect<TYPE> gyr_data(V1x3S);
-	vect<TYPE> acc_bias(V1x3S, a_bias);
-	vect<TYPE> gyr_bias(V1x3S, g_bias);
-
-	acc_data = accel.m_data - acc_bias;
-	gyr_data = (gyro.m_data - gyr_bias) / (TYPE) SCALE_GYRO;
 
 	m_filt_accel[0] = m_filt_accel[1];
 	m_filt_gyro[0] = m_filt_gyro[1];
@@ -127,23 +112,20 @@ inline void orientation_filter<TYPE>::filter_sensor_data(const sensor_data<TYPE>
 
 	if (ENABLE_LPF)
 	{
-		m_filt_accel[1].m_data = acc_data * iir_b[0] - m_filt_accel[0].m_data * iir_a[1];
-		m_filt_gyro[1].m_data = gyr_data * iir_b[0] - m_filt_gyro[0].m_data * iir_a[1];
+		m_filt_accel[1].m_data = accel.m_data * iir_b[0] - m_filt_accel[0].m_data * iir_a[1];
+		m_filt_gyro[1].m_data = gyro.m_data * iir_b[0] - m_filt_gyro[0].m_data * iir_a[1];
 		m_filt_magnetic[1].m_data = magnetic.m_data * iir_b[0] - m_filt_magnetic[0].m_data * iir_a[1];
 	}
 	else
 	{
-		m_filt_accel[1].m_data = acc_data;
-		m_filt_gyro[1].m_data = gyr_data;
+		m_filt_accel[1].m_data = accel.m_data;
+		m_filt_gyro[1].m_data = gyro.m_data;
 		m_filt_magnetic[1].m_data = magnetic.m_data;
 	}
 
 	m_filt_accel[1].m_time_stamp = accel.m_time_stamp;
 	m_filt_gyro[1].m_time_stamp = accel.m_time_stamp;
 	m_filt_magnetic[1].m_time_stamp = accel.m_time_stamp;
-
-	normalize(m_filt_accel[1]);
-	normalize(m_filt_magnetic[1]);
 
 	m_filt_gyro[1].m_data = m_filt_gyro[1].m_data - m_bias_correction;
 }
@@ -152,7 +134,7 @@ template <typename TYPE>
 inline void orientation_filter<TYPE>::orientation_triad_algorithm()
 {
 	TYPE arr_acc_e[V1x3S] = {0.0, 0.0, 1.0};
-	TYPE arr_mag_e[V1x3S] = {0.0, -1.0, 0.0};
+	TYPE arr_mag_e[V1x3S] = {0.0, m_magnetic_alignment_factor, 0.0};
 
 	vect<TYPE> acc_e(V1x3S, arr_acc_e);
 	vect<TYPE> mag_e(V1x3S, arr_mag_e);
@@ -261,7 +243,9 @@ inline void orientation_filter<TYPE>::time_update()
 
 	orientation = quat2euler(m_quat_driv);
 
-	m_orientation = orientation.m_ang * (TYPE) DRIVING_SYSTEM_PHASE_COMPENSATION;
+	m_orientation.m_ang.m_vec[0] = orientation.m_ang.m_vec[0] * m_roll_phase_compensation;
+	m_orientation.m_ang.m_vec[1] = orientation.m_ang.m_vec[1] * m_pitch_phase_compensation;
+	m_orientation.m_ang.m_vec[2] = orientation.m_ang.m_vec[2] * m_yaw_phase_compensation;
 
 	m_rot_matrix = quat2rot_mat(m_quat_driv);
 
