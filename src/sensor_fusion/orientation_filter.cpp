@@ -134,7 +134,7 @@ template <typename TYPE>
 inline void orientation_filter<TYPE>::orientation_triad_algorithm()
 {
 	TYPE arr_acc_e[V1x3S] = {0.0, 0.0, 1.0};
-	TYPE arr_mag_e[V1x3S] = {0.0, m_magnetic_alignment_factor, 0.0};
+	TYPE arr_mag_e[V1x3S] = {0.0, (TYPE) m_magnetic_alignment_factor, 0.0};
 
 	vect<TYPE> acc_e(V1x3S, arr_acc_e);
 	vect<TYPE> mag_e(V1x3S, arr_mag_e);
