@@ -55,6 +55,7 @@ private:
 	float m_pitch;
 	float m_yaw;
 	unsigned long long m_timestamp;
+	unsigned int m_interval;
 };
 
 #endif /* _ORIENTATION_SENSOR_H_ */
