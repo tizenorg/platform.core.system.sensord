@@ -42,21 +42,18 @@ public:
 
 	void synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs);
 
-	virtual bool add_interval(int client_id, unsigned int interval, bool is_processor = false);
-	virtual bool delete_interval(int client_id, bool is_processor = false);
+	bool add_interval(int client_id, unsigned int interval);
+	bool delete_interval(int client_id);
 
-	int get_sensor_data(const unsigned int data_id, sensor_data_t &data);
+	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
 	bool get_properties(const unsigned int type, sensor_properties_t &properties);
 private:
-	sensor_base *m_accel_sensor;
-	cmutex m_value_mutex;
+	sensor_base *m_orientation_sensor;
 
 	float m_x;
 	float m_y;
 	float m_z;
-	unsigned long long m_time;
-
-	void calibrate_gravity(const sensor_event_t &raw, float &x, float &y, float &z);
+	unsigned long long m_timestamp;
 };
 
 #endif /*_GRAVITY_SENSOR_H_*/

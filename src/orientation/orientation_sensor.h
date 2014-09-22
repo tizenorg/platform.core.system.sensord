@@ -17,27 +17,19 @@
  *
  */
 
-#ifndef _LINEAR_ACCEL_SENSOR_H_
-#define _LINEAR_ACCEL_SENSOR_H_
+#ifndef _ORIENTATION_SENSOR_H_
+#define _ORIENTATION_SENSOR_H_
 
 #include <sensor.h>
-#include <vconf.h>
-#include <string>
 #include <virtual_sensor.h>
+#include <orientation_filter.h>
 
-using std::string;
-
-class linear_accel_sensor : public virtual_sensor
-{
+class orientation_sensor : public virtual_sensor {
 public:
-	linear_accel_sensor();
-	virtual ~linear_accel_sensor();
+	orientation_sensor();
+	~orientation_sensor();
 
-	bool init();
-	sensor_type_t get_type(void);
-
-	static bool working(void *inst);
-
+	bool init(void);
 	bool on_start(void);
 	bool on_stop(void);
 
@@ -45,18 +37,25 @@ public:
 
 	bool add_interval(int client_id, unsigned int interval);
 	bool delete_interval(int client_id);
+	bool get_properties(sensor_properties_t &properties);
+	sensor_type_t get_type(void);
 
-	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
-	bool get_properties(const unsigned int type, sensor_properties_t &properties);
+	int get_sensor_data(const unsigned int data_id, sensor_data_t &data);
+
 private:
 	sensor_base *m_accel_sensor;
-	sensor_base *m_gravity_sensor;
-	cmutex m_value_mutex;
+	sensor_base *m_gyro_sensor;
+	sensor_base *m_magnetic_sensor;
 
-	float m_x;
-	float m_y;
-	float m_z;
-	unsigned long long m_time;
+	orientation_filter<float> m_orientation;
+
+	unsigned int m_enable_orientation;
+
+	float m_roll;
+	float m_pitch;
+	float m_yaw;
+	unsigned long long m_timestamp;
+	unsigned int m_interval;
 };
 
-#endif /*_LINEAR_ACCEL_SENSOR_H_*/
+#endif /* _ORIENTATION_SENSOR_H_ */

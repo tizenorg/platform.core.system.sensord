@@ -53,6 +53,11 @@ public:
 	rotation_matrix<TYPE> m_rot_matrix;
 	euler_angles<TYPE> m_orientation;
 
+	int m_pitch_phase_compensation;
+	int m_roll_phase_compensation;
+	int m_yaw_phase_compensation;
+	int m_magnetic_alignment_factor;
+
 	orientation_filter();
 	~orientation_filter();
 
