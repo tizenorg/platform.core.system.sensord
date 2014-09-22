@@ -10,7 +10,7 @@ Source2:    sensord.socket
 
 %define accel_state ON
 %define gyro_state ON
-%define proxi_state OFF
+%define proxi_state ON
 %define light_state OFF
 %define geo_state ON
 %define gravity_state OFF
