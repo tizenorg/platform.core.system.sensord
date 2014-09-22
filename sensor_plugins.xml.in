@@ -5,6 +5,7 @@
 		<MODULE path = "/usr/lib/sensord/libgeo_sensor_hal.so"/>
 		<MODULE path = "/usr/lib/sensord/libproxi_sensor_hal.so"/>
 		<MODULE path = "/usr/lib/sensord/liblight_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensord/libpressure_sensor_hal.so"/>
 	</HAL>
 
 	<SENSOR>
@@ -13,6 +14,7 @@
 		<MODULE path = "/usr/lib/sensord/libgeo_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libproxi_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/liblight_sensor.so"/>
+		<MODULE path = "/usr/lib/sensord/libpressure_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libmotion_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/liborientation_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libgravity_sensor.so"/>
