@@ -19,10 +19,22 @@
 
 #ifdef _GRAVITY_SENSOR_H
 
+#define GRAVITY		9.80665
+
 sensor_data<float> gravity_sensor::get_gravity(const sensor_data<float> accel,
 				const sensor_data<float> gyro, const sensor_data<float> magnetic)
 {
-	return comp_grav.orientation2gravity(accel, gyro, magnetic);
+	euler_angles<float> orientation;
+	sensor_data<float> gravity;
+
+	orientation = orien_sensor.get_orientation(accel, gyro, magnetic);
+
+	gravity.m_data.m_vec[0] = GRAVITY * sin(orientation.m_ang.m_vec[0]);
+	gravity.m_data.m_vec[1] = GRAVITY * sin(orientation.m_ang.m_vec[1]);
+	gravity.m_data.m_vec[2] = GRAVITY * cos(orientation.m_ang.m_vec[0]) *
+									cos(orientation.m_ang.m_vec[1]);
+
+	return gravity;
 }
 
 #endif
