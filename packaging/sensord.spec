@@ -11,12 +11,16 @@ Source2:    sensord.socket
 %define accel_state ON
 %define gyro_state ON
 %define proxi_state ON
-%define light_state OFF
+%define light_state ON
 %define geo_state ON
+%define pressure_state ON
+%define temperature_state OFF
+%define orientation_state ON
 %define gravity_state OFF
 %define linear_accel_state OFF
 %define motion_state OFF
-%define sensor_fusion_state ON
+
+%define build_test_suite OFF
 
 BuildRequires:  cmake
 BuildRequires:  vconf-keys-devel
@@ -55,6 +59,17 @@ Requires:   %{name} = %{version}-%{release}
 %description -n libsensord-devel
 Sensord library (devel)
 
+%if %{build_test_suite} == "ON"
+%package -n sensor-tc
+Summary:    Sensord library
+Group:      System/Sensor Framework
+Requires:   %{name} = %{version}-%{release}
+
+%description -n sensor-tc
+Sensor functional testing
+
+%endif
+
 %prep
 %setup -q
 
@@ -63,9 +78,10 @@ Sensord library (devel)
 #CXXFLAGS+=" -fvisibility=hidden -fvisibility-inlines-hidden ";export CXXFLAGS
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGYRO=%{gyro_state} -DPROXI=%{proxi_state} -DLIGHT=%{light_state} \
-	-DGEO=%{geo_state} -DGRAVITY=%{gravity_state} \
+	-DGEO=%{geo_state} -DPRESSURE=%{pressure_state} -DTEMPERATURE=%{temperature_state} \
+	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DMOTION=%{motion_state} \
-	-DSENSOR_FUSION=%{sensor_fusion_state}
+	-DTEST_SUITE=%{build_test_suite}
 
 make %{?jobs:-j%jobs}
 
@@ -117,3 +133,18 @@ systemctl daemon-reload
 %{_libdir}/pkgconfig/sensor.pc
 %{_libdir}/pkgconfig/sf_common.pc
 %{_libdir}/pkgconfig/sensord-server.pc
+
+%if %{build_test_suite} == "ON"
+%files -n sensor-tc
+%defattr(-,root,root,-)
+/usr/bin/accelerometer
+/usr/bin/geomagnetic
+/usr/bin/orientation
+/usr/bin/gravity
+/usr/bin/linear_acceleration
+/usr/bin/gyro
+/usr/bin/priority_test
+%license LICENSE.APLv2
+%{_datadir}/license/test
+%endif
+
