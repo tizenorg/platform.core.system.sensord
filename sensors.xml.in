@@ -150,6 +150,11 @@
 			<VENDOR value="AKM"/>
 		</MODEL>
 
+		<MODEL id="ak8975">
+			<NAME value="AK8975"/>
+			<VENDOR value="AKM"/>
+		</MODEL>
+
 		<MODEL id="MPU9250">
 			<NAME value="MPU9250"/>
 			<VENDOR value="Invensense"/>
