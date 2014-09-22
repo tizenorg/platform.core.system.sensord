@@ -28,13 +28,31 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 link_directories(../src/libsensord/)
 
 add_executable(accelerometer src/accelerometer.c)
+add_executable(geomagnetic src/geomagnetic.c)
+add_executable(orientation src/orientation.c)
+add_executable(gravity src/gravity.c)
+add_executable(linear_acceleration src/linear_acceleration.c)
+add_executable(gyro src/gyro.c)
 
 SET_TARGET_PROPERTIES(accelerometer PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(geomagnetic PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(orientation PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(gravity PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(linear_acceleration PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(gyro PROPERTIES LINKER_LANGUAGE C)
 
 target_link_libraries(accelerometer glib-2.0 dlog sensor)
+target_link_libraries(geomagnetic glib-2.0 dlog sensor)
+target_link_libraries(orientation glib-2.0 dlog sensor)
+target_link_libraries(gravity glib-2.0 dlog sensor)
+target_link_libraries(linear_acceleration glib-2.0 dlog sensor)
+target_link_libraries(gyro glib-2.0 dlog sensor)
 
 INSTALL(TARGETS accelerometer DESTINATION /usr/bin/)
-
-
+INSTALL(TARGETS geomagnetic DESTINATION /usr/bin/)
+INSTALL(TARGETS orientation DESTINATION /usr/bin/)
+INSTALL(TARGETS gravity DESTINATION /usr/bin/)
+INSTALL(TARGETS linear_acceleration DESTINATION /usr/bin/)
+INSTALL(TARGETS gyro DESTINATION /usr/bin/)
 
 
