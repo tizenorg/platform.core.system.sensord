@@ -17,14 +17,14 @@
  *
  */
 
-#include "../../compute_gravity.h"
+#include "../../gravity_sensor.h"
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 using namespace std;
 
-#define GRAVITY_DATA_PATH "../../../../design/data/100ms/gravity/throw/"
+#define GRAVITY_DATA_PATH "../../../design/data/100ms/gravity/throw/"
 #define GRAVITY_DATA_SIZE 135
 
 int main()
@@ -36,7 +36,7 @@ int main()
 	float sdata[3];
 	unsigned long long time_stamp;
 	sensor_data<float> gravity;
-	compute_gravity<float> comp_grav;
+	gravity_sensor grav_sensor;
 
 	accel_in.open(((string)GRAVITY_DATA_PATH + (string)"accel.txt").c_str());
 	gyro_in.open(((string)GRAVITY_DATA_PATH + (string)"gyro.txt").c_str());
@@ -75,7 +75,7 @@ int main()
 
 		cout << "Magnetic Data\t" << magnetic_data.m_data << "\t Time Stamp\t" << magnetic_data.m_time_stamp << "\n\n";
 
-		gravity = comp_grav.orientation2gravity(accel_data, gyro_data, magnetic_data);
+		gravity = grav_sensor.get_gravity(accel_data, gyro_data, magnetic_data);
 
 		gravity_file << gravity.m_data;
 
@@ -89,4 +89,3 @@ int main()
 
 	return 0;
 }
-

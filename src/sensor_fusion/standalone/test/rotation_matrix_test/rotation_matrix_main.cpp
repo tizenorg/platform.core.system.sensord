@@ -17,7 +17,7 @@
  *
  */
 
-#include "../../rotation_matrix.h"
+#include "../../../rotation_matrix.h"
 
 int main()
 {

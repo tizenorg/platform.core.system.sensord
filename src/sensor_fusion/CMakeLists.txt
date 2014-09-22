@@ -35,7 +35,14 @@ add_definitions(-Iinclude)
 SET(SENSOR_FUSION_NAME sensor_fusion)
 
 add_library(${SENSOR_FUSION_NAME} SHARED
-		lib_sensor_fusion.cpp
+		compute_gravity.cpp
+		euler_angles.cpp
+		matrix.cpp
+		orientation_filter.cpp
+		quaternion.cpp
+		rotation_matrix.cpp
+		sensor_data.cpp
+		vector.cpp
 		)
 
 target_link_libraries(${SENSOR_FUSION_NAME} ${rpkgs_LDFLAGS} ${GLES_LDFLAGS} "-lm")
