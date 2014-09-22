@@ -23,50 +23,50 @@
 #include "matrix.h"
 
 template <typename TYPE>
-class vector {
+class vect {
 public:
 	int m_size;
 	TYPE *m_vec;
 
-	vector(void);
-	vector(const int size);
-	vector(const int size, TYPE *vec_data);
-	vector(const vector<TYPE>& v);
-	~vector();
+	vect(void);
+	vect(const int size);
+	vect(const int size, TYPE *vec_data);
+	vect(const vect<TYPE>& v);
+	~vect();
 
-	vector<TYPE> operator =(const vector<TYPE>& v);
+	vect<TYPE> operator =(const vect<TYPE>& v);
 
 	template<typename T> friend ostream& operator << (ostream& dout,
-			vector<T>& v);
-	template<typename T> friend vector<T> operator +(const vector<T> v1,
-			const vector<T> v2);
-	template<typename T> friend vector<T> operator +(const vector<T> v,
+			vect<T>& v);
+	template<typename T> friend vect<T> operator +(const vect<T> v1,
+			const vect<T> v2);
+	template<typename T> friend vect<T> operator +(const vect<T> v,
 			const T val);
-	template<typename T> friend vector<T> operator -(const vector<T> v1,
-			const vector<T> v2);
-	template<typename T> friend vector<T> operator -(const vector<T> v,
+	template<typename T> friend vect<T> operator -(const vect<T> v1,
+			const vect<T> v2);
+	template<typename T> friend vect<T> operator -(const vect<T> v,
 			const T val);
 	template<typename T> friend matrix<T> operator *(const matrix<T> v1,
-			const vector<T> v2);
-	template<typename T> friend vector<T> operator *(const vector<T> v,
+			const vect<T> v2);
+	template<typename T> friend vect<T> operator *(const vect<T> v,
 			const matrix<T> m);
-	template<typename T> friend vector<T> operator *(const vector<T> v,
+	template<typename T> friend vect<T> operator *(const vect<T> v,
 			const T val);
-	template<typename T> friend vector<T> operator /(const vector<T> v1,
+	template<typename T> friend vect<T> operator /(const vect<T> v1,
 			const T val);
-	template<typename T> friend bool operator ==(const vector<T> v1,
-			const vector<T> v2);
-	template<typename T> friend bool operator !=(const vector<T> v1,
-			const vector<T> v2);
+	template<typename T> friend bool operator ==(const vect<T> v1,
+			const vect<T> v2);
+	template<typename T> friend bool operator !=(const vect<T> v1,
+			const vect<T> v2);
 
-	template<typename T> friend T mul(const vector<T> v, const matrix<T> m);
-	template<typename T> friend void insert_end(vector<T>& v, T val);
-	template<typename T> friend matrix<T> transpose(const vector<T> v);
-	template <typename T> friend vector<T> transpose(const matrix<T> m);
-	template<typename T> friend vector<T> cross(const vector<T> v1,
-			const vector<T> v2);
-	template <typename T> friend T var(const vector<T> v);
-	template <typename T> friend bool is_initialized(const vector<T> v);
+	template<typename T> friend T mul(const vect<T> v, const matrix<T> m);
+	template<typename T> friend void insert_end(vect<T>& v, T val);
+	template<typename T> friend matrix<T> transpose(const vect<T> v);
+	template <typename T> friend vect<T> transpose(const matrix<T> m);
+	template<typename T> friend vect<T> cross(const vect<T> v1,
+			const vect<T> v2);
+	template <typename T> friend T var(const vect<T> v);
+	template <typename T> friend bool is_initialized(const vect<T> v);
 };
 
 #include "vector.cpp"

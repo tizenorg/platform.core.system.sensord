@@ -26,11 +26,11 @@
 template <typename TYPE>
 class euler_angles {
 public:
-	vector<TYPE> m_ang;
+	vect<TYPE> m_ang;
 
 	euler_angles();
 	euler_angles(const TYPE roll, const TYPE pitch, const TYPE yaw);
-	euler_angles(const vector<TYPE> v);
+	euler_angles(const vect<TYPE> v);
 	euler_angles(const euler_angles<TYPE>& e);
 	~euler_angles();
 

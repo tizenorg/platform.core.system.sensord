@@ -31,19 +31,19 @@ int main()
 	float arr43[6] = {2.3454,-0.0384,-8.90,3.455,6.785,21.345};
 	float arr5[5] = {0.2,-0.4,0.6,-0.8,1.0};
 
-	vector<float> v1(5, arr0);
-	vector<float> v2(5, arr8);
-	vector<float> v10(4, arr3);
-	vector<float> v12(4, arr4);
-	vector<float> v15(6, arr1);
-	vector<float> v20(6, arr43);
-	vector<float> v21(3, arr2);
-	vector<float> v22(3, arr15);
-	vector<float> v3(4);
-	vector<float> v6(3);
-	vector<float> v13(5);
-	vector<float> v95(6);
-	vector<float> v35(5, arr5);
+	vect<float> v1(5, arr0);
+	vect<float> v2(5, arr8);
+	vect<float> v10(4, arr3);
+	vect<float> v12(4, arr4);
+	vect<float> v15(6, arr1);
+	vect<float> v20(6, arr43);
+	vect<float> v21(3, arr2);
+	vect<float> v22(3, arr15);
+	vect<float> v3(4);
+	vect<float> v6(3);
+	vect<float> v13(5);
+	vect<float> v95(6);
+	vect<float> v35(5, arr5);
 
 	float arr57[3][3] = {{2.24, 0.5, 0.023}, {3.675, 5.32, 0.556}, {1.023, 45.75, 621.6}};
 	matrix<float> m12(3, 3, (float *) arr57);
@@ -102,7 +102,7 @@ int main()
 	cout<< "\nProduct:\n"<< m102 << endl;
 
 	cout<< "\n\n\nVector x Multiplication matrix:\n";
-	vector<float> v102 = (v22 * m12);
+	vect<float> v102 = (v22 * m12);
 	cout<< "\n" << v22 << "\n" << m12;
 	cout<< "\nProduct:\n" << v102 << endl;
 	float val = mul(v22, m32);
@@ -163,7 +163,7 @@ int main()
 	cout<< "\nOutput:\n" << v3 << endl;
 
 
-	vector<float> v111 = cross(v21, v22);
+	vect<float> v111 = cross(v21, v22);
 	cout<< "\n\n\nCross Product:";
 	cout << "\n\n" << v21 << "\n\n" << v22;
 	cout << "\nResult:\n\n" << v111;

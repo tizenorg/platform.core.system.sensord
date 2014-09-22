@@ -73,9 +73,9 @@ orientation_filter<TYPE>::orientation_filter()
 
 	std::fill_n(arr, MOVING_AVERAGE_WINDOW_LENGTH, NON_ZERO_VAL);
 
-	vector<TYPE> vec(MOVING_AVERAGE_WINDOW_LENGTH, arr);
-	vector<TYPE> vec1x3(V1x3S);
-	vector<TYPE> vec1x6(V1x6S);
+	vect<TYPE> vec(MOVING_AVERAGE_WINDOW_LENGTH, arr);
+	vect<TYPE> vec1x3(V1x3S);
+	vect<TYPE> vec1x6(V1x6S);
 	matrix<TYPE> mat6x6(M6X6R, M6X6C);
 
 	m_var_gyr_x = vec;
@@ -113,10 +113,10 @@ inline void orientation_filter<TYPE>::filter_sensor_data(const sensor_data<TYPE>
 	TYPE a_bias[] = {BIAS_AX, BIAS_AY, BIAS_AZ};
 	TYPE g_bias[] = {BIAS_GX, BIAS_GY, BIAS_GZ};
 
-	vector<TYPE> acc_data(V1x3S);
-	vector<TYPE> gyr_data(V1x3S);
-	vector<TYPE> acc_bias(V1x3S, a_bias);
-	vector<TYPE> gyr_bias(V1x3S, g_bias);
+	vect<TYPE> acc_data(V1x3S);
+	vect<TYPE> gyr_data(V1x3S);
+	vect<TYPE> acc_bias(V1x3S, a_bias);
+	vect<TYPE> gyr_bias(V1x3S, g_bias);
 
 	acc_data = accel.m_data - acc_bias;
 	gyr_data = (gyro.m_data - gyr_bias) / (TYPE) SCALE_GYRO;
@@ -154,14 +154,14 @@ inline void orientation_filter<TYPE>::orientation_triad_algorithm()
 	TYPE arr_acc_e[V1x3S] = {0.0, 0.0, 1.0};
 	TYPE arr_mag_e[V1x3S] = {0.0, -1.0, 0.0};
 
-	vector<TYPE> acc_e(V1x3S, arr_acc_e);
-	vector<TYPE> mag_e(V1x3S, arr_mag_e);
+	vect<TYPE> acc_e(V1x3S, arr_acc_e);
+	vect<TYPE> mag_e(V1x3S, arr_mag_e);
 
-	vector<TYPE> acc_b_x_mag_b = cross(m_filt_accel[1].m_data, m_filt_magnetic[1].m_data);
-	vector<TYPE> acc_e_x_mag_e = cross(acc_e, mag_e);
+	vect<TYPE> acc_b_x_mag_b = cross(m_filt_accel[1].m_data, m_filt_magnetic[1].m_data);
+	vect<TYPE> acc_e_x_mag_e = cross(acc_e, mag_e);
 
-	vector<TYPE> cross1 = cross(acc_b_x_mag_b, m_filt_accel[1].m_data);
-	vector<TYPE> cross2 = cross(acc_e_x_mag_e, acc_e);
+	vect<TYPE> cross1 = cross(acc_b_x_mag_b, m_filt_accel[1].m_data);
+	vect<TYPE> cross2 = cross(acc_e_x_mag_e, acc_e);
 
 	matrix<TYPE> mat_b(M3X3R, M3X3C);
 	matrix<TYPE> mat_e(M3X3R, M3X3C);
@@ -312,7 +312,7 @@ inline void orientation_filter<TYPE>::measurement_update()
 	m_state_old = m_state_new;
 
 	TYPE arr_bias[V1x3S] = {m_state_new.m_vec[3], m_state_new.m_vec[4], m_state_new.m_vec[5]};
-	vector<TYPE> vec(V1x3S, arr_bias);
+	vect<TYPE> vec(V1x3S, arr_bias);
 
 	m_bias_correction = vec;
 }

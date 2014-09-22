@@ -34,12 +34,12 @@ euler_angles<TYPE>::euler_angles(const TYPE roll, const TYPE pitch, const TYPE y
 {
 	TYPE euler_data[EULER_SIZE] = {roll, pitch, yaw};
 
-	vector<TYPE> v(EULER_SIZE, euler_data);
+	vect<TYPE> v(EULER_SIZE, euler_data);
 	m_ang = v;
 }
 
 template <typename TYPE>
-euler_angles<TYPE>::euler_angles(const vector<TYPE> v)
+euler_angles<TYPE>::euler_angles(const vect<TYPE> v)
 {
 	m_ang = v;
 }
