@@ -16,9 +16,8 @@ Source2:    sensord.socket
 %define pressure_state ON
 %define temperature_state OFF
 %define orientation_state ON
-%define gravity_state OFF
-%define linear_accel_state OFF
-%define motion_state OFF
+%define gravity_state ON
+%define linear_accel_state ON
 
 %define build_test_suite OFF
 

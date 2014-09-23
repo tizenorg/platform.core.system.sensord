@@ -172,7 +172,7 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 
 	sensor_data_t accel_data;
 	sensor_data_t gyro_data;
-	sensor_data_t mag_data;
+	sensor_data_t magnetic_data;
 
 	sensor_event_t orientation_event;
 	euler_angles<float> euler_orientation;
