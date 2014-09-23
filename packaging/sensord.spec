@@ -142,6 +142,7 @@ systemctl daemon-reload
 /usr/bin/gravity
 /usr/bin/linear_acceleration
 /usr/bin/gyro
+/usr/bin/proxi
 %license LICENSE.APLv2
 %{_datadir}/license/test
 %endif
