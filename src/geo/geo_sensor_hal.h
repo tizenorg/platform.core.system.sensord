@@ -22,7 +22,6 @@
 
 #include <sensor_hal.h>
 #include <string>
-#include <fstream>
 
 #define IIO_DIR			"/sys/bus/iio/devices/"
 #define X_RAW_VAL_NODE	"/in_magn_x_raw"
@@ -34,7 +33,6 @@
 #define NAME_NODE		"/name"
 
 using std::string;
-using std::ifstream;
 
 class geo_sensor_hal : public sensor_hal
 {
@@ -81,21 +79,5 @@ private:
 	bool update_value(void);
 	bool is_sensorhub_supported(void);
 	bool init_resources(void);
-
-	template <typename value_t>
-	bool read_node_value(string node_path, value_t &value)
-	{
-		ifstream handle;
-		handle.open(node_path.c_str());
-		if (!handle)
-		{
-			ERR("Failed to open handle(%s)", node_path.c_str());
-			return false;
-		}
-		handle >> value;
-		handle.close();
-
-		return true;
-	}
 };
 #endif /*_GEO_SENSOR_HAL_H_*/

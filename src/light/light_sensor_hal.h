@@ -22,17 +22,15 @@
 
 #include <sensor_hal.h>
 #include <string>
-#include <fstream>
 
-#define IIO_DIR				"/sys/bus/iio/devices/"
-#define NAME_NODE			"/name"
-#define ILL_CLEAR_NODE		"/in_illuminance_clear_raw"
+#define IIO_DIR			"/sys/bus/iio/devices/"
+#define NAME_NODE		"/name"
+#define ILL_CLEAR_NODE	"/in_illuminance_clear_raw"
 
 #define IIO_DEV_BASE_NAME	"iio:device"
 #define IIO_DEV_STR_LEN		10
 
 using std::string;
-using std::ifstream;
 
 class light_sensor_hal : public sensor_hal
 {
@@ -63,21 +61,5 @@ private:
 
 	bool update_value(void);
 	bool is_sensorhub_supported(void);
-
-	template <typename value_t>
-	bool read_node_value(string node_path, value_t &value)
-	{
-		ifstream handle;
-		handle.open(node_path.c_str());
-		if (!handle)
-		{
-			ERR("Failed to open handle(%s)", node_path.c_str());
-			return false;
-		}
-		handle >> value;
-		handle.close();
-
-		return true;
-	}
 };
 #endif /*_LIGHT_SENSOR_HAL_H_*/
