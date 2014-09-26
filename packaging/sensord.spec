@@ -143,6 +143,7 @@ systemctl daemon-reload
 /usr/bin/linear_acceleration
 /usr/bin/gyro
 /usr/bin/proxi
+/usr/bin/pressure
 %license LICENSE.APLv2
 %{_datadir}/license/test
 %endif
