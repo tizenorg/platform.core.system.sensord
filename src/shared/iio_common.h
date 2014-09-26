@@ -21,6 +21,12 @@
 #define IIO_COMMON_H_
 
 #include <linux/ioctl.h>
+#include <fstream>
+#include <string>
+#include <common.h>
+
+using std::string;
+using std::ifstream;
 
 #define NO_OF_ULL_BYTES		8
 #define NO_OF_SHORT_VAL		4
@@ -76,5 +82,21 @@ int get_channel_array_size(struct channel_parameters *channels, int num_channels
 int update_sysfs_num(const char *filepath, int val, bool verify = false);
 int update_sysfs_string(const char *filepath, char *val, bool verify = false);
 int convert_bytes_to_int(int input, struct channel_parameters *info);
+
+template <typename value_t>
+bool read_node_value(string node_path, value_t &value)
+{
+	ifstream handle;
+	handle.open(node_path.c_str());
+	if (!handle)
+	{
+		ERR("Failed to open handle(%s)", node_path.c_str());
+		return false;
+	}
+	handle >> value;
+	handle.close();
+
+	return true;
+}
 
 #endif /* IIO_COMMON_H_ */

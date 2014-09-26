@@ -22,7 +22,6 @@
 
 #include <sensor_hal.h>
 #include <string>
-#include <fstream>
 
 #define IIO_DIR			"/sys/bus/iio/devices/"
 #define NAME_NODE		"/name"
@@ -39,7 +38,6 @@
 #define IIO_DEV_STR_LEN		10
 
 using std::string;
-using std::ifstream;
 
 class pressure_sensor_hal : public sensor_hal
 {
@@ -92,21 +90,5 @@ private:
 	bool update_value(bool wait);
 	bool enable_resource(bool enable);
 	bool is_sensorhub_supported(void);
-
-	template <typename value_t>
-	bool read_node_value(string node_path, value_t &value)
-	{
-		ifstream handle;
-		handle.open(node_path.c_str());
-		if (!handle)
-		{
-			ERR("Failed to open handle(%s)", node_path.c_str());
-			return false;
-		}
-		handle >> value;
-		handle.close();
-
-		return true;
-	}
 };
 #endif /*_PRESSURE_SENSOR_HAL_CLASS_H_*/

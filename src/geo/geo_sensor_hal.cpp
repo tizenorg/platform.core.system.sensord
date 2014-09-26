@@ -25,6 +25,7 @@
 #include <linux/input.h>
 #include <cconfig.h>
 #include <geo_sensor_hal.h>
+#include <iio_common.h>
 
 using std::ifstream;
 using std::string;
