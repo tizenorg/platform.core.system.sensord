@@ -71,6 +71,7 @@ typedef enum {
 	LINEAR_ACCEL_SENSOR,
 	ROTATION_VECTOR_SENSOR,
 	ORIENTATION_SENSOR,
+	TEMPERATURE_SENSOR
 } sensor_type_t;
 
 typedef struct sensor_data_t {
