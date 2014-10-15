@@ -30,7 +30,7 @@ static GMainLoop *mainloop;
 void callback(unsigned int event_type, sensor_event_data_t *event, void *user_data)
 {
 	sensor_data_t *data = (sensor_data_t *)event->event_data;
-	printf("Linear Acceleration [%6.6f] [%6.6f] [%6.6f] [%lld]\n\n", data->values[0], data->values[1], data->values[2], data->timestamp);
+	printf("Linear Acceleration [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 }
 
 void printformat()
@@ -47,8 +47,7 @@ void printformat()
 
 int main(int argc,char **argv)
 {
-	int result, handle;
-	bool error_state = FALSE;
+	int result, handle, start_handle, stop_handle;
 	unsigned int event;
 
 	mainloop = g_main_loop_new(NULL, FALSE);
@@ -59,47 +58,48 @@ int main(int argc,char **argv)
 
 	if (argc != 2 && argc != 3) {
 		printformat();
-		error_state = TRUE;
+		free(event_condition);
+		return 0;
 	}
 	else {
 		if (strcmp(argv[1], "RAW_DATA_REPORT_ON_TIME") == 0)
 			event = LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME;
 		else {
 			printformat();
-			error_state = TRUE;
+			free(event_condition);
+			return 0;
 		}
 
 		if (argc == 3)
 			event_condition->cond_value1 = atof(argv[2]);
 	}
 
-	if (!error_state) {
-		handle = sf_connect(type);
-		result = sf_register_event(handle, event, event_condition, callback, NULL);
+	handle = sf_connect(type);
+	result = sf_register_event(handle, event, event_condition, callback, NULL);
 
-		if (result < 0)
-			printf("Can't register linear acceleration virtual sensor\n");
+	if (result < 0)
+		printf("Can't register linear acceleration virtual sensor\n");
 
-		if (!(sf_start(handle,0) < 0)) {
-			printf("Success start \n");
-		}
-		else {
-			printf("Error\n\n\n\n");
-			sf_unregister_event(handle, event);
-			sf_disconnect(handle);
-			return -1;
-		}
+	start_handle = sf_start(handle,0);
 
-		g_main_loop_run(mainloop);
-		g_main_loop_unref(mainloop);
-
+	if (start_handle < 0) {
+		printf("Error\n\n\n\n");
 		sf_unregister_event(handle, event);
-
-		if (!(sf_stop(handle) < 0))
-			printf("Success stop \n");
-
 		sf_disconnect(handle);
+		return -1;
 	}
+
+	g_main_loop_run(mainloop);
+	g_main_loop_unref(mainloop);
+
+	sf_unregister_event(handle, event);
+
+	if (stop_handle < 0) {
+		printf("Error\n\n");
+		return -1;
+	}
+
+	sf_disconnect(handle);
 
 	free(event_condition);
 
