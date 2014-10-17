@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _QUATERNION_H
-#define _QUATERNION_H
+#ifndef _QUATERNION_H_
+#define _QUATERNION_H_
 
 #include "vector.h"
 
@@ -42,10 +42,8 @@ public:
 			const quaternion<T> q2);
 	template<typename T> friend quaternion<T> operator +(const quaternion<T> q1,
 			const quaternion<T> q2);
-
-	template<typename T> friend quaternion<T> quat_conj(const quaternion<T> q);
 };
 
 #include "quaternion.cpp"
 
-#endif  //_QUATERNION_H
+#endif  //_QUATERNION_H_

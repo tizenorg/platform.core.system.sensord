@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _EULER_ANGLES_H
-#define _EULER_ANGLES_H
+#ifndef _EULER_ANGLES_H_
+#define _EULER_ANGLES_H_
 
 #include "vector.h"
 #include "quaternion.h"
@@ -43,4 +43,4 @@ public:
 
 #include "euler_angles.cpp"
 
-#endif  //_EULER_ANGLES_H
+#endif  //_EULER_ANGLES_H_

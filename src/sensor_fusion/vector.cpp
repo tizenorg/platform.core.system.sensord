@@ -17,7 +17,7 @@
  *
  */
 
-#if defined (_VECTOR_H) && defined (_MATRIX_H)
+#if defined (_VECTOR_H_) && defined (_MATRIX_H_)
 
 template <typename TYPE>
 vect<TYPE>::vect(void)

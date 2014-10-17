@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _MATRIX_H
-#define _MATRIX_H
+#ifndef _MATRIX_H_
+#define _MATRIX_H_
 
 #include <assert.h>
 #include <iostream>
@@ -67,4 +67,4 @@ public:
 
 #include "matrix.cpp"
 
-#endif  //_MATRIX_H
+#endif  //_MATRIX_H_

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _GRAVITY_SENSOR_H
-#define _GRAVITY_SENSOR_H
+#ifndef _GRAVITY_SENSOR_H_
+#define _GRAVITY_SENSOR_H_
 
 #include "orientation_sensor.h"
 
@@ -33,4 +33,4 @@ public:
 
 #include "gravity_sensor.cpp"
 
-#endif /* _GRAVITY_SENSOR_H */
+#endif /* _GRAVITY_SENSOR_H_ */

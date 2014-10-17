@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _VECTOR_H
-#define _VECTOR_H
+#ifndef _VECTOR_H_
+#define _VECTOR_H_
 
 #include "matrix.h"
 
@@ -71,4 +71,4 @@ public:
 
 #include "vector.cpp"
 
-#endif /* _VECTOR_H */
+#endif /* _VECTOR_H_ */

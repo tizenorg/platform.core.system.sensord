@@ -17,7 +17,7 @@
  *
  */
 
-#if defined (_QUATERNION_H) && defined (_VECTOR_H)
+#if defined (_QUATERNION_H_) && defined (_VECTOR_H_)
 
 #include <math.h>
 
@@ -117,19 +117,4 @@ quaternion<T> operator +(const quaternion<T> q1, const quaternion<T> q2)
 	return (q1.m_quat + q2.m_quat);
 }
 
-template <typename T>
-quaternion<T> quat_conj(const quaternion<T> q)
-{
-	T w, x, y, z;
-
-	w = q.m_quat.m_vec[0];
-	x = q.m_quat.m_vec[1];
-	y = q.m_quat.m_vec[2];
-	z = q.m_quat.m_vec[3];
-
-	quaternion<T> q1(w, -x, -y, -z);
-
-	return q1;
-}
-
-#endif  //_QUATERNION_H
+#endif  //_QUATERNION_H_

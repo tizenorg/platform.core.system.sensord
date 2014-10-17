@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SENSOR_DATA_H
-#define _SENSOR_DATA_H
+#ifndef _SENSOR_DATA_H_
+#define _SENSOR_DATA_H_
 
 #include "vector.h"
 
@@ -48,4 +48,4 @@ public:
 
 #include "sensor_data.cpp"
 
-#endif /* _SENSOR_DATA_H */
+#endif /* _SENSOR_DATA_H_ */

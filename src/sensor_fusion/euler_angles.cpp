@@ -16,7 +16,7 @@
  * limitations under the License.
  *
  */
-#if defined (_EULER_ANGLES_H) && defined (_VECTOR_H)
+#if defined (_EULER_ANGLES_H_) && defined (_VECTOR_H_)
 
 #include <math.h>
 
@@ -103,4 +103,4 @@ euler_angles<T> deg2rad(const euler_angles<T> e)
 	return (e.m_ang * (T) DEG2RAD);
 }
 
-#endif  //_EULER_ANGLES_H
+#endif  //_EULER_ANGLES_H_

@@ -17,7 +17,7 @@
  *
  */
 
-#ifdef _MATRIX_H
+#ifdef _MATRIX_H_
 
 template <typename TYPE>
 matrix<TYPE>::matrix(void)
@@ -287,4 +287,4 @@ matrix<T> mul(const matrix<T> m1, const matrix<T> m2)
 	return m3;
 }
 
-#endif //_MATRIX_H
+#endif //_MATRIX_H_

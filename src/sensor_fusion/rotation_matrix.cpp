@@ -17,7 +17,7 @@
  *
  */
 
-#if defined (_ROTATION_MATRIX_H) && defined (_MATRIX_H)
+#if defined (_ROTATION_MATRIX_H_) && defined (_MATRIX_H_)
 
 #define QUAT_LEN 4
 #define ROT_MAT_ROWS 3
@@ -143,4 +143,4 @@ quaternion<T> rot_mat2quat(rotation_matrix<T> rm)
 	return q;
 }
 
-#endif /* _ROTATION_MATRIX_H */
+#endif /* _ROTATION_MATRIX_H_ */

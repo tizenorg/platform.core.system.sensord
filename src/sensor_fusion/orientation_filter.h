@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _ORIENTATION_FILTER_H
-#define _ORIENTATION_FILTER_H
+#ifndef _ORIENTATION_FILTER_H_
+#define _ORIENTATION_FILTER_H_
 
 #include "matrix.h"
 #include "vector.h"
@@ -30,9 +30,9 @@
 template <typename TYPE>
 class orientation_filter {
 public:
-	sensor_data<TYPE> m_filt_accel[2];
-	sensor_data<TYPE> m_filt_gyro[2];
-	sensor_data<TYPE> m_filt_magnetic[2];
+	sensor_data<TYPE> m_accel;
+	sensor_data<TYPE> m_gyro;
+	sensor_data<TYPE> m_magnetic;
 	vect<TYPE> m_var_gyr_x;
 	vect<TYPE> m_var_gyr_y;
 	vect<TYPE> m_var_gyr_z;
@@ -52,6 +52,7 @@ public:
 	quaternion<TYPE> m_quat_driv;
 	rotation_matrix<TYPE> m_rot_matrix;
 	euler_angles<TYPE> m_orientation;
+	TYPE m_gyro_dt;
 
 	int m_pitch_phase_compensation;
 	int m_roll_phase_compensation;
@@ -61,7 +62,7 @@ public:
 	orientation_filter();
 	~orientation_filter();
 
-	inline void filter_sensor_data(const sensor_data<TYPE> accel,
+	inline void initialize_sensor_data(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
 	inline void orientation_triad_algorithm();
 	inline void compute_covariance();
@@ -76,4 +77,4 @@ public:
 
 #include "orientation_filter.cpp"
 
-#endif /* _ORIENTATION_FILTER_H */
+#endif /* _ORIENTATION_FILTER_H_ */

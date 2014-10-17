@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _LINEAR_ACCELERATION_SENSOR_H
-#define _LINEAR_ACCELERATION_SENSOR_H
+#ifndef _LINEAR_ACCELERATION_SENSOR_H_
+#define _LINEAR_ACCELERATION_SENSOR_H_
 
 #include "gravity_sensor.h"
 
@@ -33,4 +33,4 @@ public:
 
 #include "linear_acceleration_sensor.cpp"
 
-#endif /* _LINEAR_ACCELERATION_SENSOR_H */
+#endif /* _LINEAR_ACCELERATION_SENSOR_H_ */

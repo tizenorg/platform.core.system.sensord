@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _ORIENTATION_SENSOR_H
-#define _ORIENTATION_SENSOR_H
+#ifndef _ORIENTATION_SENSOR_H_
+#define _ORIENTATION_SENSOR_H_
 
 #include "../orientation_filter.h"
 
@@ -35,4 +35,4 @@ public:
 
 #include "orientation_sensor.cpp"
 
-#endif /* _ORIENTATION_SENSOR_H */
+#endif /* _ORIENTATION_SENSOR_H_ */

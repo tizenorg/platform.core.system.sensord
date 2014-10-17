@@ -17,7 +17,7 @@
  *
  */
 
-#if defined (_SENSOR_DATA_H) && defined (_VECTOR_H)
+#if defined (_SENSOR_DATA_H_) && defined (_VECTOR_H_)
 
 #include "math.h"
 
@@ -104,5 +104,5 @@ sensor_data<T> scale_data(sensor_data<T> data, T scaling_factor)
 	return s;
 }
 
-#endif /* _SENSOR_DATA_H */
+#endif /* _SENSOR_DATA_H_ */
 

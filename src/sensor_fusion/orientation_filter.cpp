@@ -18,7 +18,7 @@
  */
 
 
-#ifdef _ORIENTATION_FILTER_H
+#ifdef _ORIENTATION_FILTER_H_
 
 #include "orientation_filter.h"
 
@@ -29,27 +29,15 @@
 #define US2S	(1.0 / 1000000.0)
 #define SAMPLE_FREQ		100000
 
-// Gyro Types
-// Systron-donner "Horizon"
-#define ZIGMA_W		(0.05 * DEG2RAD)//deg/s
-#define TAU_W		1000//secs
-// Crossbow DMU-6X
-//#define ZIGMA_W			0.05 * DEG2RAD //deg/s
-//#define TAU_W			300 //secs
-// FOGs (KVH Autogyro and Crossbow DMU-FOG)
-//#define ZIGMA_W			0 	//deg/s
-
+#define ZIGMA_W		(0.05 * DEG2RAD)
+#define TAU_W		1000
 #define QWB_CONST	((2 * (ZIGMA_W * ZIGMA_W)) / TAU_W)
 #define F_CONST		(-1 / TAU_W)
 
-#define ENABLE_LPF		false
-
 #define M3X3R	3
 #define M3X3C	3
-
 #define M6X6R	6
 #define M6X6C	6
-
 #define V1x3S	3
 #define V1x4S	4
 #define V1x6S	6
@@ -88,46 +76,37 @@ orientation_filter<TYPE>::orientation_filter()
 	m_roll_phase_compensation = 1;
 	m_yaw_phase_compensation = 1;
 	m_magnetic_alignment_factor = 1;
+
+	m_gyro.m_time_stamp = 0;
 }
 
 template <typename TYPE>
 orientation_filter<TYPE>::~orientation_filter()
 {
-
 }
 
 template <typename TYPE>
-inline void orientation_filter<TYPE>::filter_sensor_data(const sensor_data<TYPE> accel,
+inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<TYPE> accel,
 		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
 {
-	const TYPE iir_b[] = {0.98, 0};
-	const TYPE iir_a[] = {1.0000000, 0.02};
-
 	vect<TYPE> acc_data(V1x3S);
 	vect<TYPE> gyr_data(V1x3S);
+	unsigned long long sample_interval_gyro = SAMPLE_FREQ;
 
-	m_filt_accel[0] = m_filt_accel[1];
-	m_filt_gyro[0] = m_filt_gyro[1];
-	m_filt_magnetic[0] = m_filt_magnetic[1];
+	m_accel.m_data = accel.m_data;
+	m_gyro.m_data = gyro.m_data;
+	m_magnetic.m_data = magnetic.m_data;
 
-	if (ENABLE_LPF)
-	{
-		m_filt_accel[1].m_data = accel.m_data * iir_b[0] - m_filt_accel[0].m_data * iir_a[1];
-		m_filt_gyro[1].m_data = gyro.m_data * iir_b[0] - m_filt_gyro[0].m_data * iir_a[1];
-		m_filt_magnetic[1].m_data = magnetic.m_data * iir_b[0] - m_filt_magnetic[0].m_data * iir_a[1];
-	}
-	else
-	{
-		m_filt_accel[1].m_data = accel.m_data;
-		m_filt_gyro[1].m_data = gyro.m_data;
-		m_filt_magnetic[1].m_data = magnetic.m_data;
-	}
+	if (m_gyro.m_time_stamp != 0 && gyro.m_time_stamp != 0)
+		sample_interval_gyro = 	gyro.m_time_stamp - m_gyro.m_time_stamp;
 
-	m_filt_accel[1].m_time_stamp = accel.m_time_stamp;
-	m_filt_gyro[1].m_time_stamp = accel.m_time_stamp;
-	m_filt_magnetic[1].m_time_stamp = accel.m_time_stamp;
+	m_gyro_dt = sample_interval_gyro * US2S;
 
-	m_filt_gyro[1].m_data = m_filt_gyro[1].m_data - m_bias_correction;
+	m_accel.m_time_stamp = accel.m_time_stamp;
+	m_gyro.m_time_stamp = gyro.m_time_stamp;
+	m_magnetic.m_time_stamp = magnetic.m_time_stamp;
+
+	m_gyro.m_data = m_gyro.m_data - m_bias_correction;
 }
 
 template <typename TYPE>
@@ -139,10 +118,10 @@ inline void orientation_filter<TYPE>::orientation_triad_algorithm()
 	vect<TYPE> acc_e(V1x3S, arr_acc_e);
 	vect<TYPE> mag_e(V1x3S, arr_mag_e);
 
-	vect<TYPE> acc_b_x_mag_b = cross(m_filt_accel[1].m_data, m_filt_magnetic[1].m_data);
+	vect<TYPE> acc_b_x_mag_b = cross(m_accel.m_data, m_magnetic.m_data);
 	vect<TYPE> acc_e_x_mag_e = cross(acc_e, mag_e);
 
-	vect<TYPE> cross1 = cross(acc_b_x_mag_b, m_filt_accel[1].m_data);
+	vect<TYPE> cross1 = cross(acc_b_x_mag_b, m_accel.m_data);
 	vect<TYPE> cross2 = cross(acc_e_x_mag_e, acc_e);
 
 	matrix<TYPE> mat_b(M3X3R, M3X3C);
@@ -150,7 +129,7 @@ inline void orientation_filter<TYPE>::orientation_triad_algorithm()
 
 	for(int i = 0; i < M3X3R; i++)
 	{
-		mat_b.m_mat[i][0] = m_filt_accel[1].m_data.m_vec[i];
+		mat_b.m_mat[i][0] = m_accel.m_data.m_vec[i];
 		mat_b.m_mat[i][1] = acc_b_x_mag_b.m_vec[i];
 		mat_b.m_mat[i][2] = cross1.m_vec[i];
 		mat_e.m_mat[i][0] = acc_e.m_vec[i];
@@ -170,9 +149,9 @@ inline void orientation_filter<TYPE>::compute_covariance()
 	TYPE var_gyr_x, var_gyr_y, var_gyr_z;
 	TYPE var_roll, var_pitch, var_yaw;
 
-	insert_end(m_var_gyr_x, m_filt_gyro[1].m_data.m_vec[0]);
-	insert_end(m_var_gyr_y, m_filt_gyro[1].m_data.m_vec[1]);
-	insert_end(m_var_gyr_z, m_filt_gyro[1].m_data.m_vec[2]);
+	insert_end(m_var_gyr_x, m_gyro.m_data.m_vec[0]);
+	insert_end(m_var_gyr_y, m_gyro.m_data.m_vec[1]);
+	insert_end(m_var_gyr_z, m_gyro.m_data.m_vec[2]);
 	insert_end(m_var_roll, m_orientation.m_ang.m_vec[0]);
 	insert_end(m_var_pitch, m_orientation.m_ang.m_vec[1]);
 	insert_end(m_var_yaw, m_orientation.m_ang.m_vec[2]);
@@ -202,20 +181,13 @@ inline void orientation_filter<TYPE>::time_update()
 	quaternion<TYPE> quat_diff, quat_error;
 	euler_angles<TYPE> euler_error;
 	euler_angles<TYPE> orientation;
-	unsigned long long sample_interval_gyro = SAMPLE_FREQ;
-	TYPE dt = 0;
 
-	if (m_filt_gyro[1].m_time_stamp != 0 && m_filt_gyro[0].m_time_stamp != 0)
-		sample_interval_gyro = 	m_filt_gyro[1].m_time_stamp - m_filt_gyro[0].m_time_stamp;
-
-	dt = sample_interval_gyro * US2S;
-
-	m_tran_mat.m_mat[0][1] = m_filt_gyro[1].m_data.m_vec[2];
-	m_tran_mat.m_mat[0][2] = -m_filt_gyro[1].m_data.m_vec[1];
-	m_tran_mat.m_mat[1][0] = -m_filt_gyro[1].m_data.m_vec[2];
-	m_tran_mat.m_mat[1][2] = m_filt_gyro[1].m_data.m_vec[0];
-	m_tran_mat.m_mat[2][0] = m_filt_gyro[1].m_data.m_vec[1];
-	m_tran_mat.m_mat[2][1] = -m_filt_gyro[1].m_data.m_vec[0];
+	m_tran_mat.m_mat[0][1] = m_gyro.m_data.m_vec[2];
+	m_tran_mat.m_mat[0][2] = -m_gyro.m_data.m_vec[1];
+	m_tran_mat.m_mat[1][0] = -m_gyro.m_data.m_vec[2];
+	m_tran_mat.m_mat[1][2] = m_gyro.m_data.m_vec[0];
+	m_tran_mat.m_mat[2][0] = m_gyro.m_data.m_vec[1];
+	m_tran_mat.m_mat[2][1] = -m_gyro.m_data.m_vec[0];
 	m_tran_mat.m_mat[3][3] = (TYPE) F_CONST;
 	m_tran_mat.m_mat[4][4] = (TYPE) F_CONST;
 	m_tran_mat.m_mat[5][5] = (TYPE) F_CONST;
@@ -232,12 +204,12 @@ inline void orientation_filter<TYPE>::time_update()
 	if(!is_initialized(m_quat_driv.m_quat))
 		m_quat_driv = m_quat_aid;
 
-	quaternion<TYPE> quat_rot_inc(0, m_filt_gyro[1].m_data.m_vec[0], m_filt_gyro[1].m_data.m_vec[1],
-			m_filt_gyro[1].m_data.m_vec[2]);
+	quaternion<TYPE> quat_rot_inc(0, m_gyro.m_data.m_vec[0], m_gyro.m_data.m_vec[1],
+			m_gyro.m_data.m_vec[2]);
 
 	quat_diff = (m_quat_driv * quat_rot_inc) * (TYPE) 0.5;
 
-	m_quat_driv = m_quat_driv + (quat_diff * (TYPE) dt * (TYPE) PI);
+	m_quat_driv = m_quat_driv + (quat_diff * (TYPE) m_gyro_dt * (TYPE) PI);
 
 	m_quat_driv.quat_normalize();
 
@@ -289,7 +261,8 @@ inline void orientation_filter<TYPE>::measurement_update()
 			else
 				iden = 0;
 
-			m_pred_cov.m_mat[i][j] = (iden - (gain.m_mat[i][j] * m_measure_mat.m_mat[j][i])) * m_pred_cov.m_mat[i][j];
+			m_pred_cov.m_mat[i][j] = (iden - (gain.m_mat[i][j] * m_measure_mat.m_mat[j][i])) *
+					m_pred_cov.m_mat[i][j];
 		}
 	}
 
@@ -307,11 +280,11 @@ euler_angles<TYPE> orientation_filter<TYPE>::get_orientation(const sensor_data<T
 {
 	euler_angles<TYPE> cor_euler_ang;
 
-	filter_sensor_data(accel, gyro, magnetic);
+	initialize_sensor_data(accel, gyro, magnetic);
 
-	normalize(m_filt_accel[1]);
-	m_filt_gyro[1].m_data = m_filt_gyro[1].m_data * (TYPE) PI;
-	normalize(m_filt_magnetic[1]);
+	normalize(m_accel);
+	m_gyro.m_data = m_gyro.m_data * (TYPE) PI;
+	normalize(m_magnetic);
 
 	orientation_triad_algorithm();
 
@@ -333,4 +306,4 @@ rotation_matrix<TYPE> orientation_filter<TYPE>::get_rotation_matrix(const sensor
 	return m_rot_matrix;
 }
 
-#endif  //_ORIENTATION_FILTER_H
+#endif  //_ORIENTATION_FILTER_H_

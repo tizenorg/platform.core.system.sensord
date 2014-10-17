@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _ROTATION_MATRIX_H
-#define _ROTATION_MATRIX_H
+#ifndef _ROTATION_MATRIX_H_
+#define _ROTATION_MATRIX_H_
 
 #include "matrix.h"
 #include "quaternion.h"
@@ -42,4 +42,4 @@ public:
 
 #include "rotation_matrix.cpp"
 
-#endif /* _ROTATION_MATRIX_H */
+#endif /* _ROTATION_MATRIX_H_ */
