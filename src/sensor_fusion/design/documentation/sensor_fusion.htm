@@ -6,7 +6,7 @@
 <p>Sensor Fusion is the process of combining the accelerometer,
 gyroscope, geo-magnetic sensor, GPS data and barometer in order to generate
 accurate virtual sensor outputs such as Orientation, Gravity, Linear
-Acceleration, Altitude, Pedometer, etc. Sensor Fusion is used for extracting
+Acceleration, Altitude, etc. Sensor Fusion is used for extracting
 individual virtual sensor components from composite sensor data and/or
 combining multiple sensor data to create new sensor component data while
 compensating for individual sensor errors. Ideally the following errors would
@@ -64,8 +64,55 @@ to determine the heading of a device.</p>
 
 <h1>Orientation Estimation</h1>
 
-<p><center><img src="./block_diagram_orientation_estimation.png"
-width="60%" height="60%"></center></p>
+<p><center></center></p>
+
+<FIGURE>
+<center>
+<img src="./device_orientation.png" alt="Fig. 1. Device Orientation in Euler Angles"
+width="30%" height="40%">
+<FIGCAPTION>Fig. 1. Device Orientation in Euler Angles.</FIGCAPTION>
+</center>
+</FIGURE>
+
+<p>The rotation of the device along the x-axis is considered as roll(phi), y-axis
+as pitch(theta) and the z-axis as yaw(psi) as shown in Fig. 1. The orientation of
+the device can be represented either in terms of Euler angles (roll, pitch, yaw),
+or in the form of Rotation Matrix, or in the form of Quaternions. These are
+different mathematical forms of representing the same device orientation data.
+During orientation estimation all these representations would be used based on
+requirements and for stability reasons. When the device is lying flat on the x-y
+axis, the earth’s gravitational force is observed along the device z-axis. The
+reference axis for the device considered in this paper is shown in Fig. 1. The
+device reference x and y axis may change for each device, based on the individual
+MEMS sensor chip reference axis (that can be obtained from the datasheet) or the
+orientation of the sensor chip when it gets integrated into the device. The equations
+related to the computation of orientation, gravity and linear acceleration virtual
+sensors would have to be modified based on the change in reference axes.</p>
+
+<FIGURE>
+<center>
+<img src="./block_diagram_orientation_estimation.png" width="40%" height="80%">
+<FIGCAPTION>Fig. 2. Quaternion based Sensor Fusion Approach for Orientation
+Estimation.</FIGCAPTION>
+</center>
+</FIGURE>
+
+<p>The overall method for determining orientation of a device based on sensor
+fusion is shown in Fig. 2. This paper proposes to improve on the existing
+approach [1] to obtain more accurate orientation estimate. The Aiding System is used
+in sensor fusion for computing an inaccurate value for device orientation based on the
+accelerometer and the magnetometer sensor data. The accelerometer and magnetometer
+sensor data is combined using the Triad algorithm explained in [3] to obtain an
+inaccurate orientation measure. The problem with the orientation measured using the
+aiding system is that the smaller orientation changes of the device are not detected
+accurately. The orientation measured using the aiding system is not accurate due to the
+effect of gravity on the sensor data. But the aiding system orientation measured has
+the advantage that it is not affected by drift. The driving system is used for
+computing the orientation of a device using the 3D angular rates measured by the
+gyroscope sensor. The gyroscope sensor is accurate in detecting even small orientation
+changes but the orientation derived from it are affected due to drift. The drift in
+the measured gyroscope orientation is due to the integration of the noise
+components present along with angular rates samples measured with the gyroscope.</p>
 
 <h2>Driving System</h2>
 
