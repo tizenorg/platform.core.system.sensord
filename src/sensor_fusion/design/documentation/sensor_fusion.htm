@@ -6,7 +6,7 @@
 <p>Sensor Fusion is the process of combining the accelerometer,
 gyroscope, geo-magnetic sensor, GPS data and barometer in order to generate
 accurate virtual sensor outputs such as Orientation, Gravity, Linear
-Acceleration, Altitude, Pedometer, etc. Sensor Fusion is used for extracting
+Acceleration, Altitude, etc. Sensor Fusion is used for extracting
 individual virtual sensor components from composite sensor data and/or
 combining multiple sensor data to create new sensor component data while
 compensating for individual sensor errors. Ideally the following errors would
@@ -64,8 +64,25 @@ to determine the heading of a device.</p>
 
 <h1>Orientation Estimation</h1>
 
-<p><center><img src="./block_diagram_orientation_estimation.png"
-width="60%" height="60%"></center></p>
+<p><center></center></p>
+
+<FIGURE>
+<center>
+<img src="./diagram/device_orientation.png" width="30%" height="40%">
+<FIGCAPTION>Fig. 1. Device Orientation in Euler Angles.</FIGCAPTION>
+</center>
+</FIGURE>
+
+
+<FIGURE>
+<center>
+<img src="./diagram/block_diagram_orientation_estimation.png" width="40%"
+height="80%">
+<FIGCAPTION>Fig. 2. Quaternion based Sensor Fusion Approach for Orientation
+Estimation.</FIGCAPTION>
+</center>
+</FIGURE>
+
 
 <h2>Driving System</h2>
 
@@ -92,11 +109,16 @@ Kalman filtering.</p>
 
 <h2>Kalman Filtering</h2>
 
-<p><center><img src="./kalman_filter_stages.png"></center></p>
+<FIGURE>
+<center>
+<img src="./diagram/kalman_filter_stages.png">
+<FIGCAPTION>Fig. 3. Kalman Filter Stages.</FIGCAPTION>
+</center>
+</FIGURE>
 
 <p>To ensure linear Kalman filtering the following error state equation is used:</p>
 
-<p><img src="./state_equation.png"></p>
+<p><img src="./equation/state_equation.png"></p>
 
 <p>,where the first term is the quaternion representation of the Euler angles
 error and the next three terms are the error in knowledge of bias errors.</p>
@@ -109,8 +131,13 @@ gravity measurements in 3D space are derived from the orientation (pitch, roll
 and yaw) measurements that is output from the Kalman filter. The process to compute
 gravity and linear acceleration is shown in figure below.
 
-<p><center><img src="./block_diagram_gravity_and_linear_acceleration.png"
-width="40%" height="40%"></center></p>
+<FIGURE>
+<center>
+<img src="./diagram/block_diagram_gravity_and_linear_acceleration.png"
+width="40%" height="40%">
+<FIGCAPTION>Fig. 4. Computation of Gravity and Linear Acceleration.</FIGCAPTION>
+</center>
+</FIGURE>
 
 <p>Gravity virtual sensor data provides the measure of the direction in which the
 Earth’s gravitational force is observed in the device’s frame of reference. The
@@ -123,7 +150,12 @@ gravitational effect on the devices reference axis.</p>
 <p>GRy = Earth’s Gravity * sin(roll)</p>
 <p>GRz = Earth’s Gravity * cos(pitch) * cos(roll)</p>
 
-<p><center><img src="./orientation_effect_on_gravity.png"></center></p>
+<FIGURE>
+<center>
+<img src="./diagram/orientation_effect_on_gravity.png">
+<FIGCAPTION>Fig. 5. Effect of Device Orientation on Gravity.</FIGCAPTION>
+</center>
+</FIGURE>
 
 <p>When the device tilt values (pitch,roll) are changed from (0,0) to (0,&Pi;/2),
 phone is rotated around x-axis, the y-axis gets aligned to earth's gravitational field
