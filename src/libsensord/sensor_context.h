@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SENSOR_CONTEXT_H_
-#define _SENSOR_CONTEXT_H_
+#ifndef __SENSOR_CONTEXT_H__
+#define __SENSOR_CONTEXT_H__
 
 //! Pre-defined events for the context sensor
 //! Sensor Plugin developer can add more event to their own headers
@@ -26,7 +26,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif /*__cplusplus*/
+#endif
 
 /**
  * @defgroup SENSOR_CONTEXT Context Sensor
@@ -54,6 +54,7 @@ enum context_property_id {
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
-#endif /*_SENSOR_CONTEXT_H_*/
+#endif
+//! End of a file

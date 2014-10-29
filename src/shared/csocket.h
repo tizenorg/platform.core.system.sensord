@@ -28,11 +28,9 @@
 #include <fcntl.h>
 #include "common.h"
 #include <string>
-
 using std::string;
 
-class csocket
-{
+class csocket {
 public:
 	csocket();
 	virtual ~csocket();
@@ -43,38 +41,35 @@ public:
 	bool create(int sock_type);
 	bool bind (const char *sock_path);
 	bool listen(const int max_connections);
-	bool accept(csocket &client_socket) const;
+	bool accept(csocket& client_socket) const;
 
 	//Client
 	bool connect(const char *sock_path);
 
 	//Data Transfer
-	ssize_t send(void const *buffer, size_t size) const;
-	ssize_t recv(void *buffer, size_t size) const;
+	ssize_t send(void const* buffer, size_t size) const;
+	ssize_t recv(void* buffer, size_t size) const;
 
 	bool set_connection_mode(void);
 	bool set_transfer_mode(void);
 	bool is_blocking_mode(void);
 
 	//check if socket is created
-	bool is_valid(void) const {
-		return (m_sock_fd >= 0);
-	}
-	int get_socket_fd(void) const {
-		return m_sock_fd;
-	}
+	bool is_valid(void) const;
+	int get_socket_fd(void) const;
 
 	bool close(void);
+
 	bool is_block_mode(void);
 
 private:
 	bool set_blocking_mode(bool blocking);
 	bool set_sock_type(void);
 
-	ssize_t send_for_seqpacket(void const *buffer, size_t size) const;
-	ssize_t send_for_stream(void const *buffer, size_t size) const;
-	ssize_t recv_for_seqpacket(void *buffer, size_t size) const;
-	ssize_t recv_for_stream(void *buffer, size_t size) const;
+	ssize_t send_for_seqpacket(void const* buffer, size_t size) const;
+	ssize_t send_for_stream(void const* buffer, size_t size) const;
+	ssize_t recv_for_seqpacket(void* buffer, size_t size) const;
+	ssize_t recv_for_stream(void* buffer, size_t size) const;
 
 	int m_sock_fd;
 	int m_sock_type;

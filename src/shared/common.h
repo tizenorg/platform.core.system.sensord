@@ -1,7 +1,7 @@
 /*
  * libsensord-share
  *
- * Copyright (c) 2013 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  *
  */
 
-#ifndef _COMMON_H_
+#if !defined(_COMMON_H_)
 #define _COMMON_H_
 
 #ifndef __cplusplus
@@ -27,18 +27,19 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif /*__cplusplus*/
+#endif
 
 #include <sys/types.h>
 #include <unistd.h>
 
-#ifndef PATH_MAX
+#if !defined(PATH_MAX)
 #define PATH_MAX 256
 #endif
 
-#ifndef NAME_MAX
+#if !defined(NAME_MAX)
 #define NAME_MAX 256
 #endif
+
 
 #define SENSOR_TYPE_SHIFT 16
 
@@ -147,6 +148,7 @@ void sf_log(int type , int priority , const char *tag , const char *fmt , ...);
 
 #endif
 
+
 #if defined(_DEBUG)
 #  define warn_if(expr, fmt, arg...) do { \
 		if(expr) { \
@@ -212,15 +214,19 @@ void sf_log(int type , int priority , const char *tag , const char *fmt , ...);
 #endif
 
 struct sensor_data_t;
+struct sensorhub_data_t;
 typedef struct sensor_data_t sensor_data_t;
+typedef struct sensorhub_data_t sensorhub_data_t;
 
 const char* get_client_name(void);
 bool get_proc_name(pid_t pid, char *process_name);
 bool is_sensorhub_event(unsigned int event_type);
-void copy_sensor_data(sensor_data_t *src, sensor_data_t *dest);
+void copy_sensor_data(sensor_data_t *dest, sensor_data_t *src);
+void copy_sensorhub_data(sensorhub_data_t *dest, sensorhub_data_t *src);
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
-#endif /*_COMMON_H_*/
+#endif
+//! End of a file

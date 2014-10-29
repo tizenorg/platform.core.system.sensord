@@ -20,12 +20,14 @@
 #ifndef CLIENT_COMMON_H_
 #define CLIENT_COMMON_H_
 
-#include <sensor.h>
+/*header for each sensor type*/
+#include <sensor_internal.h>
 #include <csensor_handle_info.h>
 #include <creg_event_info.h>
 #include <common.h>
 
 #define BASE_GATHERING_INTERVAL	100
+
 #define CLIENT_NAME_SIZE NAME_MAX+10
 
 enum log_id {
@@ -34,7 +36,6 @@ enum log_id {
 	LOG_ID_EVENT,
 	LOG_ID_DATA,
 	LOG_ID_PROPERTY,
-	LOG_ID_ROTATE,
 	LOG_ID_END,
 };
 
@@ -50,6 +51,7 @@ struct log_element {
 	struct log_attr log_attr;
 };
 
+
 typedef struct {
 	int handle;
 	unsigned int event_type;
@@ -60,23 +62,21 @@ typedef struct {
 	creg_event_info event_info;
 } log_info;
 
-bool is_sensorhub_event(unsigned int event_type);
 bool is_one_shot_event(unsigned int event_type);
 bool is_ontime_event(unsigned int event_type);
 bool is_panning_event(unsigned int event_type);
 bool is_single_state_event(unsigned int event_type);
 unsigned int get_calibration_event_type(unsigned int event_type);
 unsigned long long get_timestamp(void);
-void sensor_event_to_data(sensor_event_t &event, sensor_data_t &data);
-void sensorhub_event_to_hub_data(sensorhub_event_t &event, sensorhub_data_t &data);
 
-const char *get_log_element_name(log_id id, unsigned int type);
-const char *get_sensor_name(sensor_type_t sensor_type);
-const char *get_event_name(unsigned int event_type);
-const char *get_data_name(unsigned int data_id);
-const char *get_rotate_name(unsigned int rotate_type);
-void print_event_occurrence_log(csensor_handle_info &sensor_handle_info,
-								creg_event_info &event_info,
-								sensor_event_data_t &event_data);
+const char* get_log_element_name(log_id id, unsigned int type);
+const char* get_sensor_name(sensor_id_t sensor_id);
+const char* get_event_name(unsigned int event_type);
+const char* get_data_name(unsigned int data_id);
+void print_event_occurrence_log(csensor_handle_info &sensor_handle_info, const creg_event_info *event_info);
+
+class sensor_info;
+sensor_info *sensor_to_sensor_info(sensor_t sensor);
+sensor_t sensor_info_to_sensor(const sensor_info *info);
 
 #endif /* CLIENT_COMMON_H_ */

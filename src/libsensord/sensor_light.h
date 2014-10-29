@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SENSOR_LIGHT_H_
-#define _SENSOR_LIGHT_H_
+#ifndef __SENSOR_LIGHT_H__
+#define __SENSOR_LIGHT_H__
 
 //! Pre-defined events for the light sensor
 //! Sensor Plugin developer can add more event to their own headers
@@ -26,7 +26,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif /*__cplusplus*/
+#endif
 
 /**
  * @defgroup SENSOR_LIGHT Light Sensor
@@ -37,14 +37,14 @@ extern "C"
  */
 
 enum light_data_id {
-	LIGHT_BASE_DATA_SET	= (LIGHT_SENSOR << 16) | 0x0001,
-	LIGHT_LUX_DATA_SET	= (LIGHT_SENSOR << 16) | 0x0002,
+	LIGHT_LUX_DATA_SET	= (LIGHT_SENSOR << 16) | 0x0001,
+	LIGHT_BASE_DATA_SET	= (LIGHT_SENSOR << 16) | 0x0002,
 };
 
 enum light_evet_type {
-	LIGHT_EVENT_CHANGE_LEVEL				= (LIGHT_SENSOR << 16) | 0x0001,
+	LIGHT_EVENT_LUX_DATA_REPORT_ON_TIME		= (LIGHT_SENSOR << 16) | 0x0001,
 	LIGHT_EVENT_LEVEL_DATA_REPORT_ON_TIME 	= (LIGHT_SENSOR << 16) | 0x0002,
-	LIGHT_EVENT_LUX_DATA_REPORT_ON_TIME		= (LIGHT_SENSOR << 16) | 0x0004,
+	LIGHT_EVENT_CHANGE_LEVEL				= (LIGHT_SENSOR << 16) | 0x0004,
 };
 
 enum light_property_id {
@@ -57,6 +57,7 @@ enum light_property_id {
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
-#endif /*_SENSOR_LIGHT_H_*/
+#endif
+//! End of a file

@@ -17,135 +17,267 @@
  *
  */
 
+
 #include <sensor_plugin_loader.h>
+
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
+
 #include <sensor_hal.h>
 #include <sensor_base.h>
+
 #include <dlfcn.h>
+#include <dirent.h>
 #include <common.h>
+#include <unordered_set>
+#include <algorithm>
 
 using std::make_pair;
+using std::equal;
+using std::unordered_set;
 
 #define ROOT_ELEMENT "PLUGIN"
 #define TEXT_ELEMENT "text"
 #define PATH_ATTR "path"
+
 #define HAL_ELEMENT "HAL"
 #define SENSOR_ELEMENT "SENSOR"
+
+#define PLUGINS_CONFIG_PATH "/usr/etc/sensor_plugins.xml"
+#define PLUGINS_DIR_PATH "/usr/lib/sensord"
+
+#define SENSOR_INDEX_SHIFT 16
 
 sensor_plugin_loader::sensor_plugin_loader()
 {
 }
 
-void *sensor_plugin_loader::load_module(const char *path)
+sensor_plugin_loader& sensor_plugin_loader::get_instance()
 {
-	void *handle = dlopen(path, RTLD_NOW);
+	static sensor_plugin_loader inst;
+	return inst;
+}
 
-	if (!handle) {
-		DBG("Target file is %s , dlerror : %s", path, dlerror());
-		return NULL;
+bool sensor_plugin_loader::load_module(const string &path, void** module, void** handle)
+{
+	void *_handle = dlopen(path.c_str(), RTLD_NOW);
+
+	if (!_handle) {
+		ERR("Failed with dlopen(%s), dlerror : %s", path.c_str(), dlerror());
+		return false;
 	}
 
 	dlerror();
 
-	typedef void *create_t(void);
+	typedef void* create_t(void);
 	typedef void destroy_t(void *);
-	create_t *init_module = (create_t *) dlsym(handle, "create");
-	const char *dlsym_error = dlerror();
 
-	if (dlsym_error) {
-		ERR("Failed to find \"create\" %s", dlsym_error);
-		dlclose(handle);
-		return NULL;
+	create_t* init_module = (create_t*) dlsym(_handle, "create");
+
+	if (!init_module) {
+		ERR("Failed to find \"create\" symbol");
+		dlclose(_handle);
+		return false;
 	}
 
-	destroy_t *exit_module = (destroy_t *) dlsym(handle, "destroy");
-	dlsym_error = dlerror();
+	destroy_t* exit_module = (destroy_t*) dlsym(_handle, "destroy");
 
-	if (dlsym_error) {
-		ERR("Failed to find \"destroy\" %s", dlsym_error);
-		dlclose(handle);
-		return NULL;
+	if (!exit_module) {
+		ERR("Failed to find \"destroy\" symbol");
+		dlclose(_handle);
+		return false;
 	}
 
-	void *module = init_module();
+	void *_module = init_module();
 
-	if (!module) {
-		ERR("Failed to init the module => dlerror : %s , Target file is %s", dlerror(), path);
-		dlclose(handle);
-		return NULL;
+	if (!_module) {
+		ERR("Failed to init the module, Target file is %s\n", path.c_str());
+		exit_module(_module);
+		dlclose(_handle);
+		return false;
 	}
 
-	return module;
+	*module = _module;
+	*handle = _handle;
+
+	return true;
 }
 
-bool sensor_plugin_loader::insert_module(const char *node_name, const char *path)
+bool sensor_plugin_loader::insert_module(plugin_type type, const string &path)
 {
-	if (strcmp(node_name, HAL_ELEMENT) == 0) {
+	if (type == PLUGIN_TYPE_HAL) {
 		DBG("insert sensor plugin [%s]", path);
 		sensor_hal *module;
-		module = (sensor_hal *)load_module(path);
+		void *handle;
 
-		if (!module)
+		if (!load_module(path, (void **)&module, &handle))
 			return false;
 
 		sensor_type_t sensor_type = module->get_type();
 		m_sensor_hals.insert(make_pair(sensor_type, module));
-	}
-
-	if (strcmp(node_name, SENSOR_ELEMENT) == 0) {
-		DBG("insert sensor plugin [%s]", path);
+	} else if (type == PLUGIN_TYPE_SENSOR) {
+		DBG("insert sensor plugin [%s]", path.c_str());
 		sensor_base *module;
-		module = (sensor_base *)load_module(path);
+		void *handle;
 
-		if (!module)
+		if (!load_module(path, (void**)&module, &handle))
 			return false;
 
 		if (!module->init()) {
-			ERR("Failed to init [%s] module", module->get_name());
+			ERR("Failed to init [%s] module\n", module->get_name());
 			delete module;
+			dlclose(handle);
 			return false;
 		}
-
 		DBG("init [%s] module", module->get_name());
+
 		sensor_type_t sensor_type = module->get_type();
 
+		int idx;
+		idx = m_sensors.count(sensor_type);
+		module->set_id(idx << SENSOR_INDEX_SHIFT | sensor_type);
 		m_sensors.insert(make_pair(sensor_type, module));
+	}else {
+		ERR("Not supported type: %d", type);
+		return false;
 	}
 
 	return true;
 }
 
-bool sensor_plugin_loader::load_plugins(const string &plugins_path)
+bool sensor_plugin_loader::load_plugins(void)
+{
+	vector<string> hal_paths, sensor_paths;
+	vector<string> unique_hal_paths, unique_sensor_paths;
+
+	get_paths_from_config(string(PLUGINS_CONFIG_PATH), hal_paths, sensor_paths);
+	get_paths_from_dir(string(PLUGINS_DIR_PATH), hal_paths, sensor_paths);
+
+	//remove duplicates while keeping the original ordering => unique_*_paths
+	unordered_set<string> s;
+	auto unique = [&s](vector<string> &paths, const string &path) {
+		if (s.insert(path).second)
+			paths.push_back(path);
+	};
+
+	for_each(hal_paths.begin(), hal_paths.end(),
+		[&](const string &path) {
+			unique(unique_hal_paths, path);
+		}
+	);
+
+	for_each(sensor_paths.begin(), sensor_paths.end(),
+		[&](const string &path) {
+			unique(unique_sensor_paths, path);
+		}
+	);
+
+	//load plugins specified by unique_*_paths
+	auto insert = [&](plugin_type type, const string &path) {
+			insert_module(type, path);
+	};
+
+	for_each(unique_hal_paths.begin(), unique_hal_paths.end(),
+		[&](const string &path) {
+			insert(PLUGIN_TYPE_HAL, path);
+		}
+	);
+
+	for_each(unique_sensor_paths.begin(), unique_sensor_paths.end(),
+		[&](const string &path) {
+			insert(PLUGIN_TYPE_SENSOR, path);
+		}
+	);
+
+	show_sensor_info();
+	return true;
+}
+
+void sensor_plugin_loader::show_sensor_info(void)
+{
+	INFO("========== Loaded sensor information ==========\n");
+
+	int index = 0;
+
+	auto it = m_sensors.begin();
+
+	while (it != m_sensors.end()) {
+		sensor_base* sensor = it->second;
+
+		sensor_info info;
+		sensor->get_sensor_info(info);
+		INFO("No:%d [%s]\n", ++index, sensor->get_name());
+		info.show();
+		it++;
+	}
+
+	INFO("===============================================\n");
+}
+
+
+bool sensor_plugin_loader::get_paths_from_dir(const string &dir_path, vector<string> &hal_paths, vector<string> &sensor_paths)
+{
+	const string PLUGIN_POSTFIX = ".so";
+	const string HAL_POSTFIX = "_hal.so";
+
+	DIR *dir = NULL;
+	struct dirent *dir_entry = NULL;
+
+	dir = opendir(dir_path.c_str());
+
+	if (!dir) {
+		ERR("Failed to open dir: %s", dir_path.c_str());
+		return false;
+	}
+
+	string name;
+
+	while (dir_entry = readdir(dir)) {
+		name = string(dir_entry->d_name);
+
+		if (equal(PLUGIN_POSTFIX.rbegin(), PLUGIN_POSTFIX.rend(), name.rbegin())) {
+			if (equal(HAL_POSTFIX.rbegin(), HAL_POSTFIX.rend(), name.rbegin()))
+				hal_paths.push_back(dir_path + "/" + name);
+			else
+				sensor_paths.push_back(dir_path + "/" + name);
+		}
+	}
+
+	closedir(dir);
+	return true;
+}
+
+bool sensor_plugin_loader::get_paths_from_config(const string &config_path, vector<string> &hal_paths, vector<string> &sensor_paths)
 {
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 
-	DBG("sensor_plugin_load::load_plugins(\"%s\") is called!", plugins_path.c_str());
-	doc = xmlParseFile(plugins_path.c_str());
+	doc = xmlParseFile(config_path.c_str());
 
 	if (doc == NULL) {
-		ERR("There is no %s", plugins_path.c_str());
+		ERR("There is no %s\n", config_path.c_str());
 		return false;
 	}
 
 	cur = xmlDocGetRootElement(doc);
 
 	if (cur == NULL) {
-		ERR("There is no root element in %s", plugins_path.c_str());
+		ERR("There is no root element in %s\n", config_path.c_str());
 		xmlFreeDoc(doc);
 		return false;
 	}
 
 	if (xmlStrcmp(cur->name, (const xmlChar *)ROOT_ELEMENT)) {
-		ERR("Wrong type document: there is no [%s] root element in %s", ROOT_ELEMENT, plugins_path.c_str());
+		ERR("Wrong type document: there is no [%s] root element in %s\n", ROOT_ELEMENT, config_path.c_str());
 		xmlFreeDoc(doc);
 		return false;
 	}
 
 	xmlNodePtr plugin_list_node_ptr;
 	xmlNodePtr module_node_ptr;
-	char *prop = NULL;
+	char* prop = NULL;
+	string path, category;
+
 	plugin_list_node_ptr = cur->xmlChildrenNode;
 
 	while (plugin_list_node_ptr != NULL) {
@@ -155,72 +287,45 @@ bool sensor_plugin_loader::load_plugins(const string &plugins_path)
 			continue;
 		}
 
-		DBG("<%s>", (const char *)plugin_list_node_ptr->name);
+		DBG("<%s>\n", (const char*)plugin_list_node_ptr->name);
 
 		module_node_ptr = plugin_list_node_ptr->xmlChildrenNode;
-
 		while (module_node_ptr != NULL) {
 			if (!xmlStrcmp(module_node_ptr->name, (const xmlChar *)TEXT_ELEMENT)) {
 				module_node_ptr = module_node_ptr->next;
 				continue;
 			}
 
-			string path;
-			prop = (char *)xmlGetProp(module_node_ptr, (const xmlChar *)PATH_ATTR);
+			prop = (char*)xmlGetProp(module_node_ptr, (const xmlChar*)PATH_ATTR);
 			path = prop;
 			free(prop);
-			DBG("<%s path=\"%s\">", (const char *) module_node_ptr->name, path.c_str());
-			bool error = insert_module((const char *) plugin_list_node_ptr->name, path.c_str());
 
-			if (!error) {
-				//ERR("Fail to insert module : [%s]", path.c_str()) ;
-			}
+			DBG("<%s path=\"%s\">\n", (const char*) module_node_ptr->name, path.c_str());
 
-			DBG("");
+			category = (const char*) plugin_list_node_ptr->name;
+
+			if (category == string(HAL_ELEMENT))
+				hal_paths.push_back(path);
+			else if (category == string(SENSOR_ELEMENT))
+				sensor_paths.push_back(path);
+
+			DBG("\n");
 			module_node_ptr = module_node_ptr->next;
 		}
 
-		DBG("");
+		DBG("\n");
 		plugin_list_node_ptr = plugin_list_node_ptr->next;
 	}
 
 	xmlFreeDoc(doc);
-	show_sensor_info();
+
 	return true;
+
 }
 
-void sensor_plugin_loader::show_sensor_info(void)
+sensor_hal* sensor_plugin_loader::get_sensor_hal(sensor_type_t type)
 {
-	int index = 0;
-	sensor_plugins::iterator it = m_sensors.begin();
-
-	INFO("========== Loaded sensor information ==========");
-
-	while (it != m_sensors.end()) {
-		sensor_base *sensor = it->second;
-		sensor_properties_t properties;
-		int default_type = sensor->get_type() << SENSOR_TYPE_SHIFT | 0x1;
-
-		if (sensor->get_properties(default_type, properties)) {
-			INFO("[%d] %s", ++index, sensor->get_name());
-			INFO("name : %s", properties.sensor_name);
-			INFO("vendor : %s", properties.sensor_vendor);
-			INFO("unit_idx : %d", properties.sensor_unit_idx);
-			INFO("min_range : %f", properties.sensor_min_range);
-			INFO("max_range : %f", properties.sensor_max_range);
-			INFO("resolution : %f", properties.sensor_resolution);
-		}
-
-		it++;
-	}
-
-	INFO("===============================================");
-}
-
-sensor_hal *sensor_plugin_loader::get_sensor_hal(sensor_type_t type)
-{
-	sensor_hal_plugins::iterator it_plugins;
-	it_plugins = m_sensor_hals.find(type);
+	auto it_plugins = m_sensor_hals.find(type);
 
 	if (it_plugins == m_sensor_hals.end())
 		return NULL;
@@ -233,19 +338,16 @@ vector<sensor_hal *> sensor_plugin_loader::get_sensor_hals(sensor_type_t type)
 	vector<sensor_hal *> sensor_hal_list;
 	pair<sensor_hal_plugins::iterator, sensor_hal_plugins::iterator> ret;
 	ret = m_sensor_hals.equal_range(type);
-	sensor_hal_plugins::iterator it;
 
-	for (it = ret.first; it != ret.second; ++it) {
+	for (auto it = ret.first; it != ret.second; ++it)
 		sensor_hal_list.push_back(it->second);
-	}
 
 	return sensor_hal_list;
 }
 
-sensor_base *sensor_plugin_loader::get_sensor(sensor_type_t type)
+sensor_base* sensor_plugin_loader::get_sensor(sensor_type_t type)
 {
-	sensor_plugins::iterator it_plugins;
-	it_plugins = m_sensors.find(type);
+	auto it_plugins = m_sensors.find(type);
 
 	if (it_plugins == m_sensors.end())
 		return NULL;
@@ -257,23 +359,42 @@ vector<sensor_base *> sensor_plugin_loader::get_sensors(sensor_type_t type)
 {
 	vector<sensor_base *> sensor_list;
 	pair<sensor_plugins::iterator, sensor_plugins::iterator> ret;
-	ret = m_sensors.equal_range(type);
-	sensor_plugins::iterator it;
 
-	for (it = ret.first; it != ret.second; ++it) {
+	if (type == ALL_SENSOR)
+		ret = std::make_pair(m_sensors.begin(), m_sensors.end());
+	else
+		ret = m_sensors.equal_range(type);
+
+	for (auto it = ret.first; it != ret.second; ++it)
 		sensor_list.push_back(it->second);
-	}
 
 	return sensor_list;
 }
 
+
+sensor_base* sensor_plugin_loader::get_sensor(sensor_id_t id)
+{
+	const int SENSOR_TYPE_MASK = 0x0000FFFF;
+	vector<sensor_base *> sensors;
+
+	sensor_type_t type = (sensor_type_t) (id & SENSOR_TYPE_MASK);
+	int index = id >> SENSOR_INDEX_SHIFT;
+
+	sensors = get_sensors(type);
+
+	if (sensors.size() <= index)
+		return NULL;
+
+	return sensors[index];
+}
+
+
 vector<sensor_base *> sensor_plugin_loader::get_virtual_sensors(void)
 {
 	vector<sensor_base *> virtual_list;
-	sensor_plugins::iterator sensor_it;
-	sensor_base *module;
+	sensor_base* module;
 
-	for (sensor_it = m_sensors.begin(); sensor_it != m_sensors.end(); ++sensor_it) {
+	for (auto sensor_it = m_sensors.begin(); sensor_it != m_sensors.end(); ++sensor_it) {
 		module = sensor_it->second;
 
 		if (module && module->is_virtual() == true) {
@@ -286,24 +407,31 @@ vector<sensor_base *> sensor_plugin_loader::get_virtual_sensors(void)
 
 bool sensor_plugin_loader::destroy()
 {
-	sensor_base *sensor;
-	sensor_plugins::iterator sensor_it;
+	sensor_base* sensor;
 
-	for (sensor_it = m_sensors.begin(); sensor_it != m_sensors.end(); ++sensor_it) {
+	for (auto sensor_it = m_sensors.begin(); sensor_it != m_sensors.end(); ++sensor_it) {
 		sensor = sensor_it->second;
+
+		//need to dlclose
+		//unregister_module(module);
+
 		delete sensor;
 	}
 
-	sensor_hal *sensor_hal;
-	sensor_hal_plugins::iterator sensor_hal_it;
+	sensor_hal* sensor_hal;
 
-	for (sensor_hal_it = m_sensor_hals.begin(); sensor_hal_it != m_sensor_hals.end(); ++sensor_hal_it) {
+	for (auto sensor_hal_it = m_sensor_hals.begin(); sensor_hal_it != m_sensor_hals.end(); ++sensor_hal_it) {
 		sensor_hal = sensor_hal_it->second;
+
+		// need to dlclose
+		//unregister_module(module);
+
 		delete sensor_hal;
 	}
 
 	m_sensors.clear();
 	m_sensor_hals.clear();
+
 	return true;
 }
 

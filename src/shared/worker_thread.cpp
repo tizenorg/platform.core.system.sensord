@@ -40,7 +40,7 @@ worker_thread::~worker_thread()
 bool worker_thread::transition_function(trans_func_index index)
 {
 	if (m_trans_func[index] != NULL) {
-		if (!m_trans_func[index](m_context)) {
+		if(!m_trans_func[index](m_context)) {
 			_T("Transition[%d] function returning false", index);
 			return false;
 		}
@@ -54,6 +54,7 @@ worker_thread::worker_state_t worker_thread::get_state(void)
 	lock l(m_mutex);
 	return m_state;
 }
+
 
 bool worker_thread::start(void)
 {
@@ -71,7 +72,6 @@ bool worker_thread::start(void)
 			thread th(&worker_thread::main, this);
 			th.detach();
 		}
-
 		return true;
 	} else if (m_state == WORKER_STATE_PAUSED) {
 		m_state = WORKER_STATE_WORKING;
@@ -80,6 +80,7 @@ bool worker_thread::start(void)
 	}
 
 	_T("Failed to start, because current state(%d) is not for START", m_state);
+
 	return false;
 }
 
@@ -93,6 +94,7 @@ bool worker_thread::stop(void)
 	}
 
 	if ((m_state == WORKER_STATE_WORKING) || (m_state == WORKER_STATE_PAUSED)) {
+
 		if (m_state == WORKER_STATE_PAUSED)
 			m_cond_working.notify_one();
 
@@ -119,7 +121,9 @@ bool worker_thread::pause(void)
 	}
 
 	_T("Failed to pause, because current state(%d) is not for PAUSE", m_state);
+
 	return false;
+
 }
 
 bool worker_thread::resume(void)
@@ -144,12 +148,13 @@ bool worker_thread::resume(void)
 
 /*
  * After state changed to STOPPED, it should not access member fields,
- * because some transition funciton of STOPPED delete this pointer
+    because some transition funciton of STOPPED delete this pointer
  */
 
 void worker_thread::main(void)
 {
 	_T("Worker thread(0x%x) is created", std::this_thread::get_id());
+
 	transition_function(STARTED);
 
 	while (true) {
@@ -164,7 +169,6 @@ void worker_thread::main(void)
 				transition_function(STOPPED);
 				break;
 			}
-
 			continue;
 		}
 
@@ -172,6 +176,7 @@ void worker_thread::main(void)
 
 		if (m_state == WORKER_STATE_PAUSED) {
 			transition_function(PAUSED);
+
 			_T("Worker thread(0x%x) is paused", std::this_thread::get_id());
 			m_cond_working.wait(u);
 
@@ -189,7 +194,6 @@ void worker_thread::main(void)
 			break;
 		}
 	}
-
 	_T("Worker thread(0x%x)'s main is terminated", std::this_thread::get_id());
 }
 

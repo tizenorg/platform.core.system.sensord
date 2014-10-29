@@ -21,7 +21,7 @@ add_definitions(-DPREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions(-DLOCALEDIR="$ENV{DATAFS}/share/locale")
 add_definitions(-DFACTORYFS="$ENV{FACTORYFS}")
 add_definitions(-DDATAFS="$ENV{DATAFS}")
-add_definitions(-Wall -std=gnu++0x)
+add_definitions(-Wall -fPIC -std=gnu++0x)
 add_definitions(-DUSE_DLOG_LOG)
 #add_definitions(-DX1_PROF)
 #add_definitions(-D_GETTEXT)
@@ -59,6 +59,7 @@ add_library(sensord-share SHARED
 	cbase_lock.cpp
 	cmutex.cpp
 	common.cpp
+	sensor_info.cpp
 )
 
 target_link_libraries(sensord-server ${rpkgs_LDFLAGS} "-lrt -ldl -pthread" "sensord-share")
@@ -87,6 +88,7 @@ install(FILES
 	cbase_lock.h
 	cmutex.h
 	common.h
+	sensor_info.h
 	iio_common.h
 	DESTINATION include/${PROJECT_NAME}
 )

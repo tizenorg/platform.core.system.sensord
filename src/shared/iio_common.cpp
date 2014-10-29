@@ -166,21 +166,15 @@ int update_sysfs_num(const char *filepath, int val, bool verify)
 	return 0;
 }
 
-int update_sysfs_string(const char *filepath, char *val, bool verify)
+int update_sysfs_string(const char *filepath, const char *val)
 {
 	fstream sysfile;
 	sysfile.open(filepath);
-	if (!sysfile.is_open())
+	if (!sysfile.is_open()) {
+		ERR("File Open Error, %s", filepath);
 		return -1;
-	sysfile << val;
-	if (verify)
-	{
-		string test;
-		sysfile.seekp(0, ios::beg);
-		sysfile >> test;
-		if (test != string(val))
-			return -1;
 	}
+	sysfile << val;
 	return 0;
 }
 

@@ -20,12 +20,15 @@
 #include <physical_sensor.h>
 #include <csensor_event_queue.h>
 
+
 physical_sensor::physical_sensor()
 {
+
 }
 
 physical_sensor::~physical_sensor()
 {
+
 }
 
 bool physical_sensor::push(sensor_event_t const &event)
@@ -46,9 +49,11 @@ void physical_sensor::set_poller(working_func_t func, void *arg)
 	m_sensor_data_poller.set_working(func);
 }
 
+
 bool physical_sensor::start_poll(void)
 {
 	return m_sensor_data_poller.start();
+
 }
 
 bool physical_sensor::stop_poll(void)

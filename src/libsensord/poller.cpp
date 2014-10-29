@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  */
-
 #include <common.h>
 #include <poller.h>
 #include <sf_common.h>
@@ -32,6 +31,7 @@ bool poller::create(int fd)
 	m_epfd = epoll_create(1);
 
 	struct epoll_event event;
+
 	event.data.fd = fd;
 	event.events = EPOLLIN | EPOLLERR | EPOLLHUP;
 
@@ -43,9 +43,11 @@ bool poller::create(int fd)
 	return true;
 }
 
+
 bool poller::fill_event_queue(void)
 {
-	const int EPOLL_MAX_EVENT = 16;
+	const int EPOLL_MAX_EVENT = 1;
+
 	struct epoll_event event_items[EPOLL_MAX_EVENT];
 	int nr_events = epoll_wait(m_epfd, event_items, EPOLL_MAX_EVENT, -1);
 
@@ -63,14 +65,17 @@ bool poller::fill_event_queue(void)
 		return false;
 	}
 
-	for (int i = 0; i < nr_events; i++)
+    for (int i = 0; i < nr_events; i++)
 		m_event_queue.push(event_items[i].events);
 
 	return true;
 }
 
-bool poller::poll(void)
+
+bool poller::poll(int &event)
 {
+	event = 0;
+
 	while (true) {
 		if (m_event_queue.empty()) {
 			if (!fill_event_queue())
@@ -78,7 +83,7 @@ bool poller::poll(void)
 		}
 
 		if (!m_event_queue.empty()) {
-			int event = m_event_queue.front();
+			event = m_event_queue.front();
 			m_event_queue.pop();
 
 			if (event & EPOLLERR) {

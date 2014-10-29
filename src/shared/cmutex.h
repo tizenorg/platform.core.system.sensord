@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _CMUTEX_H_
-#define _CMUTEX_H_
+#if !defined(_CMUTEX_CLASS_H_)
+#define _CMUTEX_CLASS_H_
 
 #include "cbase_lock.h"
 
@@ -29,7 +29,7 @@ public:
 	virtual ~cmutex();
 
 	void lock(void);
-	void lock(const char *expr, const char *module, const char *func, int line);
+	void lock(const char* expr, const char *module, const char *func, int line);
 
 protected:
 	int lock_impl(void);
@@ -39,4 +39,5 @@ private:
 	pthread_mutex_t m_mutex;
 };
 
-#endif /*_CMUTEXT_H_*/
+#endif
+// End of a file
