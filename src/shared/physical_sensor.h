@@ -44,4 +44,4 @@ protected:
 	bool stop_poll(void);
 };
 
-#endif /*_PHYSICAL_SENSOR_H_*/
+#endif

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SENSOR_LINEAR_ACCEL_H_
-#define _SENSOR_LINEAR_ACCEL_H_
+#ifndef __SENSOR_LINEAR_ACCEL_H__
+#define __SENSOR_LINEAR_ACCEL_H__
 
 //! Pre-defined events for the linear accelerometer sensor
 //! Sensor Plugin developer can add more event to their own headers
@@ -26,7 +26,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif /*__cplusplus*/
+#endif
 
 /**
  * @defgroup SENSOR_LINEAR_ACCEL Linear Accelerometer Sensor
@@ -35,6 +35,10 @@ extern "C"
  * These APIs are used to control the Linear Accelerometer sensor.
  * @{
  */
+
+enum linear_accel_data_id {
+	LINEAR_ACCEL_BASE_DATA_SET 				= (LINEAR_ACCEL_SENSOR << 16) | 0x0001,
+};
 
 enum linear_accel_event_type {
 	LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME					= (LINEAR_ACCEL_SENSOR << 16) | 0x0001,
@@ -46,6 +50,7 @@ enum linear_accel_event_type {
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
-#endif /*_SENSOR_LINEAR_ACCEL_H_*/
+#endif
+//! End of a file

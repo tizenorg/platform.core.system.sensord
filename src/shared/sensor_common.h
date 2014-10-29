@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SENSOR_COMMON_H_
-#define _SENSOR_COMMON_H_
+#ifndef __SENSOR_COMMON_H__
+#define __SENSOR_COMMON_H__
 
 #ifndef DEPRECATED
 #define DEPRECATED __attribute__((deprecated))
@@ -27,15 +27,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif /*__cplusplus*/
-
-#define MAX_KEY_LENGTH 64
-#define MAX_VALUE_SIZE 12
-#define SENSORHUB_TYPE_CONTEXT	1
-#define SENSORHUB_TYPE_GESTURE	2
-#define MS_TO_SEC 1000
-#define US_TO_SEC 1000000
-#define NS_TO_SEC 1000000000
+#endif
 
 /**
  * @defgroup SENSOR_FRAMEWORK SensorFW
@@ -51,6 +43,7 @@ extern "C"
  */
 
 typedef enum {
+	ALL_SENSOR = -1,
 	UNKNOWN_SENSOR = 0,
 	ACCELEROMETER_SENSOR,
 	GEOMAGNETIC_SENSOR,
@@ -61,87 +54,67 @@ typedef enum {
 	PRESSURE_SENSOR,
 	MOTION_SENSOR,
 	FUSION_SENSOR,
-	PEDOMETER_SENSOR,
 	CONTEXT_SENSOR,
 	FLAT_SENSOR,
-	BIO_SENSOR,
-	BIO_HRM_SENSOR,
 	AUTO_ROTATION_SENSOR,
 	GRAVITY_SENSOR,
 	LINEAR_ACCEL_SENSOR,
-	ROTATION_VECTOR_SENSOR,
 	ORIENTATION_SENSOR,
 	TEMPERATURE_SENSOR
 } sensor_type_t;
 
-typedef struct sensor_data_t {
-	int data_accuracy;
-	int data_unit_idx;
+typedef unsigned int sensor_id_t;
+
+typedef void *sensor_t;
+
+typedef enum {
+	SENSOR_PRIVILEGE_PUBLIC,
+	SENSOR_PRIVILEGE_INTERNAL,
+} sensor_privilege_t;
+
+
+#define SENSOR_DATA_VALUE_SIZE 16
+
 /*
- *	Use "timestamp" instead of "time_stamp"
- *	which is going to be removed soon
+ *	When modifying it, check copy_sensor_data()
+ */
+typedef struct sensor_data_t {
+/*
+ * 	Use "accuracy" instead of "data_accuracy"
+ * 	which is going to be removed soon
  */
 	union {
-		unsigned long long time_stamp;
-		unsigned long long timestamp;
+		int accuracy;
+		int data_accuracy; //deprecated
 	};
-	int values_num;
-	float values[MAX_VALUE_SIZE];
+
+	unsigned long long timestamp;
+
+/*
+ * 	Use "value_count" instead of "values_num"
+ * 	which is going to be removed soon
+ */
+	union {
+		int value_count;
+		int values_num; //deprecated
+	};
+
+	float values[SENSOR_DATA_VALUE_SIZE];
 } sensor_data_t;
 
-typedef struct sensor_event_t {
-	unsigned int event_type;
-	int situation;
-	sensor_data_t data;
-} sensor_event_t;
+#define SENSOR_HUB_DATA_SIZE	4096
 
-#define HUB_DATA_MAX_SIZE	4096
-
-typedef struct {
+typedef struct sensorhub_data_t {
     int version;
     int sensorhub;
     int type;
     int hub_data_size;
-    long long timestamp;
-    char hub_data[HUB_DATA_MAX_SIZE];
+    unsigned long long timestamp;
+    char hub_data[SENSOR_HUB_DATA_SIZE];
     float data[16];
 } sensorhub_data_t;
 
-typedef struct sensorhub_event_t {
-	unsigned int event_type;
-	int situation;
-	sensorhub_data_t data;
-} sensorhub_event_t;
-
-typedef struct {
-	int sensor_unit_idx;
-	float sensor_min_range;
-	float sensor_max_range;
-	float sensor_resolution;
-	char sensor_name[MAX_KEY_LENGTH];
-	char sensor_vendor[MAX_KEY_LENGTH];
-} sensor_properties_t;
-
-enum sensor_data_unit_idx {
-	SENSOR_UNDEFINED_UNIT,
-	SENSOR_UNIT_METRE_PER_SECOND_SQUARED,
-	SENSOR_UNIT_MICRO_TESLA,
-	SENSOR_UNIT_DEGREE,
-	SENSOR_UNIT_LUX,
-	SENSOR_UNIT_CENTIMETER,
-	SENSOR_UNIT_LEVEL,
-	SENSOR_UNIT_STATE_ON_OFF,
-	SENSOR_UNIT_DEGREE_PER_SECOND,
-	SENSOR_UNIT_HECTOPASCAL,
-	SENSOR_UNIT_CELSIUS,
-	SENSOR_UNIT_METER,
-	SENSOR_UNIT_STEP,
-	SENSOR_UNIT_VENDOR_UNIT = 100,
-	SENSOR_UNIT_FILTER_CONVERTED,
-	SENSOR_UNIT_SENSOR_END
-};
-
-enum sensor_data_accuracy {
+enum sensor_accuracy_t {
 	SENSOR_ACCURACY_UNDEFINED = -1,
 	SENSOR_ACCURACY_BAD = 0,
 	SENSOR_ACCURACY_NORMAL =1,
@@ -149,46 +122,26 @@ enum sensor_data_accuracy {
 	SENSOR_ACCURACY_VERYGOOD = 3
 };
 
-enum sensor_start_option {
+/*
+ *	To prevent naming confliction as using same enums as sensor CAPI use
+ */
+#ifndef __SENSORS_H__
+enum sensor_option_t {
 	SENSOR_OPTION_DEFAULT = 0,
-	SENSOR_OPTION_ALWAYS_ON = 1,
+	SENSOR_OPTION_ON_IN_SCREEN_OFF = 1,
+	SENSOR_OPTION_ON_IN_POWERSAVE_MODE = 2,
+	SENSOR_OPTION_ALWAYS_ON = SENSOR_OPTION_ON_IN_SCREEN_OFF | SENSOR_OPTION_ON_IN_POWERSAVE_MODE,
 	SENSOR_OPTION_END
 };
 
-enum _sensor_current_state {
-	SENSOR_STATE_UNKNOWN = -1,
-	SENSOR_STATE_STOPPED = 0,
-	SENSOR_STATE_STARTED = 1,
-	SENSOR_STATE_PAUSED = 2
+typedef enum sensor_option_t sensor_option_e;
+#endif
+
+enum sensor_interval_t {
+	SENSOR_INTERVAL_FASTEST = 0,
+	SENSOR_INTERVAL_NORMAL = 200,
 };
 
-enum _sensor_wakeup_state {
-	SENSOR_WAKEUP_UNKNOWN = -1,
-	SENSOR_WAKEUP_UNSETTED = 0,
-	SENSOR_WAKEUP_SETTED = 1,
-};
-
-enum _sensor_poweroff_state {
-	SENSOR_POWEROFF_UNKNOWN = -1,
-	SENSOR_POWEROFF_AWAKEN  =  1,
-};
-
-enum event_situation {
-	SITUATION_LCD_ON,
-	SITUATION_LCD_OFF,
-	SITUATION_SURVIVAL_MODE
-};
-
-enum poll_value_t {
-	POLL_100HZ_MS	= 10,
-	POLL_50HZ_MS	= 20,
-	POLL_25HZ_MS	= 40,
-	POLL_20HZ_MS	= 50,
-	POLL_10HZ_MS	= 100,
-	POLL_5HZ_MS		= 200,
-	POLL_1HZ_MS		= 1000,
-	POLL_MAX_HZ_MS  = POLL_1HZ_MS,
-};
 
 typedef enum {
 	CONDITION_NO_OP,
@@ -199,6 +152,8 @@ typedef enum {
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
-#endif /*_SENSOR_COMMON_H_*/
+
+#endif
+//! End of a file

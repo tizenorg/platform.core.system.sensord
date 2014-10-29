@@ -17,6 +17,7 @@
  *
  */
 
+
 #ifndef _WORKER_THREAD_H_
 #define _WORKER_THREAD_H_
 
@@ -82,4 +83,4 @@ public:
 	void set_context(void *ctx);
 };
 
-#endif /*_WORKER_THREAD_H_*/
+#endif

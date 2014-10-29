@@ -20,6 +20,7 @@
 #include <signal.h>
 #include <common.h>
 #include <server.h>
+#include <dbus_util.h>
 #include <sensor_plugin_loader.h>
 
 static void sig_term_handler(int signo, siginfo_t *info, void *data)
@@ -28,17 +29,16 @@ static void sig_term_handler(int signo, siginfo_t *info, void *data)
 
 	get_proc_name(info->si_pid, proc_name);
 
-	ERR("Received SIGTERM(%d) from %s(%d)", signo, proc_name, info->si_pid);
+	ERR("Received SIGTERM(%d) from %s(%d)\n", signo, proc_name, info->si_pid);
 	exit(EXIT_SUCCESS);
 }
 
 static void signal_init(void)
 {
 	struct sigaction sig_act;
+	memset(&sig_act, 0, sizeof(struct sigaction));
 
 	sig_act.sa_handler = SIG_IGN;
-	sigemptyset(&sig_act.sa_mask);
-
 	sigaction(SIGCHLD, &sig_act, NULL);
 	sigaction(SIGPIPE, &sig_act, NULL);
 
@@ -50,13 +50,14 @@ static void signal_init(void)
 
 int main(int argc, char *argv[])
 {
-	signal_init();
-
 	INFO("Sensord started");
+
+	signal_init();
 
 	sensor_plugin_loader::get_instance().load_plugins();
 
 	server::get_instance().run();
+
 	server::get_instance().stop();
 
 	sensor_plugin_loader::get_instance().destroy();

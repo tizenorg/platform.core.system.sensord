@@ -1,5 +1,5 @@
 /*
- * libsensord-share
+ * sensord
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -17,32 +17,16 @@
  *
  */
 
-#include <virtual_sensor.h>
-#include <csensor_event_dispatcher.h>
+#ifndef _DBUS_UTIL_H_
+#define _DBUS_UTIL_H_
 
+enum dbus_ret{
+	DBUS_INIT = -1,
+	DBUS_FAILED = 0,
+	DBUS_SUCCESS = 1
+};
 
-virtual_sensor::virtual_sensor()
-{
+void init_dbus(void);
+void fini_dbus(void);
 
-}
-
-virtual_sensor::~virtual_sensor()
-{
-
-}
-
-bool virtual_sensor::is_virtual(void)
-{
-	return true;
-}
-
-
-bool virtual_sensor::activate(void)
-{
-	return csensor_event_dispatcher::get_instance().add_active_virtual_sensor(this);
-}
-
-bool virtual_sensor::deactivate(void)
-{
-	return csensor_event_dispatcher::get_instance().delete_active_virtual_sensor(this);
-}
+#endif /* SENSORD_GDBUS_H_ */

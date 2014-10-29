@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SENSOR_MOTION_H_
-#define _SENSOR_MOTION_H_
+#ifndef __SENSOR_MOTION_H__
+#define __SENSOR_MOTION_H__
 
 //! Pre-defined events for the motion sensor
 //! Sensor Plugin developer can add more event to their own headers
@@ -26,12 +26,14 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif /*__cplusplus*/
+#endif
 
 enum motion_event_type {
 	MOTION_ENGINE_EVENT_SNAP				= (MOTION_SENSOR << 16) | 0x0001,
 	MOTION_ENGINE_EVENT_SHAKE				= (MOTION_SENSOR << 16) | 0x0002,
 	MOTION_ENGINE_EVENT_DOUBLETAP			= (MOTION_SENSOR << 16) | 0x0004,
+	MOTION_ENGINE_EVENT_PANNING				= (MOTION_SENSOR << 16) | 0x0008,
+	MOTION_ENGINE_EVENT_TOP_TO_BOTTOM		= (MOTION_SENSOR << 16) | 0x0010,
 	MOTION_ENGINE_EVENT_DIRECT_CALL			= (MOTION_SENSOR << 16) | 0x0020,
 	MOTION_ENGINE_EVENT_TILT_TO_UNLOCK		= (MOTION_SENSOR << 16) | 0x0040,
 	MOTION_ENGINE_EVENT_LOCK_EXECUTE_CAMERA = (MOTION_SENSOR << 16) | 0x0080,
@@ -40,6 +42,7 @@ enum motion_event_type {
 	MOTION_ENGINE_EVENT_PANNING_BROWSE		= (MOTION_SENSOR << 16) | 0x0400,
 	MOTION_ENGINE_EVENT_NO_MOVE				= (MOTION_SENSOR << 16) | 0x0800,
 	MOTION_ENGINE_EVENT_SHAKE_ALWAYS_ON     = (MOTION_SENSOR << 16) | 0x1000,
+	MOTION_ENGINE_EVENT_SMART_RELAY         = (MOTION_SENSOR << 16) | 0x2000,
 };
 
 enum motion_snap_event {
@@ -96,6 +99,11 @@ enum motion_direct_call_event_t {
 	MOTION_ENGINE_DIRECT_CALL_DETECTION,
 };
 
+enum motion_smart_relay_event_t {
+	MOTION_ENGINE_SMART_RELAY_NONE,
+	MOTION_ENGINE_SMART_RELAY_DETECTION,
+};
+
 enum motion_tilt_to_unlock_event_t {
 	MOTION_ENGINE_TILT_TO_UNLOCK_NONE,
 	MOTION_ENGINE_TILT_TO_UNLOCK_DETECTION,
@@ -136,6 +144,7 @@ enum motion_property_id {
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
-#endif /*_SENSOR_MOTION_H_*/
+#endif
+//! End of a file

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SERVER_H_
-#define _SERVER_H_
+#ifndef SERVER_H_
+#define SERVER_H_
 
 #include <glib.h>
 #include <csocket.h>
@@ -37,10 +37,7 @@ private:
 public:
 	void run(void);
 	void stop(void);
-	static server &get_instance() {
-		static server inst;
-		return inst;
-	}
+	static server& get_instance();
 };
 
-#endif /*_SERVER_H_*/
+#endif

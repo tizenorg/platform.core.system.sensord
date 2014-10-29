@@ -21,7 +21,7 @@ add_definitions(-DPREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions(-DLOCALEDIR="$ENV{DATAFS}/share/locale")
 add_definitions(-DFACTORYFS="$ENV{FACTORYFS}")
 add_definitions(-DDATAFS="$ENV{DATAFS}")
-add_definitions(-Wall -std=gnu++0x)
+add_definitions(-Wall -fPIC -std=gnu++0x)
 add_definitions(-DUSE_DLOG_LOG)
 #add_definitions(-DX1_PROF)
 #add_definitions(-D_GETTEXT)
@@ -51,6 +51,8 @@ add_library(sensord-server SHARED
 	physical_sensor.cpp
 	virtual_sensor.cpp
 	iio_common.cpp
+	sensor_fusion.cpp
+	fusion_util.cpp
 )
 
 add_library(sensord-share SHARED
@@ -59,6 +61,7 @@ add_library(sensord-share SHARED
 	cbase_lock.cpp
 	cmutex.cpp
 	common.cpp
+	sensor_info.cpp
 )
 
 target_link_libraries(sensord-server ${rpkgs_LDFLAGS} "-lrt -ldl -pthread" "sensord-share")
@@ -71,6 +74,7 @@ install(TARGETS sensord-share DESTINATION lib)
 install(FILES sensord-server.pc DESTINATION lib/pkgconfig)
 install(FILES ${PROJECT_NAME}.pc DESTINATION lib/pkgconfig)
 install(FILES
+	sensor_fusion.h
 	crw_lock.h
 	worker_thread.h
 	cconfig.h
@@ -81,12 +85,15 @@ install(FILES
 	sensor_base.h
 	physical_sensor.h
 	virtual_sensor.h
+	sensor_fusion.h
 	sf_common.h
 	cpacket.h
 	csocket.h
 	cbase_lock.h
 	cmutex.h
 	common.h
+	fusion_util.h
+	sensor_info.h
 	iio_common.h
 	DESTINATION include/${PROJECT_NAME}
 )

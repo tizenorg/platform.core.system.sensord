@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _CRW_LOCK_H_
-#define _CRW_LOCK_H_
+#if !defined(_CRW_LOCK_CLASS_H_)
+#define _CRW_LOCK_CLASS_H_
 
 #include "cbase_lock.h"
 
@@ -42,4 +42,5 @@ private:
 	pthread_rwlock_t m_rw_lock;
 };
 
-#endif /*_CRW_LOCK_H_*/
+#endif
+// End of a file

@@ -17,64 +17,60 @@
  *
  */
 
-#ifndef _CCLIENT_INFO_MANAGER_H_
-#define _CCLIENT_INFO_MANAGER_H_
+#ifndef CCLIENT_INFO_MANAGER_H_
+#define CCLIENT_INFO_MANAGER_H_
 
 #include <cclient_sensor_record.h>
-#include <map>
+#include <unordered_map>
 #include <common.h>
 #include <cmutex.h>
+using std::unordered_map;
 
-using std::map;
-
-typedef map<int, cclient_sensor_record> client_id_sensor_record_map;
+typedef unordered_map<int,cclient_sensor_record> client_id_sensor_record_map;
 typedef vector<int> client_id_vec;
 
-class cclient_info_manager
-{
-public:
-	static cclient_info_manager &get_instance() {
-		static cclient_info_manager inst;
-		return inst;
-	}
 
+class cclient_info_manager {
+public:
+	static cclient_info_manager& get_instance();
 	int create_client_record(void);
-	bool remove_client_record(const int client_id);
+	bool remove_client_record(int client_id);
 	bool has_client_record(int client_id);
 
 	void set_client_info(int client_id, pid_t pid);
-	const char *get_client_info(int client_id);
+	const char* get_client_info(int client_id);
 
-	bool create_sensor_record(int client_id, const sensor_type_t sensor);
-	bool remove_sensor_record(const int client_id, const sensor_type_t sensor);
-	bool has_sensor_record(const int client_id, const sensor_type_t sensor);
-	bool has_sensor_record(const int client_id);
+	bool set_permission(int client_id, int permission);
+	bool get_permission(int client_id, int &permission);
 
-	bool register_event(const int client_id, const unsigned int event_type);
-	bool unregister_event(const int client_id, const unsigned int event_type);
-	bool is_sensor_event_registered(const int client_id, const unsigned int event_type);
+	bool create_sensor_record(int client_id, sensor_id_t sensor_id);
+	bool remove_sensor_record(int client_id, sensor_id_t sensor_id);
+	bool has_sensor_record(int client_id, sensor_id_t sensor_id);
+	bool has_sensor_record(int client_id);
 
-	bool set_interval(const int client_id, const sensor_type_t sensor, const unsigned int interval);
-	unsigned int get_interval(const int client_id, const sensor_type_t sensor);
-	bool set_option(const int client_id, const sensor_type_t sensor, const int option);
+	bool register_event(int client_id, sensor_id_t sensor_id, unsigned int event_type);
+	bool unregister_event(int client_id, sensor_id_t sensor_id, unsigned int event_type);
 
-	bool set_start(const int client_id, const sensor_type_t sensor, bool start);
-	bool is_started(const int client_id, const sensor_type_t sensor);
+	bool set_interval(int client_id, sensor_id_t sensor_id, unsigned int interval);
+	unsigned int get_interval(int client_id, sensor_id_t sensor_id);
+	bool set_option(int client_id, sensor_id_t sensor_id, int option);
 
-	bool is_sensor_used(const sensor_type_t sensor, const event_situation mode);
-	bool get_registered_events(const int client_id, const sensor_type_t sensor, event_type_vector &event_vec);
+	bool set_start(int client_id, sensor_id_t sensor_id, bool start);
+	bool is_started(int client_id, sensor_id_t sensor_id);
 
-	bool get_listener_ids(const unsigned int event_type, const event_situation mode, client_id_vec &id_vec);
-	bool get_event_socket(const int client_id, csocket &sock);
-	bool set_event_socket(const int client_id, const csocket &sock);
+	bool get_registered_events(int client_id, sensor_id_t sensor_id, event_type_vector &event_vec);
+
+	bool get_listener_ids(sensor_id_t sensor_id, unsigned int event_type, client_id_vec &id_vec);
+	bool get_event_socket(int client_id, csocket &sock);
+	bool set_event_socket(int client_id, const csocket &sock);
 private:
 	client_id_sensor_record_map m_clients;
 	cmutex m_mutex;
 
 	cclient_info_manager();
 	~cclient_info_manager();
-	cclient_info_manager(cclient_info_manager const &) {};
-	cclient_info_manager &operator=(cclient_info_manager const &);
+	cclient_info_manager(cclient_info_manager const&) {};
+	cclient_info_manager& operator=(cclient_info_manager const&);
 };
 
-#endif /*_CCLIENT_INFO_MANAGER_H_*/
+#endif /* CCLIENT_INFO_MANAGER_H_ */

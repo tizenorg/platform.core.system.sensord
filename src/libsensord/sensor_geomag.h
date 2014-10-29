@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SENSOR_GEOMAG_H_
-#define _SENSOR_GEOMAG_H_
+#ifndef __SENSOR_GEOMAG_H__
+#define __SENSOR_GEOMAG_H__
 
 //! Pre-defined events for the geomagnetic sensor
 //! Sensor Plugin developer can add more event to their own headers
@@ -26,7 +26,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif /*__cplusplus*/
+#endif
 
 /**
  * @defgroup SENSOR_GEOMAG Geomagnetic Sensor
@@ -39,19 +39,11 @@ extern "C"
 enum geomag_data_id {
 	GEOMAGNETIC_BASE_DATA_SET		= (GEOMAGNETIC_SENSOR << 16) | 0x0001,
 	GEOMAGNETIC_RAW_DATA_SET 		= (GEOMAGNETIC_SENSOR << 16) | 0x0001,
-	GEOMAGNETIC_ATTITUDE_DATA_SET	= (GEOMAGNETIC_SENSOR << 16) | 0x0002,
 };
 
 enum geomag_evet_type {
-	GEOMAGNETIC_EVENT_CALIBRATION_NEEDED			= (GEOMAGNETIC_SENSOR << 16) | 0x0001,
-	GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME       = (GEOMAGNETIC_SENSOR << 16) | 0x0002,
-	GEOMAGNETIC_EVENT_ATTITUDE_DATA_REPORT_ON_TIME 	= (GEOMAGNETIC_SENSOR << 16) | 0x0004,
-};
-
-enum geomag_property_id {
-	GEOMAGNETIC_PROPERTY_UNKNOWN = 0,
-	GEOMAGNETIC_PROPERTY_SET_ACCEL_CALIBRATION,
-	GEOMAGNETIC_PROPERTY_CHECK_ACCEL_CALIBRATION,
+	GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME       = (GEOMAGNETIC_SENSOR << 16) | 0x0001,
+	GEOMAGNETIC_EVENT_CALIBRATION_NEEDED			= (GEOMAGNETIC_SENSOR << 16) | 0x0002,
 };
 
 /**
@@ -60,6 +52,7 @@ enum geomag_property_id {
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
-#endif /*_SENSOR_GEOMAG_H_*/
+#endif
+//! End of a file

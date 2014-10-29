@@ -21,6 +21,7 @@
 #include <attr/xattr.h>
 #include <sys/stat.h>
 
+
 csocket::csocket()
 : m_sock_fd(-1)
 , m_sock_type(SOCK_STREAM)
@@ -30,6 +31,7 @@ csocket::csocket()
 	memset(&m_addr, 0, sizeof(m_addr));
 }
 
+
 csocket::csocket(int sock_fd)
 : m_send_flags(MSG_NOSIGNAL)
 , m_recv_flags(MSG_NOSIGNAL)
@@ -38,6 +40,7 @@ csocket::csocket(int sock_fd)
 	set_sock_type();
 	memset(&m_addr, 0, sizeof(m_addr));
 }
+
 
 csocket::csocket(const csocket &sock)
 {
@@ -52,9 +55,7 @@ csocket::csocket(const csocket &sock)
 	memcpy(&m_addr, &sock.m_addr, sizeof(sockaddr_un));
 }
 
-csocket::~csocket() 
-{
-}
+csocket::~csocket() { }
 
 bool csocket::create(int sock_type)
 {
@@ -67,6 +68,7 @@ bool csocket::create(int sock_type)
 	}
 
 	m_sock_type = sock_type;
+
 	return true;
 }
 
@@ -80,18 +82,18 @@ bool csocket::bind (const char *sock_path)
 		return false;
 	}
 
-	if ((fsetxattr(m_sock_fd, "security.SMACK64IPOUT", "@", 2, 0)) < 0) {
-		if (errno != EOPNOTSUPP) {
+	if((fsetxattr(m_sock_fd, "security.SMACK64IPOUT", "@", 2, 0)) < 0) {
+		if(errno != EOPNOTSUPP) {
 			close();
-			ERR("security.SMACK64IPOUT error = [%d][%s]", errno, strerror(errno) );
+			ERR("security.SMACK64IPOUT error = [%d][%s]\n", errno, strerror(errno) );
 			return false;
 		}
 	}
 
-	if ((fsetxattr(m_sock_fd, "security.SMACK64IPIN", "*", 2, 0)) < 0) {
-		if (errno != EOPNOTSUPP)	{
+	if((fsetxattr(m_sock_fd, "security.SMACK64IPIN", "*", 2, 0)) < 0) {
+		if(errno != EOPNOTSUPP)	{
 			close();
-			ERR("security.SMACK64IPIN error  = [%d][%s]", errno, strerror(errno) );
+			ERR("security.SMACK64IPIN error  = [%d][%s]\n", errno, strerror(errno) );
 			return false;
 		}
 	}
@@ -102,6 +104,7 @@ bool csocket::bind (const char *sock_path)
 
 	m_addr.sun_family = AF_UNIX;
 	strcpy(m_addr.sun_path, sock_path);
+
 	length = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 
 	if (::bind(m_sock_fd, (struct sockaddr *)&m_addr, length) < 0) {
@@ -111,7 +114,6 @@ bool csocket::bind (const char *sock_path)
 	}
 
 	socket_mode = ( S_IRWXU | S_IRWXG | S_IRWXO );
-
 	if (chmod(sock_path, socket_mode) < 0) {
 		ERR("chmod failed for socket(%d), errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
 		close();
@@ -137,10 +139,16 @@ bool csocket::listen(const int max_connections)
 	return true;
 }
 
-bool csocket::accept(csocket &client_socket) const
+bool csocket::accept(csocket& client_socket) const
 {
 	int addr_length = sizeof(m_addr);
-	client_socket.m_sock_fd = ::accept(m_sock_fd, (sockaddr *)&m_addr, (socklen_t *)&addr_length);
+	int err = 0;
+
+	do {
+		client_socket.m_sock_fd = ::accept(m_sock_fd, (sockaddr *)&m_addr, (socklen_t *)&addr_length);
+		if (!client_socket.is_valid())
+			err = errno;
+	} while (err == EINTR);
 
 	if (!client_socket.is_valid()) {
 		ERR("Accept failed for socket(%d), errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
@@ -150,7 +158,7 @@ bool csocket::accept(csocket &client_socket) const
 	return true;
 }
 
-ssize_t csocket::send_for_seqpacket(void const *buffer, size_t size) const
+ssize_t csocket::send_for_seqpacket(void const* buffer, size_t size) const
 {
 	ssize_t err, len;
 
@@ -167,12 +175,12 @@ ssize_t csocket::send_for_seqpacket(void const *buffer, size_t size) const
 	return err == 0 ? len : -err;
 }
 
-ssize_t csocket::recv_for_seqpacket(void *buffer, size_t size) const
+ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
 {
-	ssize_t err, len;
+    ssize_t err, len;
 
 	do {
-		len = ::recv(m_sock_fd, buffer, size, m_recv_flags);
+        len = ::recv(m_sock_fd, buffer, size, m_recv_flags);
 
 		if (len > 0) {
 			err = 0;
@@ -183,7 +191,7 @@ ssize_t csocket::recv_for_seqpacket(void *buffer, size_t size) const
 		} else {
 			err = errno;
 		}
-	} while (err == EINTR);
+    } while (err == EINTR);
 
 	if ((err == EAGAIN) || (err == EWOULDBLOCK)) {
 		DBG("recv(%d, 0x%x, %d, 0x%x) = %d cause = %s(%d)",
@@ -196,10 +204,11 @@ ssize_t csocket::recv_for_seqpacket(void *buffer, size_t size) const
 			m_sock_fd, buffer, size, m_recv_flags, len, strerror(errno), errno);
 	}
 
-	return err == 0 ? len : -err;
+    return err == 0 ? len : -err;
 }
 
-ssize_t csocket::send_for_stream(void const *buffer, size_t size) const
+
+ssize_t csocket::send_for_stream(void const* buffer, size_t size) const
 {
 	ssize_t len;
 	ssize_t err = 0;
@@ -226,7 +235,7 @@ ssize_t csocket::send_for_stream(void const *buffer, size_t size) const
 	return err == 0 ? total_sent_size : -err;
 }
 
-ssize_t csocket::recv_for_stream(void *buffer, size_t size) const
+ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 {
 	ssize_t len;
 	ssize_t err = 0;
@@ -257,7 +266,8 @@ ssize_t csocket::recv_for_stream(void *buffer, size_t size) const
 	return err == 0 ? total_recv_size : -err;
 }
 
-ssize_t csocket::send(void const *buffer, size_t size) const
+
+ssize_t csocket::send(void const* buffer, size_t size) const
 {
 	if (m_sock_type == SOCK_STREAM)
 		return send_for_stream(buffer, size);
@@ -265,7 +275,7 @@ ssize_t csocket::send(void const *buffer, size_t size) const
 	return send_for_seqpacket(buffer, size);
 }
 
-ssize_t csocket::recv(void *buffer, size_t size) const
+ssize_t csocket::recv(void* buffer, size_t size) const
 {
 	if (m_sock_type == SOCK_STREAM)
 		return recv_for_stream(buffer, size);
@@ -275,7 +285,7 @@ ssize_t csocket::recv(void *buffer, size_t size) const
 
 bool csocket::connect(const char *sock_path)
 {
-	const int TIMEOUT = 3;
+	const int TIMEOUT = 5;
 	fd_set write_fds;
 	struct timeval tv;
 	int addr_len;
@@ -287,14 +297,15 @@ bool csocket::connect(const char *sock_path)
 	}
 
 	prev_blocking_mode = is_blocking_mode();
+
 	set_blocking_mode(false);
 
 	m_addr.sun_family = AF_UNIX;
 	strcpy(m_addr.sun_path, sock_path);
 	addr_len = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 
-	if (::connect(m_sock_fd, (sockaddr *) &m_addr, addr_len) < 0) {
-		ERR("connect error: %s sock_fd: %d for %s", strerror(errno), m_sock_fd, get_client_name());
+	if (::connect(m_sock_fd,(sockaddr *) &m_addr, addr_len) < 0) {
+		ERR("connect error: %s sock_fd: %d\n for %s", strerror(errno), m_sock_fd, get_client_name());
 		return false;
 	}
 
@@ -304,10 +315,11 @@ bool csocket::connect(const char *sock_path)
 	tv.tv_usec = 0;
 
 	int ret;
+
 	ret = select(m_sock_fd + 1, NULL, &write_fds, NULL, &tv);
 
 	if (ret == -1) {
-		ERR("select error: %s sock_fd: %d for %s", strerror(errno), m_sock_fd, get_client_name());
+		ERR("select error: %s sock_fd: %d\n for %s", strerror(errno), m_sock_fd, get_client_name());
 		close();
 		return false;
 	} else if (!ret) {
@@ -348,6 +360,7 @@ bool csocket::connect(const char *sock_path)
 bool csocket::set_blocking_mode(bool blocking)
 {
 	int flags;
+
 	flags = fcntl(m_sock_fd, F_GETFL);
 
 	if (flags == -1) {
@@ -356,6 +369,7 @@ bool csocket::set_blocking_mode(bool blocking)
 	}
 
 	flags = blocking ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
+
 	flags = fcntl(m_sock_fd, F_SETFL, flags);
 
 	if (flags == -1) {
@@ -366,15 +380,17 @@ bool csocket::set_blocking_mode(bool blocking)
 	return true;
 }
 
+
 bool csocket::set_sock_type(void)
 {
 	socklen_t opt_len;
 	int sock_type;
+
 	opt_len = sizeof(sock_type);
 
 	if (getsockopt(m_sock_fd, SOL_SOCKET, SO_TYPE, &sock_type, &opt_len) < 0) {
-		ERR("getsockopt(SOL_SOCKET, SO_TYPE) failed for %s, m_sock_fd: %d, errno : %d , errstr : %s", get_client_name(), m_sock_fd, errno, strerror(errno));
-		return false;
+	   ERR("getsockopt(SOL_SOCKET, SO_TYPE) failed for %s, m_sock_fd: %d, errno : %d , errstr : %s", get_client_name(), m_sock_fd, errno, strerror(errno));
+	   return false;
 	}
 
 	m_sock_type = sock_type;
@@ -384,12 +400,14 @@ bool csocket::set_sock_type(void)
 bool csocket::set_connection_mode(void)
 {
 	struct timeval tv;
-	const int TIMEOUT = 3;
+	const int TIMEOUT = 5;
+
 	set_blocking_mode(true);
+
 	tv.tv_sec = TIMEOUT;
 	tv.tv_usec = 0;
 
-	if (setsockopt(m_sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+	if(setsockopt(m_sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
 		ERR("Set SO_RCVTIMEO failed for %s, m_sock_fd : %d, errno : %d , errstr : %s",
 			get_client_name(), m_sock_fd, errno, strerror(errno));
 		close();
@@ -398,20 +416,25 @@ bool csocket::set_connection_mode(void)
 
 	m_send_flags = MSG_NOSIGNAL;
 	m_recv_flags = MSG_NOSIGNAL;
+
 	return true;
 }
 
 bool csocket::set_transfer_mode(void)
 {
 	set_blocking_mode(false);
+
+
 	m_send_flags = MSG_DONTWAIT | MSG_NOSIGNAL;
 	m_recv_flags = MSG_DONTWAIT | MSG_NOSIGNAL;
+
 	return true;
 }
 
 bool csocket::is_blocking_mode(void)
 {
 	int flags;
+
 	flags = fcntl(m_sock_fd, F_GETFL);
 
 	if (flags == -1) {
@@ -422,6 +445,17 @@ bool csocket::is_blocking_mode(void)
 	return !(flags & O_NONBLOCK);
 }
 
+
+bool csocket::is_valid(void) const
+{
+	return (m_sock_fd >= 0);
+}
+
+int csocket::get_socket_fd(void) const
+{
+	return m_sock_fd;
+}
+
 bool csocket::close(void)
 {
 	if (m_sock_fd >= 0) {
@@ -429,7 +463,6 @@ bool csocket::close(void)
 			ERR("Socket(%d) close failed, errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
 			return false;
 		}
-
 		m_sock_fd = -1;
 	}
 
