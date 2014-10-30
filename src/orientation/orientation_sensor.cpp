@@ -60,13 +60,11 @@ int roll_phase_compensation = 1;
 int yaw_phase_compensation = -1;
 int magnetic_alignment_factor = 1;
 
-void pre_process_data(sensor_data<float> &data_out, sensor_data_t &data_in, float *bias, int *sign, float scale)
+void pre_process_data(sensor_data<float> &data_out, const float *data_in, float *bias, int *sign, float scale)
 {
-	data_out.m_data.m_vec[0] = sign[0] * (data_in.values[0] - bias[0]) / scale;
-	data_out.m_data.m_vec[1] = sign[1] * (data_in.values[1] - bias[1]) / scale;
-	data_out.m_data.m_vec[2] = sign[2] * (data_in.values[2] - bias[2]) / scale;
-
-	data_out.m_time_stamp = data_in.timestamp;
+	data_out.m_data.m_vec[0] = sign[0] * (data_in[0] - bias[0]) / scale;
+	data_out.m_data.m_vec[1] = sign[1] * (data_in[1] - bias[1]) / scale;
+	data_out.m_data.m_vec[2] = sign[2] * (data_in[2] - bias[2]) / scale;
 }
 
 orientation_sensor::orientation_sensor()
@@ -105,7 +103,6 @@ bool orientation_sensor::init(void)
 	return true;
 }
 
-
 sensor_type_t orientation_sensor::get_type(void)
 {
 	return ORIENTATION_SENSOR;
@@ -116,10 +113,13 @@ bool orientation_sensor::on_start(void)
 	AUTOLOCK(m_mutex);
 
 	m_accel_sensor->add_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_accel_sensor->add_interval((int)this, (m_interval/MS_TO_US), true);
 	m_accel_sensor->start();
 	m_gyro_sensor->add_client(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_gyro_sensor->add_interval((int)this, (m_interval/MS_TO_US), true);
 	m_gyro_sensor->start();
 	m_magnetic_sensor->add_client(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_magnetic_sensor->add_interval((int)this, (m_interval/MS_TO_US), true);
 	m_magnetic_sensor->start();
 
 	activate();
@@ -128,11 +128,16 @@ bool orientation_sensor::on_start(void)
 
 bool orientation_sensor::on_stop(void)
 {
+	AUTOLOCK(m_mutex);
+
 	m_accel_sensor->delete_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_accel_sensor->delete_interval((int)this, true);
 	m_accel_sensor->stop();
 	m_gyro_sensor->delete_client(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_gyro_sensor->delete_interval((int)this, true);
 	m_gyro_sensor->stop();
 	m_magnetic_sensor->delete_client(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_magnetic_sensor->delete_interval((int)this, true);
 	m_magnetic_sensor->stop();
 
 	deactivate();
@@ -166,16 +171,9 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 	const float MIN_DELIVERY_DIFF_FACTOR = 0.75f;
 	unsigned long long diff_time;
 
-	sensor_data<float> accel;
-	sensor_data<float> gyro;
-	sensor_data<float> magnetic;
-
-	sensor_data_t accel_data;
-	sensor_data_t gyro_data;
-	sensor_data_t magnetic_data;
-
 	sensor_event_t orientation_event;
 	euler_angles<float> euler_orientation;
+	float raw_data[3];
 
 	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
 		diff_time = event.data.timestamp - m_timestamp;
@@ -183,7 +181,9 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
-		pre_process_data(accel, accel_data, bias_accel, sign_accel, scale_accel);
+		pre_process_data(m_accel, event.data.values, bias_accel, sign_accel, scale_accel);
+
+		m_accel.m_time_stamp = event.data.timestamp;
 
 		m_enable_orientation |= ACCELEROMETER_ENABLED;
 	}
@@ -193,7 +193,9 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
-		pre_process_data(gyro, gyro_data, bias_gyro, sign_gyro, scale_gyro);
+		pre_process_data(m_gyro, event.data.values, bias_gyro, sign_gyro, scale_gyro);
+
+		m_gyro.m_time_stamp = event.data.timestamp;
 
 		m_enable_orientation |= GYROSCOPE_ENABLED;
 	}
@@ -203,7 +205,9 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
-		pre_process_data(magnetic, magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
+		pre_process_data(m_magnetic, event.data.values, bias_magnetic, sign_magnetic, scale_magnetic);
+
+		m_magnetic.m_time_stamp = event.data.timestamp;
 
 		m_enable_orientation |= GEOMAGNETIC_ENABLED;
 	}
@@ -217,7 +221,7 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		m_orientation.m_yaw_phase_compensation = yaw_phase_compensation;
 		m_orientation.m_magnetic_alignment_factor = magnetic_alignment_factor;
 
-		euler_orientation = m_orientation.get_orientation(accel, gyro, magnetic);
+		euler_orientation = m_orientation.get_orientation(m_accel, m_gyro, m_magnetic);
 
 		orientation_event.data.data_accuracy = SENSOR_ACCURACY_GOOD;
 		orientation_event.data.data_unit_idx = SENSOR_UNIT_DEGREE;
@@ -253,9 +257,12 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 	m_gyro_sensor->get_sensor_data(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME, gyro_data);
 	m_magnetic_sensor->get_sensor_data(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME, magnetic_data);
 
-	pre_process_data(accel, accel_data, bias_accel, sign_accel, scale_accel);
-	pre_process_data(gyro, gyro_data, bias_gyro, sign_gyro, scale_gyro);
-	pre_process_data(magnetic, magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
+	pre_process_data(accel, accel_data.values, bias_accel, sign_accel, scale_accel);
+	pre_process_data(gyro, gyro_data.values, bias_gyro, sign_gyro, scale_gyro);
+	pre_process_data(magnetic, magnetic_data.values, bias_magnetic, sign_magnetic, scale_magnetic);
+	accel.m_time_stamp = accel_data.timestamp;
+	gyro.m_time_stamp = gyro_data.timestamp;
+	magnetic.m_time_stamp = magnetic_data.timestamp;
 
 	m_orientation.m_pitch_phase_compensation = pitch_phase_compensation;
 	m_orientation.m_roll_phase_compensation = roll_phase_compensation;
