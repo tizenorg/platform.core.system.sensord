@@ -47,6 +47,12 @@ private:
 	sensor_base *m_gyro_sensor;
 	sensor_base *m_magnetic_sensor;
 
+	sensor_data<float> m_accel;
+	sensor_data<float> m_gyro;
+	sensor_data<float> m_magnetic;
+
+	cmutex m_value_mutex;
+
 	orientation_filter<float> m_orientation;
 
 	unsigned int m_enable_orientation;
