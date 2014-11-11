@@ -9,7 +9,7 @@ Source1:    sensord.service
 Source2:    sensord.socket
 
 %define accel_state ON
-%define gyro_state OFF
+%define gyro_state ON
 %define proxi_state OFF
 %define light_state OFF
 %define geo_state OFF
