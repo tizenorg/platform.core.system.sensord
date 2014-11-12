@@ -21,8 +21,13 @@
 #include <sensor_plugin_loader.h>
 #include <thread>
 #include <string>
+#include <set>
 
+using namespace std;
 using std::string;
+using std::set;
+
+set<unsigned int> priority_list;
 
 command_worker::cmd_handler_t command_worker::m_cmd_handlers[];
 
@@ -365,12 +370,17 @@ bool command_worker::cmd_register_event(void *payload)
 			cmd->event_type, m_client_id);
 		goto out;
 	}
+	if (cmd->event_type == GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME || cmd->event_type ==  LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME || cmd->event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
+			priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+			priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+			priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
+	}
 
 	m_module->add_client(cmd->event_type);
 	ret_val = OP_SUCCESS;
 	DBG("Registering Event [0x%x] is done for client [%d]", cmd->event_type, m_client_id);
 
-out:
+ out:
 
 	if (!send_cmd_done(ret_val))
 		ERR("Failed to send cmd_done to a client");
