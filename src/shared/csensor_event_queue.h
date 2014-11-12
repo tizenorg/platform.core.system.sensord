@@ -41,13 +41,13 @@ using std::lock_guard;
 using std::unique_lock;
 using std::condition_variable;
 
-static set<unsigned int> priority_list;
+extern set<unsigned int> priority_list;
 
 class csensor_event_queue
 {
-private:
+private:	
 	static const unsigned int QUEUE_FULL_SIZE = 1000;
-
+	
 	class compare {
 	public:
 		bool operator() (void* &v1,void *&v2) {
@@ -55,13 +55,7 @@ private:
 			sensor_event_t *e2 = (sensor_event_t *)v2;
 			bool prioritize_e1 = true;
 			bool prioritize_e2 = true;
-			/*Since priority_list is a set it will insert an event only if it is not present in the set*/
-			if (e2->event_type == GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME || e2->event_type == LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME || e2->event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
-				priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-				priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
-				priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
-			}
-
+			
 			if (priority_list.empty())
 				return (e2->data.timestamp < e1->data.timestamp);
 
