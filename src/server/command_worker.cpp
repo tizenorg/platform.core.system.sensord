@@ -20,15 +20,26 @@
 #include <command_worker.h>
 #include <sensor_plugin_loader.h>
 #include <sensor_info.h>
+#include <sensor_accel.h>
+#include <sensor_gyro.h>
+#include <sensor_geomag.h>
+#include <sensor_orientation.h>
+#include <sensor_linear_accel.h>
+#include <sensor_gravity.h>
 #include <thread>
 #include <string>
 #include <utility>
 #include <dlfcn.h>
+#include <set>
 
+using namespace std;
 using std::string;
+using std::set;
 using std::make_pair;
 
 #define SECURITY_LIB "/usr/lib/libsecurity-server-client.so.1"
+
+set<unsigned int> priority_list;
 
 void *command_worker::m_security_handle  = NULL;
 command_worker::security_server_check_privilege_by_sockfd_t command_worker::security_server_check_privilege_by_sockfd = NULL;
@@ -551,6 +562,11 @@ bool command_worker::cmd_register_event(void *payload)
 			cmd->event_type, m_client_id);
 		ret_value = OP_ERROR;
 		goto out;
+	}
+		if (cmd->event_type == GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME || cmd->event_type ==  LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME || cmd->event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
+			priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+			priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+			priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
 	}
 
 	m_module->add_client(cmd->event_type);
