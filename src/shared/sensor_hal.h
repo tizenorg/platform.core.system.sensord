@@ -47,7 +47,6 @@ typedef struct {
 	string buffer_length_node_path;
 	string trigger_node_path;
 	string available_freq_node_path;
-	string available_scale_node_path;
 	string base_dir;
 } node_path_info;
 

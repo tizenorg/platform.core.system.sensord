@@ -47,7 +47,8 @@ using config::CConfig;
 #define INPUT_NAME	"accelerometer_sensor"
 #define ACCEL_SENSORHUB_POLL_NODE_NAME "accel_poll_delay"
 
-#define SCAN_EL_DIR			"scan_elements/"
+#define SCAN_EL_DIR				"scan_elements/"
+#define SCALE_AVAILABLE_NODE	"in_accel_scale_available"
 #define ACCEL_RINGBUF_LEN	32
 #define SEC_MSEC			1000
 #define MSEC_TO_FREQ(VAL)	((SEC_MSEC) / (VAL))
@@ -94,7 +95,7 @@ accel_sensor_hal::accel_sensor_hal()
 	m_buffer_enable_node_path = info.buffer_enable_node_path;
 	m_buffer_length_node_path = info.buffer_length_node_path;
 	m_available_freq_node_path = info.available_freq_node_path;
-	m_available_scale_node_path = info.available_scale_node_path;
+	m_available_scale_node_path = m_accel_dir + string(SCALE_AVAILABLE_NODE);
 
 	if (!config.get(SENSOR_TYPE_ACCEL, m_model_id, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");

@@ -151,7 +151,6 @@ bool sensor_hal::get_iio_node_info(const string &key, const string& enable_node_
 	info.buffer_length_node_path = base_dir + string("buffer/length");
 	info.trigger_node_path = base_dir + string("trigger/current_trigger");
 	info.available_freq_node_path = base_dir + string("sampling_frequency_available");
-	info.available_scale_node_path = base_dir + string("in_accel_scale_available");
 
 	return true;
 }
