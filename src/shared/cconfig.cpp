@@ -21,10 +21,12 @@
 #include "common.h"
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
-#include <system/system_info.h>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 
 using namespace config;
+using std::ifstream;
 
 #define ROOT_ELEMENT	"SENSOR"
 #define TEXT_ELEMENT 	"text"
@@ -35,29 +37,47 @@ CConfig::CConfig()
 {
 }
 
-bool CConfig::load_config(const string &config_path)
+CConfig& CConfig::get_instance(void)
+{
+	static bool load_done = false;
+	static CConfig inst;
+
+	if (!load_done) {
+		inst.load_config();
+		inst.get_device_id();
+		if (!inst.m_device_id.empty())
+			INFO("Device ID = %s", inst.m_device_id.c_str());
+		else
+			ERR("Failed to get Device ID");
+		load_done = true;
+	}
+
+	return inst;
+}
+
+bool CConfig::load_config(const string& config_path)
 {
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 
-	DBG("CConfig::load_config(\"%s\") is called!", config_path.c_str());
+	DBG("CConfig::load_config(\"%s\") is called!\n",config_path.c_str());
+
 	doc = xmlParseFile(config_path.c_str());
 
 	if (doc == NULL) {
-		ERR("There is no %s", config_path.c_str());
+		ERR("There is no %s\n",config_path.c_str());
 		return false;
 	}
 
 	cur = xmlDocGetRootElement(doc);
-
-	if (cur == NULL) {
-		ERR("There is no root element in %s", config_path.c_str());
+	if(cur == NULL) {
+		ERR("There is no root element in %s\n",config_path.c_str());
 		xmlFreeDoc(doc);
 		return false;
 	}
 
-	if (xmlStrcmp(cur->name, (const xmlChar *)ROOT_ELEMENT)) {
-		ERR("Wrong type document: there is no [%s] root element in %s", ROOT_ELEMENT, config_path.c_str());
+	if(xmlStrcmp(cur->name, (const xmlChar *)ROOT_ELEMENT)) {
+		ERR("Wrong type document: there is no [%s] root element in %s\n",ROOT_ELEMENT,config_path.c_str());
 		xmlFreeDoc(doc);
 		return false;
 	}
@@ -66,75 +86,75 @@ bool CConfig::load_config(const string &config_path)
 	xmlNodePtr model_node_ptr;
 	xmlNodePtr element_node_ptr;
 	xmlAttrPtr attr_ptr;
-	char *prop = NULL;
+	char* prop = NULL;
+
 	model_list_node_ptr = cur->xmlChildrenNode;
 
 	while (model_list_node_ptr != NULL) {
-		/* skip garbage element, [text] */
-		if (!xmlStrcmp(model_list_node_ptr->name, (const xmlChar *)TEXT_ELEMENT)) {
+		//skip garbage element, [text]
+		if (!xmlStrcmp(model_list_node_ptr->name,(const xmlChar *)TEXT_ELEMENT)) {
 			model_list_node_ptr = model_list_node_ptr->next;
 			continue;
 		}
 
-		/* insert Model_list to config map */
-		m_sensor_config[(const char *)model_list_node_ptr->name];
-		DBG("<%s>", (const char *)model_list_node_ptr->name);
+		//insert Model_list to config map
+		m_sensor_config[(const char*)model_list_node_ptr->name];
+		DBG("<%s>\n",(const char*)model_list_node_ptr->name);
 
 		model_node_ptr = model_list_node_ptr->xmlChildrenNode;
-
-		while (model_node_ptr != NULL) {
-			/* skip garbage element, [text] */
-			if (!xmlStrcmp(model_node_ptr->name, (const xmlChar *)TEXT_ELEMENT)) {
+		while (model_node_ptr != NULL){
+			//skip garbage element, [text]
+			if (!xmlStrcmp(model_node_ptr->name,(const xmlChar *)TEXT_ELEMENT)) {
 				model_node_ptr = model_node_ptr->next;
 				continue;
 			}
 
+
 			string model_id;
-			prop = (char *)xmlGetProp(model_node_ptr, (const xmlChar *)MODEL_ID_ATTR);
+			prop = (char*)xmlGetProp(model_node_ptr,(const xmlChar*)MODEL_ID_ATTR);
 			model_id = prop;
 			free(prop);
 
-			/* insert Model to Model_list */
-			m_sensor_config[(const char *)model_list_node_ptr->name][model_id];
-			DBG("<%s id=\"%s\">", (const char *)model_list_node_ptr->name, model_id.c_str());
+			//insert Model to Model_list
+			m_sensor_config[(const char*)model_list_node_ptr->name][model_id];
+			DBG("<%s id=\"%s\">\n",(const char*)model_list_node_ptr->name,model_id.c_str());
 
 			element_node_ptr = model_node_ptr->xmlChildrenNode;
-
 			while (element_node_ptr != NULL) {
-				/* skip garbage element, [text] */
-				if (!xmlStrcmp(element_node_ptr->name, (const xmlChar *)TEXT_ELEMENT)) {
+				//skip garbage element, [text]
+				if (!xmlStrcmp(element_node_ptr->name,(const xmlChar *)TEXT_ELEMENT)) {
 					element_node_ptr = element_node_ptr->next;
 					continue;
 				}
 
-				/* insert Element to Model */
-				m_sensor_config[(const char *)model_list_node_ptr->name][model_id][(const char *)element_node_ptr->name];
-				DBG("<%s id=\"%s\"><%s>", (const char *)model_list_node_ptr->name, model_id.c_str(), (const char *)element_node_ptr->name);
+				//insert Element to Model
+				m_sensor_config[(const char*)model_list_node_ptr->name][model_id][(const char*)element_node_ptr->name];
+				DBG("<%s id=\"%s\"><%s>\n",(const char*)model_list_node_ptr->name,model_id.c_str(),(const char*)element_node_ptr->name);
 
 				attr_ptr = element_node_ptr->properties;
-
 				while (attr_ptr != NULL) {
-					string key, value;
-					key = (char *)attr_ptr->name;
-					prop = (char *)xmlGetProp(element_node_ptr, attr_ptr->name);
+
+					string key,value;
+					key = (char*)attr_ptr->name;
+					prop = (char*)xmlGetProp(element_node_ptr,attr_ptr->name);
 					value = prop;
 					free(prop);
 
-					/* insert attribute to Element */
-					m_sensor_config[(const char *)model_list_node_ptr->name][model_id][(const char *)element_node_ptr->name][key] = value;
-					DBG("<%s id=\"%s\"><%s \"%s\"=\"%s\">", (const char *)model_list_node_ptr->name, model_id.c_str(), (const char *)element_node_ptr->name, key.c_str(), value.c_str());
-
+					//insert attribute to Element
+					m_sensor_config[(const char*)model_list_node_ptr->name][model_id][(const char*)element_node_ptr->name][key]=value;
+					DBG("<%s id=\"%s\"><%s \"%s\"=\"%s\">\n",(const char*)model_list_node_ptr->name,model_id.c_str(),(const char*)element_node_ptr->name,key.c_str(),value.c_str());
 					attr_ptr = attr_ptr->next;
 				}
+
 
 				element_node_ptr = element_node_ptr->next;
 			}
 
-			DBG("");
+			DBG("\n");
 			model_node_ptr = model_node_ptr->next;
 		}
 
-		DBG("");
+		DBG("\n");
 		model_list_node_ptr = model_list_node_ptr->next;
 	}
 
@@ -142,49 +162,47 @@ bool CConfig::load_config(const string &config_path)
 	return true;
 }
 
-bool CConfig::get(const string &sensor_type, const string &model_id, const string &element, const string &attr, string &value)
-{
-	Sensor_config::iterator it_model_list;
-	it_model_list = m_sensor_config.find(sensor_type);
 
-	if (it_model_list == m_sensor_config.end()) {
-		ERR("There is no <%s> element", sensor_type.c_str());
+bool CConfig::get(const string& sensor_type,const string& model_id, const string& element, const string& attr, string& value)
+{
+	auto it_model_list = m_sensor_config.find(sensor_type);
+
+	if (it_model_list == m_sensor_config.end())	{
+		ERR("There is no <%s> element\n",sensor_type.c_str());
 		return false;
 	}
 
-	Model_list::iterator it_model;
-	it_model = it_model_list->second.find(model_id);
+	auto it_model = it_model_list->second.find(model_id);
 
 	if (it_model == it_model_list->second.end()) {
-		ERR("There is no <%s id=\"%s\"> element", sensor_type.c_str(), model_id.c_str());
+		ERR("There is no <%s id=\"%s\"> element\n",sensor_type.c_str(),model_id.c_str());
 		return false;
 	}
 
-	Model::iterator it_element;
-	it_element = it_model->second.find(element);
+	auto it_element = it_model->second.find(element);
 
 	if (it_element == it_model->second.end()) {
-		ERR("There is no <%s id=\"%s\"><%s> element", sensor_type.c_str(), model_id.c_str(), element.c_str());
+		DBG("There is no <%s id=\"%s\"><%s> element\n",sensor_type.c_str(),model_id.c_str(),element.c_str());
 		return false;
 	}
 
-	Element::iterator it_attr;
-	it_attr = it_element->second.find(attr);
+	auto it_attr = it_element->second.find(attr);
 
 	if (it_attr == it_element->second.end()) {
-		DBG("There is no <%s id=\"%s\"><%s \"%s\">", sensor_type.c_str(), model_id.c_str(), element.c_str(), attr.c_str());
+		DBG("There is no <%s id=\"%s\"><%s \"%s\">\n",sensor_type.c_str(),model_id.c_str(),element.c_str(),attr.c_str());
 		return false;
 	}
 
 	value = it_attr->second;
+
 	return true;
 }
 
-bool CConfig::get(const string &sensor_type, const string &model_id, const string &element, const string &attr, double &value)
+bool CConfig::get(const string& sensor_type, const string& model_id, const string& element, const string& attr, double& value)
 {
 	string str_value;
 
-	if (get(sensor_type, model_id, element, attr, str_value) == false)
+	if (get(sensor_type,model_id,element,attr,str_value) == false)
 		return false;
 
 	istringstream convert(str_value);
@@ -195,11 +213,11 @@ bool CConfig::get(const string &sensor_type, const string &model_id, const strin
 	return true;
 }
 
-bool CConfig::get(const string &sensor_type, const string &model_id, const string &element, const string &attr, long &value)
+bool CConfig::get(const string& sensor_type, const string& model_id, const string& element, const string& attr, long& value)
 {
 	string str_value;
 
-	if (get(sensor_type, model_id, element, attr, str_value) == false)
+	if (get(sensor_type,model_id,element,attr,str_value) == false)
 		return false;
 
 	istringstream convert(str_value);
@@ -210,7 +228,7 @@ bool CConfig::get(const string &sensor_type, const string &model_id, const strin
 	return true;
 }
 
-bool CConfig::get(const string &sensor_type, const string &model_id, const string &element, string &value)
+bool CConfig::get(const string& sensor_type, const string& model_id, const string& element, string& value)
 {
 	if (get(sensor_type, model_id, element, m_device_id, value))
 		return true;
@@ -221,7 +239,7 @@ bool CConfig::get(const string &sensor_type, const string &model_id, const strin
 	return false;
 }
 
-bool CConfig::get(const string &sensor_type, const string &model_id, const string &element, double &value)
+bool CConfig::get(const string& sensor_type, const string& model_id, const string& element, double& value)
 {
 	if (get(sensor_type, model_id, element, m_device_id, value))
 		return true;
@@ -232,7 +250,7 @@ bool CConfig::get(const string &sensor_type, const string &model_id, const strin
 	return false;
 }
 
-bool CConfig::get(const string &sensor_type, const string &model_id, const string &element, long &value)
+bool CConfig::get(const string& sensor_type, const string& model_id, const string& element, long& value)
 {
 	if (get(sensor_type, model_id, element, m_device_id, value))
 		return true;
@@ -243,16 +261,14 @@ bool CConfig::get(const string &sensor_type, const string &model_id, const strin
 	return false;
 }
 
-bool CConfig::is_supported(const string &sensor_type, const string &model_id)
+bool CConfig::is_supported(const string& sensor_type,const string& model_id)
 {
-	Sensor_config::iterator it_model_list;
-	it_model_list = m_sensor_config.find(sensor_type);
+	auto it_model_list = m_sensor_config.find(sensor_type);
 
 	if (it_model_list == m_sensor_config.end())
 		return false;
 
-	Model_list::iterator it_model;
-	it_model = it_model_list->second.find(model_id);
+	auto it_model = it_model_list->second.find(model_id);
 
 	if (it_model == it_model_list->second.end())
 		return false;
@@ -262,14 +278,36 @@ bool CConfig::is_supported(const string &sensor_type, const string &model_id)
 
 bool CConfig::get_device_id(void)
 {
-	int ret;
-	char *device = NULL;
+	const string INFO_INI_PATH = "/etc/info.ini";
+	const string START_DELIMETER = "Model=";
+	const string END_DELIMETER = ";";
+	string line;
+	ifstream in_file;
+	std::size_t start_pos, end_pos;
+	bool ret = false;
 
-	ret = system_info_get_value_string(SYSTEM_INFO_KEY_MODEL, &device);
+	in_file.open(INFO_INI_PATH);
 
-	if (device)
-		m_device_id = device;
+	if (!in_file.is_open())
+		return false;
 
-	free(device);
-	return (ret == SYSTEM_INFO_ERROR_NONE);
+	while (!in_file.eof()) {
+		getline(in_file, line);
+		start_pos = line.find(START_DELIMETER);
+
+		if (start_pos != std::string::npos) {
+			start_pos = start_pos + START_DELIMETER.size();
+			end_pos = line.find(END_DELIMETER, start_pos);
+
+			if (end_pos != std::string::npos) {
+				m_device_id = line.substr(start_pos, end_pos - start_pos);
+				ret = true;
+				break;
+			}
+		}
+	}
+
+	in_file.close();
+
+	return ret;
 }

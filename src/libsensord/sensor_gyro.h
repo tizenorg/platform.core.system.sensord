@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SENSOR_GYRO_H_
-#define _SENSOR_GYRO_H_
+#ifndef __SENSOR_GYRO_H__
+#define __SENSOR_GYRO_H__
 
 //! Pre-defined events for the gyroscope sensor
 //! Sensor Plugin developer can add more event to their own headers
@@ -26,7 +26,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif /*__cplusplus*/
+#endif
 
 /**
  * @defgroup SENSOR_GYRO Gyro Sensor
@@ -44,18 +44,13 @@ enum gyro_event_type {
 	GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME	= (GYROSCOPE_SENSOR << 16) | 0x0001,
 };
 
-enum gyro_property_id {
-	GYROSCOPE_PROPERTY_UNKNOWN = 0,
-	GYROSCOPE_PROPERTY_SET_CALIBRATION,
-	GYROSCOPE_PROPERTY_CHECK_CALIBRATION,
-};
-
 /**
  * @}
  */
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
-#endif /*_SENSOR_GYRO_H_*/
+#endif
+//! End of a file

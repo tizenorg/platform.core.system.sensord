@@ -23,13 +23,11 @@
 #include <sf_common.h>
 #include <algorithm>
 #include <vector>
-
 using std::vector;
 
 typedef vector<unsigned int> reg_event_vector;
 
-class csensor_usage
-{
+class csensor_usage {
 public:
 	unsigned int m_interval;
 	int m_option;
@@ -39,9 +37,9 @@ public:
 	csensor_usage();
 	~csensor_usage();
 
-	bool register_event(const unsigned int event_type);
-	bool unregister_event(const unsigned int event_type);
-	bool is_event_registered(const unsigned int event_type);
+	bool register_event(unsigned int event_type);
+	bool unregister_event(unsigned int event_type);
+	bool is_event_registered(unsigned int event_type);
 };
 
 #endif /* CSENSOR_USAGE_H_ */

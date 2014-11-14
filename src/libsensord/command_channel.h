@@ -20,7 +20,7 @@
 #ifndef _COMMAND_CHANNEL_H_
 #define _COMMAND_CHANNEL_H_
 #include <sf_common.h>
-#include <sensor.h>
+#include <sensor_internal.h>
 #include <cpacket.h>
 #include <csocket.h>
 #include <vector>
@@ -38,7 +38,8 @@ public:
 	void set_client_id(int client_id);
 
 	bool cmd_get_id(int &client_id);
-	bool cmd_hello(sensor_type_t sensor);
+	bool cmd_get_sensor_list(void);
+	bool cmd_hello(sensor_id_t sensor);
 	bool cmd_byebye(void);
 	bool cmd_start(void);
 	bool cmd_stop(void);
@@ -47,17 +48,15 @@ public:
 	bool cmd_register_events(event_type_vector &event_vec);
 	bool cmd_unregister_event(unsigned int event_type);
 	bool cmd_unregister_events(event_type_vector &event_vec);
-	bool cmd_check_event(unsigned int event_type);
 	bool cmd_set_interval(unsigned int interval);
 	bool cmd_unset_interval(void);
-	bool cmd_get_properties(unsigned int type, void *properties);
 	bool cmd_set_command(unsigned int cmd, long value);
-	bool cmd_get_data(unsigned int type, sensor_data_t *values);
-	bool cmd_send_sensorhub_data(int data_len, const char *buffer);
+	bool cmd_get_data(unsigned int type, sensor_data_t* values);
+	bool cmd_send_sensorhub_data(const char* buffer, int data_len);
 private:
 	csocket m_command_socket;
 	int m_client_id;
-	sensor_type_t m_sensor_type;
+	sensor_id_t m_sensor_id;
 	bool command_handler(cpacket *packet, void **return_payload);
 };
 

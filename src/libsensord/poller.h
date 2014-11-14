@@ -31,13 +31,12 @@
 
 using std::queue;
 
-class poller
-{
+class poller {
 public:
 	poller(int fd);
 	~poller();
 
-	bool poll(void);
+	bool poll(int &event);
 private:
 	int m_epfd;
 	queue<int> m_event_queue;

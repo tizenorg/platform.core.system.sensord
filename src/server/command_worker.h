@@ -24,24 +24,37 @@
 #include <cclient_info_manager.h>
 #include <csensor_event_dispatcher.h>
 #include <sensor_base.h>
+#include <map>
 
-class command_worker
-{
+using std::multimap;
+
+typedef multimap<int, raw_data_t> sensor_raw_data_map;
+
+class command_worker {
 private:
 	typedef bool (command_worker::*cmd_handler_t)(void *payload);
+	typedef int (*security_server_check_privilege_by_sockfd_t)(int sockfd,
+				  const char *object,
+				  const char *access_rights);
 
 	static const int OP_ERROR = -1;
 	static const int OP_SUCCESS = 0;
 
 	int m_client_id;
+	int m_permission;
 	csocket m_socket;
 	worker_thread m_worker;
 	sensor_base *m_module;
-	sensor_type_t m_sensor_type;
-
+	static void *m_security_handle;
+	static security_server_check_privilege_by_sockfd_t security_server_check_privilege_by_sockfd;
 	static cmd_handler_t m_cmd_handlers[CMD_CNT];
+	static cpacket m_sensor_list;
+	static sensor_raw_data_map m_sensor_raw_data_map;
 
+	static void init_security_lib(void);
 	static void init_cmd_handlers(void);
+	static void make_sensor_raw_data_map(void);
+	static void get_sensor_list(int permissions, cpacket &sensor_list);
 
 	static bool working(void *ctx);
 	static bool stopped(void *ctx);
@@ -50,10 +63,11 @@ private:
 
 	bool send_cmd_done(long value);
 	bool send_cmd_get_id_done(int client_id);
-	bool send_cmd_properties_done(int state, sensor_properties_t *properties);
 	bool send_cmd_get_data_done(int state, sensor_data_t *data);
+	bool send_cmd_get_sensor_list_done(void);
 
 	bool cmd_get_id(void *payload);
+	bool cmd_get_sensor_list(void *payload);
 	bool cmd_hello(void *payload);
 	bool cmd_byebye(void *payload);
 	bool cmd_get_value(void *payload);
@@ -61,23 +75,26 @@ private:
 	bool cmd_stop(void *payload);
 	bool cmd_register_event(void *payload);
 	bool cmd_unregister_event(void *payload);
-	bool cmd_check_event(void *payload);
 	bool cmd_set_interval(void *payload);
 	bool cmd_unset_interval(void *payload);
 	bool cmd_set_option(void *payload);
 	bool cmd_set_command(void *payload);
-	bool cmd_get_properties(void *payload);
 	bool cmd_get_data(void *payload);
 	bool cmd_send_sensorhub_data(void *payload);
 
-	const char *get_info(void);
+	void get_info(string &info);
 
-	static cclient_info_manager &get_client_info_manager(void);
-	static csensor_event_dispatcher &get_event_dispathcher(void);
+	int get_permission(void);
+	bool is_permission_allowed(void);
+
+	static cclient_info_manager& get_client_info_manager(void);
+	static csensor_event_dispatcher& get_event_dispathcher(void);
 public:
-	command_worker(const csocket &socket);
+	command_worker(const csocket& socket);
 	virtual ~command_worker();
 
 	bool start(void);
+
 };
+
 #endif /* COMMAND_WORKER_H_ */

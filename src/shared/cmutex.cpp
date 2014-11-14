@@ -36,10 +36,14 @@ cmutex::~cmutex()
 
 void cmutex::lock()
 {
+#ifdef _LOCK_DEBUG
 	cbase_lock::lock(LOCK_TYPE_MUTEX, "mutex", __MODULE__, __func__, __LINE__);
+#else
+	cbase_lock::lock(LOCK_TYPE_MUTEX);
+#endif
 }
 
-void cmutex::lock(const char *expr, const char *module, const char *func, int line)
+void cmutex::lock(const char* expr, const char *module, const char *func, int line)
 {
 	cbase_lock::lock(LOCK_TYPE_MUTEX, expr, module, func, line);
 }
@@ -52,6 +56,7 @@ int cmutex::lock_impl(void)
 int cmutex::try_lock_impl(void)
 {
 	return pthread_mutex_trylock(&m_mutex);
+
 }
 
 int cmutex::unlock_impl()

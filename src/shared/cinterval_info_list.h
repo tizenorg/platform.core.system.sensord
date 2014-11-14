@@ -17,26 +17,19 @@
  *
  */
 
-#ifndef _CINTERVAL_INFO_LIST_H_
-#define _CINTERVAL_INFO_LIST_H_
+#if !defined(_CINTERVAL_INFO_LIST_CLASS_H_)
+#define _CINTERVAL_INFO_LIST_CLASS_H_
 
 #include <list>
-
 using std::list;
 
 class cinterval_info
 {
 public:
-	cinterval_info(int client_id, bool is_processor, unsigned int interval) {
-		this->client_id = client_id;
-		this->is_processor = is_processor;
-		this->interval = interval;
-	}
-
+	cinterval_info(int client_id, bool is_processor, unsigned int interval);
 	int client_id;
 	bool is_processor;
 	unsigned int interval;
-
 };
 
 typedef list<cinterval_info>::iterator cinterval_info_iterator;
@@ -55,4 +48,4 @@ public:
 	unsigned int get_interval(int client_id, bool is_processor = false);
 	unsigned int get_min(void);
 };
-#endif /*_CINTERVAL_INFO_LIST_H_*/
+#endif

@@ -28,6 +28,7 @@ using std::thread;
 server::server()
 : m_mainloop(NULL)
 {
+
 }
 
 server::~server()
@@ -56,6 +57,7 @@ int server::get_systemd_socket(const char *name)
 void server::accept_client(void)
 {
 	command_worker *cmd_worker;
+
 	INFO("Client acceptor is started");
 
 	while (true) {
@@ -67,9 +69,15 @@ void server::accept_client(void)
 		}
 
 		DBG("New client (socket_fd : %d) connected", client_command_socket.get_socket_fd());
-		cmd_worker = new command_worker(client_command_socket);
 
-		if (!cmd_worker->start())
+		cmd_worker = new(std::nothrow) command_worker(client_command_socket);
+
+		if (!cmd_worker) {
+			ERR("Failed to allocate memory");
+			continue;
+		}
+
+		if(!cmd_worker->start())
 			delete cmd_worker;
 	}
 }
@@ -88,19 +96,18 @@ void server::run(void)
 		m_client_accep_socket = csocket(sock_fd);
 	} else {
 		ERR("Failed to get systemd socket, create it by myself!");
-
 		if (!m_client_accep_socket.create(SOCK_STREAM)) {
 			ERR("Failed to create command channel");
 			return;
 		}
 
-		if (!m_client_accep_socket.bind(COMMAND_CHANNEL_PATH)) {
+		if(!m_client_accep_socket.bind(COMMAND_CHANNEL_PATH)) {
 			ERR("Failed to bind command channel");
 			m_client_accep_socket.close();
 			return;
 		}
 
-		if (!m_client_accep_socket.listen(MAX_PENDING_CONNECTION)) {
+		if(!m_client_accep_socket.listen(MAX_PENDING_CONNECTION)) {
 			ERR("Failed to listen command channel");
 			return;
 		}
@@ -115,13 +122,20 @@ void server::run(void)
 
 	g_main_loop_run(m_mainloop);
 	g_main_loop_unref(m_mainloop);
+
 	return;
 }
 
 void server::stop(void)
 {
-	if (m_mainloop)
+	if(m_mainloop)
 		g_main_loop_quit(m_mainloop);
 
 	m_client_accep_socket.close();
+}
+
+server& server::get_instance()
+{
+	static server inst;
+	return inst;
 }

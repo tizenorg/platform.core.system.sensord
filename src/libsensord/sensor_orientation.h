@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SENSOR_ORIENTATION_H_
-#define _SENSOR_ORIENTATION_H_
+#ifndef __SENSOR_ORIENTATION_H__
+#define __SENSOR_ORIENTATION_H__
 
 //! Pre-defined events for the orientation sensor
 //! Sensor Plugin developer can add more event to their own headers
@@ -26,7 +26,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif /*__cplusplus*/
+#endif
 
 /**
  * @defgroup SENSOR_ORIENTATION Orientation Sensor
@@ -36,8 +36,13 @@ extern "C"
  * @{
  */
 
+enum orientation_data_id {
+	ORIENTATION_BASE_DATA_SET 				= (ORIENTATION_SENSOR << 16) | 0x0001,
+};
+
 enum orientation_event_type {
 	ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME		= (ORIENTATION_SENSOR << 16) | 0x0001,
+	ORIENTATION_EVENT_CALIBRATION_NEEDED			= (ORIENTATION_SENSOR << 16) | 0x0002,
 };
 
 /**
@@ -46,6 +51,7 @@ enum orientation_event_type {
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
-#endif /*_SENSOR_ORIENTATION_H_*/
+#endif
+//! End of a file

@@ -17,20 +17,20 @@
  *
  */
 
-#ifndef _CCONFIG_H_
-#define _CCONFIG_H_
+#if !defined(_CCONFIG_CLASS_H_)
+#define _CCONFIG_CLASS_H_
 
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <common.h>
 
-using std::map;
+using std::unordered_map;
 using std::string;
 using std::istringstream;
 
 #define CONFIG_FILE_PATH "/usr/etc/sensors.xml"
 
-typedef map<string, string> Element;
+typedef unordered_map<string,string> Element;
 /*
 * an Element  is a group of attributes
 * <Element value1 = "10.0", value2 =  "20.0"/>
@@ -39,7 +39,7 @@ typedef map<string, string> Element;
 *
 */
 
-typedef map<string, Element> Model;
+typedef unordered_map<string,Element> Model;
 /*
 * a Model is a group of elements to consist of  specific vendor's one sensor configuration
 * <NAME value = "LSM330DLC" />
@@ -51,7 +51,7 @@ typedef map<string, Element> Model;
 *
 */
 
-typedef map<string, Model> Model_list;
+typedef unordered_map<string,Model> Model_list;
 /*
 * a Model_list is  a group of Model
 * <MODEL id = "lsm330dlc_accel">
@@ -63,7 +63,7 @@ typedef map<string, Model> Model_list;
 *
 */
 
-typedef map<string, Model_list> Sensor_config;
+typedef unordered_map<string,Model_list> Sensor_config;
 /*
 * a SensorConfig represents sensors.xml
 * <ACCEL/>
@@ -80,40 +80,24 @@ namespace config
 	{
 	private:
 		CConfig();
-		CConfig(CConfig const &) {};
-		CConfig &operator=(CConfig const &);
-		bool load_config(const string &config_path = CONFIG_FILE_PATH);
+		CConfig(CConfig const&) {};
+		CConfig& operator=(CConfig const&);
+		bool load_config(const string& config_path = CONFIG_FILE_PATH);
 		Sensor_config m_sensor_config;
 		string m_device_id;
 	public:
-		static CConfig &get_instance(void) {
-			static bool load_done = false;
-			static CConfig inst;
+		static CConfig& get_instance(void);
 
-			if (!load_done) {
-				inst.load_config();
-				inst.get_device_id();
+		bool get(const string& sensor_type, const string& model_id, const string& element, const string& attr, string& value);
+		bool get(const string& sensor_type, const string& model_id, const string& element, const string& attr, double& value);
+		bool get(const string& sensor_type, const string& model_id, const string& element, const string& attr, long& value);
 
-				if (!inst.m_device_id.empty())
-					INFO("Device ID = %s", inst.m_device_id.c_str());
-				else
-					ERR("Failed to get Device ID");
-
-				load_done = true;
-			}
-
-			return inst;
-		}
-		bool get(const string &sensor_type, const string &model_id, const string &element, const string &attr, string &value);
-		bool get(const string &sensor_type, const string &model_id, const string &element, const string &attr, double &value);
-		bool get(const string &sensor_type, const string &model_id, const string &element, const string &attr, long &value);
-
-		bool get(const string &sensor_type, const string &model_id, const string &element, string &value);
-		bool get(const string &sensor_type, const string &model_id, const string &element, double &value);
-		bool get(const string &sensor_type, const string &model_id, const string &element, long &value);
+		bool get(const string& sensor_type, const string& model_id, const string& element, string& value);
+		bool get(const string& sensor_type, const string& model_id, const string& element, double& value);
+		bool get(const string& sensor_type, const string& model_id, const string& element, long& value);
 
 		bool is_supported(const string &sensor_type, const string &model_id);
 		bool get_device_id(void);
 	};
 }
-#endif /*_CCONFIG_H_*/
+#endif

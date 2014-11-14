@@ -27,7 +27,7 @@
 #include <virtual_sensor.h>
 #include <vconf.h>
 
-typedef map<unsigned int, sensor_event_t> event_type_last_event_map;
+typedef unordered_map<unsigned int, sensor_event_t> event_type_last_event_map;
 typedef list<virtual_sensor *> virtual_sensors;
 
 class csensor_event_dispatcher
@@ -43,18 +43,16 @@ private:
 
 	csensor_event_dispatcher();
 	~csensor_event_dispatcher();
-	csensor_event_dispatcher(csensor_event_dispatcher const &) {};
-	csensor_event_dispatcher &operator=(csensor_event_dispatcher const &);
+	csensor_event_dispatcher(csensor_event_dispatcher const&) {};
+	csensor_event_dispatcher& operator=(csensor_event_dispatcher const&);
 
 	void accept_connections(void);
 	void accept_event_channel(csocket client_socket);
 
 	void dispatch_event(void);
-	void send_sensor_events(void *events, int event_cnt, bool is_hub_event, event_situation situation);
-	static void situation_watcher(keynode_t *node, void *user_data);
-	bool is_lcd_on(void);
-	static cclient_info_manager &get_client_info_manager(void);
-	static csensor_event_queue &get_event_queue(void);
+	void send_sensor_events(void* events, int event_cnt, bool is_hub_event);
+	static cclient_info_manager& get_client_info_manager(void);
+	static csensor_event_queue& get_event_queue(void);
 
 	bool is_record_event(unsigned int event_type);
 	void put_last_event(unsigned int event_type, const sensor_event_t &event);
@@ -63,19 +61,14 @@ private:
 	bool has_active_virtual_sensor(virtual_sensor *sensor);
 	virtual_sensors get_active_virtual_sensors(void);
 
-	static bool compare_by_timestamp(const sensor_event_t &a, const sensor_event_t &b);
 	void sort_sensor_events(sensor_event_t *events, unsigned int cnt);
 public:
-	static csensor_event_dispatcher &get_instance() {
-		static csensor_event_dispatcher inst;
-		return inst;
-	}
-
+	static csensor_event_dispatcher& get_instance();
 	bool run(void);
-	void request_last_event(int client_id, const sensor_type_t sensor);
+	void request_last_event(int client_id, sensor_id_t sensor_id);
 
 	bool add_active_virtual_sensor(virtual_sensor *sensor);
 	bool delete_active_virtual_sensor(virtual_sensor *sensor);
 };
 
-#endif /*_CSENSOR_EVENT_DISPATCHER_H_*/
+#endif

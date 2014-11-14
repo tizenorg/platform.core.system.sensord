@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SENSOR_GRAVITY_H_
-#define _SENSOR_GRAVITY_H_
+#ifndef __SENSOR_GRAVITY_H__
+#define __SENSOR_GRAVITY_H__
 
 //! Pre-defined events for the gravity sensor
 //! Sensor Plugin developer can add more event to their own headers
@@ -26,7 +26,7 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif /*__cplusplus*/
+#endif
 
 /**
  * @defgroup SENSOR_GRAVITY Gravity Sensor
@@ -36,8 +36,12 @@ extern "C"
  * @{
  */
 
+enum gravity_data_id {
+	GRAVITY_BASE_DATA_SET 				= (GRAVITY_SENSOR << 16) | 0x0001,
+};
+
 enum gravity_event_type {
-	GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME					= (GRAVITY_SENSOR << 16) | 0x0001,
+	GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME	= (GRAVITY_SENSOR << 16) | 0x0001,
 };
 
 /**
@@ -46,6 +50,7 @@ enum gravity_event_type {
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
-#endif /*_SENSOR_GRAVITY_H_*/
+#endif
+//! End of a file

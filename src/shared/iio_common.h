@@ -28,6 +28,7 @@
 using std::string;
 using std::ifstream;
 
+
 #define NO_OF_ULL_BYTES		8
 #define NO_OF_SHORT_VAL		4
 #define CH0_INDEX			0
@@ -80,7 +81,7 @@ int decode_channel_data_type(const char *device_dir, const char *ch_name, struct
 int add_channel_to_array(const char *device_dir, const char *ch_name, struct channel_parameters *channel);
 int get_channel_array_size(struct channel_parameters *channels, int num_channels);
 int update_sysfs_num(const char *filepath, int val, bool verify = false);
-int update_sysfs_string(const char *filepath, char *val, bool verify = false);
+int update_sysfs_string(const char *filepath, const char *val);
 int convert_bytes_to_int(int input, struct channel_parameters *info);
 
 template <typename value_t>

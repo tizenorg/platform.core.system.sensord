@@ -10,6 +10,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
 
 SET(SERVER_SRCS
+	dbus_util.cpp
 	server.cpp
 	command_worker.cpp
 	main.cpp
