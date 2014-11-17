@@ -15,12 +15,13 @@ include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
 
 include(FindPkgConfig)
 pkg_check_modules(rpkgs REQUIRED vconf)
-add_definitions(${rpkgs_CFLAGS} -DUSE_ONLY_ONE_MODULE)
+add_definitions(${rpkgs_CFLAGS} -DUSE_ONLY_ONE_MODULE -DUSE_LCD_TYPE_CHECK)
 
 set(PROJECT_MAJOR_VERSION "0")
 set(PROJECT_MINOR_VERSION "0")
 set(PROJECT_RELEASE_VERSION "1")
 set(CMAKE_VERBOSE_MAKEFILE OFF)
+
 
 FIND_PROGRAM(UNAME NAMES uname)
 EXEC_PROGRAM("${UNAME}" ARGS "-m" OUTPUT_VARIABLE "ARCH")

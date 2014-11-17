@@ -1,5 +1,5 @@
 /*
- * sensord
+ * geo_sensor_hal
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -23,14 +23,12 @@
 #include <sensor_hal.h>
 #include <string>
 
-#define IIO_DIR			"/sys/bus/iio/devices/"
-#define X_RAW_VAL_NODE	"/in_magn_x_raw"
-#define Y_RAW_VAL_NODE	"/in_magn_y_raw"
-#define Z_RAW_VAL_NODE	"/in_magn_z_raw"
-#define X_SCALE_NODE	"/in_magn_x_scale"
-#define Y_SCALE_NODE	"/in_magn_y_scale"
-#define Z_SCALE_NODE	"/in_magn_z_scale"
-#define NAME_NODE		"/name"
+#define X_RAW_VAL_NODE	"in_magn_x_raw"
+#define Y_RAW_VAL_NODE	"in_magn_y_raw"
+#define Z_RAW_VAL_NODE	"in_magn_z_raw"
+#define X_SCALE_NODE	"in_magn_x_scale"
+#define Y_SCALE_NODE	"in_magn_y_scale"
+#define Z_SCALE_NODE	"in_magn_z_scale"
 
 using std::string;
 
@@ -47,9 +45,17 @@ public:
 	bool is_data_ready(bool wait);
 	virtual int get_sensor_data(sensor_data_t &data);
 	bool get_properties(sensor_properties_t &properties);
-	bool check_hw_node(void);
-
 private:
+	string m_model_id;
+	string m_vendor;
+	string m_chip_name;
+
+	float m_min_range;
+	float m_max_range;
+	float m_raw_data_unit;
+
+	unsigned long m_polling_interval;
+
 	double m_x;
 	double m_y;
 	double m_z;
@@ -57,15 +63,19 @@ private:
 	double m_y_scale;
 	double m_z_scale;
 
-	unsigned long m_polling_interval;
+	int m_hdst;
+
 	unsigned long long m_fired_time;
-	bool m_sensorhub_supported;
+	int m_node_handle;
 
-	string m_model_id;
-	string m_name;
-	string m_vendor;
-	string m_chip_name;
+	string m_enable_node;
 
+	/*For Input Method*/
+	string m_data_node;
+	string m_interval_node;
+
+	/*For IIO method*/
+	string m_geo_dir;
 	string m_x_node;
 	string m_y_node;
 	string m_z_node;
@@ -73,11 +83,11 @@ private:
 	string m_y_scale_node;
 	string m_z_scale_node;
 
+	bool m_sensorhub_controlled;
+
 	cmutex m_value_mutex;
 
-	bool enable_resource(string &resource_node, bool enable);
 	bool update_value(void);
-	bool is_sensorhub_supported(void);
 	bool init_resources(void);
 };
 #endif /*_GEO_SENSOR_HAL_H_*/

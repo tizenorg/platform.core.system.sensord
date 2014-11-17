@@ -148,11 +148,17 @@
 		<MODEL id="AK09911C">
 			<NAME value="AK09911C"/>
 			<VENDOR value="AKM"/>
+			<RAW_DATA_UNIT value="0.06"/>
+			<MIN_RANGE value="-4900"/>
+			<MAX_RANGE value="4900"/>
 		</MODEL>
 
 		<MODEL id="ak8975">
 			<NAME value="AK8975"/>
 			<VENDOR value="AKM"/>
+			<RAW_DATA_UNIT value="0.03"/>
+			<MIN_RANGE value="-1200"/>
+			<MAX_RANGE value="1200"/>
 		</MODEL>
 
 		<MODEL id="MPU9250">

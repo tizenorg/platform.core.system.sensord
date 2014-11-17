@@ -19,6 +19,7 @@
 
 #include <common.h>
 #include <sf_common.h>
+
 #include <geo_sensor.h>
 #include <sensor_plugin_loader.h>
 
@@ -26,6 +27,7 @@
 
 geo_sensor::geo_sensor()
 : m_sensor_hal(NULL)
+, m_resolution(0.0f)
 {
 	m_name = string(SENSOR_NAME);
 
@@ -37,7 +39,7 @@ geo_sensor::geo_sensor()
 
 geo_sensor::~geo_sensor()
 {
-	INFO("geo_sensor is destroyed!");
+	INFO("geo_sensor is destroyed!\n");
 }
 
 bool geo_sensor::init()
@@ -49,7 +51,17 @@ bool geo_sensor::init()
 		return false;
 	}
 
-	INFO("%s is created!", sensor_base::get_name());
+	sensor_properties_t properties;
+
+	if (m_sensor_hal->get_properties(properties) == false) {
+		ERR("sensor->get_properties() is failed!\n");
+		return false;
+	}
+
+	m_resolution = properties.resolution;
+
+	INFO("%s is created!\n", sensor_base::get_name());
+
 	return true;
 }
 
@@ -60,8 +72,8 @@ sensor_type_t geo_sensor::get_type(void)
 
 bool geo_sensor::working(void *inst)
 {
-	geo_sensor *sensor = (geo_sensor *)inst;
-	return sensor->process_event();
+	geo_sensor *sensor = (geo_sensor*)inst;
+	return sensor->process_event();;
 }
 
 bool geo_sensor::process_event(void)
@@ -77,8 +89,9 @@ bool geo_sensor::process_event(void)
 	AUTOLOCK(m_mutex);
 
 	if (get_client_cnt(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME)) {
+		event.sensor_id = get_id();
 		event.event_type = GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME;
-
+		raw_to_base(event.data);
 		push(event);
 	}
 
@@ -87,10 +100,8 @@ bool geo_sensor::process_event(void)
 
 bool geo_sensor::on_start(void)
 {
-	AUTOLOCK(m_mutex);
-
 	if (!m_sensor_hal->enable()) {
-		ERR("m_sensor_hal start fail");
+		ERR("m_sensor_hal start fail\n");
 		return false;
 	}
 
@@ -99,32 +110,20 @@ bool geo_sensor::on_start(void)
 
 bool geo_sensor::on_stop(void)
 {
-	AUTOLOCK(m_mutex);
-
 	if (!m_sensor_hal->disable()) {
-		ERR("m_sensor_hal stop fail");
+		ERR("m_sensor_hal stop fail\n");
 		return false;
 	}
 
 	return stop_poll();
 }
 
-long geo_sensor::set_command(const unsigned int cmd, long value)
-{
-	if (m_sensor_hal->set_command(cmd, value) < 0) {
-		ERR("m_sensor_hal set_cmd fail");
-		return -1;
-	}
-
-	return 0;
-}
-
-bool geo_sensor::get_properties(const unsigned int type, sensor_properties_t &properties)
+bool geo_sensor::get_properties(sensor_properties_t &properties)
 {
 	return m_sensor_hal->get_properties(properties);
 }
 
-int geo_sensor::get_sensor_data(const unsigned int type, sensor_data_t &data)
+int geo_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 {
 	int state;
 
@@ -134,7 +133,7 @@ int geo_sensor::get_sensor_data(const unsigned int type, sensor_data_t &data)
 	state = m_sensor_hal->get_sensor_data(data);
 
 	if (state < 0) {
-		ERR("m_sensor_hal get struct_data fail");
+		ERR("m_sensor_hal get struct_data fail\n");
 		return -1;
 	}
 
@@ -146,7 +145,16 @@ bool geo_sensor::set_interval(unsigned long interval)
 	AUTOLOCK(m_mutex);
 
 	INFO("Polling interval is set to %dms", interval);
+
 	return m_sensor_hal->set_interval(interval);
+}
+
+void geo_sensor::raw_to_base(sensor_data_t &data)
+{
+	data.value_count = 3;
+	data.values[0] = data.values[0] * m_resolution;
+	data.values[1] = data.values[1] * m_resolution;
+	data.values[2] = data.values[2] * m_resolution;
 }
 
 extern "C" void *create(void)
@@ -156,14 +164,14 @@ extern "C" void *create(void)
 	try {
 		inst = new geo_sensor();
 	} catch (int err) {
-		ERR("Failed to create geo_sensor class, errno : %d, errstr : %s", err, strerror(err));
+		ERR("geo_sensor class create fail , errno : %d , errstr : %s\n", err, strerror(err));
 		return NULL;
 	}
 
-	return (void *)inst;
+	return (void*)inst;
 }
 
 extern "C" void destroy(void *inst)
 {
-	delete (geo_sensor *)inst;
+	delete (geo_sensor*)inst;;
 }

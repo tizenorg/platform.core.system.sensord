@@ -1068,7 +1068,6 @@ API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* senso
 		return false;
 	}
 
-
 	client_id = event_listener.get_client_id();
 	retvm_if ((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
 

@@ -21,11 +21,11 @@
 #define _GEO_SENSOR_H_
 
 #include <sensor_common.h>
+
 #include <physical_sensor.h>
 #include <sensor_hal.h>
 
-class geo_sensor : public physical_sensor
-{
+class geo_sensor : public physical_sensor {
 public:
 	geo_sensor();
 	virtual ~geo_sensor();
@@ -35,17 +35,19 @@ public:
 
 	static bool working(void *inst);
 
-	virtual bool on_start(void);
-	virtual bool on_stop(void);
-
 	virtual bool set_interval(unsigned long interval);
-	virtual long set_command(const unsigned int cmd, long value);
-	virtual bool get_properties(const unsigned int type, sensor_properties_t &properties);
-	int get_sensor_data(const unsigned int type, sensor_data_t &data);
+	virtual bool get_properties(sensor_properties_t &properties);
+	int get_sensor_data(unsigned int type, sensor_data_t &data);
 private:
 	sensor_hal *m_sensor_hal;
-	cmutex m_mutex;
 
+	float m_resolution;
+
+	virtual bool on_start(void);
+	virtual bool on_stop(void);
 	bool process_event(void);
+	void raw_to_base(sensor_data_t &data);
 };
-#endif /*_GEO_SENSOR_H_*/
+
+#endif
+
