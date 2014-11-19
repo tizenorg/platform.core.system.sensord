@@ -17,15 +17,11 @@
  *
  */
 
-
 #include <sensor_plugin_loader.h>
-
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
-
 #include <sensor_hal.h>
 #include <sensor_base.h>
-
 #include <dlfcn.h>
 #include <dirent.h>
 #include <common.h>
@@ -39,7 +35,6 @@ using std::unordered_set;
 #define ROOT_ELEMENT "PLUGIN"
 #define TEXT_ELEMENT "text"
 #define PATH_ATTR "path"
-
 #define HAL_ELEMENT "HAL"
 #define SENSOR_ELEMENT "SENSOR"
 
@@ -106,7 +101,7 @@ bool sensor_plugin_loader::load_module(const string &path, void** module, void**
 bool sensor_plugin_loader::insert_module(plugin_type type, const string &path)
 {
 	if (type == PLUGIN_TYPE_HAL) {
-		DBG("insert sensor plugin [%s]", path);
+		DBG("insert sensor plugin [%s]", path.c_str());
 		sensor_hal *module;
 		void *handle;
 
