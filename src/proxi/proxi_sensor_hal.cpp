@@ -23,12 +23,12 @@
 #include <sys/ioctl.h>
 #include <dirent.h>
 #include <linux/input.h>
-#include <cconfig.h>
+#include <csensor_config.h>
 #include <proxi_sensor_hal.h>
 #include <iio_common.h>
 
 using std::ifstream;
-using config::CConfig;
+using config::csensor_config;
 
 #define INITIAL_VALUE -1
 #define INITIAL_TIME 0
@@ -58,7 +58,7 @@ proxi_sensor_hal::proxi_sensor_hal()
 		throw ENXIO;
 	}
 
-	CConfig &config = CConfig::get_instance();
+	csensor_config &config = csensor_config::get_instance();
 
 	if (!config.get(SENSOR_TYPE_PROXI, m_model_id, ELEMENT_VENDOR, m_vendor))
 	{

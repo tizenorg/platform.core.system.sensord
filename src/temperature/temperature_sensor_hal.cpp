@@ -19,17 +19,14 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <dirent.h>
-
 #include <linux/input.h>
-#include <cconfig.h>
-
+#include <csensor_config.h>
 #include <temperature_sensor_hal.h>
 #include <fstream>
-#include <cconfig.h>
 #include <iio_common.h>
 
 using std::ifstream;
-using config::CConfig;
+using config::csensor_config;
 
 #define SENSOR_TYPE_TEMPERATURE		"TEMPERATURE"
 #define ELEMENT_NAME				"NAME"
@@ -56,7 +53,7 @@ temperature_sensor_hal::temperature_sensor_hal()
 		throw ENXIO;
 	}
 
-	CConfig &config = CConfig::get_instance();
+	csensor_config &config = csensor_config::get_instance();
 
 	if (!config.get(SENSOR_TYPE_TEMPERATURE, m_model_id, ELEMENT_VENDOR, m_vendor))
 	{

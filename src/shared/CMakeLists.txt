@@ -38,7 +38,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
 add_library(sensord-server SHARED
 	crw_lock.cpp
 	worker_thread.cpp
-	cconfig.cpp
+	csensor_config.cpp
 	csensor_event_queue.cpp
 	csensor_event_dispatcher.cpp
 	csensor_usage.cpp
@@ -74,7 +74,7 @@ install(FILES ${PROJECT_NAME}.pc DESTINATION lib/pkgconfig)
 install(FILES
 	crw_lock.h
 	worker_thread.h
-	cconfig.h
+	csensor_config.h
 	csensor_event_queue.h
 	cinterval_info_list.h
 	sensor_plugin_loader.h

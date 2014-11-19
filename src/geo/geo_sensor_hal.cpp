@@ -19,18 +19,15 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <dirent.h>
-
 #include <linux/input.h>
-#include <cconfig.h>
-
+#include <csensor_config.h>
 #include <geo_sensor_hal.h>
 #include <sys/ioctl.h>
 #include <fstream>
-#include <cconfig.h>
 #include <iio_common.h>
 
 using std::ifstream;
-using config::CConfig;
+using config::csensor_config;
 
 #define SENSOR_TYPE_MAGNETIC	"MAGNETIC"
 #define ELEMENT_NAME			"NAME"
@@ -53,7 +50,7 @@ geo_sensor_hal::geo_sensor_hal()
 , m_fired_time(INITIAL_TIME)
 {
 	const string sensorhub_interval_node_name = "mag_poll_delay";
-	CConfig &config = CConfig::get_instance();
+	csensor_config &config = csensor_config::get_instance();
 
 	node_path_info_query query;
 	node_path_info info;

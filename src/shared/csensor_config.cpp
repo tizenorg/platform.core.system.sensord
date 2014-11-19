@@ -1,7 +1,7 @@
 /*
  * libsensord-share
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  *
  */
 
-#include <cconfig.h>
+#include <csensor_config.h>
 #include "common.h"
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -33,17 +33,17 @@ using std::ifstream;
 #define MODEL_ID_ATTR 	"id"
 #define DEFAULT_ATTR	"value"
 
-CConfig::CConfig()
+csensor_config::csensor_config()
 {
 }
 
-CConfig& CConfig::get_instance(void)
+csensor_config& csensor_config::get_instance(void)
 {
 	static bool load_done = false;
-	static CConfig inst;
+	static csensor_config inst;
 
 	if (!load_done) {
-		inst.load_config();
+		inst.load_config(SENSOR_CONFIG_FILE_PATH);
 		inst.get_device_id();
 		if (!inst.m_device_id.empty())
 			INFO("Device ID = %s", inst.m_device_id.c_str());
@@ -55,12 +55,12 @@ CConfig& CConfig::get_instance(void)
 	return inst;
 }
 
-bool CConfig::load_config(const string& config_path)
+bool csensor_config::load_config(const string& config_path)
 {
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 
-	DBG("CConfig::load_config(\"%s\") is called!\n",config_path.c_str());
+	DBG("csensor_config::load_config(\"%s\") is called!\n",config_path.c_str());
 
 	doc = xmlParseFile(config_path.c_str());
 
@@ -163,7 +163,7 @@ bool CConfig::load_config(const string& config_path)
 }
 
 
-bool CConfig::get(const string& sensor_type,const string& model_id, const string& element, const string& attr, string& value)
+bool csensor_config::get(const string& sensor_type,const string& model_id, const string& element, const string& attr, string& value)
 {
 	auto it_model_list = m_sensor_config.find(sensor_type);
 
@@ -198,7 +198,7 @@ bool CConfig::get(const string& sensor_type,const string& model_id, const string
 	return true;
 }
 
-bool CConfig::get(const string& sensor_type, const string& model_id, const string& element, const string& attr, double& value)
+bool csensor_config::get(const string& sensor_type, const string& model_id, const string& element, const string& attr, double& value)
 {
 	string str_value;
 
@@ -213,7 +213,7 @@ bool CConfig::get(const string& sensor_type, const string& model_id, const strin
 	return true;
 }
 
-bool CConfig::get(const string& sensor_type, const string& model_id, const string& element, const string& attr, long& value)
+bool csensor_config::get(const string& sensor_type, const string& model_id, const string& element, const string& attr, long& value)
 {
 	string str_value;
 
@@ -228,7 +228,7 @@ bool CConfig::get(const string& sensor_type, const string& model_id, const strin
 	return true;
 }
 
-bool CConfig::get(const string& sensor_type, const string& model_id, const string& element, string& value)
+bool csensor_config::get(const string& sensor_type, const string& model_id, const string& element, string& value)
 {
 	if (get(sensor_type, model_id, element, m_device_id, value))
 		return true;
@@ -239,7 +239,7 @@ bool CConfig::get(const string& sensor_type, const string& model_id, const strin
 	return false;
 }
 
-bool CConfig::get(const string& sensor_type, const string& model_id, const string& element, double& value)
+bool csensor_config::get(const string& sensor_type, const string& model_id, const string& element, double& value)
 {
 	if (get(sensor_type, model_id, element, m_device_id, value))
 		return true;
@@ -250,7 +250,7 @@ bool CConfig::get(const string& sensor_type, const string& model_id, const strin
 	return false;
 }
 
-bool CConfig::get(const string& sensor_type, const string& model_id, const string& element, long& value)
+bool csensor_config::get(const string& sensor_type, const string& model_id, const string& element, long& value)
 {
 	if (get(sensor_type, model_id, element, m_device_id, value))
 		return true;
@@ -261,7 +261,7 @@ bool CConfig::get(const string& sensor_type, const string& model_id, const strin
 	return false;
 }
 
-bool CConfig::is_supported(const string& sensor_type,const string& model_id)
+bool csensor_config::is_supported(const string& sensor_type,const string& model_id)
 {
 	auto it_model_list = m_sensor_config.find(sensor_type);
 
@@ -276,7 +276,7 @@ bool CConfig::is_supported(const string& sensor_type,const string& model_id)
 	return true;
 }
 
-bool CConfig::get_device_id(void)
+bool csensor_config::get_device_id(void)
 {
 	const string INFO_INI_PATH = "/etc/info.ini";
 	const string START_DELIMETER = "Model=";
