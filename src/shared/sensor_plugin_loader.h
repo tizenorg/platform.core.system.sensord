@@ -33,7 +33,6 @@
 
 class sensor_hal;
 class sensor_base;
-class sensor_fusion;
 
 using std::pair;
 using std::vector;
@@ -60,15 +59,6 @@ typedef multimap<sensor_type_t, sensor_base*> sensor_plugins;
 *
 */
 
-typedef vector<sensor_fusion*> fusion_plugins;
-/*
-* a fusion_plugins is a group of fusion plugin
-* <FUSION>
-* ...
-* </FUSION>
-*
-*/
-
 class sensor_plugin_loader
 {
 private:
@@ -87,7 +77,6 @@ private:
 
 	sensor_hal_plugins m_sensor_hals;
 	sensor_plugins m_sensors;
-	fusion_plugins m_fusions;
 
 public:
 	static sensor_plugin_loader& get_instance();
