@@ -38,7 +38,7 @@ public:
 	vect<TYPE> m_var_gyr_z;
 	vect<TYPE> m_var_roll;
 	vect<TYPE> m_var_pitch;
-	vect<TYPE> m_var_yaw;
+	vect<TYPE> m_var_azimuth;
 	matrix<TYPE> m_driv_cov;
 	matrix<TYPE> m_aid_cov;
 	matrix<TYPE> m_tran_mat;
@@ -56,7 +56,7 @@ public:
 
 	int m_pitch_phase_compensation;
 	int m_roll_phase_compensation;
-	int m_yaw_phase_compensation;
+	int m_azimuth_phase_compensation;
 	int m_magnetic_alignment_factor;
 
 	orientation_filter();

@@ -42,6 +42,8 @@ public:
 			const quaternion<T> q2);
 	template<typename T> friend quaternion<T> operator +(const quaternion<T> q1,
 			const quaternion<T> q2);
+	template<typename T> friend quaternion<T> phase_correction(const quaternion<T> q1,
+			const quaternion<T> q2);
 };
 
 #include "quaternion.cpp"

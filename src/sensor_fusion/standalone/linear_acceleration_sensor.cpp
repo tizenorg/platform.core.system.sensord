@@ -17,7 +17,7 @@
  *
  */
 
-#ifdef _LINEAR_ACCELERATION_SENSOR_H
+#ifdef _LINEAR_ACCELERATION_SENSOR_H_
 
 sensor_data<float> linear_acceleration_sensor::get_linear_acceleration(const sensor_data<float> accel,
 				const sensor_data<float> gyro, const sensor_data<float> magnetic)

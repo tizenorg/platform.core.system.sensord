@@ -22,18 +22,25 @@
 
 #include "orientation_filter.h"
 
+//Windowing is used for buffering of previous samples for statistical analysis
 #define MOVING_AVERAGE_WINDOW_LENGTH	20
+//Earth's Gravity
 #define GRAVITY		9.80665
 #define PI		3.141593
+//Needed for non-zero initialization for statistical analysis
 #define NON_ZERO_VAL	0.1
+//microseconds to seconds
 #define US2S	(1.0 / 1000000.0)
-#define SAMPLE_FREQ		100000
+//Initialize sampling interval to 100000microseconds
+#define SAMPLE_INTV		100000
 
+// constants for computation of covariance and transition matrices
 #define ZIGMA_W		(0.05 * DEG2RAD)
 #define TAU_W		1000
 #define QWB_CONST	((2 * (ZIGMA_W * ZIGMA_W)) / TAU_W)
 #define F_CONST		(-1 / TAU_W)
 
+// M-matrix, V-vector, MxN=> matrix dimension, R-RowCount, C-Column count
 #define M3X3R	3
 #define M3X3C	3
 #define M6X6R	6
@@ -59,7 +66,7 @@ orientation_filter<TYPE>::orientation_filter()
 	m_var_gyr_z = vec;
 	m_var_roll = vec;
 	m_var_pitch = vec;
-	m_var_yaw = vec;
+	m_var_azimuth = vec;
 
 	m_tran_mat = mat6x6;
 	m_measure_mat = mat6x6;
@@ -74,7 +81,7 @@ orientation_filter<TYPE>::orientation_filter()
 
 	m_pitch_phase_compensation = 1;
 	m_roll_phase_compensation = 1;
-	m_yaw_phase_compensation = 1;
+	m_azimuth_phase_compensation = 1;
 	m_magnetic_alignment_factor = 1;
 
 	m_gyro.m_time_stamp = 0;
@@ -91,7 +98,7 @@ inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<T
 {
 	vect<TYPE> acc_data(V1x3S);
 	vect<TYPE> gyr_data(V1x3S);
-	unsigned long long sample_interval_gyro = SAMPLE_FREQ;
+	unsigned long long sample_interval_gyro = SAMPLE_INTV;
 
 	m_accel.m_data = accel.m_data;
 	m_gyro.m_data = gyro.m_data;
@@ -147,21 +154,21 @@ template <typename TYPE>
 inline void orientation_filter<TYPE>::compute_covariance()
 {
 	TYPE var_gyr_x, var_gyr_y, var_gyr_z;
-	TYPE var_roll, var_pitch, var_yaw;
+	TYPE var_roll, var_pitch, var_azimuth;
 
 	insert_end(m_var_gyr_x, m_gyro.m_data.m_vec[0]);
 	insert_end(m_var_gyr_y, m_gyro.m_data.m_vec[1]);
 	insert_end(m_var_gyr_z, m_gyro.m_data.m_vec[2]);
 	insert_end(m_var_roll, m_orientation.m_ang.m_vec[0]);
 	insert_end(m_var_pitch, m_orientation.m_ang.m_vec[1]);
-	insert_end(m_var_yaw, m_orientation.m_ang.m_vec[2]);
+	insert_end(m_var_azimuth, m_orientation.m_ang.m_vec[2]);
 
 	var_gyr_x = var(m_var_gyr_x);
 	var_gyr_y = var(m_var_gyr_y);
 	var_gyr_z = var(m_var_gyr_z);
 	var_roll = var(m_var_roll);
 	var_pitch = var(m_var_pitch);
-	var_yaw = var(m_var_yaw);
+	var_azimuth = var(m_var_azimuth);
 
 	m_driv_cov.m_mat[0][0] = var_gyr_x;
 	m_driv_cov.m_mat[1][1] = var_gyr_y;
@@ -172,13 +179,13 @@ inline void orientation_filter<TYPE>::compute_covariance()
 
 	m_aid_cov.m_mat[0][0] = var_roll;
 	m_aid_cov.m_mat[1][1] = var_pitch;
-	m_aid_cov.m_mat[2][2] = var_yaw;
+	m_aid_cov.m_mat[2][2] = var_azimuth;
 }
 
 template <typename TYPE>
 inline void orientation_filter<TYPE>::time_update()
 {
-	quaternion<TYPE> quat_diff, quat_error;
+	quaternion<TYPE> quat_diff, quat_error, quat_output;
 	euler_angles<TYPE> euler_error;
 	euler_angles<TYPE> orientation;
 
@@ -210,14 +217,14 @@ inline void orientation_filter<TYPE>::time_update()
 	quat_diff = (m_quat_driv * quat_rot_inc) * (TYPE) 0.5;
 
 	m_quat_driv = m_quat_driv + (quat_diff * (TYPE) m_gyro_dt * (TYPE) PI);
-
 	m_quat_driv.quat_normalize();
+	quat_output = phase_correction(m_quat_driv, m_quat_aid);
 
-	orientation = quat2euler(m_quat_driv);
+	orientation = rad2deg(quat2euler(quat_output));
 
-	m_orientation.m_ang.m_vec[0] = orientation.m_ang.m_vec[0] * m_roll_phase_compensation;
-	m_orientation.m_ang.m_vec[1] = orientation.m_ang.m_vec[1] * m_pitch_phase_compensation;
-	m_orientation.m_ang.m_vec[2] = orientation.m_ang.m_vec[2] * m_yaw_phase_compensation;
+	m_orientation.m_ang.m_vec[0] = orientation.m_ang.m_vec[0] * m_pitch_phase_compensation;
+	m_orientation.m_ang.m_vec[1] = orientation.m_ang.m_vec[1] * m_roll_phase_compensation;
+	m_orientation.m_ang.m_vec[2] = orientation.m_ang.m_vec[2] * m_azimuth_phase_compensation;
 
 	m_rot_matrix = quat2rot_mat(m_quat_driv);
 

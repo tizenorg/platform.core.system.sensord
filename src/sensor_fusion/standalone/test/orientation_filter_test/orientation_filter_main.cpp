@@ -39,7 +39,7 @@ float scale_magnetic = 1;
 
 int pitch_phase_compensation = -1;
 int roll_phase_compensation = -1;
-int yaw_phase_compensation = -1;
+int azimuth_phase_compensation = -1;
 int magnetic_alignment_factor = -1;
 
 void pre_process_data(sensor_data<float> &data_out, sensor_data<float> &data_in, float *bias, int *sign, float scale)
@@ -105,7 +105,7 @@ int main()
 
 		orien_filter.m_pitch_phase_compensation = pitch_phase_compensation;
 		orien_filter.m_roll_phase_compensation = roll_phase_compensation;
-		orien_filter.m_yaw_phase_compensation = yaw_phase_compensation;
+		orien_filter.m_azimuth_phase_compensation = azimuth_phase_compensation;
 		orien_filter.m_magnetic_alignment_factor = magnetic_alignment_factor;
 
 		orientation = orien_filter.get_orientation(accel_data, gyro_data, magnetic_data);

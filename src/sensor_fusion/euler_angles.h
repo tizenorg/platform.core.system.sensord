@@ -29,7 +29,7 @@ public:
 	vect<TYPE> m_ang;
 
 	euler_angles();
-	euler_angles(const TYPE roll, const TYPE pitch, const TYPE yaw);
+	euler_angles(const TYPE roll, const TYPE pitch, const TYPE azimuth);
 	euler_angles(const vect<TYPE> v);
 	euler_angles(const euler_angles<TYPE>& e);
 	~euler_angles();
