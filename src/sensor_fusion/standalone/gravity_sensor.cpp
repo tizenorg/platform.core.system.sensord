@@ -17,7 +17,7 @@
  *
  */
 
-#ifdef _GRAVITY_SENSOR_H
+#ifdef _GRAVITY_SENSOR_H_
 
 #define GRAVITY		9.80665
 

@@ -17,7 +17,7 @@
  *
  */
 
-#ifdef _ORIENTATION_SENSOR_H
+#ifdef _ORIENTATION_SENSOR_H_
 
 float bias_accel[] = {0.098586, 0.18385, (10.084 - GRAVITY)};
 float bias_gyro[] = {-5.3539, 0.24325, 2.3391};
@@ -31,7 +31,7 @@ float scale_magnetic = 1;
 
 int pitch_phase_compensation = -1;
 int roll_phase_compensation = -1;
-int yaw_phase_compensation = -1;
+int azimuth_phase_compensation = -1;
 int magnetic_alignment_factor = -1;
 
 void pre_process_data(sensor_data<float> &data_out, sensor_data<float> &data_in, float *bias, int *sign, float scale)
@@ -55,7 +55,7 @@ euler_angles<float> orientation_sensor::get_orientation(sensor_data<float> accel
 
 	orien_filter.m_pitch_phase_compensation = pitch_phase_compensation;
 	orien_filter.m_roll_phase_compensation = roll_phase_compensation;
-	orien_filter.m_yaw_phase_compensation = yaw_phase_compensation;
+	orien_filter.m_azimuth_phase_compensation = azimuth_phase_compensation;
 	orien_filter.m_magnetic_alignment_factor = magnetic_alignment_factor;
 
 	return orien_filter.get_orientation(accel_data, gyro_data, magnetic_data);
@@ -73,7 +73,7 @@ rotation_matrix<float> orientation_sensor::get_rotation_matrix(sensor_data<float
 
 	orien_filter.m_pitch_phase_compensation = pitch_phase_compensation;
 	orien_filter.m_roll_phase_compensation = roll_phase_compensation;
-	orien_filter.m_yaw_phase_compensation = yaw_phase_compensation;
+	orien_filter.m_azimuth_phase_compensation = azimuth_phase_compensation;
 	orien_filter.m_magnetic_alignment_factor = magnetic_alignment_factor;
 
 	return orien_filter.get_rotation_matrix(accel_data, gyro_data, magnetic_data);

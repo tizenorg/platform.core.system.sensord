@@ -30,9 +30,9 @@ euler_angles<TYPE>::euler_angles() : m_ang(EULER_SIZE)
 }
 
 template <typename TYPE>
-euler_angles<TYPE>::euler_angles(const TYPE roll, const TYPE pitch, const TYPE yaw)
+euler_angles<TYPE>::euler_angles(const TYPE roll, const TYPE pitch, const TYPE azimuth)
 {
-	TYPE euler_data[EULER_SIZE] = {roll, pitch, yaw};
+	TYPE euler_data[EULER_SIZE] = {roll, pitch, azimuth};
 
 	vect<TYPE> v(EULER_SIZE, euler_data);
 	m_ang = v;
@@ -83,7 +83,7 @@ euler_angles<T> quat2euler(const quaternion<T> q)
 	R33 = 2 * (w * w) - 1 + 2 * (z * z);
 
 	phi = atan2(R32, R33);
-	theta = -atan(R31 / sqrt(1 - (R31 * R31)));
+	theta = atan2(-R31 , sqrt((R32 * R32) + (R33 * R33)));
 	psi = atan2(R21, R11);
 
 	euler_angles<T> e(phi, theta, psi);
