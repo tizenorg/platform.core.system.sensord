@@ -20,13 +20,13 @@
 #include <sys/stat.h>
 
 #include <linux/input.h>
-#include <cconfig.h>
+#include <csensor_config.h>
 
 #include <accel_sensor_hal.h>
 #include <sys/poll.h>
 
 using std::ifstream;
-using config::CConfig;
+using config::csensor_config;
 
 #define GRAVITY 9.80665
 #define G_TO_MG 1000
@@ -63,7 +63,7 @@ accel_sensor_hal::accel_sensor_hal()
 , m_fired_time(0)
 {
 	const string sensorhub_interval_node_name = "accel_poll_delay";
-	CConfig &config = CConfig::get_instance();
+	csensor_config &config = csensor_config::get_instance();
 
 	node_path_info_query query;
 	node_path_info info;

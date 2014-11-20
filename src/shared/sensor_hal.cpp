@@ -21,11 +21,11 @@
 #include <dirent.h>
 #include <string.h>
 #include <fstream>
-#include <cconfig.h>
+#include <csensor_config.h>
 
 using std::ifstream;
 using std::fstream;
-using config::CConfig;
+using config::csensor_config;
 
 cmutex sensor_hal::m_shared_mutex;
 
@@ -310,7 +310,7 @@ bool sensor_hal::find_model_id(int method, const string &sensor_type, string &mo
 
 			infile >> name;
 
-			if (CConfig::get_instance().is_supported(sensor_type, name)) {
+			if (csensor_config::get_instance().is_supported(sensor_type, name)) {
 				model_id = name;
 				find = true;
 				break;
