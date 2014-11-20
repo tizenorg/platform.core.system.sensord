@@ -21,16 +21,15 @@
 #include <dirent.h>
 
 #include <linux/input.h>
-#include <cconfig.h>
+#include <csensor_config.h>
 
 #include <gyro_sensor_hal.h>
 #include <sys/ioctl.h>
 #include <fstream>
-#include <cconfig.h>
 #include <sys/poll.h>
 
 using std::ifstream;
-using config::CConfig;
+using config::csensor_config;
 
 #define DPS_TO_MDPS 1000
 #define MIN_RANGE(RES) (-((1 << (RES))/2))
@@ -63,7 +62,7 @@ gyro_sensor_hal::gyro_sensor_hal()
 {
 
 	const string sensorhub_interval_node_name = "gyro_poll_delay";
-	CConfig &config = CConfig::get_instance();
+	csensor_config &config = csensor_config::get_instance();
 
 	node_path_info_query query;
 	node_path_info info;

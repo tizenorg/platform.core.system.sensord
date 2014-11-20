@@ -1,7 +1,7 @@
 /*
  * libsensord-share
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
  *
  */
 
-#if !defined(_CCONFIG_CLASS_H_)
-#define _CCONFIG_CLASS_H_
+#if !defined(_CSENSOR_CONFIG_CLASS_H_)
+#define _CSENSOR_CONFIG_CLASS_H_
 
 #include <string>
 #include <unordered_map>
@@ -28,7 +28,7 @@ using std::unordered_map;
 using std::string;
 using std::istringstream;
 
-#define CONFIG_FILE_PATH "/usr/etc/sensors.xml"
+#define SENSOR_CONFIG_FILE_PATH "/usr/etc/sensors.xml"
 
 typedef unordered_map<string,string> Element;
 /*
@@ -76,17 +76,17 @@ typedef unordered_map<string,Model_list> Sensor_config;
 
 namespace config
 {
-	class CConfig
+	class csensor_config
 	{
 	private:
-		CConfig();
-		CConfig(CConfig const&) {};
-		CConfig& operator=(CConfig const&);
-		bool load_config(const string& config_path = CONFIG_FILE_PATH);
+		csensor_config();
+		csensor_config(csensor_config const&) {};
+		csensor_config& operator=(csensor_config const&);
+		bool load_config(const string& config_path);
 		Sensor_config m_sensor_config;
 		string m_device_id;
 	public:
-		static CConfig& get_instance(void);
+		static csensor_config& get_instance(void);
 
 		bool get(const string& sensor_type, const string& model_id, const string& element, const string& attr, string& value);
 		bool get(const string& sensor_type, const string& model_id, const string& element, const string& attr, double& value);

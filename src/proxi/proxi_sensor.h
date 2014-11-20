@@ -21,7 +21,6 @@
 #define _PROXI_SENSOR_H_
 
 #include <sensor_common.h>
-
 #include <physical_sensor.h>
 #include <sensor_hal.h>
 

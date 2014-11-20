@@ -19,15 +19,15 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <dirent.h>
-
 #include <linux/input.h>
-#include <cconfig.h>
-
+#include <csensor_config.h>
 #include <proxi_sensor_hal.h>
 #include <sys/ioctl.h>
 #include <fstream>
-#include <cconfig.h>
 #include <iio_common.h>
+
+using std::ifstream;
+using config::csensor_config;
 
 #define NO_FLAG			0
 #define PROXIMITY_TYPE	8
@@ -42,8 +42,6 @@
 
 #define PROXI_CODE	0x0019
 
-using std::ifstream;
-using config::CConfig;
 
 proxi_sensor_hal::proxi_sensor_hal()
 : m_state(PROXIMITY_STATE_FAR)
@@ -51,7 +49,7 @@ proxi_sensor_hal::proxi_sensor_hal()
 , m_node_handle(-1)
 {
 	const string sensorhub_interval_node_name = "prox_poll_delay";
-	CConfig &config = CConfig::get_instance();
+	csensor_config &config = csensor_config::get_instance();
 
 	node_path_info_query query;
 	node_path_info info;

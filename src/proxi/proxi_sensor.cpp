@@ -19,10 +19,8 @@
 
 #include <common.h>
 #include <sf_common.h>
-
 #include <proxi_sensor.h>
 #include <sensor_plugin_loader.h>
-
 
 #define SENSOR_NAME "PROXI_SENSOR"
 

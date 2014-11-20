@@ -23,9 +23,9 @@
 #include <pressure_sensor.h>
 #include <sensor_plugin_loader.h>
 #include <algorithm>
-#include <cconfig.h>
+#include <csensor_config.h>
 
-using config::CConfig;
+using config::csensor_config;
 using std::bind1st;
 using std::mem_fun;
 
@@ -79,7 +79,7 @@ bool pressure_sensor::init()
 
 	string model_id = m_sensor_hal->get_model_id();
 
-	CConfig &config = CConfig::get_instance();
+	csensor_config &config = csensor_config::get_instance();
 
 	double temperature_resolution;
 
