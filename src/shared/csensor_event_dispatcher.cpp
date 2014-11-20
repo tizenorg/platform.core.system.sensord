@@ -151,7 +151,6 @@ void csensor_event_dispatcher::dispatch_event(void)
 		} else {
 			sensor_event_t sensor_events[MAX_SENSOR_EVENT];
 			unsigned int event_cnt = 0;
-
 			sensor_events[event_cnt++] = *((sensor_event_t *)seed_event);
 
 			virtual_sensors v_sensors = get_active_virtual_sensors();
@@ -160,11 +159,8 @@ void csensor_event_dispatcher::dispatch_event(void)
 
 			while (it_v_sensor != v_sensors.end()) {
 				int synthesized_cnt;
-
 				v_sensor_events.clear();
-
 				(*it_v_sensor)->synthesize(*((sensor_event_t *)seed_event), v_sensor_events);
-
 				synthesized_cnt = v_sensor_events.size();
 
 				for (int i = 0; i < synthesized_cnt; ++i)
