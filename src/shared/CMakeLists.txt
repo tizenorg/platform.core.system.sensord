@@ -39,6 +39,7 @@ add_library(sensord-server SHARED
 	crw_lock.cpp
 	worker_thread.cpp
 	csensor_config.cpp
+	cvirtual_sensor_config.cpp
 	csensor_event_queue.cpp
 	csensor_event_dispatcher.cpp
 	csensor_usage.cpp
@@ -75,6 +76,7 @@ install(FILES
 	crw_lock.h
 	worker_thread.h
 	csensor_config.h
+	cvirtual_sensor_config.h
 	csensor_event_queue.h
 	cinterval_info_list.h
 	sensor_plugin_loader.h
