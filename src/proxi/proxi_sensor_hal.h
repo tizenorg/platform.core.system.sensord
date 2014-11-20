@@ -1,5 +1,5 @@
 /*
- * sensord
+ * proxi_sensor_hal
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -23,24 +23,17 @@
 #include <sensor_hal.h>
 #include <string>
 
-#define IIO_DIR			"/sys/bus/iio/devices/"
-#define NAME_NODE		"/name"
-#define EVENT_DIR		"/events"
-#define EVENT_EN_NODE	"/in_proximity_thresh_either_en"
-#define DEV_DIR			"/dev/"
-
-#define IIO_DEV_BASE_NAME	"iio:device"
-#define IIO_DEV_STR_LEN		10
-
-#define PROXIMITY_NODE_STATE_NEAR	1
-#define PROXIMITY_NODE_STATE_FAR	2
-#define PROXIMITY_TYPE				8
-
 using std::string;
 
 class proxi_sensor_hal : public sensor_hal
 {
 public:
+	enum proxi_node_state_event_t {	//changed as per IIO definitions
+		PROXIMITY_NODE_STATE_NEAR = 1,
+		PROXIMITY_NODE_STATE_FAR = 2,
+		PROXIMITY_NODE_STATE_UNKNOWN = 0,
+	};
+
 	proxi_sensor_hal();
 	virtual ~proxi_sensor_hal();
 	string get_model_id(void);
@@ -49,31 +42,24 @@ public:
 	bool disable(void);
 	bool is_data_ready(bool wait);
 	virtual int get_sensor_data(sensor_data_t &data);
-	bool get_properties(sensor_properties_t &properties);
-	bool check_hw_node(void);
-
+	virtual bool get_properties(sensor_properties_t &properties);
 private:
-	unsigned int m_state;
-	int m_node_handle;
-	unsigned long long m_fired_time;
-	bool m_sensorhub_supported;
-
 	string m_model_id;
-	string m_name;
 	string m_vendor;
 	string m_chip_name;
 
-	string m_proxi_dir;
+	string m_enable_node;
+	string m_data_node;
 
-	string m_enable_resource;
-	string m_event_resource;
+	unsigned int m_state;
 
+	unsigned long long m_fired_time;
+
+	int m_node_handle;
+	bool m_sensorhub_controlled;
 	cmutex m_value_mutex;
 
-	int m_event_fd;
-
-	bool enable_resource(bool enable);
 	bool update_value(bool wait);
-	bool is_sensorhub_supported(void);
+	bool enable_resource(bool enable);
 };
 #endif /*_PROXI_SENSOR_HAL_H_*/

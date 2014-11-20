@@ -15,7 +15,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
 
 include(FindPkgConfig)
 pkg_check_modules(rpkgs REQUIRED vconf)
-add_definitions(${rpkgs_CFLAGS} -DUSE_ONLY_ONE_MODULE)
+add_definitions(${rpkgs_CFLAGS} -DUSE_ONLY_ONE_MODULE -DUSE_LCD_TYPE_CHECK)
 
 set(PROJECT_MAJOR_VERSION "0")
 set(PROJECT_MINOR_VERSION "0")
@@ -43,7 +43,7 @@ add_library(${SENSOR_NAME} SHARED
 )
 
 add_library(${SENSOR_HAL_NAME} SHARED
-	proxi_sensor_hal.cpp
+        proxi_sensor_hal.cpp
 )
 
 target_link_libraries(${SENSOR_NAME} ${rpkgs_LDFLAGS} ${GLES_LDFLAGS} "-lm")

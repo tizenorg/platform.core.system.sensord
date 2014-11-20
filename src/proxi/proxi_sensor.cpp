@@ -19,8 +19,10 @@
 
 #include <common.h>
 #include <sf_common.h>
+
 #include <proxi_sensor.h>
 #include <sensor_plugin_loader.h>
+
 
 #define SENSOR_NAME "PROXI_SENSOR"
 
@@ -39,7 +41,7 @@ proxi_sensor::proxi_sensor()
 
 proxi_sensor::~proxi_sensor()
 {
-	INFO("proxi_sensor is destroyed!");
+	INFO("proxi_sensor is destroyed!\n");
 }
 
 bool proxi_sensor::init()
@@ -51,7 +53,7 @@ bool proxi_sensor::init()
 		return false;
 	}
 
-	INFO("%s is created!", sensor_base::get_name());
+	INFO("%s is created!\n", sensor_base::get_name());
 	return true;
 }
 
@@ -62,7 +64,7 @@ sensor_type_t proxi_sensor::get_type(void)
 
 bool proxi_sensor::working(void *inst)
 {
-	proxi_sensor *sensor = (proxi_sensor *)inst;
+	proxi_sensor *sensor = (proxi_sensor*)inst;
 	return sensor->process_event();
 }
 
@@ -79,6 +81,7 @@ bool proxi_sensor::process_event(void)
 	AUTOLOCK(m_client_info_mutex);
 	AUTOLOCK(m_mutex);
 
+	event.sensor_id = get_id();
 	if (get_client_cnt(PROXIMITY_EVENT_DISTANCE_DATA_REPORT_ON_TIME)) {
 		event.event_type = PROXIMITY_EVENT_DISTANCE_DATA_REPORT_ON_TIME;
 		raw_to_base(event.data);
@@ -103,10 +106,8 @@ bool proxi_sensor::process_event(void)
 
 bool proxi_sensor::on_start(void)
 {
-	AUTOLOCK(m_mutex);
-
 	if (!m_sensor_hal->enable()) {
-		ERR("m_sensor_hal start fail");
+		ERR("m_sensor_hal start fail\n");
 		return false;
 	}
 
@@ -115,22 +116,25 @@ bool proxi_sensor::on_start(void)
 
 bool proxi_sensor::on_stop(void)
 {
-	AUTOLOCK(m_mutex);
-
 	if (!m_sensor_hal->disable()) {
-		ERR("m_sensor_hal stop fail");
+		ERR("m_sensor_hal stop fail\n");
 		return false;
 	}
 
 	return stop_poll();
 }
 
-bool proxi_sensor::get_properties(const unsigned int type, sensor_properties_t &properties)
+bool proxi_sensor::get_properties(sensor_properties_t &properties)
 {
-	return m_sensor_hal->get_properties(properties);
+	m_sensor_hal->get_properties(properties);
+
+	properties.min_range = properties.min_range * 5;
+	properties.max_range = properties.max_range * 5;
+
+	return true;
 }
 
-int proxi_sensor::get_sensor_data(const unsigned int type, sensor_data_t &data)
+int proxi_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 {
 	int state;
 
@@ -140,7 +144,7 @@ int proxi_sensor::get_sensor_data(const unsigned int type, sensor_data_t &data)
 	state = m_sensor_hal->get_sensor_data(data);
 
 	if (state < 0) {
-		ERR("m_sensor_hal get struct_data fail");
+		ERR("m_sensor_hal get struct_data fail\n");
 		return -1;
 	}
 
@@ -159,7 +163,7 @@ void proxi_sensor::raw_to_base(sensor_data_t &data)
 
 void proxi_sensor::raw_to_state(sensor_data_t &data)
 {
-	data.values_num = 1;
+	data.value_count = 1;
 }
 
 extern "C" void *create(void)
@@ -169,14 +173,14 @@ extern "C" void *create(void)
 	try {
 		inst = new proxi_sensor();
 	} catch (int err) {
-		ERR("Failed to create proxi_sensor class, errno : %d, errstr : %s", err, strerror(err));
+		ERR("proxi_sensor class create fail , errno : %d , errstr : %s\n", err, strerror(err));
 		return NULL;
 	}
 
-	return (void *)inst;
+	return (void*)inst;
 }
 
 extern "C" void destroy(void *inst)
 {
-	delete (proxi_sensor *)inst;
+	delete (proxi_sensor*)inst;
 }
