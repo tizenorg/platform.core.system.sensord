@@ -1,5 +1,5 @@
 /*
- * sensord
+ * light_sensor_hal
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -16,24 +16,20 @@
  * limitations under the License.
  *
  */
-
 #include <fstream>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <dirent.h>
+
 #include <linux/input.h>
 #include <csensor_config.h>
+
 #include <light_sensor_hal.h>
+#include <sys/ioctl.h>
 #include <iio_common.h>
 
 using std::ifstream;
 using config::csensor_config;
-
-#define BIAS				1
-#define INITIAL_VALUE		-1
-#define INITIAL_TIME		0
-#define NO_OF_DATA_VAL		1
 
 #define SENSOR_TYPE_LIGHT		"LIGHT"
 #define ELEMENT_NAME			"NAME"
@@ -41,46 +37,93 @@ using config::csensor_config;
 #define ELEMENT_RAW_DATA_UNIT	"RAW_DATA_UNIT"
 #define ELEMENT_RESOLUTION		"RESOLUTION"
 #define ATTR_VALUE				"value"
+#define INITIAL_TIME -1
+#define BIAS	1
+#define INVALID_VALUE	-1
+#define INITIAL_VALUE	-1
 
 light_sensor_hal::light_sensor_hal()
-: m_adc(INITIAL_VALUE)
-, m_sensorhub_supported(false)
+: m_polling_interval(POLL_1HZ_MS)
+, m_adc(INVALID_VALUE)
+, m_fired_time(INITIAL_TIME)
+, m_node_handle(-1)
 {
-	if (!check_hw_node())
-	{
-		ERR("check_hw_node() fail");
+	const string sensorhub_interval_node_name = "light_poll_delay";
+	csensor_config &config = csensor_config::get_instance();
+
+	node_path_info_query query;
+	node_path_info info;
+	int input_method = IIO_METHOD;
+
+	if (!get_model_properties(SENSOR_TYPE_LIGHT, m_model_id, input_method)) {
+		ERR("Failed to find model_properties");
+		throw ENXIO;
+
+	}
+
+	query.input_method = IIO_METHOD;
+	query.sensorhub_controlled = m_sensorhub_controlled = is_sensorhub_controlled(sensorhub_interval_node_name);
+	query.sensor_type = SENSOR_TYPE_LIGHT;
+	query.input_event_key = "light_sensor";
+	query.iio_enable_node_name = "light_enable";
+	query.sensorhub_interval_node_name = sensorhub_interval_node_name;
+
+	if (!get_node_path_info(query, info)) {
+		ERR("Failed to get node info");
 		throw ENXIO;
 	}
 
-	csensor_config &config = csensor_config::get_instance();
+	show_node_path_info(info);
 
-	if (!config.get(SENSOR_TYPE_LIGHT, m_model_id, ELEMENT_VENDOR, m_vendor))
+	m_data_node = info.data_node_path;
+	m_enable_node = info.enable_node_path;
+	m_interval_node = info.interval_node_path;
+	
+	if(input_method == IIO_METHOD)
 	{
-		ERR("[VENDOR] is empty");
+	m_light_dir=info.base_dir;	
+	m_light_node = m_light_dir + string(ILL_CLEAR_NODE);
+
+	INFO("m_light_node = %s", m_light_node.c_str());
+	INFO("m_light_dir = %s", m_light_dir.c_str());
+	}	
+
+	if (!config.get(SENSOR_TYPE_LIGHT, m_model_id, ELEMENT_VENDOR, m_vendor)) {
+		ERR("[VENDOR] is empty\n");
 		throw ENXIO;
 	}
 
 	INFO("m_vendor = %s", m_vendor.c_str());
 
-	if (!config.get(SENSOR_TYPE_LIGHT, m_model_id, ELEMENT_NAME, m_chip_name))
-	{
-		ERR("[NAME] is empty");
+	if (!config.get(SENSOR_TYPE_LIGHT, m_model_id, ELEMENT_NAME, m_chip_name)) {
+		ERR("[NAME] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_chip_name = %s", m_chip_name.c_str());
-	INFO("light_sensor_hal is created!");
+	INFO("m_chip_name = %s\n",m_chip_name.c_str());
+
+	if ((m_node_handle = open(m_light_node.c_str(),O_RDWR)) < 0) {
+		ERR("Failed to open handle(%d)", m_node_handle);
+		throw ENXIO;
+	}	
+
+	INFO("light_sensor_hal is created!\n");
+
 }
 
 light_sensor_hal::~light_sensor_hal()
 {
-	INFO("light_sensor_hal is destroyed!");
+	close(m_node_handle);
+	m_node_handle = -1;
+
+	INFO("light_sensor_hal is destroyed!\n");
 }
 
 string light_sensor_hal::get_model_id(void)
 {
 	return m_model_id;
 }
+
 
 sensor_type_t light_sensor_hal::get_type(void)
 {
@@ -89,26 +132,32 @@ sensor_type_t light_sensor_hal::get_type(void)
 
 bool light_sensor_hal::enable(void)
 {
-	INFO("Resource already enabled. Enable not supported.");
+	
+	m_fired_time = INITIAL_TIME;
+	INFO("Light sensor real starting");
 	return true;
 }
 
 bool light_sensor_hal::disable(void)
 {
-	INFO("Disable not supported.");
+	
+	INFO("Light sensor real stopping");
 	return true;
 }
 
 bool light_sensor_hal::set_interval(unsigned long val)
 {
-	INFO("Polling not supported. Polling interval cannot be changed.");
+	
 	return true;
+
 }
 
-bool light_sensor_hal::update_value(void)
+
+bool light_sensor_hal::update_value(bool wait)
 {
+
 	unsigned short int adc = INITIAL_VALUE;
-	if (!read_node_value<unsigned short int>(m_clear_raw_node, adc))
+	if (!read_node_value<unsigned short int>(m_light_node, adc))
 	{
 		INFO("Read Value Failed. clear val: %d", adc);
 		return false;
@@ -118,97 +167,40 @@ bool light_sensor_hal::update_value(void)
 	m_adc = (int)adc;
 
 	return true;
+
+	
 }
 
 bool light_sensor_hal::is_data_ready(bool wait)
 {
 	bool ret;
-	ret = update_value();
+	ret = update_value(wait);
 	return ret;
 }
 
 int light_sensor_hal::get_sensor_data(sensor_data_t &data)
 {
 	AUTOLOCK(m_value_mutex);
-	data.data_accuracy = SENSOR_ACCURACY_GOOD;
-	data.data_unit_idx = SENSOR_UNIT_LUX;
-	data.timestamp = INITIAL_TIME;
-	data.values_num = NO_OF_DATA_VAL;
+	data.accuracy = SENSOR_ACCURACY_GOOD;
+	data.timestamp = m_fired_time ;
+	data.value_count = 1;
 	data.values[0] = (float) m_adc;
 
 	return 0;
 }
 
+
 bool light_sensor_hal::get_properties(sensor_properties_t &properties)
 {
-	properties.sensor_unit_idx = SENSOR_UNIT_LUX;
-	properties.sensor_min_range = 0;
-	properties.sensor_max_range = 65536;
-	snprintf(properties.sensor_name, sizeof(properties.sensor_name), "%s", m_chip_name.c_str());
-	snprintf(properties.sensor_vendor, sizeof(properties.sensor_vendor), "%s", m_vendor.c_str());
-	properties.sensor_resolution = 1.0f;
+	properties.name = m_chip_name;
+	properties.vendor = m_vendor;
+	properties.min_range = 0;
+	properties.max_range = 65536;
+	properties.min_interval = 1;
+	properties.resolution = 1;
+	properties.fifo_count = 0;
+	properties.max_batch_count = 0;
 	return true;
-}
-
-bool light_sensor_hal::is_sensorhub_supported(void)
-{
-	return false;
-}
-
-bool light_sensor_hal::check_hw_node(void)
-{
-	string name_node;
-	string hw_name;
-	string file_name;
-	DIR *main_dir = NULL;
-	struct dirent *dir_entry = NULL;
-	bool find_node = false;
-
-	INFO("======================start check_hw_node=============================");
-
-	m_sensorhub_supported = is_sensorhub_supported();
-	main_dir = opendir(IIO_DIR);
-
-	if (!main_dir)
-	{
-		ERR("Directory open failed to collect data");
-		return false;
-	}
-
-	while (!find_node)
-	{
-		dir_entry = readdir(main_dir);
-		if(dir_entry == NULL)
-			break;
-
-		if ((strncasecmp(dir_entry->d_name , ".", 1 ) != 0) && (strncasecmp(dir_entry->d_name , "..", 2 ) != 0) && (dir_entry->d_ino != 0))
-		{
-			file_name = string(IIO_DIR) + string(dir_entry->d_name) + string(NAME_NODE);
-
-			ifstream infile(file_name.c_str());
-
-			if (!infile)
-				continue;
-
-			infile >> hw_name;
-
-			if (strncmp(dir_entry->d_name, IIO_DEV_BASE_NAME, IIO_DEV_STR_LEN) == 0)
-			{
-				if (CConfig::get_instance().is_supported(SENSOR_TYPE_LIGHT, hw_name) == true)
-				{
-					m_name = m_model_id = hw_name;
-					m_clear_raw_node = string(IIO_DIR) + string(dir_entry->d_name) + string(ILL_CLEAR_NODE);
-					INFO("m_model_id = %s", m_model_id.c_str());
-					INFO("m_clear_raw_node = %s", m_clear_raw_node.c_str());
-					find_node = true;
-					break;
-				}
-			}
-		}
-	}
-	closedir(main_dir);
-
-	return find_node;
 }
 
 extern "C" void *create(void)
@@ -218,14 +210,14 @@ extern "C" void *create(void)
 	try {
 		inst = new light_sensor_hal();
 	} catch (int err) {
-		ERR("Failed to create light_sensor_hal class, errno : %d, errstr : %s", err, strerror(err));
+		ERR("light_sensor_hal class create fail , errno : %d , errstr : %s\n", err, strerror(err));
 		return NULL;
 	}
 
-	return (void *)inst;
+	return (void*)inst;
 }
 
 extern "C" void destroy(void *inst)
 {
-	delete (light_sensor_hal *)inst;
+	delete (light_sensor_hal*)inst;
 }
