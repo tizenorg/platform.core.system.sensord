@@ -30,8 +30,10 @@
 #include <orientation_sensor.h>
 #include <sensor_plugin_loader.h>
 #include <orientation_filter.h>
+#include <cvirtual_sensor_config.h>
 
 #define SENSOR_NAME "ORIENTATION_SENSOR"
+#define SENSOR_TYPE_ORIENTATION		"ORIENTATION"
 
 #define ACCELEROMETER_ENABLED 0x01
 #define GYROSCOPE_ENABLED 0x02
@@ -39,26 +41,28 @@
 #define ORIENTATION_ENABLED 7
 
 #define INITIAL_VALUE -1
-#define INITIAL_TIME 0
 
-// Below Defines const variables to be input from sensor config files once code is stabilized
-#define SAMPLING_TIME 100
 #define MS_TO_US 1000
 
-float bias_accel[] = {0.098586, 0.18385, (10.084 - GRAVITY)};
-float bias_gyro[] = {-5.3539, 0.24325, 2.3391};
-float bias_magnetic[] = {0, -37.6, +37.6};
-int sign_accel[] = {+1, +1, +1};
-int sign_gyro[] = {+1, +1, +1};
-int sign_magnetic[] = {+1, -1, +1};
-float scale_accel = 1;
-float scale_gyro = 580 * 2;
-float scale_magnetic = 1;
+#define AZIMUTH_OFFSET 360
 
-int pitch_phase_compensation = 1;
-int roll_phase_compensation = 1;
-int yaw_phase_compensation = -1;
-int magnetic_alignment_factor = 1;
+#define ELEMENT_NAME											"NAME"
+#define ELEMENT_VENDOR											"VENDOR"
+#define ELEMENT_RAW_DATA_UNIT									"RAW_DATA_UNIT"
+#define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
+#define ELEMENT_ACCEL_STATIC_BIAS								"ACCEL_STATIC_BIAS"
+#define ELEMENT_GYRO_STATIC_BIAS								"GYRO_STATIC_BIAS"
+#define ELEMENT_GEOMAGNETIC_STATIC_BIAS							"GEOMAGNETIC_STATIC_BIAS"
+#define ELEMENT_ACCEL_ROTATION_DIRECTION_COMPENSATION			"ACCEL_ROTATION_DIRECTION_COMPENSATION"
+#define ELEMENT_GYRO_ROTATION_DIRECTION_COMPENSATION			"GYRO_ROTATION_DIRECTION_COMPENSATION"
+#define ELEMENT_GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION		"GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION"
+#define ELEMENT_ACCEL_SCALE										"ACCEL_SCALE"
+#define ELEMENT_GYRO_SCALE										"GYRO_SCALE"
+#define ELEMENT_GEOMAGNETIC_SCALE								"GEOMAGNETIC_SCALE"
+#define ELEMENT_MAGNETIC_ALIGNMENT_FACTOR						"MAGNETIC_ALIGNMENT_FACTOR"
+#define ELEMENT_PITCH_ROTATION_COMPENSATION						"PITCH_ROTATION_COMPENSATION"
+#define ELEMENT_ROLL_ROTATION_COMPENSATION						"ROLL_ROTATION_COMPENSATION"
+#define ELEMENT_AZIMUTH_ROTATION_COMPENSATION					"AZIMUTH_ROTATION_COMPENSATION"
 
 void pre_process_data(sensor_data<float> &data_out, const float *data_in, float *bias, int *sign, float scale)
 {
@@ -73,13 +77,129 @@ orientation_sensor::orientation_sensor()
 , m_magnetic_sensor(NULL)
 , m_roll(INITIAL_VALUE)
 , m_pitch(INITIAL_VALUE)
-, m_yaw(INITIAL_VALUE)
+, m_azimuth(INITIAL_VALUE)
 {
+	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
+
 	m_name = string(SENSOR_NAME);
 	register_supported_event(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_interval = SAMPLING_TIME * MS_TO_US;
 	m_timestamp = get_timestamp();
 	m_enable_orientation = 0;
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_VENDOR, m_vendor)) {
+		ERR("[VENDOR] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_vendor = %s", m_vendor.c_str());
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
+		ERR("[RAW_DATA_UNIT] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_raw_data_unit = %s", m_raw_data_unit.c_str());
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
+		ERR("[DEFAULT_SAMPLING_TIME] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_default_sampling_time = %d", m_default_sampling_time);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_ACCEL_STATIC_BIAS, m_accel_static_bias, 3)) {
+		ERR("[ACCEL_STATIC_BIAS] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_accel_static_bias = (%f, %f, %f)", m_accel_static_bias[0], m_accel_static_bias[1], m_accel_static_bias[2]);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_GYRO_STATIC_BIAS, m_gyro_static_bias,3)) {
+		ERR("[GYRO_STATIC_BIAS] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_gyro_static_bias = (%f, %f, %f)", m_gyro_static_bias[0], m_gyro_static_bias[1], m_gyro_static_bias[2]);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_GEOMAGNETIC_STATIC_BIAS, m_geomagnetic_static_bias, 3)) {
+		ERR("[GEOMAGNETIC_STATIC_BIAS] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_geomagnetic_static_bias = (%f, %f, %f)", m_geomagnetic_static_bias[0], m_geomagnetic_static_bias[1], m_geomagnetic_static_bias[2]);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_ACCEL_ROTATION_DIRECTION_COMPENSATION, m_accel_rotation_direction_compensation, 3)) {
+		ERR("[ACCEL_ROTATION_DIRECTION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_accel_rotation_direction_compensation = (%d, %d, %d)", m_accel_rotation_direction_compensation[0], m_accel_rotation_direction_compensation[1], m_accel_rotation_direction_compensation[2]);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_GYRO_ROTATION_DIRECTION_COMPENSATION, m_gyro_rotation_direction_compensation, 3)) {
+		ERR("[GYRO_ROTATION_DIRECTION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_gyro_rotation_direction_compensation = (%d, %d, %d)", m_gyro_rotation_direction_compensation[0], m_gyro_rotation_direction_compensation[1], m_gyro_rotation_direction_compensation[2]);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION, m_geomagnetic_rotation_direction_compensation, 3)) {
+		ERR("[GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_geomagnetic_rotation_direction_compensation = (%d, %d, %d)", m_geomagnetic_rotation_direction_compensation[0], m_geomagnetic_rotation_direction_compensation[1], m_geomagnetic_rotation_direction_compensation[2]);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_ACCEL_SCALE, &m_accel_scale)) {
+		ERR("[ACCEL_SCALE] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_accel_scale = %f", m_accel_scale);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_GYRO_SCALE, &m_gyro_scale)) {
+		ERR("[GYRO_SCALE] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_gyro_scale = %f", m_gyro_scale);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_GEOMAGNETIC_SCALE, &m_geomagnetic_scale)) {
+		ERR("[GEOMAGNETIC_SCALE] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_geomagnetic_scale = %f", m_geomagnetic_scale);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_MAGNETIC_ALIGNMENT_FACTOR, &m_magnetic_alignment_factor)) {
+		ERR("[MAGNETIC_ALIGNMENT_FACTOR] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_magnetic_alignment_factor = %d", m_magnetic_alignment_factor);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_AZIMUTH_ROTATION_COMPENSATION, &m_azimuth_rotation_compensation)) {
+		ERR("[AZIMUTH_ROTATION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_azimuth_rotation_compensation = %d", m_azimuth_rotation_compensation);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_PITCH_ROTATION_COMPENSATION, &m_pitch_rotation_compensation)) {
+		ERR("[PITCH_ROTATION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_pitch_rotation_compensation = %d", m_pitch_rotation_compensation);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_ROLL_ROTATION_COMPENSATION, &m_roll_rotation_compensation)) {
+		ERR("[ROLL_ROTATION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_roll_rotation_compensation = %d", m_roll_rotation_compensation);
+
+	m_interval = m_default_sampling_time * MS_TO_US;
+
 }
 
 orientation_sensor::~orientation_sensor()
@@ -181,7 +301,7 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
-		pre_process_data(m_accel, event.data.values, bias_accel, sign_accel, scale_accel);
+		pre_process_data(m_accel, event.data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);
 
 		m_accel.m_time_stamp = event.data.timestamp;
 
@@ -193,7 +313,7 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
-		pre_process_data(m_gyro, event.data.values, bias_gyro, sign_gyro, scale_gyro);
+		pre_process_data(m_gyro, event.data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, m_gyro_scale);
 
 		m_gyro.m_time_stamp = event.data.timestamp;
 
@@ -205,7 +325,7 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
-		pre_process_data(m_magnetic, event.data.values, bias_magnetic, sign_magnetic, scale_magnetic);
+		pre_process_data(m_magnetic, event.data.values, m_geomagnetic_static_bias, m_geomagnetic_rotation_direction_compensation, m_geomagnetic_scale);
 
 		m_magnetic.m_time_stamp = event.data.timestamp;
 
@@ -216,23 +336,26 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		m_enable_orientation = 0;
 		m_timestamp = get_timestamp();
 
-		m_orientation.m_pitch_phase_compensation = pitch_phase_compensation;
-		m_orientation.m_roll_phase_compensation = roll_phase_compensation;
-		m_orientation.m_yaw_phase_compensation = yaw_phase_compensation;
-		m_orientation.m_magnetic_alignment_factor = magnetic_alignment_factor;
+		m_orientation.m_pitch_phase_compensation = m_pitch_rotation_compensation;
+		m_orientation.m_roll_phase_compensation = m_roll_rotation_compensation;
+		m_orientation.m_azimuth_phase_compensation = m_azimuth_rotation_compensation;
+		m_orientation.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
 
 		euler_orientation = m_orientation.get_orientation(m_accel, m_gyro, m_magnetic);
 
-		orientation_event.data.data_accuracy = SENSOR_ACCURACY_GOOD;
-		orientation_event.data.data_unit_idx = SENSOR_UNIT_DEGREE;
+		orientation_event.sensor_id = get_id();
 		orientation_event.event_type = ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME;
+		orientation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 		orientation_event.data.timestamp = m_timestamp;
-		orientation_event.data.values_num = 3;
-		orientation_event.data.values[0] = euler_orientation.m_ang.m_vec[0];
-		orientation_event.data.values[1] = euler_orientation.m_ang.m_vec[1];
-		orientation_event.data.values[2] = euler_orientation.m_ang.m_vec[2];
+		orientation_event.data.value_count = 3;
+		orientation_event.data.values[1] = euler_orientation.m_ang.m_vec[0];
+		orientation_event.data.values[2] = euler_orientation.m_ang.m_vec[1];
+		if (euler_orientation.m_ang.m_vec[2] >= 0)
+			orientation_event.data.values[0] = euler_orientation.m_ang.m_vec[2];
+		else
+			orientation_event.data.values[0] = euler_orientation.m_ang.m_vec[2] + AZIMUTH_OFFSET;
 
-		outs.push_back(orientation_event);
+		push(orientation_event);
 	}
 
 	return;
@@ -257,40 +380,41 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 	m_gyro_sensor->get_sensor_data(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME, gyro_data);
 	m_magnetic_sensor->get_sensor_data(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME, magnetic_data);
 
-	pre_process_data(accel, accel_data.values, bias_accel, sign_accel, scale_accel);
-	pre_process_data(gyro, gyro_data.values, bias_gyro, sign_gyro, scale_gyro);
-	pre_process_data(magnetic, magnetic_data.values, bias_magnetic, sign_magnetic, scale_magnetic);
+	pre_process_data(accel, accel_data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);
+	pre_process_data(gyro, gyro_data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, m_gyro_scale);
+	pre_process_data(magnetic, magnetic_data.values, m_geomagnetic_static_bias, m_geomagnetic_rotation_direction_compensation, m_geomagnetic_scale);
 	accel.m_time_stamp = accel_data.timestamp;
 	gyro.m_time_stamp = gyro_data.timestamp;
 	magnetic.m_time_stamp = magnetic_data.timestamp;
 
-	m_orientation.m_pitch_phase_compensation = pitch_phase_compensation;
-	m_orientation.m_roll_phase_compensation = roll_phase_compensation;
-	m_orientation.m_yaw_phase_compensation = yaw_phase_compensation;
-	m_orientation.m_magnetic_alignment_factor = magnetic_alignment_factor;
+	m_orientation.m_pitch_phase_compensation = m_pitch_rotation_compensation;
+	m_orientation.m_roll_phase_compensation = m_roll_rotation_compensation;
+	m_orientation.m_azimuth_phase_compensation = m_azimuth_rotation_compensation;
+	m_orientation.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
 
 	euler_orientation = m_orientation.get_orientation(accel, gyro, magnetic);
 
-	data.data_accuracy = SENSOR_ACCURACY_GOOD;
-	data.data_unit_idx = SENSOR_UNIT_DEGREE;
+	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();
-	data.values[0] = euler_orientation.m_ang.m_vec[0];
-	data.values[1] = euler_orientation.m_ang.m_vec[1];
-	data.values[2] = euler_orientation.m_ang.m_vec[2];
-	data.values_num = 3;
+	data.values[1] = euler_orientation.m_ang.m_vec[0];
+	data.values[2] = euler_orientation.m_ang.m_vec[1];
+	if (euler_orientation.m_ang.m_vec[2] >= 0)
+		data.values[0] = euler_orientation.m_ang.m_vec[2];
+	else
+		data.values[0] = euler_orientation.m_ang.m_vec[2] + AZIMUTH_OFFSET;
+	data.value_count = 3;
 
 	return 0;
 }
 
 bool orientation_sensor::get_properties(sensor_properties_t &properties)
 {
-	properties.sensor_unit_idx = SENSOR_UNIT_DEGREE;
-	properties.sensor_min_range = -180;
-	properties.sensor_max_range = 180;
-	properties.sensor_resolution = 1;
+	properties.min_range = -180;
+	properties.max_range = 360;
+	properties.resolution = 1;
 
-	strncpy(properties.sensor_vendor, "Samsung", MAX_KEY_LENGTH);
-	strncpy(properties.sensor_name, SENSOR_NAME, MAX_KEY_LENGTH);
+	properties.vendor = "Samsung";
+	properties.name = SENSOR_NAME;
 
 	return true;
 }

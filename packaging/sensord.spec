@@ -15,7 +15,7 @@ Source2:    sensord.socket
 %define geo_state ON
 %define pressure_state OFF
 %define temperature_state OFF
-%define orientation_state OFF
+%define orientation_state ON
 %define gravity_state OFF
 %define linear_accel_state OFF
 
