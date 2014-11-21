@@ -24,9 +24,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <fstream>
 
-using std::ifstream;
 using std::string;
 using std::stringstream;
 
@@ -282,38 +280,3 @@ bool cvirtual_sensor_config::is_supported(const string& sensor_type)
 	return true;
 }
 
-bool cvirtual_sensor_config::get_device_id(void)
-{
-	const string INFO_INI_PATH = "/etc/info.ini";
-	const string START_DELIMETER = "Model=";
-	const string END_DELIMETER = ";";
-	string line;
-	ifstream in_file;
-	std::size_t start_pos, end_pos;
-	bool ret = false;
-
-	in_file.open(INFO_INI_PATH);
-
-	if (!in_file.is_open())
-		return false;
-
-	while (!in_file.eof()) {
-		getline(in_file, line);
-		start_pos = line.find(START_DELIMETER);
-
-		if (start_pos != std::string::npos) {
-			start_pos = start_pos + START_DELIMETER.size();
-			end_pos = line.find(END_DELIMETER, start_pos);
-
-			if (end_pos != std::string::npos) {
-				m_device_id = line.substr(start_pos, end_pos - start_pos);
-				ret = true;
-				break;
-			}
-		}
-	}
-
-	in_file.close();
-
-	return ret;
-}

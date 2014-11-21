@@ -25,7 +25,6 @@
 
 using std::ifstream;
 using std::fstream;
-using config::csensor_config;
 
 cmutex sensor_hal::m_shared_mutex;
 

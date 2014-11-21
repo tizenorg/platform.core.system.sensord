@@ -20,13 +20,7 @@
 #if !defined(_CVIRTUAL_SENSOR_CONFIG_CLASS_H_)
 #define _CVIRTUAL_SENSOR_CONFIG_CLASS_H_
 
-#include <string>
-#include <unordered_map>
-#include <common.h>
-
-using std::unordered_map;
-using std::string;
-using std::istringstream;
+#include <cconfig.h>
 
 #define VIRTUAL_SENSOR_CONFIG_FILE_PATH "/usr/etc/virtual_sensors.xml"
 
@@ -55,15 +49,16 @@ typedef unordered_map<string,Virtual_sensor> Virtual_sensor_config;
 *
 */
 
-class cvirtual_sensor_config
+class cvirtual_sensor_config : public cconfig
 {
 private:
 	cvirtual_sensor_config();
 	cvirtual_sensor_config(cvirtual_sensor_config const&) {};
 	cvirtual_sensor_config& operator=(cvirtual_sensor_config const&);
+
 	bool load_config(const string& config_path);
+
 	Virtual_sensor_config m_virtual_sensor_config;
-	string m_device_id;
 public:
 	static cvirtual_sensor_config& get_instance(void);
 
@@ -76,7 +71,6 @@ public:
 	bool get(const string& sensor_type, const string& element, int *value, int count = 1);
 
 	bool is_supported(const string &sensor_type);
-	bool get_device_id(void);
 };
 
 #endif

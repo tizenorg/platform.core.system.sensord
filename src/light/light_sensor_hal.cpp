@@ -28,7 +28,6 @@
 #include <iio_common.h>
 
 using std::ifstream;
-using config::csensor_config;
 
 #define BIAS				1
 #define INITIAL_VALUE		-1

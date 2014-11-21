@@ -18,15 +18,12 @@
  */
 #include <fcntl.h>
 #include <sys/stat.h>
-
 #include <linux/input.h>
 #include <csensor_config.h>
-
 #include <accel_sensor_hal.h>
 #include <sys/poll.h>
 
 using std::ifstream;
-using config::csensor_config;
 
 #define GRAVITY 9.80665
 #define G_TO_MG 1000
