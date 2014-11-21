@@ -59,7 +59,7 @@ bool temperature_sensor::init()
 		return false;
 	}
 
-	m_resolution = properties.sensor_resolution;
+	m_resolution = properties.resolution;
 
 	INFO("%s is created!", sensor_base::get_name());
 
@@ -94,7 +94,7 @@ bool temperature_sensor::process_event(void)
 		raw_to_base(event.data);
 		push(event);
 	}
-
+	INFO("data value %f\n",event.data.values[0]);
 	return true;
 }
 
@@ -130,7 +130,7 @@ int temperature_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 	int ret;
 
 	ret = m_sensor_hal->get_sensor_data(data);
-
+	INFO("TYPE %d %d\n",type,TEMPERATURE_BASE_DATA_SET);
 	if (ret < 0)
 		return -1;
 
@@ -139,7 +139,7 @@ int temperature_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 		raw_to_base(data);
 		return 0;
 	}
-
+	INFO("data value base %f\n",data.values[0]);
 	return -1;
 }
 

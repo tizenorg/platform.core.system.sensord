@@ -22,15 +22,13 @@
 
 #include <sensor_hal.h>
 #include <string>
-
-
 #define IIO_DIR				"/sys/bus/iio/devices/"
 #define IIO_DEV_BASE_NAME	"iio:device"
 #define IIO_DEV_STR_LEN		10
 #define NAME_NODE			"/name"
-#define TEMP_OFFSET			"/in_temp_offset"
-#define TEMP_SCALE			"/in_temp_scale"
-#define TEMP_RAW			"/in_temp_raw"
+#define TEMP_OFFSET			"in_temp_offset"
+#define TEMP_SCALE			"in_temp_scale"
+#define TEMP_RAW			"in_temp_raw"
 
 using std::string;
 
@@ -47,9 +45,11 @@ public:
 	bool is_data_ready(bool wait);
 	virtual int get_sensor_data(sensor_data_t &data);
 	bool get_properties(sensor_properties_t &properties);
-
 private:
-	int m_temperature;
+	float m_temperature;
+	int m_node_handle;
+	unsigned long m_polling_interval;
+	unsigned long long m_fired_time;
 
 	string m_model_id;
 	string m_vendor;
@@ -59,16 +59,16 @@ private:
 	float m_raw_data_unit;
 	float m_temp_offset;
 
-	string m_temp_node;
+	string m_data_node;
+	string m_enable_node;
+	string m_interval_node;
 	string m_temperature_dir;
+	string m_temp_node;
 
-	bool m_sensorhub_supported;
+	bool m_sensorhub_controlled;
 
 	cmutex m_value_mutex;
 
 	bool update_value(bool wait);
-	bool is_sensorhub_supported(void);
-	bool check_hw_node(void);
-	bool enable_resource(bool enable);
 };
 #endif /*_TEMPERATURE_SENSOR_HAL_CLASS_H_*/
