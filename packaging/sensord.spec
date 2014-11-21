@@ -14,7 +14,7 @@ Source2:    sensord.socket
 %define light_state OFF
 %define geo_state ON
 %define pressure_state OFF
-%define temperature_state OFF
+%define temperature_state ON
 %define orientation_state OFF
 %define gravity_state OFF
 %define linear_accel_state OFF
@@ -136,14 +136,8 @@ systemctl daemon-reload
 %if %{build_test_suite} == "ON"
 %files -n sensor-tc
 %defattr(-,root,root,-)
-/usr/bin/accelerometer
-/usr/bin/geomagnetic
-/usr/bin/orientation
-/usr/bin/gravity
-/usr/bin/linear_acceleration
-/usr/bin/gyro
-/usr/bin/proxi
-/usr/bin/pressure
+
+/usr/bin/test-temp1
 %license LICENSE.APLv2
 %{_datadir}/license/test
 %endif
