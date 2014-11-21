@@ -159,10 +159,9 @@ bool light_sensor::get_properties(const unsigned int type, sensor_properties_t &
 		return 0;
 
 	if (type == LIGHT_BASE_DATA_SET) {
-		properties.sensor_unit_idx = SENSOR_UNIT_LEVEL;
-		properties.sensor_min_range = 0;
-		properties.sensor_max_range = sizeof(m_light_level) / sizeof(m_light_level[0]) - 1;
-		properties.sensor_resolution = 1;
+		properties.min_range = 0;
+		properties.max_range = sizeof(m_light_level) / sizeof(m_light_level[0]) - 1;
+		properties.resolution = 1;
 		return 0;
 	}
 
@@ -198,7 +197,6 @@ bool light_sensor::set_interval(unsigned long interval)
 
 void light_sensor::raw_to_level(sensor_data_t &data)
 {
-	data.data_unit_idx = SENSOR_UNIT_LEVEL;
 	data.values[0] = (int) adc_to_light_level((int)data.values[0]);
 	data.values_num = 1;
 }
