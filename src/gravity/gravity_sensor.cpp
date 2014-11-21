@@ -27,31 +27,72 @@
 #include <dlfcn.h>
 #include <common.h>
 #include <sf_common.h>
-#include <sensor_base.h>
 #include <gravity_sensor.h>
 #include <sensor_plugin_loader.h>
+#include <cvirtual_sensor_config.h>
 
 #define INITIAL_VALUE -1
-#define INITIAL_TIME 0
 #define GRAVITY 9.80665
 
+#define DEG2RAD (M_PI/180)
+
 #define SENSOR_NAME "GRAVITY_SENSOR"
+#define SENSOR_TYPE_GRAVITY		"GRAVITY"
+
+#define MS_TO_US 1000
+
+#define ELEMENT_NAME											"NAME"
+#define ELEMENT_VENDOR											"VENDOR"
+#define ELEMENT_RAW_DATA_UNIT									"RAW_DATA_UNIT"
+#define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
+#define ELEMENT_GRAVITY_SIGN_COMPENSATION						"GRAVITY_SIGN_COMPENSATION"
 
 gravity_sensor::gravity_sensor()
 : m_orientation_sensor(NULL)
 , m_x(INITIAL_VALUE)
 , m_y(INITIAL_VALUE)
 , m_z(INITIAL_VALUE)
-, m_timestamp(INITIAL_TIME)
 {
-	m_name = string(SENSOR_NAME);
+	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
+	m_name = string(SENSOR_NAME);
+	m_timestamp = get_timestamp();
 	register_supported_event(GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME);
+
+	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_VENDOR, m_vendor)) {
+		ERR("[VENDOR] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_vendor = %s", m_vendor.c_str());
+
+	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
+		ERR("[RAW_DATA_UNIT] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_raw_data_unit = %s", m_raw_data_unit.c_str());
+
+	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
+		ERR("[DEFAULT_SAMPLING_TIME] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_default_sampling_time = %d", m_default_sampling_time);
+
+	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_GRAVITY_SIGN_COMPENSATION, m_gravity_sign_compensation, 3)) {
+		ERR("[GRAVITY_SIGN_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_gravity_sign_compensation = (%d, %d, %d)", m_gravity_sign_compensation[0], m_gravity_sign_compensation[1], m_gravity_sign_compensation[2]);
+
+	m_interval = m_default_sampling_time * MS_TO_US;
 }
 
 gravity_sensor::~gravity_sensor()
 {
-	INFO("gravity_sensor is destroyed!");
+	INFO("gravity_sensor is destroyed!\n");
 }
 
 bool gravity_sensor::init()
@@ -77,6 +118,7 @@ bool gravity_sensor::on_start(void)
 	AUTOLOCK(m_mutex);
 
 	m_orientation_sensor->add_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_orientation_sensor->add_interval((int)this, (m_interval/MS_TO_US), true);
 	m_orientation_sensor->start();
 
 	activate();
@@ -88,6 +130,7 @@ bool gravity_sensor::on_stop(void)
 	AUTOLOCK(m_mutex);
 
 	m_orientation_sensor->delete_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_orientation_sensor->delete_interval((int)this, true);
 	m_orientation_sensor->stop();
 
 	deactivate();
@@ -113,24 +156,28 @@ bool gravity_sensor::delete_interval(int client_id)
 void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
 {
 	sensor_event_t gravity_event;
-	vector<sensor_event_t> orientation_event;
-	((virtual_sensor *)m_orientation_sensor)->synthesize(event, orientation_event);
 
-	if (!orientation_event.empty()) {
-		AUTOLOCK(m_mutex);
+	const float MIN_DELIVERY_DIFF_FACTOR = 0.75f;
+	unsigned long long diff_time;
 
-		m_timestamp = orientation_event[0].data.timestamp;
-		gravity_event.data.values[0] = GRAVITY * sin(orientation_event[0].data.values[1]);
-		gravity_event.data.values[1] = GRAVITY * sin(orientation_event[0].data.values[0]);
-		gravity_event.data.values[2] = GRAVITY * cos(orientation_event[0].data.values[1] *
-										orientation_event[0].data.values[0]);
-		gravity_event.data.values_num = 3;
+	if (event.event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
+		diff_time = event.data.timestamp - m_timestamp;
+
+		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
+			return;
+
+		gravity_event.sensor_id = get_id();
+		gravity_event.event_type = GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME;
+		m_timestamp = get_timestamp();
+		gravity_event.data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(event.data.values[2] * DEG2RAD);
+		gravity_event.data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(event.data.values[1] * DEG2RAD);
+		gravity_event.data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(event.data.values[2] * DEG2RAD) *
+										cos(event.data.values[1] * DEG2RAD);
+		gravity_event.data.value_count = 3;
 		gravity_event.data.timestamp = m_timestamp;
-		gravity_event.data.data_accuracy = SENSOR_ACCURACY_GOOD;
-		gravity_event.data.data_unit_idx = SENSOR_UNIT_METRE_PER_SECOND_SQUARED;
+		gravity_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 
-		outs.push_back(gravity_event);
-		return;
+		push(gravity_event);
 	}
 }
 
@@ -143,25 +190,24 @@ int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t
 
 	m_orientation_sensor->get_sensor_data(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME, orientation_data);
 
-	data.data_accuracy = SENSOR_ACCURACY_GOOD;
-	data.data_unit_idx = SENSOR_UNIT_METRE_PER_SECOND_SQUARED;
-	data.timestamp = orientation_data.timestamp;
-	data.values[0] = GRAVITY * sin(orientation_data.values[1]);
-	data.values[1] = GRAVITY * sin(orientation_data.values[0]);
-	data.values[2] = GRAVITY * cos(orientation_data.values[1] * orientation_data.values[0]);
-	data.values_num = 3;
+	data.accuracy = SENSOR_ACCURACY_GOOD;
+	data.timestamp = get_timestamp();
+	data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(orientation_data.values[2] * DEG2RAD);
+	data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(orientation_data.values[1] * DEG2RAD);
+	data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(orientation_data.values[2] * DEG2RAD) *
+						cos(orientation_data.values[1] * DEG2RAD);
+	data.value_count = 3;
 
 	return 0;
 }
 
-bool gravity_sensor::get_properties(const unsigned int type, sensor_properties_t &properties)
+bool gravity_sensor::get_properties(sensor_properties_t &properties)
 {
-	properties.sensor_unit_idx = SENSOR_UNIT_DEGREE;
-	properties.sensor_min_range = -GRAVITY;
-	properties.sensor_max_range = GRAVITY;
-	properties.sensor_resolution = 1;
-	strncpy(properties.sensor_vendor, "Samsung", MAX_KEY_LENGTH);
-	strncpy(properties.sensor_name, SENSOR_NAME, MAX_KEY_LENGTH);
+	properties.min_range = -GRAVITY;
+	properties.max_range = GRAVITY;
+	properties.resolution = 1;
+	properties.vendor = m_vendor;
+	properties.name = SENSOR_NAME;
 
 	return true;
 }
