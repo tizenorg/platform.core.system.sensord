@@ -14,7 +14,7 @@ Source2:    sensord.socket
 %define light_state OFF
 %define geo_state ON
 %define pressure_state OFF
-%define temperature_state OFF
+%define temperature_state ON
 %define orientation_state OFF
 %define gravity_state OFF
 %define linear_accel_state OFF
@@ -144,6 +144,7 @@ systemctl daemon-reload
 /usr/bin/gyro
 /usr/bin/proxi
 /usr/bin/pressure
+
 %license LICENSE.APLv2
 %{_datadir}/license/test
 %endif
