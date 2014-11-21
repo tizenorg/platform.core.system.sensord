@@ -20,15 +20,11 @@
 #ifndef _LINEAR_ACCEL_SENSOR_H_
 #define _LINEAR_ACCEL_SENSOR_H_
 
-#include <sensor.h>
-#include <vconf.h>
-#include <string>
+#include <sensor_internal.h>
 #include <virtual_sensor.h>
+#include <orientation_filter.h>
 
-using std::string;
-
-class linear_accel_sensor : public virtual_sensor
-{
+class linear_accel_sensor : public virtual_sensor {
 public:
 	linear_accel_sensor();
 	virtual ~linear_accel_sensor();
@@ -36,27 +32,39 @@ public:
 	bool init();
 	sensor_type_t get_type(void);
 
-	static bool working(void *inst);
-
-	bool on_start(void);
-	bool on_stop(void);
-
 	void synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs);
 
 	bool add_interval(int client_id, unsigned int interval);
 	bool delete_interval(int client_id);
 
 	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
-	bool get_properties(const unsigned int type, sensor_properties_t &properties);
+	bool get_properties(sensor_properties_t &properties);
 private:
 	sensor_base *m_accel_sensor;
 	sensor_base *m_gravity_sensor;
 	cmutex m_value_mutex;
 
+	sensor_data<float> m_accel;
+	sensor_data<float> m_gravity;
+
 	float m_x;
 	float m_y;
 	float m_z;
-	unsigned long long m_time;
+	unsigned long long m_timestamp;
+	unsigned int m_interval;
+
+	unsigned int m_enable_linear_accel;
+
+	string m_vendor;
+	string m_raw_data_unit;
+	int m_default_sampling_time;
+	float m_accel_static_bias[3];
+	int m_accel_rotation_direction_compensation[3];
+	float m_accel_scale;
+	int m_linear_accel_sign_compensation[3];
+
+	bool on_start(void);
+	bool on_stop(void);
 };
 
-#endif /*_LINEAR_ACCEL_SENSOR_H_*/
+#endif
