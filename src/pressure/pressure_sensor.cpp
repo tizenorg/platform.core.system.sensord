@@ -29,17 +29,15 @@ using config::csensor_config;
 using std::bind1st;
 using std::mem_fun;
 
-#define SENSOR_NAME				"PRESSURE_SENSOR"
-#define SENSOR_TYPE_PRESSURE	"PRESSURE"
+#define SENSOR_NAME "PRESSURE_SENSOR"
+#define SENSOR_TYPE_PRESSURE		"PRESSURE"
 #define ELEMENT_NAME			"NAME"
 #define ELEMENT_VENDOR			"VENDOR"
 #define ELEMENT_TEMPERATURE_RESOLUTION	"TEMPERATURE_RESOLUTION"
 #define ELEMENT_TEMPERATURE_OFFSET		"TEMPERATURE_OFFSET"
 #define ATTR_VALUE				"value"
 
-#define SEA_LEVEL_RESOLUTION	0.01
-#define ALT_CONST1				44330.0
-#define ALT_CONST2				(1.0f/5.255f)
+#define SEA_LEVEL_RESOLUTION 0.01
 
 pressure_sensor::pressure_sensor()
 : m_sensor_hal(NULL)
@@ -61,21 +59,19 @@ bool pressure_sensor::init()
 {
 	m_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(PRESSURE_SENSOR);
 
-	if (!m_sensor_hal)
-	{
+	if (!m_sensor_hal) {
 		ERR("cannot load sensor_hal[%s]", sensor_base::get_name());
 		return false;
 	}
 
 	sensor_properties_t properties;
 
-	if (m_sensor_hal->get_properties(properties) == false)
-	{
+	if (!m_sensor_hal->get_properties(properties)) {
 		ERR("sensor->get_properties() is failed!\n");
 		return false;
 	}
 
-	m_resolution = properties.sensor_resolution;
+	m_resolution = properties.resolution;
 
 	string model_id = m_sensor_hal->get_model_id();
 
@@ -83,8 +79,7 @@ bool pressure_sensor::init()
 
 	double temperature_resolution;
 
-	if (!config.get(SENSOR_TYPE_PRESSURE, model_id, ELEMENT_TEMPERATURE_RESOLUTION, temperature_resolution))
-	{
+	if (!config.get(SENSOR_TYPE_PRESSURE, model_id, ELEMENT_TEMPERATURE_RESOLUTION, temperature_resolution)) {
 		ERR("[TEMPERATURE_RESOLUTION] is empty\n");
 		throw ENXIO;
 	}
@@ -94,8 +89,7 @@ bool pressure_sensor::init()
 
 	double temperature_offset;
 
-	if (!config.get(SENSOR_TYPE_PRESSURE, model_id, ELEMENT_TEMPERATURE_OFFSET, temperature_offset))
-	{
+	if (!config.get(SENSOR_TYPE_PRESSURE, model_id, ELEMENT_TEMPERATURE_OFFSET, temperature_offset)) {
 		ERR("[TEMPERATURE_OFFSET] is empty\n");
 		throw ENXIO;
 	}
@@ -122,7 +116,6 @@ bool pressure_sensor::working(void *inst)
 bool pressure_sensor::process_event(void)
 {
 	sensor_event_t event;
-	int pressure;
 
 	if (!m_sensor_hal->is_data_ready(true))
 		return true;
@@ -131,8 +124,8 @@ bool pressure_sensor::process_event(void)
 
 	AUTOLOCK(m_client_info_mutex);
 
-	if (get_client_cnt(PRESSURE_EVENT_RAW_DATA_REPORT_ON_TIME))
-	{
+	if (get_client_cnt(PRESSURE_EVENT_RAW_DATA_REPORT_ON_TIME)) {
+		event.sensor_id = get_id();
 		event.event_type = PRESSURE_EVENT_RAW_DATA_REPORT_ON_TIME;
 		raw_to_base(event.data);
 		push(event);
@@ -143,8 +136,7 @@ bool pressure_sensor::process_event(void)
 
 bool pressure_sensor::on_start(void)
 {
-	if (!m_sensor_hal->enable())
-	{
+	if (!m_sensor_hal->enable()) {
 		ERR("m_sensor_hal start fail\n");
 		return false;
 	}
@@ -154,8 +146,7 @@ bool pressure_sensor::on_start(void)
 
 bool pressure_sensor::on_stop(void)
 {
-	if (!m_sensor_hal->disable())
-	{
+	if (!m_sensor_hal->disable()) {
 		ERR("m_sensor_hal stop fail\n");
 		return false;
 	}
@@ -163,12 +154,12 @@ bool pressure_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool pressure_sensor::get_properties(const unsigned int type, sensor_properties_t &properties)
+bool pressure_sensor::get_properties(sensor_properties_t &properties)
 {
 	return m_sensor_hal->get_properties(properties);
 }
 
-int pressure_sensor::get_sensor_data(const unsigned int type, sensor_data_t &data)
+int pressure_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 {
 	int ret;
 
@@ -177,8 +168,7 @@ int pressure_sensor::get_sensor_data(const unsigned int type, sensor_data_t &dat
 	if (ret < 0)
 		return -1;
 
-	if (type == PRESSURE_BASE_DATA_SET)
-	{
+	if (type == PRESSURE_BASE_DATA_SET) {
 		raw_to_base(data);
 		return 0;
 	}
@@ -197,25 +187,23 @@ bool pressure_sensor::set_interval(unsigned long interval)
 
 float pressure_sensor::pressure_to_altitude(float pressure)
 {
-	return ALT_CONST1 * (1.0f - pow(pressure/m_sea_level_pressure, ALT_CONST2));
+	return 44330.0f * (1.0f - pow(pressure/m_sea_level_pressure, 1.0f/5.255f));
 }
 
 void pressure_sensor::raw_to_base(sensor_data_t &data)
 {
 	m_sea_level_pressure = data.values[1] * SEA_LEVEL_RESOLUTION;
 	data.values[1] = pressure_to_altitude(data.values[0]);
+	data.value_count = 3;
 }
 
 extern "C" void *create(void)
 {
 	pressure_sensor *inst;
 
-	try
-	{
+	try {
 		inst = new pressure_sensor();
-	}
-	catch (int err)
-	{
+	} catch (int err) {
 		ERR("pressure_sensor class create fail , errno : %d , errstr : %s\n", err, strerror(err));
 		return NULL;
 	}

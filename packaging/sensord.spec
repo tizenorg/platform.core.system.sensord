@@ -13,7 +13,7 @@ Source2:    sensord.socket
 %define proxi_state ON
 %define light_state OFF
 %define geo_state ON
-%define pressure_state OFF
+%define pressure_state ON
 %define temperature_state OFF
 %define orientation_state OFF
 %define gravity_state OFF

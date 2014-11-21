@@ -23,20 +23,6 @@
 #include <sensor_hal.h>
 #include <string>
 
-#define IIO_DIR			"/sys/bus/iio/devices/"
-#define NAME_NODE		"/name"
-#define EVENT_DIR		"/events"
-#define EVENT_EN_NODE	"/in_pressure_mag_either_en"
-#define DEV_DIR			"/dev/"
-#define PRESSURE_SCALE	"/in_pressure_scale"
-#define PRESSURE_RAW	"/in_pressure_raw"
-#define TEMP_OFFSET		"/in_temp_offset"
-#define TEMP_SCALE		"/in_temp_scale"
-#define TEMP_RAW		"/in_temp_raw"
-
-#define IIO_DEV_BASE_NAME	"iio:device"
-#define IIO_DEV_STR_LEN		10
-
 using std::string;
 
 class pressure_sensor_hal : public sensor_hal
@@ -46,17 +32,15 @@ public:
 	virtual ~pressure_sensor_hal();
 	string get_model_id(void);
 	sensor_type_t get_type(void);
-
 	bool enable(void);
 	bool disable(void);
 	bool set_interval(unsigned long val);
 	bool is_data_ready(bool wait);
 	virtual int get_sensor_data(sensor_data_t &data);
-	bool get_properties(sensor_properties_t &properties);
+	virtual bool get_properties(sensor_properties_t &properties);
 
 private:
 	string m_model_id;
-	string m_name;
 	string m_vendor;
 	string m_chip_name;
 
@@ -67,6 +51,8 @@ private:
 	float m_temp_offset;
 	float m_temperature;
 
+	int m_resolution;
+
 	float m_min_range;
 	float m_max_range;
 	float m_raw_data_unit;
@@ -74,21 +60,20 @@ private:
 	unsigned long m_polling_interval;
 
 	unsigned long long m_fired_time;
-	int m_event_fd;
+	int m_node_handle;
+
+	string m_enable_node;
+	string m_data_node;
+	string m_interval_node;
 
 	string m_pressure_dir;
 	string m_pressure_node;
 	string m_temp_node;
-	string m_event_resource;
-	string m_enable_resource;
+
+	bool m_sensorhub_controlled;
 
 	cmutex m_value_mutex;
 
-	bool m_sensorhub_supported;
-
-	bool check_hw_node(void);
 	bool update_value(bool wait);
-	bool enable_resource(bool enable);
-	bool is_sensorhub_supported(void);
 };
 #endif /*_PRESSURE_SENSOR_HAL_CLASS_H_*/
