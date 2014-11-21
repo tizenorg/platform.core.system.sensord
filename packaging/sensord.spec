@@ -11,13 +11,13 @@ Source2:    sensord.socket
 %define accel_state ON
 %define gyro_state ON
 %define proxi_state ON
-%define light_state OFF
+%define light_state ON
 %define geo_state ON
-%define pressure_state OFF
-%define temperature_state OFF
-%define orientation_state OFF
-%define gravity_state OFF
-%define linear_accel_state OFF
+%define pressure_state ON
+%define temperature_state ON
+%define orientation_state ON
+%define gravity_state ON
+%define linear_accel_state ON
 
 %define build_test_suite OFF
 
@@ -144,6 +144,7 @@ systemctl daemon-reload
 /usr/bin/gyro
 /usr/bin/proxi
 /usr/bin/pressure
+
 %license LICENSE.APLv2
 %{_datadir}/license/test
 %endif
