@@ -1,0 +1,146 @@
+<html>
+<head><title>Information on Configuration of Virtual Sensors</title></head>
+
+<h1>Description for Orientation Virtual Sensor "ORIENTATION"</h1>
+
+<h2>XML Code</h2>
+
+
+&lt;ORIENTATION&gt;<br>
+&emsp;&lt;NAME value="ORIENTATION_SENSOR" &gt;<br>
+&emsp;&lt;VENDOR value="SAMSUNG" &gt;<br>
+&emsp;&lt;RAW_DATA_UNIT value="DEGREES" &gt;<br>
+&emsp;&lt;DEFAULT_SAMPLING_TIME value="100" &gt;<br>
+&emsp;&lt;ACCEL_STATIC_BIAS value1="0" value2="0" value3="0" &gt;<br>
+&emsp;&lt;GYRO_STATIC_BIAS value1="0" value2="0" value3="0" &gt;<br>
+&emsp;&lt;GEOMAGNETIC_STATIC_BIAS value1="0" value2="0" value3="0" &gt;<br>
+&emsp;&lt;ACCEL_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="-1" value3="-1" &gt;<br>
+&emsp;&lt;GYRO_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" &gt;<br>
+&emsp;&lt;GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="-1" value3="-1" &gt;<br>
+&emsp;&lt;ACCEL_SCALE value="1" &gt;<br>
+&emsp;&lt;GYRO_SCALE value="1146" &gt;<br>
+&emsp;&lt;GEOMAGNETIC_SCALE value="1" &gt;<br>
+&emsp;&lt;MAGNETIC_ALIGNMENT_FACTOR value="1" &gt;<br>
+&emsp;&lt;AZIMUTH_ROTATION_COMPENSATION value="-1" &gt;<br>
+&emsp;&lt;PITCH_ROTATION_COMPENSATION value="-1" &gt;<br>
+&emsp;&lt;ROLL_ROTATION_COMPENSATION value="-1" &gt;<br>
+&lt;ORIENTATION&gt;<br>
+
+<h2>Description of Congiguration in XML Code</h2>
+
+<p>Based on the configuration parameter there may be a single value or
+three values assigned. In case of three values, 'value1' represents X-axis
+component, 'value2' represents Y-axis component and 'value3' represents
+Z-axis component for any sensor.</p>
+
+<h3>NAME</h3>
+<p>Name of the Virtual Sensor</p>
+
+<h3>VENDOR</h3>
+<p>Name of the vendor who developed Orientation virtual sensor.</p>
+
+<h3>RAW_DATA_UNIT</h3>
+<p>Units for the raw data output from the Orientation virtual sensor. The
+unit options available are 'DEGREES' and 'RADIANS'. The output device
+orientation would be expresses in terms of degrees or radians based on the
+option selected.</p>
+
+<h3>DEFAULT_SAMPLING_TIME</h3>
+<p>Default sampling interval (in msec) value at which the Orientation
+virtual sensor is initialized.</p>
+
+<h3>ACCEL_STATIC_BIAS</h3>
+<p>The static bias value for accelerometer X, Y and Z axis data is
+computed when the device is at rest with an device orientation (pitch,
+roll, azimuth) as (0, 0, 0). The non-zero accelerometer data values observed
+on the X, Y and Z axis are the bias values to be entered respectively.
+The entered bias values would be subtracted from the accelerometer input
+data in the pre-processing stage of the sensor fusion algorithm.</p>
+
+<h3>GYRO_STATIC_BIAS</h3>
+<p>The static bias value for gyroscope X, Y and Z axis data is computed
+when the device is at rest with an device orientation (pitch, roll, azimuth)
+as (0, 0, 0). The non-zero gyroscope data values observed on the X, Y and
+Z axis are the bias values to be entered respectively. The entered bias
+values would be subtracted from the gyroscope input data in the
+pre-processing stage of the sensor fusion algorithm.</p>
+
+<h3>GEOMAGNETIC_STATIC_BIAS</h3>
+<p>The static bias value for geomagnetic sensor X, Y and Z axis data is
+computed when the device is at rest with an device orientation (pitch, roll,
+azimuth) as (0, 0, 0). The non-zero geomagnetic sensor data values observed
+on the X, Y and Z axis are the bias values to be entered respectively. The
+entered bias values would be subtracted from the geomagnetic sensor input
+data in the pre-processing stage of the sensor fusion algorithm.</p>
+
+<h3>ACCEL_ROTATION_DIRECTION_COMPENSATION</h3>
+<p>The rotation direction compensation for each axis X, Y and Z is assigned a
+value of "+1" if the clockwise rotation of the device for the particular axis
+results in positive increase in accelerometer data values. The rotation
+direction compensation for each axis is assigned a value of "-1" if for the
+clockwise rotation of the device for the particular axis results in negative
+increase in accelerometer data value. This parameter will take only take two
+values +1 or -1.</p>
+
+<h3>GYRO_ROTATION_DIRECTION_COMPENSATION</h3>
+<p>The rotation direction compensation for each axis X, Y and Z is assigned a
+value of "+1" if the clockwise rotation of the device for the particular axis
+results in positive change in gyroscope angular rate values. The rotation
+direction compensation for each axis is assigned a value of "-1" if for the
+clockwise rotation of the device for the particular axis results in negative
+change in gyroscope angular rate value. This parameter will take only take
+two values of either +1 or -1.</p>
+
+<h3>GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION</h3>
+<p>The rotation direction compensation for each axis X, Y and Z is assigned a
+value of "+1" if the clockwise rotation of the device around any of the 
+different axis results in a positive increase in geomagnetic sensor data values.
+The rotation direction compensation for the axis is assigned a value of "-1"
+if for the clockwise rotation of the device for the any axis results in
+negative increase in geomagnetic sensor value. This parameter will only take
+two values of either +1 or -1.</p>
+
+<h3>ACCEL_SCALE</h3>
+<p>In the current version of the sensor fusion algorithm this value is always
+set to +1.</p>
+
+<h3>GYRO_SCALE</h3>
+<p>If MAX_VAL is the maximum possible gyroscope data magnitude on all three
+axes for both the positive and negative measured values, then the value equal
+to (2 x MAX_VAL) should be entered for this field. The MAX_VAL magnitude which
+also is the same as the maximum range of the gyroscope sensor has to be taken
+from the sensor specification document or can be computed by rotating the
+device on all axis and measuring the maximum possible gyroscope value during
+the rotations.</p>
+
+<h3>GEOMAGNETIC_SCALE</h3>
+<p>In the current version of the sensor fusion algorithm this value is always
+set to +1.</p>
+
+<h3>MAGNETIC_ALIGNMENT_FACTOR</h3>
+<p>If the magnetic orientation of the device geomagnetic sensor points to north
+when the device azimuth is pointing north this value is set as +1. If the
+magnetic orientation of the device geomagnetic sensor points to south
+when the device azimuth is pointing north this value is set as -1. For both 
+the settings the North->East->South->West rotation of the device results in
+positive change in geomagnetic sensor data values and North->West->South->East
+rotation results in a negative change in geomagnetic sensor data values.</p>
+
+<h3>AZIMUTH_ROTATION_COMPENSATION</h3>
+<p>If the North->East->South->West azimuth rotation of the device results in
+positive increase in the azimuth output this value is set to +1.If the 
+North->East->South->West azimuth rotation of the device results in negative
+increase in the azimuth output this value is set to -1.</p>
+
+<h3>PITCH_ROTATION_COMPENSATION</h3>
+<p>If the clockwise pitch rotation of the device results in positive increase
+in the pitch output this value is set to +1.If the clockwise pitch rotation
+of the device results in negative increase in the pitch output this value is
+set to -1.</p>
+
+<h3>ROLL_ROTATION_COMPENSATION</h3>
+<p>If the clockwise roll rotation of the device results in positive increase
+in the roll output this value is set to +1.If the clockwise roll rotation
+of the device results in negative increase in the roll output this value is
+set to -1.</p>
+</html>
