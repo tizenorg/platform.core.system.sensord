@@ -44,7 +44,9 @@
 
 #define MS_TO_US 1000
 
-#define AZIMUTH_OFFSET 360
+#define PI 3.141593
+#define AZIMUTH_OFFSET_DEGREES 360
+#define AZIMUTH_OFFSET_RADIANS (2 * PI)
 
 #define ELEMENT_NAME											"NAME"
 #define ELEMENT_VENDOR											"VENDOR"
@@ -294,6 +296,7 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 	sensor_event_t orientation_event;
 	euler_angles<float> euler_orientation;
 	float raw_data[3];
+	float azimuth_offset;
 
 	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
 		diff_time = event.data.timestamp - m_timestamp;
@@ -343,6 +346,14 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 
 		euler_orientation = m_orientation.get_orientation(m_accel, m_gyro, m_magnetic);
 
+		if(m_raw_data_unit == "DEGREES") {
+			euler_orientation = rad2deg(euler_orientation);
+			azimuth_offset = AZIMUTH_OFFSET_DEGREES;
+		}
+		else {
+			azimuth_offset = AZIMUTH_OFFSET_RADIANS;
+		}
+
 		orientation_event.sensor_id = get_id();
 		orientation_event.event_type = ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME;
 		orientation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
@@ -353,7 +364,7 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		if (euler_orientation.m_ang.m_vec[2] >= 0)
 			orientation_event.data.values[0] = euler_orientation.m_ang.m_vec[2];
 		else
-			orientation_event.data.values[0] = euler_orientation.m_ang.m_vec[2] + AZIMUTH_OFFSET;
+			orientation_event.data.values[0] = euler_orientation.m_ang.m_vec[2] + azimuth_offset;
 
 		push(orientation_event);
 	}
@@ -372,6 +383,7 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 	sensor_data_t magnetic_data;
 
 	euler_angles<float> euler_orientation;
+	float azimuth_offset;
 
 	if (event_type != ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME)
 		return -1;
@@ -394,6 +406,14 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 
 	euler_orientation = m_orientation.get_orientation(accel, gyro, magnetic);
 
+	if(m_raw_data_unit == "DEGREES") {
+		euler_orientation = rad2deg(euler_orientation);
+		azimuth_offset = AZIMUTH_OFFSET_DEGREES;
+	}
+	else {
+		azimuth_offset = AZIMUTH_OFFSET_RADIANS;
+	}
+
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();
 	data.values[1] = euler_orientation.m_ang.m_vec[0];
@@ -401,7 +421,7 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 	if (euler_orientation.m_ang.m_vec[2] >= 0)
 		data.values[0] = euler_orientation.m_ang.m_vec[2];
 	else
-		data.values[0] = euler_orientation.m_ang.m_vec[2] + AZIMUTH_OFFSET;
+		data.values[0] = euler_orientation.m_ang.m_vec[2] + azimuth_offset;
 	data.value_count = 3;
 
 	return 0;
@@ -409,11 +429,17 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 
 bool orientation_sensor::get_properties(sensor_properties_t &properties)
 {
-	properties.min_range = -180;
-	properties.max_range = 360;
-	properties.resolution = 1;
+	if(m_raw_data_unit == "DEGREES") {
+		properties.min_range = -180;
+		properties.max_range = 360;
+	}
+	else {
+		properties.min_range = -PI;
+		properties.max_range = 2 * PI;
+	}
+	properties.resolution = 0.000001;;
 
-	properties.vendor = "Samsung";
+	properties.vendor = m_vendor;
 	properties.name = SENSOR_NAME;
 
 	return true;

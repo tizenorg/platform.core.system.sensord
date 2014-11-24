@@ -220,7 +220,7 @@ inline void orientation_filter<TYPE>::time_update()
 	m_quat_driv.quat_normalize();
 	quat_output = phase_correction(m_quat_driv, m_quat_aid);
 
-	orientation = rad2deg(quat2euler(quat_output));
+	orientation = quat2euler(quat_output);
 
 	m_orientation.m_ang.m_vec[0] = orientation.m_ang.m_vec[0] * m_pitch_phase_compensation;
 	m_orientation.m_ang.m_vec[1] = orientation.m_ang.m_vec[1] * m_roll_phase_compensation;
