@@ -1,0 +1,75 @@
+<html>
+<head><title>Information on Configuration of Virtual Sensors</title></head>
+
+<h1>Description for Orientation Virtual Sensor "ORIENTATION"</h1>
+
+<h2>XML Code</h2>
+
+<p>
+<ORIENTATION>
+	<NAME value="ORIENTATION_SENSOR" />
+	<VENDOR value="SAMSUNG" />
+	<RAW_DATA_UNIT value="DEGREES" />
+	<DEFAULT_SAMPLING_TIME value="100" />
+	<ACCEL_STATIC_BIAS value1="0" value2="0" value3="0" />
+	<GYRO_STATIC_BIAS value1="0" value2="0" value3="0" />
+	<GEOMAGNETIC_STATIC_BIAS value1="0" value2="0" value3="0" />
+	<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="-1" value3="-1" />
+	<GYRO_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
+	<GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="-1" value3="-1" />
+	<ACCEL_SCALE value="1" />
+	<GYRO_SCALE value="1146" />
+	<GEOMAGNETIC_SCALE value="1" />
+	<MAGNETIC_ALIGNMENT_FACTOR value="1" />
+	<AZIMUTH_ROTATION_COMPENSATION value="-1" />
+	<PITCH_ROTATION_COMPENSATION value="-1" />
+	<ROLL_ROTATION_COMPENSATION value="-1" />
+</ORIENTATION>
+</p>
+
+<h3>NAME</h3>
+<p>Name of the Virtual Sensor</p>
+
+<h3>VENDOR</h3>
+<p>Name of the vendor who developed Orientation virtual sensor.</p>
+
+<h3>RAW_DATA_UNIT</h3>
+<p>Units for the raw data output from the Orientation virtual sensor.</p>
+
+<h3>DEFAULT_SAMPLING_TIME</h3>
+<p>Default sampling interval (in msec) value at which the Orientation
+virtual sensor is initialized.</p>
+
+<h3>ACCEL_STATIC_BIAS</h3>
+<p>The static bias value for accelerometer X, Y and Z axis data is
+computed when the device is at rest with an device orientation (pitch,
+roll, yaw) as (0, 0, 0). The non-zero accelerometer data values observed
+on the X, Y and Z axis are the bias values to be entered respectively.
+The entered bias values would be subtracted from the accelerometer input
+data in the pre-processing stage of the sensor fusion algorithm.</p>
+
+<h3>GYRO_STATIC_BIAS</h3>
+<p>The static bias value for gyroscope X, Y and Z axis data is computed
+when the device is at rest with an device orientation (pitch, roll, yaw)
+as (0, 0, 0). The non-zero gyroscope data values observed on the X, Y and
+Z axis are the bias values to be entered respectively. The entered bias
+values would be subtracted from the gyroscope input data in the
+pre-processing stage of the sensor fusion algorithm.</p>
+
+<h3>GEOMAGNETIC_STATIC_BIAS</h3>
+<p>The static bias value for geomagnetic sensor X, Y and Z axis data is
+computed when the device is at rest with an device orientation (pitch, roll,
+yaw) as (0, 0, 0). The non-zero geomagnetic sensor data values observed on
+the X, Y and Z axis are the bias values to be entered respectively. The
+entered bias values would be subtracted from the geomagnetic sensor input
+data in the pre-processing stage of the sensor fusion algorithm.</p>
+
+<h3>ACCEL_ROTATION_DIRECTION_COMPENSATION</h3>
+<p>The rotation direction compensation for each axis X, Y and Z is assigned a
+value of "1" if the clockwise rotation of the device for the particular axis
+results in positive change in accelerometer data values. The rotation
+direction compensation for each axis is assigned a value of "-1" if for the
+clockwise rotation of the device for the particular axis results in negative
+increase in accelerometer data value.</p>
+
+</html>
