@@ -1,5 +1,5 @@
 /*
- * sensord
+ * light_sensor_hal
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -19,16 +19,9 @@
 
 #ifndef _LIGHT_SENSOR_HAL_H_
 #define _LIGHT_SENSOR_HAL_H_
-
+#define ILL_CLEAR_NODE	"in_illuminance_clear_raw"
 #include <sensor_hal.h>
 #include <string>
-
-#define IIO_DIR			"/sys/bus/iio/devices/"
-#define NAME_NODE		"/name"
-#define ILL_CLEAR_NODE	"/in_illuminance_clear_raw"
-
-#define IIO_DEV_BASE_NAME	"iio:device"
-#define IIO_DEV_STR_LEN		10
 
 using std::string;
 
@@ -45,21 +38,29 @@ public:
 	bool is_data_ready(bool wait);
 	virtual int get_sensor_data(sensor_data_t &data);
 	bool get_properties(sensor_properties_t &properties);
-	bool check_hw_node(void);
-
 private:
-	int m_adc;
-	bool m_sensorhub_supported;
-
 	string m_model_id;
-	string m_name;
 	string m_vendor;
 	string m_chip_name;
 
-	cmutex m_value_mutex;
-	string m_clear_raw_node;
+	unsigned long m_polling_interval;
 
-	bool update_value(void);
-	bool is_sensorhub_supported(void);
+	int m_adc;
+
+	unsigned long long m_fired_time;
+	int m_node_handle;
+
+	string m_enable_node;
+	string m_data_node;
+	string m_interval_node;
+	string m_clear_raw_node;
+	string m_light_dir;
+	string m_light_node;
+
+	bool m_sensorhub_controlled;
+
+	cmutex m_value_mutex;
+
+	bool update_value(bool wait);
 };
-#endif /*_LIGHT_SENSOR_HAL_H_*/
+#endif /*_GYRO_SENSOR_HAL_CLASS_H_*/
