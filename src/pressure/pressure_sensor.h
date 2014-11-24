@@ -25,7 +25,8 @@
 #include <physical_sensor.h>
 #include <sensor_hal.h>
 
-class pressure_sensor : public physical_sensor {
+class pressure_sensor : public physical_sensor
+{
 public:
 	pressure_sensor();
 	virtual ~pressure_sensor();
@@ -52,7 +53,6 @@ private:
 	bool process_event(void);
 	float pressure_to_altitude(float pressure);
 	void raw_to_base(sensor_data_t &data);
-
 };
 
 #endif

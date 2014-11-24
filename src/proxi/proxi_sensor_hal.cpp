@@ -27,7 +27,6 @@
 #include <iio_common.h>
 
 using std::ifstream;
-using config::csensor_config;
 
 #define NO_FLAG			0
 #define PROXIMITY_TYPE	8
@@ -41,7 +40,6 @@ using config::csensor_config;
 #define ATTR_VALUE 				"value"
 
 #define PROXI_CODE	0x0019
-
 
 proxi_sensor_hal::proxi_sensor_hal()
 : m_state(PROXIMITY_STATE_FAR)

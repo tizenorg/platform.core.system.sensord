@@ -29,7 +29,6 @@
 
 using std::ifstream;
 using std::string;
-using config::csensor_config;
 
 #define SENSOR_TYPE_PRESSURE	"PRESSURE"
 #define ELEMENT_NAME			"NAME"

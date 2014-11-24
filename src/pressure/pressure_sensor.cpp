@@ -19,13 +19,11 @@
 
 #include <common.h>
 #include <sf_common.h>
-
 #include <pressure_sensor.h>
 #include <sensor_plugin_loader.h>
 #include <algorithm>
 #include <csensor_config.h>
 
-using config::csensor_config;
 using std::bind1st;
 using std::mem_fun;
 

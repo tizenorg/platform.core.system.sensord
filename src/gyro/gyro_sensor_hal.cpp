@@ -19,17 +19,14 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <dirent.h>
-
 #include <linux/input.h>
 #include <csensor_config.h>
-
 #include <gyro_sensor_hal.h>
 #include <sys/ioctl.h>
 #include <fstream>
 #include <sys/poll.h>
 
 using std::ifstream;
-using config::csensor_config;
 
 #define DPS_TO_MDPS 1000
 #define MIN_RANGE(RES) (-((1 << (RES))/2))

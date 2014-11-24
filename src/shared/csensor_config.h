@@ -20,13 +20,7 @@
 #if !defined(_CSENSOR_CONFIG_CLASS_H_)
 #define _CSENSOR_CONFIG_CLASS_H_
 
-#include <string>
-#include <unordered_map>
-#include <common.h>
-
-using std::unordered_map;
-using std::string;
-using std::istringstream;
+#include <cconfig.h>
 
 #define SENSOR_CONFIG_FILE_PATH "/usr/etc/sensors.xml"
 
@@ -74,30 +68,28 @@ typedef unordered_map<string,Model_list> Sensor_config;
 *
 */
 
-namespace config
+class csensor_config : public cconfig
 {
-	class csensor_config
-	{
-	private:
-		csensor_config();
-		csensor_config(csensor_config const&) {};
-		csensor_config& operator=(csensor_config const&);
-		bool load_config(const string& config_path);
-		Sensor_config m_sensor_config;
-		string m_device_id;
-	public:
-		static csensor_config& get_instance(void);
+private:
+	csensor_config();
+	csensor_config(csensor_config const&) {};
+	csensor_config& operator=(csensor_config const&);
 
-		bool get(const string& sensor_type, const string& model_id, const string& element, const string& attr, string& value);
-		bool get(const string& sensor_type, const string& model_id, const string& element, const string& attr, double& value);
-		bool get(const string& sensor_type, const string& model_id, const string& element, const string& attr, long& value);
+	bool load_config(const string& config_path);
 
-		bool get(const string& sensor_type, const string& model_id, const string& element, string& value);
-		bool get(const string& sensor_type, const string& model_id, const string& element, double& value);
-		bool get(const string& sensor_type, const string& model_id, const string& element, long& value);
+	Sensor_config m_sensor_config;
+public:
+	static csensor_config& get_instance(void);
 
-		bool is_supported(const string &sensor_type, const string &model_id);
-		bool get_device_id(void);
-	};
-}
+	bool get(const string& sensor_type, const string& model_id, const string& element, const string& attr, string& value);
+	bool get(const string& sensor_type, const string& model_id, const string& element, const string& attr, double& value);
+	bool get(const string& sensor_type, const string& model_id, const string& element, const string& attr, long& value);
+
+	bool get(const string& sensor_type, const string& model_id, const string& element, string& value);
+	bool get(const string& sensor_type, const string& model_id, const string& element, double& value);
+	bool get(const string& sensor_type, const string& model_id, const string& element, long& value);
+
+	bool is_supported(const string &sensor_type, const string &model_id);
+};
+
 #endif

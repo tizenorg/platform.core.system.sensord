@@ -20,16 +20,13 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <dirent.h>
-
 #include <linux/input.h>
 #include <csensor_config.h>
-
 #include <light_sensor_hal.h>
 #include <sys/ioctl.h>
 #include <iio_common.h>
 
 using std::ifstream;
-using config::csensor_config;
 
 #define SENSOR_TYPE_LIGHT		"LIGHT"
 #define ELEMENT_NAME			"NAME"

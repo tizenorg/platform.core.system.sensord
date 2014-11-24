@@ -26,9 +26,7 @@
 #include <sys/ioctl.h>
 #include <iio_common.h>
 
-
 using std::ifstream;
-using config::csensor_config;
 
 #define SENSOR_TYPE_TEMPERATURE		"TEMPERATURE"
 #define ELEMENT_NAME				"NAME"
