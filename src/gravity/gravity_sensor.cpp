@@ -205,7 +205,7 @@ bool gravity_sensor::get_properties(sensor_properties_t &properties)
 {
 	properties.min_range = -GRAVITY;
 	properties.max_range = GRAVITY;
-	properties.resolution = 1;
+	properties.resolution = 0.000001;;
 	properties.vendor = m_vendor;
 	properties.name = SENSOR_NAME;
 

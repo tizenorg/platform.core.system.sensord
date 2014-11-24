@@ -276,6 +276,9 @@ bool linear_accel_sensor::get_properties(sensor_properties_t &properties)
 	m_gravity_sensor->get_properties(properties);
 	properties.name = "Linear Acceleration Sensor";
 	properties.vendor = m_vendor;
+	properties.min_range = - 2 * GRAVITY;
+	properties.max_range = 2 * GRAVITY;
+	properties.resolution = 0.000001;
 
 	return true;
 }
