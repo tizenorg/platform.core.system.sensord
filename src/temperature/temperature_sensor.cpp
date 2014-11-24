@@ -59,7 +59,7 @@ bool temperature_sensor::init()
 		return false;
 	}
 
-	m_resolution = properties.sensor_resolution;
+	m_resolution = properties.resolution;
 
 	INFO("%s is created!", sensor_base::get_name());
 
