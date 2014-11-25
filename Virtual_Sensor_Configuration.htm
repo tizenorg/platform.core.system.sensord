@@ -180,7 +180,7 @@ Z-axis component for any sensor.</p>
 
 <h4>2.2.3 RAW_DATA_UNIT</h4>
 <p>Units for the raw data output from the Gravity virtual sensor. The
-unit options available are 'M/S^2'.</p>
+unit options available are &quot;m/s<sup>2</sup>&quot;.</p>
 
 <h4>2.2.4 DEFAULT_SAMPLING_TIME</h4>
 <p>Default sampling interval (in msec) value at which the Gravity virtual
@@ -193,4 +193,68 @@ to +G, the orthogonal axis gravity component is set to +1. When the device
 orientation on a specific axis changes from 0 to &#928/2 and the gravity
 component for the orthogonal axis changes from 0 to -G, the orthogonal axis
 gravity component value is set to -1.</p>
-</html>
+
+<h2>3. Linear Acceleration Virtual Sensor</h2>
+
+<h3>3.1 XML Code</h3>
+
+&lt;LINEAR_ACCEL&gt;<br>
+&emsp;&lt;NAME value="LINEAR_ACCEL_SENSOR" &gt;<br>
+&emsp;&lt;VENDOR value="SAMSUNG" &gt;<br>
+&emsp;&lt;RAW_DATA_UNIT value="M/S^2" &gt;<br>
+&emsp;&lt;DEFAULT_SAMPLING_TIME value="100" &gt;<br>
+&emsp;&lt;ACCEL_STATIC_BIAS value1="0" value2="0" value3="0" &gt;<br>
+&emsp;&lt;ACCEL_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="-1" value3="-1" &gt;<br>
+&emsp;&lt;ACCEL_SCALE value="1" &gt;<br>
+&emsp;&lt;LINEAR_ACCEL_SIGN_COMPENSATION value1="1" value2="1" value3="1" &gt;<br>
+&lt;LINEAR_ACCEL&gt;<br>
+
+<h3>3.2 Description of Configuration in XML Code</h3>
+
+<p>Based on the configuration parameter there may be a single value or
+three values assigned. In case of three values, 'value1' represents X-axis
+component, 'value2' represents Y-axis component and 'value3' represents
+Z-axis component for any sensor.</p>
+
+<h4>3.2.1 NAME</h4>
+<p>Name of the Virtual Sensor</p>
+
+<h4>3.2.2 VENDOR</h4>
+<p>Name of the vendor who developed Linear Acceleration virtual sensor.</p>
+
+<h4>3.2.3 RAW_DATA_UNIT</h4>
+<p>Units for the raw data output from the Linear Acceleration virtual
+sensor. The unit options available are &quot;m/s<sup>2</sup>&quot;.</p>
+
+<h4>3.2.4 DEFAULT_SAMPLING_TIME</h4>
+<p>Default sampling interval (in msec) value at which the Linear
+Acceleration virtual sensor is initialized.</p>
+
+<h4>3.2.5 ACCEL_STATIC_BIAS</h4>
+<p>The static bias value for accelerometer X, Y and Z axis data is
+computed when the device is at rest with an device orientation (pitch,
+roll, azimuth) as (0, 0, 0). The non-zero accelerometer data values observed
+on the X, Y and Z axis are the bias values to be entered respectively.
+The entered bias values would be subtracted from the accelerometer input
+data in the pre-processing stage of the sensor fusion algorithm.</p>
+
+<h4>3.2.6 ACCEL_ROTATION_DIRECTION_COMPENSATION</h4>
+<p>The rotation direction compensation for each axis X, Y and Z is assigned a
+value of "+1" if the clockwise rotation of the device for the particular axis
+results in positive increase in accelerometer data values. The rotation
+direction compensation for each axis is assigned a value of "-1" if for the
+clockwise rotation of the device for the particular axis results in negative
+increase in accelerometer data value. This parameter will take only take two
+values +1 or -1.</p>
+
+<h4>3.2.7 ACCEL_SCALE</h4>
+<p>In the current version of the sensor fusion algorithm this value is always
+set to +1.</p>
+
+<h4>3.2.8 LINEAR_ACCEL_SIGN_COMPENSATION</h4>
+<p>When the device is linearly displaced along any of the axis in positive
+direction and the linear acceleration component for that axis should be
+positive, in this case then this value is set to +1. When the device is
+linearly displaced along any of the axis in the positive direction and if the
+linear acceleration component for that axis is measured to be negative, in this
+case this value is set to -1.</p>
