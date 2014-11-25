@@ -53,6 +53,7 @@ private:
 
 	string m_vendor;
 	string m_raw_data_unit;
+	string m_orientation_data_unit;
 	int m_default_sampling_time;
 	int m_gravity_sign_compensation[3];
 
