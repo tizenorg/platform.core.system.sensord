@@ -38,6 +38,7 @@
 
 #define SENSOR_NAME "GRAVITY_SENSOR"
 #define SENSOR_TYPE_GRAVITY		"GRAVITY"
+#define SENSOR_TYPE_ORIENTATION		"ORIENTATION"
 
 #define MS_TO_US 1000
 
@@ -46,6 +47,7 @@
 #define ELEMENT_RAW_DATA_UNIT									"RAW_DATA_UNIT"
 #define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
 #define ELEMENT_GRAVITY_SIGN_COMPENSATION						"GRAVITY_SIGN_COMPENSATION"
+#define ELEMENT_ORIENTATION_DATA_UNIT							"RAW_DATA_UNIT"
 
 gravity_sensor::gravity_sensor()
 : m_orientation_sensor(NULL)
@@ -65,6 +67,13 @@ gravity_sensor::gravity_sensor()
 	}
 
 	INFO("m_vendor = %s", m_vendor.c_str());
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_ORIENTATION_DATA_UNIT, m_orientation_data_unit)) {
+		ERR("[ORIENTATION_DATA_UNIT] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_orientation_data_unit = %s", m_orientation_data_unit.c_str());
 
 	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
 		ERR("[RAW_DATA_UNIT] is empty\n");
@@ -156,9 +165,13 @@ bool gravity_sensor::delete_interval(int client_id)
 void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
 {
 	sensor_event_t gravity_event;
+	float conversion_const = 1;
 
 	const float MIN_DELIVERY_DIFF_FACTOR = 0.75f;
 	unsigned long long diff_time;
+
+	if(m_orientation_data_unit == "DEGREES")
+		conversion_const = DEG2RAD;
 
 	if (event.event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
 		diff_time = event.data.timestamp - m_timestamp;
@@ -169,10 +182,10 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 		gravity_event.sensor_id = get_id();
 		gravity_event.event_type = GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME;
 		m_timestamp = get_timestamp();
-		gravity_event.data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(event.data.values[2] * DEG2RAD);
-		gravity_event.data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(event.data.values[1] * DEG2RAD);
-		gravity_event.data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(event.data.values[2] * DEG2RAD) *
-										cos(event.data.values[1] * DEG2RAD);
+		gravity_event.data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(event.data.values[2] * conversion_const);
+		gravity_event.data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(event.data.values[1] * conversion_const);
+		gravity_event.data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(event.data.values[2] * conversion_const) *
+										cos(event.data.values[1] * conversion_const);
 		gravity_event.data.value_count = 3;
 		gravity_event.data.timestamp = m_timestamp;
 		gravity_event.data.accuracy = SENSOR_ACCURACY_GOOD;
@@ -184,6 +197,10 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &data)
 {
 	sensor_data_t orientation_data;
+	float conversion_const = 1;
+
+	if(m_orientation_data_unit == "DEGREES")
+		conversion_const = DEG2RAD;
 
 	if (event_type != GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME)
 		return -1;
@@ -192,10 +209,10 @@ int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();
-	data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(orientation_data.values[2] * DEG2RAD);
-	data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(orientation_data.values[1] * DEG2RAD);
-	data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(orientation_data.values[2] * DEG2RAD) *
-						cos(orientation_data.values[1] * DEG2RAD);
+	data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(orientation_data.values[2] * conversion_const);
+	data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(orientation_data.values[1] * conversion_const);
+	data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(orientation_data.values[2] * conversion_const) *
+						cos(orientation_data.values[1] * conversion_const);
 	data.value_count = 3;
 
 	return 0;
