@@ -127,7 +127,7 @@ set to +1.</p>
 when the device azimuth is pointing north this value is set as +1. If the
 magnetic orientation of the device geomagnetic sensor points to south
 when the device azimuth is pointing north this value is set as -1. For both
-the settings the North->East->South->West rotation of the device results in
+the settings, the North->East->South->West rotation of the device results in
 positive change in geomagnetic sensor data values and North->West->South->East
 rotation results in a negative change in geomagnetic sensor data values.</p>
 
@@ -148,4 +148,49 @@ set to -1.</p>
 in the roll output this value is set to +1. If the clockwise roll rotation
 of the device results in negative increase in the roll output this value is
 set to -1.</p>
+
+<h2>2. Gravity Virtual Sensor</h2>
+
+<FIGURE>
+<img src="./device_gravity.png" width="30%" height="40%">
+</FIGURE><br>
+
+<h3>2.1 XML Code</h3>
+
+&lt;GRAVITY&gt;<br>
+&emsp;&lt;NAME value="GRAVITY_SENSOR" &gt;<br>
+&emsp;&lt;VENDOR value="SAMSUNG" &gt;<br>
+&emsp;&lt;RAW_DATA_UNIT value="M/S^2" &gt;<br>
+&emsp;&lt;DEFAULT_SAMPLING_TIME value="100" &gt;<br>
+&emsp;&lt;GRAVITY_SIGN_COMPENSATION value1="1" value2="1" value3="1" &gt;<br>
+&lt;GRAVITY&gt;<br>
+
+<h3>2.2 Description of Configuration in XML Code</h3>
+
+<p>Based on the configuration parameter there may be a single value or
+three values assigned. In case of three values, 'value1' represents X-axis
+component, 'value2' represents Y-axis component and 'value3' represents
+Z-axis component for any sensor.</p>
+
+<h4>2.2.1 NAME</h4>
+<p>Name of the Virtual Sensor</p>
+
+<h4>2.2.2 VENDOR</h4>
+<p>Name of the vendor who developed Gravity virtual sensor.</p>
+
+<h4>2.2.3 RAW_DATA_UNIT</h4>
+<p>Units for the raw data output from the Gravity virtual sensor. The
+unit options available are 'M/S^2'.</p>
+
+<h4>2.2.4 DEFAULT_SAMPLING_TIME</h4>
+<p>Default sampling interval (in msec) value at which the Gravity virtual
+sensor is initialized.</p>
+
+<h4>2.2.5 GRAVITY_SIGN_COMPENSATION</h4>
+<p>When the device orientation on a specific axis changes from 0 to
+&#928/2 and the gravity component for the orthogonal axis changes from 0
+to +G, the orthogonal axis gravity component is set to +1. When the device
+orientation on a specific axis changes from 0 to &#928/2 and the gravity
+component for the orthogonal axis changes from 0 to -G, the orthogonal axis
+gravity component value is set to -1.</p>
 </html>
