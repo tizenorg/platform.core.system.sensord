@@ -21,7 +21,7 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <sensor.h>
+#include <sensor_internal.h>
 #include <stdbool.h>
 
 static GMainLoop *mainloop;
@@ -86,10 +86,7 @@ int main(int argc,char **argv)
 
 	start_handle = sf_start(handle,0);
 
-	if (start_handle >= 0) {
-		printf("Success start \n");
-	}
-	else {
+	if (start_handle < 0) {
 		printf("Error\n\n\n\n");
 		sf_unregister_event(handle, event);
 		sf_disconnect(handle);
@@ -103,8 +100,10 @@ int main(int argc,char **argv)
 
 	stop_handle = sf_stop(handle);
 
-	if (stop_handle >= 0)
-		printf("Success stop \n");
+	if (stop_handle < 0) {
+		printf("Failed to stop proximity sensor\n\n");
+		return -1;
+	}
 
 	sf_disconnect(handle);
 
