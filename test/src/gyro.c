@@ -21,7 +21,7 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <sensor.h>
+#include <sensor_internal.h>
 #include <stdbool.h>
 
 static GMainLoop *mainloop;
@@ -50,7 +50,7 @@ int main(int argc,char **argv)
 	sensor_type_t type = GYROSCOPE_SENSOR;
 	event_condition_t *event_condition = (event_condition_t*) malloc(sizeof(event_condition_t));
 	event_condition->cond_op = CONDITION_EQUAL;
-	event_condition->cond_value1=10.52;
+	event_condition->cond_value1 = 10.52;
 
 	if (argc != 2 && argc != 3) {
 		printformat();
