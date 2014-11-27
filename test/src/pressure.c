@@ -21,7 +21,7 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <sensor.h>
+#include <sensor_internal.h>
 #include <stdbool.h>
 
 static GMainLoop *mainloop;
