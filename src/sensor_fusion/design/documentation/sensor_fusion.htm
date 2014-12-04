@@ -187,29 +187,79 @@ Estimation.</FIGCAPTION>
 </center>
 </FIGURE>
 
-<h3>Noise Covariance Computation</h3>
-
-<p>The process noise covariance (Q) is calculated by computing
-covariance of windowed block of driving system data. The measurement noise
-covariance (R) is calculated by computing covariance of windowed block of aiding
-system data. The process and measurement covariance computed are to be used in
-Kalman filtering.</p>
-
-<h3>Kalman Filtering</h3>
+<h3>Time Update System</h3>
 
 <FIGURE>
 <center>
-<img src="./diagram/kalman_filter_stages.png">
-<FIGCAPTION>Fig. 3. Kalman Filter Stages.</FIGCAPTION>
+<img src="./equation/equation_19.png" width="35%" height="3.75%">
 </center>
 </FIGURE>
 
-<p>To ensure linear Kalman filtering the following error state equation is used:</p>
+<FIGURE>
+<center>
+<img src="./equation/equation_20.png" width="35%" height="6%">
+</center>
+</FIGURE>
 
-<p><img src="./equation/state_equation.png"></p>
+<FIGURE>
+<center>
+<img src="./equation/equation_21.png" width="35%" height="3.75%">
+</center>
+</FIGURE>
 
-<p>,where the first term is the quaternion representation of the Euler angles
-error and the next three terms are the error in knowledge of bias errors.</p>
+<FIGURE>
+<center>
+<img src="./equation/equation_22.png" width="35%" height="6%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_23.png" width="35%" height="3.75%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_24.png" width="35%" height="8%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_25.png" width="35%" height="8%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_26.png" width="35%" height="6%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_27.png" width="35%" height="14%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_28.png" width="35%" height="15%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_29.png" width="35%" height="3.5%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_30.png" width="35%" height="3.5%">
+</center>
+</FIGURE>
 
 <h3>Determination of Gravity</h3>
 <p>When a device is subjected to motion in Euclidean space, the 3D accelerometer
