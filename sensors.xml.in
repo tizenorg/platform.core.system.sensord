@@ -167,64 +167,6 @@
 		</MODEL>
 	</MAGNETIC>
 
-	<PEDO>
-		<MODEL id="MPU6051">
-			<NAME value="MPU6051"/>
-			<VENDOR value="Invensense"/>
-		</MODEL>
-
-		<MODEL id="MPU6500">
-			<NAME value="MPU6500"/>
-			<VENDOR value="Invensense"/>
-		</MODEL>
-
-		<MODEL id="MPU6515">
-			<NAME value="MPU6515"/>
-			<VENDOR value="Invensense"/>
-		</MODEL>
-	</PEDO>
-
-	<FLAT>
-		<MODEL id="MPU6051">
-			<NAME value="MPU6051"/>
-			<VENDOR value="Invensense"/>
-		</MODEL>
-
-		<MODEL id="MPU6500">
-			<NAME value="MPU6500"/>
-			<VENDOR value="Invensense"/>
-		</MODEL>
-
-		<MODEL id="MPU6515">
-			<NAME value="MPU6515"/>
-			<VENDOR value="Invensense"/>
-		</MODEL>
-	</FLAT>
-
-	<BIO>
-		<MODEL id="ADPD142">
-			<NAME value="ADPD142"/>
-			<VENDOR value="ANALOG DEVICES"/>
-		</MODEL>
-
-		<MODEL id="MAX86900">
-			<NAME value="MAX86900"/>
-			<VENDOR value="MAXIM"/>
-		</MODEL>
-	</BIO>
-
-	<BIO_HRM>
-		<MODEL id="ADPD142">
-			<NAME value="ADPD142"/>
-			<VENDOR value="ANALOG DEVICES"/>
-		</MODEL>
-
-		<MODEL id="MAX86900">
-			<NAME value="MAX86900"/>
-			<VENDOR value="MAXIM"/>
-		</MODEL>
-	</BIO_HRM>
-
 	<PRESSURE>
 		<MODEL id="LPS25H">
 			<NAME value="LPS25H"/>

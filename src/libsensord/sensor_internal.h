@@ -43,7 +43,6 @@ extern "C"
 #include <sensor_geomag.h>
 #include <sensor_light.h>
 #include <sensor_proxi.h>
-#include <sensor_motion.h>
 #include <sensor_gyro.h>
 #include <sensor_pressure.h>
 #include <sensor_context.h>
