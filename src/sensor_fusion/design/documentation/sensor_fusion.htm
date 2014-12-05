@@ -261,7 +261,34 @@ Estimation.</FIGCAPTION>
 </center>
 </FIGURE>
 
-<h3>Determination of Gravity</h3>
+
+<h3>Measurement Update System</h3>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_31.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_32.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_33.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_34.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<h3>Determination of Gravity and Linear Acceleration</h3>
 <p>When a device is subjected to motion in Euclidean space, the 3D accelerometer
 data generated from the device is a combination of linear acceleration and gravity
 components which are a measure of linear and rotational motion respectively.The
@@ -277,16 +304,30 @@ width="40%" height="40%">
 </center>
 </FIGURE>
 
+<FIGURE>
+<center>
+<img src="./equation/equation_35.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_36.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_37.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
 <p>Gravity virtual sensor data provides the measure of the direction in which the
 Earth’s gravitational force is observed in the device’s frame of reference. The
 orientation of the device decides the measure of the influence of Earth’s gravitational
 force on the 3-axes of the device. The following equations are used for projecting
 the tilt(pitch, roll) of the device on the Earth’s gravity axis to determine earth’s
 gravitational effect on the devices reference axis.</p>
-
-<p>GRx = Earth’s Gravity * sin(pitch)</p>
-<p>GRy = Earth’s Gravity * sin(roll)</p>
-<p>GRz = Earth’s Gravity * cos(pitch) * cos(roll)</p>
 
 <FIGURE>
 <center>
@@ -309,9 +350,24 @@ a device after removing the Gravity components on the 3-axes. Accurate linear
 acceleration data are calculated by subtracting gravity components from the 3-axes
 calibrated accelerometer data.</p>
 
-<p>LAx = Ax – GRy</p>
-<p>LAy = Ay – GRx</p>
-<p>LAz = Az – GRz</p>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_38.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_39.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_40.png" width="35%" height="4%">
+</center>
+</FIGURE>
 
 <h1>References</h1>
 
