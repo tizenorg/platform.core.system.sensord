@@ -3,7 +3,7 @@
 
 <h1><center>Sensor Fusion for Tizen Sensor Framework</center></h1>
 
-<h2>Introduction</h2>
+<h2>1. Introduction</h2>
 
 <p>Sensor Fusion is the process of combining the accelerometer,
 gyroscope and geo-magnetic sensor in order to generate accurate virtual sensor
@@ -31,12 +31,12 @@ mechanical lock-in</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Quantization error: inherent
 in all digitized systems</p>
 
-<h2>Sensors Used for Sensor Fusion</h2>
+<h2>2. Sensors Used for Sensor Fusion</h2>
 
 <p>Accelerometer Sensor :- Accelerometer data is a combination of linear
 acceleration and gravity components. Applications would be interested in using
 linear acceleration and gravity sensor data separately. Sensor fusion could be
-used to separate linear acceleration and gravity components.  Additionally,
+used to separate linear acceleration and gravity components. Additionally,
 accelerometer is used for correcting the roll and pitch orientation measurements
 generated from the gyroscope. Using the same, corrected tilt measurement (roll
 and pitch) is generated. </p>
@@ -52,9 +52,7 @@ along Z axis to produce correct yaw measurement. Geo-Magnetic sensor along with
 GPS latitude-longitude measurements could be used to accurately estimate
 heading of the device.</p>
 
-<h2>Orientation Estimation</h2>
-
-<p><center></center></p>
+<h2>3. Orientation Estimation</h2>
 
 <FIGURE>
 <center>
@@ -62,6 +60,22 @@ heading of the device.</p>
 <FIGCAPTION>Fig. 1. Device Orientation in Euler Angles.</FIGCAPTION>
 </center>
 </FIGURE>
+
+<p>The rotation of the device along the y-axis is considered as roll (&#934;),
+x-axis as pitch (&#920;) and the z-axis as yaw (&#936;) as shown in Fig. 1. The
+orientation of the device can be represented either in terms of Euler angles
+(roll, pitch, yaw), or in the form of Rotation Matrix, or in the form of
+Quaternions. These are different mathematical forms of representing the same
+device orientation data. During orientation estimation all these representations
+would be used based on requirements and for stability reasons. When the device is
+lying flat on the x-y axis, the earthâ€™s gravitational force is observed along the
+device z-axis. The reference axis for the device considered in this paper is shown
+in Fig. 1. The device reference x and y axis may change for each device, based on
+the individual MEMS sensor chipÂ reference axis (that can be obtained from the
+datasheet) or the orientation of the sensor chip when it gets integrated into the
+device. The equations related to the computation of orientation, gravity and
+linear acceleration virtual sensors would have to be modified based on the change
+in reference axes.</p>
 
 <FIGURE>
 <center>
@@ -72,7 +86,35 @@ Estimation.</FIGCAPTION>
 </center>
 </FIGURE>
 
-<h3>Preprocessing of Sensor Data</h3>
+<p>The overall method for determining orientation of a device based on sensor
+fusion is shown in Fig. 2. This paper proposes to improve on the existing approach
+[1] to obtain more accurate orientation estimate. The Aiding System is used in sensor
+fusion for computing an inaccurate value for device orientation based on the
+accelerometer and the magnetometer sensor data. The accelerometer and magnetometer
+sensor data is combined using the Triad algorithm explained in [3] to obtain an
+inaccurate orientation measure. The problem with the orientation measured using the
+aiding system is that the smaller orientation changes of the device are not detected
+accurately. The orientation measured using the aiding system is not accurate due to
+the effect of gravity on the sensor data. But the aiding system orientation measured
+has the advantage that it is not affected by drift. The driving system is used for
+computing the orientation of a device using the 3D angular rates measured by the
+gyroscope sensor. The gyroscope sensor is accurate in detecting even small
+orientation changes but the orientation derived from it are affected due to drift.
+The drift in the measured gyroscope orientation is due to the integration of the
+noise components present along with angular rates samples measured with the gyroscope.
+</p>
+
+<p>The Kalman filtering stage consists of two systems, the time update system where
+the current instances of the state vector and prediction error covariance are
+estimated based on the measurements obtained from the previous time instance. The
+orientation data that is measured using the aiding system and the driving system are
+fused during this stage. The second stage of the Kalman filtering process is the
+measurement update system, where the estimated state and prediction error covariance
+are corrected based on the Kalman gain factor that computed in this stage. The bias
+that is estimated during this stage is used to correct the pre-processed gyroscope
+sensor data that is given as input to the time update system.</p>
+
+<h3>3.1. Preprocessing of Sensor Data</h3>
 
 <FIGURE>
 <center>
@@ -111,7 +153,7 @@ Estimation.</FIGCAPTION>
 </FIGURE>
 
 
-<h3>Orientation Computation Based on Aiding System</h3>
+<h3>3.2. Orientation Computation Based on Aiding System</h3>
 
 <FIGURE>
 <center>
@@ -161,7 +203,7 @@ Estimation.</FIGCAPTION>
 </center>
 </FIGURE>
 
-<h3>Orientation Computation Based on Driving System</h3>
+<h3>3.3. Orientation Computation Based on Driving System</h3>
 
 <FIGURE>
 <center>
@@ -187,7 +229,7 @@ Estimation.</FIGCAPTION>
 </center>
 </FIGURE>
 
-<h3>Time Update System</h3>
+<h3>3.4. Time Update System</h3>
 
 <FIGURE>
 <center>
@@ -262,7 +304,7 @@ Estimation.</FIGCAPTION>
 </FIGURE>
 
 
-<h3>Measurement Update System</h3>
+<h3>3.5. Measurement Update System</h3>
 
 <FIGURE>
 <center>
@@ -288,7 +330,7 @@ Estimation.</FIGCAPTION>
 </center>
 </FIGURE>
 
-<h3>Determination of Gravity and Linear Acceleration</h3>
+<h3>4. Determination of Gravity and Linear Acceleration</h3>
 <p>When a device is subjected to motion in Euclidean space, the 3D accelerometer
 data generated from the device is a combination of linear acceleration and gravity
 components which are a measure of linear and rotational motion respectively.The
@@ -323,10 +365,10 @@ width="40%" height="40%">
 </FIGURE>
 
 <p>Gravity virtual sensor data provides the measure of the direction in which the
-Earth’s gravitational force is observed in the device’s frame of reference. The
-orientation of the device decides the measure of the influence of Earth’s gravitational
+Earth's gravitational force is observed in the device frame of reference. The
+orientation of the device decides the measure of the influence of Earth's gravitational
 force on the 3-axes of the device. The following equations are used for projecting
-the tilt(pitch, roll) of the device on the Earth’s gravity axis to determine earth’s
+the tilt(pitch, roll) of the device on the Earth's gravity axis to determine earth's
 gravitational effect on the devices reference axis.</p>
 
 <FIGURE>
