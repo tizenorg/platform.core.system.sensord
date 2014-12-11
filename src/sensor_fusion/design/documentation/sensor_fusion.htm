@@ -115,6 +115,18 @@ that is estimated during this stage is used to correct the pre-processed gyrosco
 sensor data that is given as input to the time update system.</p>
 
 <h3>3.1. Preprocessing of Sensor Data</h3>
+<p>The raw sensor data obtained from accelerometer (RAx, RAy, RAz), gyroscope
+(RGx, RGy, RGz) and magnetometer (Magx, Magy, Magz) would have to pre-processed
+before the sensor fusion process. The raw sensor data obtained from the
+accelerometer and gyroscope sensors are affected by static bias, which are the
+non-zero sensor data values observed when the device is void of any external forces.
+These static bias components on the 3-axes (BAx, BAy, BAz) for accelerometer and
+(BGx, BGy, BGz) for gyroscope are removed from the reported sensor values as shown in
+(1) and (2). There is no static bias compensation for magnetometer data, as the
+sensor measures the deviation of the x-axis relative to the earth's magnetic poles
+and it is not possible to determine if the phone is deviating from exact north. The
+'i' in the equations below specifies the current time instant, 'i-1' specifies the
+previous time instant and a '0' specifies it as an initialization value.</p>
 
 <FIGURE>
 <center>
@@ -128,6 +140,10 @@ sensor data that is given as input to the time update system.</p>
 </center>
 </FIGURE>
 
+<p>The accelerometer and magnetometer data are  normalized based on equations (3) 
+and (4) to obtain the calibrated accelerometer data (Ax, Ay, Az) and magnetometer
+data (Mx, My, Mz).</p> 
+
 <FIGURE>
 <center>
 <img src="./equation/equation_3.png" width="35%" height="9%">
@@ -140,11 +156,21 @@ sensor data that is given as input to the time update system.</p>
 </center>
 </FIGURE>
 
+<p>The paper proposes that the gyroscope angular rates (on all 3 axes) before
+being processed further are scaled to the range -1 to +1 (for accurate orientation
+estimation) by dividing all data received by the maximum possible gyroscope
+angular rate value apriori in each axis (5).</p>
+
 <FIGURE>
 <center>
 <img src="./equation/equation_5.png" width="35%" height="8%">
 </center>
 </FIGURE>
+
+<p>Based on [1], the dynamically variable Gyroscope Bias (Bx, By, Bz) is computed
+using the Kalman filter and provided as feedback to the input and is subtracted
+from scaled gyroscope data to obtain the corrected and pre-processed gyroscope
+data (Gx, Gy, Gz) given in (6).</p>
 
 <FIGURE>
 <center>
