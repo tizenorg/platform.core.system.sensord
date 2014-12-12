@@ -181,6 +181,31 @@ data (Gx, Gy, Gz) given in (6).</p>
 
 <h3>3.2. Orientation Computation Based on Aiding System</h3>
 
+<p>The device is placed on a flat surface as shown in the Fig. 1. The gravity
+vector in the earth frame for the device (Ae) is given by (0, 0, ±1) since the
+effect of gravity is observed on the z-axis reading of the Accelerometer. The sign
+assigned is based on whether the z-axis of the accelerometer (when facing up) is
+aligned towards gravity or against it. The magnetic field vector in the earth frame
+for the device (Me) is given by (0, ±1, 0) since the magnetic north is detected on
+the y-axis of the magnetometer. The sign assigned is based on whether the y-axis
+of the magnetometer is aligned to earth’s magnetic field or against it. The gravity
+vector in the device body frame (Ab) is given by (Ax, Ay, Az), which represents the
+calibrated accelerometer sensor data. The magnetic field vector in the device body
+frame (Mb) is given by (Mx, My, Mz) which represents the calibrated magnetometer
+sensor data.</p>
+
+<p>The orientation of the device is computed based on the aiding system
+(accelerometer + magnetometer) data and can be computed using the triad algorithm
+[3]. The triad algorithm determines the orientation of the device based on the
+gravity and magnetic field vectors obtained in the earth and device body frames.
+The following equations represent the triad algorithm using which the orientation
+of the device in the form of rotation matrix can be obtained. The symbol × denotes
+the cross product of two vectors [8]. Combining the vectors obtained from (7) and
+(9) along with the body frame gravity vector (Ab) the intermediate rotation matrix
+is obtained for body frame MATb, as shown in (11). Combining the vectors obtained
+from (8) and (10) along with the earth frame gravity vector (Ae) the intermediate
+rotation matrix is obtained for earth frame MATe, as shown in (12).</p>
+
 <FIGURE>
 <center>
 <img src="./equation/equation_7.png" width="35%" height="4%">
@@ -217,11 +242,21 @@ data (Gx, Gy, Gz) given in (6).</p>
 </center>
 </FIGURE>
 
+<p>Finally the rotation matrix of the device representing the orientation derived
+from the aiding system RMaid is computed by multiplying the matrices MATb and MATe
+as shown in (13).</p>
+
 <FIGURE>
 <center>
 <img src="./equation/equation_13.png" width="35%" height="3%">
 </center>
 </FIGURE>
+
+<p>The device orientation computed in the form of aiding system rotation matrix is
+then converted to quaternion representation Qaid (14) using the function
+RotMat2Quat() which is explained in [6, 9]. Using quaternions to estimate
+orientation overcomes the singularity issues faced when using Euler Angles and at
+the same time they are computationally more efficient than using rotation matrix.</p>
 
 <FIGURE>
 <center>
