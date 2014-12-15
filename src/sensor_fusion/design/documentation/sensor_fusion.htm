@@ -266,6 +266,19 @@ the same time they are computationally more efficient than using rotation matrix
 
 <h3>3.3. Orientation Computation Based on Driving System</h3>
 
+<p>The sensor data obtained from the driving system (gyroscope) given by (Gx, Gy, Gz)
+represents the calibrated angular rotation rate of the device in the 3-axes. Since
+the calibrated gyroscope data provides the rate of change of angle in each axis,
+the integration of the data acquired in each axis provides the orientation measure
+of the device. During integration of the gyroscope data the noise present in each
+instance of the measured data gets added up resulting in measured orientation
+affected by drift. First the measured gyroscope data is converted to a quaternion
+equivalent Qdriv [14, 15]. The initial value for the Qdriv is assigned based on the
+computed Qaid initial value (15). The quaternion differential which denotes the
+increment in rotation is computed by quaternion based multiplication [7, 9] of Qdriv
+with gyroscope sensor data as shown in (16). The symbol ʘ denotes quaternion based
+multiplication in the following equations.</p>
+
 <FIGURE>
 <center>
 <img src="./equation/equation_15.png" width="35%" height="3.5%">
@@ -277,6 +290,13 @@ the same time they are computationally more efficient than using rotation matrix
 <img src="./equation/equation_16.png" width="35%" height="6%">
 </center>
 </FIGURE>
+
+<p>Equation (17) represents the integration of the quaternion difference value with
+the driving system quaternion to yield the measured quaternion value for that time
+instant [1]. The value ‘dt’ represents the sampling interval for the gyroscope sensor
+and ‘π’ denotes the mathematical constant and denotes the ratio of a circle’s
+circumference to its diameter and is approximately equal to 3.14159. The driving
+system quaternion is then normalized as shown in equation (18).</p>
 
 <FIGURE>
 <center>
