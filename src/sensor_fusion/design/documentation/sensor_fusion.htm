@@ -312,17 +312,36 @@ system quaternion is then normalized as shown in equation (18).</p>
 
 <h3>3.4. Time Update System</h3>
 
+<p>The orientation computed using the driving system sensor data is affected due to
+the drift (from the integration of angular rates), the orientation computed using
+the aiding system sensor data is not accurate (measurements are affected due to gravity).
+To compensate for the deficiencies in the measurements of each system, the quaternion
+orientation computations are combined using sensor fusion to obtain corrected/more
+accurate device orientation data. The Quaternion error Qerr is computed in (19), as
+described in [1].</p>
+
 <FIGURE>
 <center>
 <img src="./equation/equation_19.png" width="35%" height="3.75%">
 </center>
 </FIGURE>
 
+<p>We introduce the equations (20) and (21) to compute the Euler error from the
+quaternion error and then using this Euler error to compensate for drift on the driving
+system orientation quaternion. First, the quaternion error Qerr is converted to the Euler
+angle representation Eerr based on (20). The quaternion representation of orientation
+error is converted to Euler angles representation using the function quat2euler() for
+which information can be found in [9].</p>
+
 <FIGURE>
 <center>
 <img src="./equation/equation_20.png" width="35%" height="6%">
 </center>
 </FIGURE>
+
+<p>The driving system quaternion is then compensated for the Euler angle error Eerr and
+normalized as per (21) and (22) to correct for drift observed in the driving system sensor
+data.</p>
 
 <FIGURE>
 <center>
@@ -336,11 +355,24 @@ system quaternion is then normalized as shown in equation (18).</p>
 </center>
 </FIGURE>
 
+<p>The quaternion Qdriv that is derived in (22) is now compensated for drift and corrected
+for dynamic bias as shown in (6). The dynamic bias correction used in (6) is determined
+using Kalman filtering as explained below. Based on [1], linear Kalman filtering is used
+based on the error state equation, given in (23). The first three elements of the error
+state vector are the Eerr values on the 3-axes (&#934;err, &#920;err, &#936;err) and the
+next three elements are the bias compensation (Bx, By, Bz) that is mentioned in (6).</p>
+
 <FIGURE>
 <center>
 <img src="./equation/equation_23.png" width="35%" height="3.75%">
 </center>
 </FIGURE>
+
+<p>The variance in the gyroscope angular rate measurements denoted by Qwn over a windowed
+period is computed in (24). The random driving process noise variance Qwb is computed in
+(25), where the noise standard deviation σw and time constant τw are obtained from the
+gyroscope sensor datasheet. Based on [1], the overall process noise covariance Q is
+derived from the computed Qwn and Qwb as shown in (26).</p>
 
 <FIGURE>
 <center>
@@ -360,11 +392,19 @@ system quaternion is then normalized as shown in equation (18).</p>
 </center>
 </FIGURE>
 
+<p>The variance in the aiding system orientation (roll, pitch and yaw) measurements are
+used to compute the measurement noise covariance R [1] which is shown in (27). The aiding
+system orientation in terms of Euler angles Eaid can be obtained by converting the
+quaternion obtained in (14) to its equivalent Euler angles.</p>
+
 <FIGURE>
 <center>
 <img src="./equation/equation_27.png" width="35%" height="14%">
 </center>
 </FIGURE>
+
+<p>The equations (28), (29) and (30) are used to determine the transformation matrix F,
+apriori state vector error &Delta;x- and prediction covariance P- based in [1].</p>
 
 <FIGURE>
 <center>
