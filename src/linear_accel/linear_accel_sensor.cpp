@@ -53,8 +53,8 @@
 #define LINEAR_ACCEL_ENABLED 3
 
 linear_accel_sensor::linear_accel_sensor()
-: m_gravity_sensor(NULL)
-, m_accel_sensor(NULL)
+: m_accel_sensor(NULL)
+, m_gravity_sensor(NULL)
 , m_x(INITIAL_VALUE)
 , m_y(INITIAL_VALUE)
 , m_z(INITIAL_VALUE)
