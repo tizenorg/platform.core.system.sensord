@@ -33,8 +33,8 @@ public:
 
 	void synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs);
 
-	bool add_interval(int client_id, unsigned int interval);
-	bool delete_interval(int client_id);
+	bool add_interval(long int client_id, unsigned int interval);
+	bool delete_interval(long int client_id);
 	bool get_properties(sensor_properties_t &properties);
 	sensor_type_t get_type(void);
 
