@@ -21,7 +21,7 @@
 #include <algorithm>
 
 
-cinterval_info::cinterval_info(int client_id, bool is_processor, unsigned int interval)
+cinterval_info::cinterval_info(long int client_id, bool is_processor, unsigned int interval)
 {
 	this->client_id = client_id;
 	this->is_processor = is_processor;
@@ -33,7 +33,7 @@ bool cinterval_info_list::comp_interval_info(cinterval_info a, cinterval_info b)
 	return a.interval < b.interval;
 }
 
-cinterval_info_iterator cinterval_info_list::find_if(int client_id, bool is_processor)
+cinterval_info_iterator cinterval_info_list::find_if(long int client_id, bool is_processor)
 {
 	auto iter = m_list.begin();
 
@@ -48,7 +48,7 @@ cinterval_info_iterator cinterval_info_list::find_if(int client_id, bool is_proc
 }
 
 
-bool cinterval_info_list::add_interval(int client_id, unsigned int interval, bool is_processor)
+bool cinterval_info_list::add_interval(long int client_id, unsigned int interval, bool is_processor)
 {
 	auto iter = find_if(client_id, is_processor);
 
@@ -60,7 +60,7 @@ bool cinterval_info_list::add_interval(int client_id, unsigned int interval, boo
 	return true;
 }
 
-bool cinterval_info_list::delete_interval(int client_id, bool is_processor)
+bool cinterval_info_list::delete_interval(long int client_id, bool is_processor)
 {
 	auto iter = find_if(client_id, is_processor);
 
@@ -72,7 +72,7 @@ bool cinterval_info_list::delete_interval(int client_id, bool is_processor)
 	return true;
 }
 
-unsigned int cinterval_info_list::get_interval(int client_id, bool is_processor)
+unsigned int cinterval_info_list::get_interval(long int client_id, bool is_processor)
 {
 	auto iter = find_if(client_id, is_processor);
 

@@ -149,11 +149,11 @@ bool linear_accel_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
 	m_gravity_sensor->add_client(GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_gravity_sensor->add_interval((int)this, (m_interval/MS_TO_US), true);
+	m_gravity_sensor->add_interval((long int)this, (m_interval/MS_TO_US), true);
 	m_gravity_sensor->start();
 
 	m_accel_sensor->add_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_accel_sensor->add_interval((int)this, (m_interval/MS_TO_US), true);
+	m_accel_sensor->add_interval((long int)this, (m_interval/MS_TO_US), true);
 	m_accel_sensor->start();
 
 	activate();
@@ -164,27 +164,27 @@ bool linear_accel_sensor::on_stop(void)
 {
 	AUTOLOCK(m_mutex);
 	m_gravity_sensor->delete_client(GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_gravity_sensor->delete_interval((int)this, true);
+	m_gravity_sensor->delete_interval((long int)this, true);
 	m_gravity_sensor->stop();
 
 	m_accel_sensor->delete_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_accel_sensor->delete_interval((int)this, true);
+	m_accel_sensor->delete_interval((long int)this, true);
 	m_accel_sensor->stop();
 
 	deactivate();
 	return true;
 }
 
-bool linear_accel_sensor::add_interval(int client_id, unsigned int interval)
+bool linear_accel_sensor::add_interval(long int client_id, unsigned int interval)
 {
 	AUTOLOCK(m_mutex);
 	m_gravity_sensor->add_interval(client_id, interval, true);
-	m_accel_sensor->add_interval((int)this , interval, true);
+	m_accel_sensor->add_interval((long int)this , interval, true);
 
 	return sensor_base::add_interval(client_id, interval, true);
 }
 
-bool linear_accel_sensor::delete_interval(int client_id)
+bool linear_accel_sensor::delete_interval(long int client_id)
 {
 	AUTOLOCK(m_mutex);
 	m_gravity_sensor->delete_interval(client_id, true);

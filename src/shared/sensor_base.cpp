@@ -188,7 +188,7 @@ bool sensor_base::delete_client(unsigned int event_type)
 	return true;
 }
 
-bool sensor_base::add_interval(int client_id, unsigned int interval, bool is_processor)
+bool sensor_base::add_interval(long int client_id, unsigned int interval, bool is_processor)
 {
 	unsigned int prev_min, cur_min;
 
@@ -212,7 +212,7 @@ bool sensor_base::add_interval(int client_id, unsigned int interval, bool is_pro
 	return true;
 }
 
-bool sensor_base::delete_interval(int client_id, bool is_processor)
+bool sensor_base::delete_interval(long int client_id, bool is_processor)
 {
 	unsigned int prev_min, cur_min;
 	AUTOLOCK(m_interval_info_list_mutex);
@@ -243,7 +243,7 @@ bool sensor_base::delete_interval(int client_id, bool is_processor)
 	return true;
 }
 
-unsigned int sensor_base::get_interval(int client_id, bool is_processor)
+unsigned int sensor_base::get_interval(long int client_id, bool is_processor)
 {
 	AUTOLOCK(m_interval_info_list_mutex);
 

@@ -26,8 +26,8 @@ using std::list;
 class cinterval_info
 {
 public:
-	cinterval_info(int client_id, bool is_processor, unsigned int interval);
-	int client_id;
+	cinterval_info(long int client_id, bool is_processor, unsigned int interval);
+	long int client_id;
 	bool is_processor;
 	unsigned int interval;
 };
@@ -38,14 +38,14 @@ class cinterval_info_list
 {
 private:
 	static bool comp_interval_info(cinterval_info a, cinterval_info b);
-	cinterval_info_iterator find_if(int client_id, bool is_processor);
+	cinterval_info_iterator find_if(long int client_id, bool is_processor);
 
 	list<cinterval_info> m_list;
 
 public:
-	bool add_interval(int client_id, unsigned int interval, bool is_processor = false);
-	bool delete_interval(int client_id, bool is_processor = false);
-	unsigned int get_interval(int client_id, bool is_processor = false);
+	bool add_interval(long int client_id, unsigned int interval, bool is_processor = false);
+	bool delete_interval(long int client_id, bool is_processor = false);
+	unsigned int get_interval(long int client_id, bool is_processor = false);
 	unsigned int get_min(void);
 };
 #endif
