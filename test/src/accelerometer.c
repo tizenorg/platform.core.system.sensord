@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <sensor_internal.h>
 #include <stdbool.h>
+#include <sensor_common.h>
+#include <unistd.h>
 
 static GMainLoop *mainloop;
 
@@ -33,11 +35,15 @@ void callback(unsigned int event_type, sensor_event_data_t *event, void *user_da
 
 void printformat()
 {
-	printf("Usage : ./accelerometer <event> <interval>(optional)\n\n");
-	printf("event:\n");
+	printf("Usage : ./accelerometer <mode>(optional) <event> <interval>(optional)\n\n");
 
-	printf("RAW_DATA_REPORT_ON_TIME\n");
+	printf("mode:");
+	printf("[-p]\n");
+	printf("p is for polling based,default mode is event driven\n");
 
+	printf("event:");
+	printf("[RAW_DATA_REPORT_ON_TIME]\n");
+	
 	printf("interval:\n");
 	printf("The time interval should be entered based on the sampling frequency supported by accelerometer driver on the device in ms.If no value for sensor is entered default value by the driver will be used.\n");
 }
@@ -46,61 +52,88 @@ int main(int argc,char **argv)
 {
 	int result, handle, start_handle, stop_handle;
 	unsigned int event;
-
 	mainloop = g_main_loop_new(NULL, FALSE);
-	sensor_type_t type = ACCELEROMETER_SENSOR;
+	event = ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME;
 	event_condition_t *event_condition = (event_condition_t*) malloc(sizeof(event_condition_t));
 	event_condition->cond_op = CONDITION_EQUAL;
-	event_condition->cond_value1 = 100;
 
-	if (argc != 2 && argc != 3) {
+	sensor_type_t type = ACCELEROMETER_SENSOR;
+
+	if (argc != 2 && argc != 3 && argc!=4) {
 		printformat();
 		free(event_condition);
 		return 0;
 	}
 
-	if (strcmp(argv[1], "RAW_DATA_REPORT_ON_TIME") == 0) {
-		event = ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME;
+	else if (argc>=3 && strcmp(argv[1], "-p") == 0 && strcmp(argv[2], "RAW_DATA_REPORT_ON_TIME") == 0) {
+		printf("Polling based\n");
+		handle = sf_connect(type);
+		result = sf_start(handle, 1);
+
+		if (result < 0) {
+			printf("Can't start accelerometer SENSOR\n");
+			printf("Error\n\n\n\n");
+			return -1;
+		}
+
+		sensor_data_t data;
+
+		while(1) {
+			result = sf_get_data(handle, ACCELEROMETER_BASE_DATA_SET , &data);
+			printf("Accelerometer [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);			
+			usleep(100000);
+		}
+
+		result = sf_disconnect(handle);
+
+		if (result < 0) {
+			printf("Can't disconnect Accelerometer sensor\n");
+			printf("Error\n\n\n\n");
+			return -1;
+		}
+	}
+
+	else if (strcmp(argv[1], "RAW_DATA_REPORT_ON_TIME") == 0) {
+		printf("Event based\n");
+
+		event_condition->cond_value1 = 100;
+		if (argc == 3)
+			event_condition->cond_value1 = atof(argv[2]);
+
+		handle = sf_connect(type);
+		result = sf_register_event(handle, event, event_condition, callback, NULL);
+
+		if (result < 0)
+			printf("Can't register accelerometer\n");
+
+		start_handle = sf_start(handle,0);
+
+		if (start_handle < 0) {
+			printf("Error\n\n\n\n");
+			sf_unregister_event(handle, event);
+			sf_disconnect(handle);
+			return -1;
+		}
+
+		g_main_loop_run(mainloop);
+		g_main_loop_unref(mainloop);
+
+		sf_unregister_event(handle, event);
+
+		stop_handle = sf_stop(handle);
+
+		if (stop_handle < 0) {
+			printf("Error\n\n");
+			return -1;
+		}
+
+		sf_disconnect(handle);
+		free(event_condition);
 	}
 
 	else {
 		printformat();
-		free(event_condition);
-		return 0;
 	}
-	if (argc == 3)
-		event_condition->cond_value1 = atof(argv[2]);
-
-	handle = sf_connect(type);
-	result = sf_register_event(handle, event, event_condition, callback, NULL);
-
-	if (result < 0)
-		printf("Can't register accelerometer\n");
-
-	start_handle = sf_start(handle,0);
-
-	if (start_handle < 0) {
-		printf("Error\n\n\n\n");
-		sf_unregister_event(handle, event);
-		sf_disconnect(handle);
-		return -1;
-	}
-
-	g_main_loop_run(mainloop);
-	g_main_loop_unref(mainloop);
-
-	sf_unregister_event(handle, event);
-
-	stop_handle = sf_stop(handle);
-
-	if (stop_handle < 0) {
-		printf("Error\n\n");
-		return -1;
-	}
-
-	sf_disconnect(handle);
-
-	free(event_condition);
 
 	return 0;
 }
