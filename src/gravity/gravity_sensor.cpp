@@ -218,6 +218,8 @@ int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t
 	sensor_data_t orientation_data;
 	float pitch, roll, azimuth;
 
+	m_orientation_sensor->get_sensor_data(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME, orientation_data);
+
 	azimuth = orientation_data.values[0];
 	pitch = orientation_data.values[1];
 	roll = orientation_data.values[2];
@@ -230,8 +232,6 @@ int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t
 
 	if (event_type != GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME)
 		return -1;
-
-	m_orientation_sensor->get_sensor_data(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME, orientation_data);
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();
