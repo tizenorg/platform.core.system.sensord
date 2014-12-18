@@ -2,7 +2,7 @@
 
 prefix=/usr/bin
 exec_prefix=${prefix}
-libdir=${prefix}/lib
+libdir=${prefix}/${_libdir}
 includedir=${prefix}/include/sensor-tc
 
 Name: sensor-tc
