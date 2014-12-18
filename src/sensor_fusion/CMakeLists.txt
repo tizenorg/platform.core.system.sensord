@@ -3,7 +3,6 @@ project(sensor_fusion CXX)
 
 # to install pkgconfig setup file.
 SET(EXEC_PREFIX "\${prefix}")
-SET(LIBDIR "\${prefix}/lib")
 SET(VERSION 1.0)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -46,4 +45,4 @@ add_library(${SENSOR_FUSION_NAME} SHARED
 
 target_link_libraries(${SENSOR_FUSION_NAME} ${rpkgs_LDFLAGS} ${GLES_LDFLAGS} "-lm")
 
-install(TARGETS ${SENSOR_FUSION_NAME} DESTINATION lib/sensord)
+install(TARGETS ${SENSOR_FUSION_NAME} DESTINATION ${LIBDIR}/sensord)

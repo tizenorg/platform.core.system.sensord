@@ -8,8 +8,6 @@ add_definitions(${rpkgs_CFLAGS})
 # to install pkgconfig setup file.
 SET(PREFIX ${CMAKE_INSTALL_PREFIX})
 SET(EXEC_PREFIX "\${prefix}")
-SET(LIBDIR "\${prefix}/lib")
-SET(INCLUDEDIR "\${prefix}/include")
 SET(VERSION 1.0)
 
 set(PROJECT_MAJOR_VERSION "0")
