@@ -3,7 +3,6 @@ project(gravity CXX)
 
 # to install pkgconfig setup file.
 SET(EXEC_PREFIX "\${prefix}")
-SET(LIBDIR "\${prefix}/lib")
 SET(VERSION 1.0)
 
 SET(SENSOR_NAME gravity_sensor)
@@ -40,4 +39,4 @@ add_library(${SENSOR_NAME} SHARED
 
 target_link_libraries(${SENSOR_NAME} ${rpkgs_LDFLAGS} ${GLES_LDFLAGS} "-lm")
 
-install(TARGETS ${SENSOR_NAME} DESTINATION lib/sensord)
+install(TARGETS ${SENSOR_NAME} DESTINATION ${LIBDIR}/sensord)

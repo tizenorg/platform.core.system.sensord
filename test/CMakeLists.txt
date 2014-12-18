@@ -3,8 +3,6 @@ project(sensor-tc C)
 
 SET(PREFIX ${CMAKE_INSTALL_PREFIX})
 SET(EXEC_PREFIX "\${prefix}")
-SET(LIBDIR "\${prefix}/lib")
-SET(INCLUDEDIR "\${prefix}/include")
 SET(VERSION 1.0)
 
 INCLUDE(FindPkgConfig)
