@@ -3,7 +3,6 @@ project(linear_accel CXX)
 
 # to install pkgconfig setup file.
 SET(EXEC_PREFIX "\${prefix}")
-SET(LIBDIR "\${prefix}/lib")
 SET(VERSION 1.0)
 
 SET(SENSOR_NAME linear_accel_sensor)

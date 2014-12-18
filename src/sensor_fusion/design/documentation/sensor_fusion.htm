@@ -3,7 +3,7 @@
 
 <h1><center>Sensor Fusion for Tizen Sensor Framework</center></h1>
 
-<h2>Introduction</h2>
+<h2>1. Introduction</h2>
 
 <p>Sensor Fusion is the process of combining the accelerometer,
 gyroscope and geo-magnetic sensor in order to generate accurate virtual sensor
@@ -31,12 +31,12 @@ mechanical lock-in</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Quantization error: inherent
 in all digitized systems</p>
 
-<h2>Sensors Used for Sensor Fusion</h2>
+<h2>2. Sensors Used for Sensor Fusion</h2>
 
 <p>Accelerometer Sensor :- Accelerometer data is a combination of linear
 acceleration and gravity components. Applications would be interested in using
 linear acceleration and gravity sensor data separately. Sensor fusion could be
-used to separate linear acceleration and gravity components.  Additionally,
+used to separate linear acceleration and gravity components. Additionally,
 accelerometer is used for correcting the roll and pitch orientation measurements
 generated from the gyroscope. Using the same, corrected tilt measurement (roll
 and pitch) is generated. </p>
@@ -52,9 +52,7 @@ along Z axis to produce correct yaw measurement. Geo-Magnetic sensor along with
 GPS latitude-longitude measurements could be used to accurately estimate
 heading of the device.</p>
 
-<h2>Orientation Estimation</h2>
-
-<p><center></center></p>
+<h2>3. Orientation Estimation</h2>
 
 <FIGURE>
 <center>
@@ -62,6 +60,22 @@ heading of the device.</p>
 <FIGCAPTION>Fig. 1. Device Orientation in Euler Angles.</FIGCAPTION>
 </center>
 </FIGURE>
+
+<p>The rotation of the device along the y-axis is considered as roll (&#934;),
+x-axis as pitch (&#920;) and the z-axis as yaw (&#936;) as shown in Fig. 1. The
+orientation of the device can be represented either in terms of Euler angles
+(roll, pitch, yaw), or in the form of Rotation Matrix, or in the form of
+Quaternions. These are different mathematical forms of representing the same
+device orientation data. During orientation estimation all these representations
+would be used based on requirements and for stability reasons. When the device is
+lying flat on the x-y axis, the earthâ€™s gravitational force is observed along the
+device z-axis. The reference axis for the device considered in this paper is shown
+in Fig. 1. The device reference x and y axis may change for each device, based on
+the individual MEMS sensor chipÂ reference axis (that can be obtained from the
+datasheet) or the orientation of the sensor chip when it gets integrated into the
+device. The equations related to the computation of orientation, gravity and
+linear acceleration virtual sensors would have to be modified based on the change
+in reference axes.</p>
 
 <FIGURE>
 <center>
@@ -72,46 +86,125 @@ Estimation.</FIGCAPTION>
 </center>
 </FIGURE>
 
-<h3>Preprocessing of Sensor Data</h3>
+<p>The overall method for determining orientation of a device based on sensor
+fusion is shown in Fig. 2. This paper proposes to improve on the existing approach
+[1] to obtain more accurate orientation estimate. The Aiding System is used in sensor
+fusion for computing an inaccurate value for device orientation based on the
+accelerometer and the magnetometer sensor data. The accelerometer and magnetometer
+sensor data is combined using the Triad algorithm explained in [3] to obtain an
+inaccurate orientation measure. The problem with the orientation measured using the
+aiding system is that the smaller orientation changes of the device are not detected
+accurately. The orientation measured using the aiding system is not accurate due to
+the effect of gravity on the sensor data. But the aiding system orientation measured
+has the advantage that it is not affected by drift. The driving system is used for
+computing the orientation of a device using the 3D angular rates measured by the
+gyroscope sensor. The gyroscope sensor is accurate in detecting even small
+orientation changes but the orientation derived from it are affected due to drift.
+The drift in the measured gyroscope orientation is due to the integration of the
+noise components present along with angular rates samples measured with the gyroscope.
+</p>
+
+<p>The Kalman filtering stage consists of two systems, the time update system where
+the current instances of the state vector and prediction error covariance are
+estimated based on the measurements obtained from the previous time instance. The
+orientation data that is measured using the aiding system and the driving system are
+fused during this stage. The second stage of the Kalman filtering process is the
+measurement update system, where the estimated state and prediction error covariance
+are corrected based on the Kalman gain factor that computed in this stage. The bias
+that is estimated during this stage is used to correct the pre-processed gyroscope
+sensor data that is given as input to the time update system.</p>
+
+<h3>3.1. Preprocessing of Sensor Data</h3>
+<p>The raw sensor data obtained from accelerometer (RAx, RAy, RAz), gyroscope
+(RGx, RGy, RGz) and magnetometer (Magx, Magy, Magz) would have to pre-processed
+before the sensor fusion process. The raw sensor data obtained from the
+accelerometer and gyroscope sensors are affected by static bias, which are the
+non-zero sensor data values observed when the device is void of any external forces.
+These static bias components on the 3-axes (BAx, BAy, BAz) for accelerometer and
+(BGx, BGy, BGz) for gyroscope are removed from the reported sensor values as shown in
+(1) and (2). There is no static bias compensation for magnetometer data, as the
+sensor measures the deviation of the x-axis relative to the earth's magnetic poles
+and it is not possible to determine if the phone is deviating from exact north. The
+'i' in the equations below specifies the current time instant, 'i-1' specifies the
+previous time instant and a '0' specifies it as an initialization value.</p>
 
 <FIGURE>
 <center>
-<img src="./equation/equation_1.png" width="35%" height="5%">
+<img src="./equation/equation_1.png" width="35%" height="4%">
 </center>
 </FIGURE>
 
 <FIGURE>
 <center>
-<img src="./equation/equation_2.png" width="35%" height="6%">
+<img src="./equation/equation_2.png" width="35%" height="5%">
+</center>
+</FIGURE>
+
+<p>The accelerometer and magnetometer data are  normalized based on equations (3) 
+and (4) to obtain the calibrated accelerometer data (Ax, Ay, Az) and magnetometer
+data (Mx, My, Mz).</p> 
+
+<FIGURE>
+<center>
+<img src="./equation/equation_3.png" width="35%" height="9%">
 </center>
 </FIGURE>
 
 <FIGURE>
 <center>
-<img src="./equation/equation_3.png" width="35%" height="10%">
+<img src="./equation/equation_4.png" width="35%" height="9%">
 </center>
 </FIGURE>
+
+<p>The paper proposes that the gyroscope angular rates (on all 3 axes) before
+being processed further are scaled to the range -1 to +1 (for accurate orientation
+estimation) by dividing all data received by the maximum possible gyroscope
+angular rate value apriori in each axis (5).</p>
 
 <FIGURE>
 <center>
-<img src="./equation/equation_4.png" width="35%" height="10%">
+<img src="./equation/equation_5.png" width="35%" height="8%">
 </center>
 </FIGURE>
+
+<p>Based on [1], the dynamically variable Gyroscope Bias (Bx, By, Bz) is computed
+using the Kalman filter and provided as feedback to the input and is subtracted
+from scaled gyroscope data to obtain the corrected and pre-processed gyroscope
+data (Gx, Gy, Gz) given in (6).</p>
 
 <FIGURE>
 <center>
-<img src="./equation/equation_5.png" width="35%" height="10%">
-</center>
-</FIGURE>
-
-<FIGURE>
-<center>
-<img src="./equation/equation_6.png" width="35%" height="5%">
+<img src="./equation/equation_6.png" width="35%" height="4%">
 </center>
 </FIGURE>
 
 
-<h3>Orientation Computation Based on Aiding System</h3>
+<h3>3.2. Orientation Computation Based on Aiding System</h3>
+
+<p>The device is placed on a flat surface as shown in the Fig. 1. The gravity
+vector in the earth frame for the device (Ae) is given by (0, 0, Â±1) since the
+effect of gravity is observed on the z-axis reading of the Accelerometer. The sign
+assigned is based on whether the z-axis of the accelerometer (when facing up) is
+aligned towards gravity or against it. The magnetic field vector in the earth frame
+for the device (Me) is given by (0, Â±1, 0) since the magnetic north is detected on
+the y-axis of the magnetometer. The sign assigned is based on whether the y-axis
+of the magnetometer is aligned to earthâ€™s magnetic field or against it. The gravity
+vector in the device body frame (Ab) is given by (Ax, Ay, Az), which represents the
+calibrated accelerometer sensor data. The magnetic field vector in the device body
+frame (Mb) is given by (Mx, My, Mz) which represents the calibrated magnetometer
+sensor data.</p>
+
+<p>The orientation of the device is computed based on the aiding system
+(accelerometer + magnetometer) data and can be computed using the triad algorithm
+[3]. The triad algorithm determines the orientation of the device based on the
+gravity and magnetic field vectors obtained in the earth and device body frames.
+The following equations represent the triad algorithm using which the orientation
+of the device in the form of rotation matrix can be obtained. The symbol Ã— denotes
+the cross product of two vectors [8]. Combining the vectors obtained from (7) and
+(9) along with the body frame gravity vector (Ab) the intermediate rotation matrix
+is obtained for body frame MATb, as shown in (11). Combining the vectors obtained
+from (8) and (10) along with the earth frame gravity vector (Ae) the intermediate
+rotation matrix is obtained for earth frame MATe, as shown in (12).</p>
 
 <FIGURE>
 <center>
@@ -143,41 +236,222 @@ Estimation.</FIGCAPTION>
 </center>
 </FIGURE>
 
-
-<h3>Driving System</h3>
-
-
-<p>The accelerometer and geomagnetic sensor data are corrected
-for noise and compensated for static bias. Accelerometer is used to compute
-tilt (pitch and roll). The geomagnetic sensor along with the computed tilt data
-is used compute yaw. The computed Euler angles (pitch, roll and yaw) are
-converted to quaternions.</p>
-
-<h3>Noise Covariance Computation</h3>
-
-<p>The process noise covariance (Q) is calculated by computing
-covariance of windowed block of driving system data. The measurement noise
-covariance (R) is calculated by computing covariance of windowed block of aiding
-system data. The process and measurement covariance computed are to be used in
-Kalman filtering.</p>
-
-<h3>Kalman Filtering</h3>
-
 <FIGURE>
 <center>
-<img src="./diagram/kalman_filter_stages.png">
-<FIGCAPTION>Fig. 3. Kalman Filter Stages.</FIGCAPTION>
+<img src="./equation/equation_12.png" width="35%" height="3.5%">
 </center>
 </FIGURE>
 
-<p>To ensure linear Kalman filtering the following error state equation is used:</p>
+<p>Finally the rotation matrix of the device representing the orientation derived
+from the aiding system RMaid is computed by multiplying the matrices MATb and MATe
+as shown in (13).</p>
 
-<p><img src="./equation/state_equation.png"></p>
+<FIGURE>
+<center>
+<img src="./equation/equation_13.png" width="35%" height="3%">
+</center>
+</FIGURE>
 
-<p>,where the first term is the quaternion representation of the Euler angles
-error and the next three terms are the error in knowledge of bias errors.</p>
+<p>The device orientation computed in the form of aiding system rotation matrix is
+then converted to quaternion representation Qaid (14) using the function
+RotMat2Quat() which is explained in [6, 9]. Using quaternions to estimate
+orientation overcomes the singularity issues faced when using Euler Angles and at
+the same time they are computationally more efficient than using rotation matrix.</p>
 
-<h3>Determination of Gravity</h3>
+<FIGURE>
+<center>
+<img src="./equation/equation_14.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<h3>3.3. Orientation Computation Based on Driving System</h3>
+
+<p>The sensor data obtained from the driving system (gyroscope) given by (Gx, Gy, Gz)
+represents the calibrated angular rotation rate of the device in the 3-axes. Since
+the calibrated gyroscope data provides the rate of change of angle in each axis,
+the integration of the data acquired in each axis provides the orientation measure
+of the device. During integration of the gyroscope data the noise present in each
+instance of the measured data gets added up resulting in measured orientation
+affected by drift. First the measured gyroscope data is converted to a quaternion
+equivalent Qdriv [14, 15]. The initial value for the Qdriv is assigned based on the
+computed Qaid initial value (15). The quaternion differential which denotes the
+increment in rotation is computed by quaternion based multiplication [7, 9] of Qdriv
+with gyroscope sensor data as shown in (16). The symbol &odot; denotes quaternion
+based multiplication in the following equations.</p>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_15.png" width="35%" height="3.5%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_16.png" width="35%" height="6%">
+</center>
+</FIGURE>
+
+<p>Equation (17) represents the integration of the quaternion difference value with
+the driving system quaternion to yield the measured quaternion value for that time
+instant [1]. The value 'dt' represents the sampling interval for the gyroscope sensor
+and '&Pi;' denotes the mathematical constant and denotes the ratio of a circle's
+circumference to its diameter and is approximately equal to 3.14159. The driving
+system quaternion is then normalized as shown in equation (18).</p>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_17.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_18.png" width="35%" height="6%">
+</center>
+</FIGURE>
+
+<h3>3.4. Time Update System</h3>
+
+<p>The orientation computed using the driving system sensor data is affected due to
+the drift (from the integration of angular rates), the orientation computed using
+the aiding system sensor data is not accurate (measurements are affected due to gravity).
+To compensate for the deficiencies in the measurements of each system, the quaternion
+orientation computations are combined using sensor fusion to obtain corrected/more
+accurate device orientation data. The Quaternion error Qerr is computed in (19), as
+described in [1].</p>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_19.png" width="35%" height="3.75%">
+</center>
+</FIGURE>
+
+<p>We introduce the equations (20) and (21) to compute the Euler error from the
+quaternion error and then using this Euler error to compensate for drift on the driving
+system orientation quaternion. First, the quaternion error Qerr is converted to the Euler
+angle representation Eerr based on (20). The quaternion representation of orientation
+error is converted to Euler angles representation using the function quat2euler() for
+which information can be found in [9].</p>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_20.png" width="35%" height="6%">
+</center>
+</FIGURE>
+
+<p>The driving system quaternion is then compensated for the Euler angle error Eerr and
+normalized as per (21) and (22) to correct for drift observed in the driving system sensor
+data.</p>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_21.png" width="35%" height="3.75%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_22.png" width="35%" height="6%">
+</center>
+</FIGURE>
+
+<p>The quaternion Qdriv that is derived in (22) is now compensated for drift and corrected
+for dynamic bias as shown in (6). The dynamic bias correction used in (6) is determined
+using Kalman filtering as explained below. Based on [1], linear Kalman filtering is used
+based on the error state equation, given in (23). The first three elements of the error
+state vector are the Eerr values on the 3-axes (&#934;err, &#920;err, &#936;err) and the
+next three elements are the bias compensation (Bx, By, Bz) that is mentioned in (6).</p>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_23.png" width="35%" height="3.75%">
+</center>
+</FIGURE>
+
+<p>The variance in the gyroscope angular rate measurements denoted by Qwn over a windowed
+period is computed in (24). The random driving process noise variance Qwb is computed in
+(25), where the noise standard deviation Ïƒw and time constant Ï„w are obtained from the
+gyroscope sensor datasheet. Based on [1], the overall process noise covariance Q is
+derived from the computed Qwn and Qwb as shown in (26).</p>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_24.png" width="35%" height="8%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_25.png" width="35%" height="8%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_26.png" width="35%" height="6%">
+</center>
+</FIGURE>
+
+<p>The variance in the aiding system orientation (roll, pitch and yaw) measurements are
+used to compute the measurement noise covariance R [1] which is shown in (27). The aiding
+system orientation in terms of Euler angles Eaid can be obtained by converting the
+quaternion obtained in (14) to its equivalent Euler angles.</p>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_27.png" width="35%" height="14%">
+</center>
+</FIGURE>
+
+<p>The equations (28), (29) and (30) are used to determine the transformation matrix F,
+apriori state vector error &Delta;x- and prediction covariance P- based in [1].</p>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_28.png" width="35%" height="15%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_29.png" width="35%" height="3.5%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_30.png" width="35%" height="3.5%">
+</center>
+</FIGURE>
+
+
+<h3>3.5. Measurement Update System</h3>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_31.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_32.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_33.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_34.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<h3>4. Determination of Gravity and Linear Acceleration</h3>
 <p>When a device is subjected to motion in Euclidean space, the 3D accelerometer
 data generated from the device is a combination of linear acceleration and gravity
 components which are a measure of linear and rotational motion respectively.The
@@ -193,16 +467,30 @@ width="40%" height="40%">
 </center>
 </FIGURE>
 
-<p>Gravity virtual sensor data provides the measure of the direction in which the
-Earth’s gravitational force is observed in the device’s frame of reference. The
-orientation of the device decides the measure of the influence of Earth’s gravitational
-force on the 3-axes of the device. The following equations are used for projecting
-the tilt(pitch, roll) of the device on the Earth’s gravity axis to determine earth’s
-gravitational effect on the devices reference axis.</p>
+<FIGURE>
+<center>
+<img src="./equation/equation_35.png" width="35%" height="4%">
+</center>
+</FIGURE>
 
-<p>GRx = Earth’s Gravity * sin(pitch)</p>
-<p>GRy = Earth’s Gravity * sin(roll)</p>
-<p>GRz = Earth’s Gravity * cos(pitch) * cos(roll)</p>
+<FIGURE>
+<center>
+<img src="./equation/equation_36.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_37.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<p>Gravity virtual sensor data provides the measure of the direction in which the
+Earth's gravitational force is observed in the device frame of reference. The
+orientation of the device decides the measure of the influence of Earth's gravitational
+force on the 3-axes of the device. The following equations are used for projecting
+the tilt(pitch, roll) of the device on the Earth's gravity axis to determine earth's
+gravitational effect on the devices reference axis.</p>
 
 <FIGURE>
 <center>
@@ -225,9 +513,24 @@ a device after removing the Gravity components on the 3-axes. Accurate linear
 acceleration data are calculated by subtracting gravity components from the 3-axes
 calibrated accelerometer data.</p>
 
-<p>LAx = Ax – GRy</p>
-<p>LAy = Ay – GRx</p>
-<p>LAz = Az – GRz</p>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_38.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_39.png" width="35%" height="4%">
+</center>
+</FIGURE>
+
+<FIGURE>
+<center>
+<img src="./equation/equation_40.png" width="35%" height="4%">
+</center>
+</FIGURE>
 
 <h1>References</h1>
 

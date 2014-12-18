@@ -3,7 +3,6 @@ project(sensor_fusion CXX)
 
 # to install pkgconfig setup file.
 SET(EXEC_PREFIX "\${prefix}")
-SET(LIBDIR "\${prefix}/lib")
 SET(VERSION 1.0)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

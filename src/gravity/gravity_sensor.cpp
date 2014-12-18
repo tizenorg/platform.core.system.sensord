@@ -35,6 +35,7 @@
 #define GRAVITY 9.80665
 
 #define DEG2RAD (M_PI/180)
+#define DEVIATION 0.1
 
 #define SENSOR_NAME "GRAVITY_SENSOR"
 #define SENSOR_TYPE_GRAVITY		"GRAVITY"
@@ -127,7 +128,7 @@ bool gravity_sensor::on_start(void)
 	AUTOLOCK(m_mutex);
 
 	m_orientation_sensor->add_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_orientation_sensor->add_interval((int)this, (m_interval/MS_TO_US), true);
+	m_orientation_sensor->add_interval((long)this, (m_interval/MS_TO_US), true);
 	m_orientation_sensor->start();
 
 	activate();
@@ -139,7 +140,7 @@ bool gravity_sensor::on_stop(void)
 	AUTOLOCK(m_mutex);
 
 	m_orientation_sensor->delete_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_orientation_sensor->delete_interval((int)this, true);
+	m_orientation_sensor->delete_interval((long)this, true);
 	m_orientation_sensor->stop();
 
 	deactivate();
@@ -165,13 +166,20 @@ bool gravity_sensor::delete_interval(int client_id)
 void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
 {
 	sensor_event_t gravity_event;
-	float conversion_const = 1;
+	float pitch, roll, azimuth;
+
+	azimuth = event.data.values[0];
+	pitch = event.data.values[1];
+	roll = event.data.values[2];
 
 	const float MIN_DELIVERY_DIFF_FACTOR = 0.75f;
 	unsigned long long diff_time;
 
-	if(m_orientation_data_unit == "DEGREES")
-		conversion_const = DEG2RAD;
+	if(m_orientation_data_unit == "DEGREES") {
+		azimuth *= DEG2RAD;
+		pitch *= DEG2RAD;
+		roll *= DEG2RAD;
+	}
 
 	if (event.event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
 		diff_time = event.data.timestamp - m_timestamp;
@@ -182,10 +190,21 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 		gravity_event.sensor_id = get_id();
 		gravity_event.event_type = GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME;
 		m_timestamp = get_timestamp();
-		gravity_event.data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(event.data.values[2] * conversion_const);
-		gravity_event.data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(event.data.values[1] * conversion_const);
-		gravity_event.data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(event.data.values[2] * conversion_const) *
-										cos(event.data.values[1] * conversion_const);
+		if ((roll >= (M_PI/2)-DEVIATION && roll <= (M_PI/2)+DEVIATION) ||
+				(roll >= -(M_PI/2)-DEVIATION && roll <= -(M_PI/2)+DEVIATION)) {
+			gravity_event.data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(roll) * cos(azimuth);
+			gravity_event.data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(azimuth);
+			gravity_event.data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(roll);
+		} else if ((pitch >= (M_PI/2)-DEVIATION && pitch <= (M_PI/2)+DEVIATION) ||
+				(pitch >= -(M_PI/2)-DEVIATION && pitch <= -(M_PI/2)+DEVIATION)) {
+			gravity_event.data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(azimuth);
+			gravity_event.data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(pitch) * cos(azimuth);
+			gravity_event.data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(pitch);
+		} else {
+			gravity_event.data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(roll);
+			gravity_event.data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(pitch);
+			gravity_event.data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(roll) * cos(pitch);
+		}
 		gravity_event.data.value_count = 3;
 		gravity_event.data.timestamp = m_timestamp;
 		gravity_event.data.accuracy = SENSOR_ACCURACY_GOOD;
@@ -197,10 +216,17 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &data)
 {
 	sensor_data_t orientation_data;
-	float conversion_const = 1;
+	float pitch, roll, azimuth;
 
-	if(m_orientation_data_unit == "DEGREES")
-		conversion_const = DEG2RAD;
+	azimuth = orientation_data.values[0];
+	pitch = orientation_data.values[1];
+	roll = orientation_data.values[2];
+
+	if(m_orientation_data_unit == "DEGREES") {
+		azimuth *= DEG2RAD;
+		pitch *= DEG2RAD;
+		roll *= DEG2RAD;
+	}
 
 	if (event_type != GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME)
 		return -1;
@@ -209,10 +235,21 @@ int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();
-	data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(orientation_data.values[2] * conversion_const);
-	data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(orientation_data.values[1] * conversion_const);
-	data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(orientation_data.values[2] * conversion_const) *
-						cos(orientation_data.values[1] * conversion_const);
+	if ((roll >= (M_PI/2)-DEVIATION && roll <= (M_PI/2)+DEVIATION) ||
+			(roll >= -(M_PI/2)-DEVIATION && roll <= -(M_PI/2)+DEVIATION)) {
+		data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(roll) * cos(azimuth);
+		data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(azimuth);
+		data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(roll);
+	} else if ((pitch >= (M_PI/2)-DEVIATION && pitch <= (M_PI/2)+DEVIATION) ||
+			(pitch >= -(M_PI/2)-DEVIATION && pitch <= -(M_PI/2)+DEVIATION)) {
+		data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(azimuth);
+		data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(pitch) * cos(azimuth);
+		data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(pitch);
+	} else {
+		data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(roll);
+		data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(pitch);
+		data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(roll) * cos(pitch);
+	}
 	data.value_count = 3;
 
 	return 0;
@@ -222,7 +259,7 @@ bool gravity_sensor::get_properties(sensor_properties_t &properties)
 {
 	properties.min_range = -GRAVITY;
 	properties.max_range = GRAVITY;
-	properties.resolution = 0.000001;;
+	properties.resolution = 0.000001;
 	properties.vendor = m_vendor;
 	properties.name = SENSOR_NAME;
 
