@@ -40,6 +40,7 @@ using std::unordered_set;
 
 #define PLUGINS_CONFIG_PATH "/usr/etc/sensor_plugins.xml"
 #define PLUGINS_DIR_PATH "/usr/lib/sensord"
+#define PLUGINS_DIR_PATH_64 "/usr/lib64/sensord"
 
 #define SENSOR_INDEX_SHIFT 16
 
@@ -147,6 +148,7 @@ bool sensor_plugin_loader::load_plugins(void)
 
 	get_paths_from_config(string(PLUGINS_CONFIG_PATH), hal_paths, sensor_paths);
 	get_paths_from_dir(string(PLUGINS_DIR_PATH), hal_paths, sensor_paths);
+	get_paths_from_dir(string(PLUGINS_DIR_PATH_64), hal_paths, sensor_paths);
 
 	//remove duplicates while keeping the original ordering => unique_*_paths
 	unordered_set<string> s;

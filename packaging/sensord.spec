@@ -80,7 +80,8 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGEO=%{geo_state} -DPRESSURE=%{pressure_state} -DTEMPERATURE=%{temperature_state} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} \
-	-DTEST_SUITE=%{build_test_suite}
+	-DTEST_SUITE=%{build_test_suite} \
+	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
 
 make %{?jobs:-j%jobs}
 
@@ -118,7 +119,7 @@ systemctl daemon-reload
 %manifest libsensord.manifest
 %defattr(-,root,root,-)
 %{_libdir}/libsensor.so.*
-%{_libdir}/sensord/*.so*
+/usr/lib/sensord/*.so*
 %{_libdir}/libsensord-share.so
 %{_libdir}/libsensord-server.so
 %license LICENSE.APLv2

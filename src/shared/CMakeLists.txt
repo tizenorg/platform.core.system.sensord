@@ -3,8 +3,6 @@ project(sf_common CXX)
 # to install pkgconfig setup file.
 SET(PREFIX ${CMAKE_INSTALL_PREFIX})
 SET(EXEC_PREFIX "\${prefix}")
-SET(LIBDIR "\${prefix}/lib")
-SET(INCLUDEDIR "\${prefix}/include")
 SET(VERSION 1.0)
 
 #set(CMAKE_INSTALL_PREFIX "$ENV{DATAFS}")
@@ -69,10 +67,10 @@ target_link_libraries(sensord-share ${rpkgs_LDFLAGS} "-lrt -ldl -pthread")
 configure_file(sensord-server.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/sensord-server.pc @ONLY)
 configure_file(${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc @ONLY)
 
-install(TARGETS sensord-server DESTINATION lib)
-install(TARGETS sensord-share DESTINATION lib)
-install(FILES sensord-server.pc DESTINATION lib/pkgconfig)
-install(FILES ${PROJECT_NAME}.pc DESTINATION lib/pkgconfig)
+install(TARGETS sensord-server DESTINATION ${LIBDIR})
+install(TARGETS sensord-share DESTINATION ${LIBDIR})
+install(FILES sensord-server.pc DESTINATION ${LIBDIR}/pkgconfig)
+install(FILES ${PROJECT_NAME}.pc DESTINATION ${LIBDIR}/pkgconfig)
 install(FILES
 	crw_lock.h
 	worker_thread.h
@@ -94,11 +92,11 @@ install(FILES
 	common.h
 	sensor_info.h
 	iio_common.h
-	DESTINATION include/${PROJECT_NAME}
+	DESTINATION ${INCLUDEDIR}/${PROJECT_NAME}
 )
 
 install(FILES
 	sensor_common.h
-	DESTINATION include/sensor
+	DESTINATION ${INCLUDEDIR}/sensor
 )
 

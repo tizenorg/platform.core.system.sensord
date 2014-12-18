@@ -128,7 +128,7 @@ bool gravity_sensor::on_start(void)
 	AUTOLOCK(m_mutex);
 
 	m_orientation_sensor->add_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_orientation_sensor->add_interval((int)this, (m_interval/MS_TO_US), true);
+	m_orientation_sensor->add_interval((long)this, (m_interval/MS_TO_US), true);
 	m_orientation_sensor->start();
 
 	activate();
@@ -140,7 +140,7 @@ bool gravity_sensor::on_stop(void)
 	AUTOLOCK(m_mutex);
 
 	m_orientation_sensor->delete_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_orientation_sensor->delete_interval((int)this, true);
+	m_orientation_sensor->delete_interval((long)this, true);
 	m_orientation_sensor->stop();
 
 	deactivate();
