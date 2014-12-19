@@ -30,8 +30,8 @@ using std::pair;
 
 csensor_event_listener::csensor_event_listener()
 : m_client_id(CLIENT_ID_INVALID)
-, m_thread_state(THREAD_STATE_TERMINATE)
 , m_poller(NULL)
+, m_thread_state(THREAD_STATE_TERMINATE)
 , m_hup_observer(NULL)
 {
 }

@@ -40,13 +40,13 @@ using std::ifstream;
 #define GAUSS_TO_UTESLA(val)	((val) * 100.0f)
 
 geo_sensor_hal::geo_sensor_hal()
-: m_x(0)
+: m_polling_interval(POLL_1HZ_MS)
+, m_x(0)
 , m_y(0)
 , m_z(0)
 , m_hdst(0)
-, m_node_handle(-1)
-, m_polling_interval(POLL_1HZ_MS)
 , m_fired_time(INITIAL_TIME)
+, m_node_handle(-1)
 {
 	const string sensorhub_interval_node_name = "mag_poll_delay";
 	csensor_config &config = csensor_config::get_instance();
