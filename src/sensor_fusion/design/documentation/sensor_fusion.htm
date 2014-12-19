@@ -140,9 +140,9 @@ previous time instant and a '0' specifies it as an initialization value.</p>
 </center>
 </FIGURE>
 
-<p>The accelerometer and magnetometer data are  normalized based on equations (3) 
+<p>The accelerometer and magnetometer data are normalized based on equations (3)
 and (4) to obtain the calibrated accelerometer data (Ax, Ay, Az) and magnetometer
-data (Mx, My, Mz).</p> 
+data (Mx, My, Mz).</p>
 
 <FIGURE>
 <center>
@@ -426,6 +426,12 @@ apriori state vector error &Delta;x- and prediction covariance P- based in [1].<
 
 
 <h3>3.5. Measurement Update System</h3>
+<p>The measurement update system is used to determine the bias value that would be
+deducted from the Gyroscope values (6). The equations (31), (32) and (33) are used to
+compute the Kalman gain K, aposteriori state error computation Δx+(i) and aposteriori
+prediction covariance P+, as shown in [4]. In equation (33), I denotes the identity
+matrix H denotes the measurement matrix (identity matrix is used here) and the apriori
+prediction covariance estimate P- (33).</p>
 
 <FIGURE>
 <center>
@@ -444,6 +450,12 @@ apriori state vector error &Delta;x- and prediction covariance P- based in [1].<
 <img src="./equation/equation_33.png" width="35%" height="4%">
 </center>
 </FIGURE>
+
+<p>The bias compensation (Bx, By, Bz) obtained from Δx+(i) is used for removing
+dynamic bias from the calibrated gyroscope values as shown in (6). The corrected
+orientation that is determined using the above sensor fusion method, is obtained from
+(22) by using the conversion function quat2euler [9] as shown in (34). This estimated
+orientation is used in Section 3 to compute Gravity virtual sensor data.</p>
 
 <FIGURE>
 <center>
@@ -501,7 +513,7 @@ gravitational effect on the devices reference axis.</p>
 
 <p>When the device tilt values (pitch,roll) are changed from (0,0) to (0,&Pi;/2),
 phone is rotated around x-axis, the y-axis gets aligned to earth's gravitational field
-after rotation instead of the z-axis.  When this rotation is applied to the equations
+after rotation instead of the z-axis. When this rotation is applied to the equations
 given above, the values (GRx,GRy,GRz) are converted from (0,0,G) to (0,G,0) due to the
 shift in the axis which experiences the gravitational field (G is measure of Earth's
 gravity).</p>
