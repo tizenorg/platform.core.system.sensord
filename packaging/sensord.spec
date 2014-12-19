@@ -19,7 +19,7 @@ Source2:    sensord.socket
 %define gravity_state ON
 %define linear_accel_state ON
 
-%define build_test_suite OFF
+%define build_test_suite ON
 
 BuildRequires:  cmake
 BuildRequires:  vconf-keys-devel
@@ -144,6 +144,7 @@ systemctl daemon-reload
 /usr/bin/gyro
 /usr/bin/proxi
 /usr/bin/pressure
+/usr/bin/light
 
 %license LICENSE.APLv2
 %{_datadir}/license/test
