@@ -32,6 +32,7 @@ public:
 	vect(const int size);
 	vect(const int size, TYPE *vec_data);
 	vect(const vect<TYPE>& v);
+	vect(const matrix<TYPE>& m);
 	~vect();
 
 	vect<TYPE> operator =(const vect<TYPE>& v);

@@ -55,6 +55,20 @@ vect<TYPE>::vect(const vect<TYPE>& v)
 		m_vec[q] = v.m_vec[q];
 }
 
+
+template <typename TYPE>
+vect<TYPE>::vect(const matrix<TYPE>& m)
+{
+	int i = 0;
+	m_size = m.m_rows * m.m_cols;
+	m_vec = NULL;
+	m_vec = new TYPE [m_size];
+
+	for (int p = 0; p < m.m_rows; p++)
+		for (int q = 0; q < m.m_cols; q++)
+			m_vec[i++] = m.m_mat[p][q];
+}
+
 template <typename TYPE>
 vect<TYPE>::~vect()
 {
