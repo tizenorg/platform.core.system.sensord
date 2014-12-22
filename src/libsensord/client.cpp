@@ -423,7 +423,7 @@ API bool sensord_get_sensor_list(sensor_type_t type, sensor_t **list, int *senso
 
 API sensor_t sensord_get_sensor(sensor_type_t type)
 {
-	retvm_if (!get_sensor_list(), false, "Fail to get sensor list from server");
+	retvm_if (!get_sensor_list(), NULL, "Fail to get sensor list from server");
 
 	const sensor_info *info;
 
