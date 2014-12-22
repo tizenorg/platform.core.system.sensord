@@ -25,6 +25,9 @@
 #include <thread>
 #include <chrono>
 
+#define MS_TO_US 1000
+#define MIN_DELIVERY_DIFF_FACTOR 0.75f
+
 using std::thread;
 using std::pair;
 
@@ -649,9 +652,6 @@ client_callback_info* csensor_event_listener::handle_calibration_cb(csensor_hand
 
 void csensor_event_listener::handle_events(void* event)
 {
-	const unsigned int MS_TO_US = 1000;
-	const float MIN_DELIVERY_DIFF_FACTOR = 0.75f;
-
 	unsigned long long cur_time;
 	creg_event_info *event_info = NULL;
 	sensor_event_data_t event_data;

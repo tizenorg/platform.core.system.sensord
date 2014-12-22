@@ -47,6 +47,7 @@
 #define GRAVITY 9.80665
 
 #define MS_TO_US 1000
+#define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
 #define ACCELEROMETER_ENABLED 0x01
 #define GRAVITY_ENABLED 0x02
@@ -197,7 +198,6 @@ void linear_accel_sensor::synthesize(const sensor_event_t &event, vector<sensor_
 {
 	sensor_event_t lin_accel_event;
 
-	const float MIN_DELIVERY_DIFF_FACTOR = 0.75f;
 	unsigned long long diff_time;
 
 	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
