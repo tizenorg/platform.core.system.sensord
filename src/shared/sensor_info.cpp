@@ -211,8 +211,8 @@ void sensor_info::show(void)
 	INFO("Fifo_count = %d", m_fifo_count);
 	INFO("Max_batch_count = %d", m_max_batch_count);
 
-	for (int i = 0; i < m_supported_events.size(); ++i)
-		INFO("supported_events[%d] = 0x%x", i, m_supported_events[i]);
+	for (unsigned int i = 0; i < m_supported_events.size(); ++i)
+		INFO("supported_events[%u] = 0x%x", i, m_supported_events[i]);
 }
 
 

@@ -171,7 +171,7 @@ void csensor_event_dispatcher::dispatch_event(void)
 
 			sort_sensor_events(sensor_events, event_cnt);
 
-			for (int i = 0; i < event_cnt; ++i) {
+			for (unsigned int i = 0; i < event_cnt; ++i) {
 				if (is_record_event(sensor_events[i].event_type))
 					put_last_event(sensor_events[i].event_type, sensor_events[i]);
 			}
