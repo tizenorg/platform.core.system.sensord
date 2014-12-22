@@ -108,7 +108,7 @@ static void clean_up(void)
 static int get_power_save_state (void)
 {
 	int state = 0;
-	int pm_state, ps_state;
+	int pm_state;
 
 	vconf_get_int(VCONFKEY_PM_STATE, &pm_state);
 
