@@ -218,7 +218,10 @@ inline void orientation_filter<TYPE>::time_update()
 
 	m_quat_driv = m_quat_driv + (quat_diff * (TYPE) m_gyro_dt * (TYPE) PI);
 	m_quat_driv.quat_normalize();
+
 	quat_output = phase_correction(m_quat_driv, m_quat_aid);
+
+	m_quaternion = quat_output;
 
 	orientation = quat2euler(quat_output);
 
@@ -311,6 +314,16 @@ rotation_matrix<TYPE> orientation_filter<TYPE>::get_rotation_matrix(const sensor
 	get_orientation(accel, gyro, magnetic);
 
 	return m_rot_matrix;
+}
+
+template <typename TYPE>
+quaternion<TYPE> orientation_filter<TYPE>::get_quaternion(const sensor_data<TYPE> accel,
+		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
+{
+
+	get_orientation(accel, gyro, magnetic);
+
+	return m_quaternion;
 }
 
 #endif  //_ORIENTATION_FILTER_H_
