@@ -295,7 +295,6 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 
 	sensor_event_t orientation_event;
 	euler_angles<float> euler_orientation;
-	float raw_data[3];
 	float azimuth_offset;
 
 	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
