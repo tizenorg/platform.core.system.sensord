@@ -145,6 +145,7 @@ systemctl daemon-reload
 /usr/bin/proxi
 /usr/bin/pressure
 /usr/bin/temperature
+/usr/bin/light
 
 %license LICENSE.APLv2
 %{_datadir}/license/test
