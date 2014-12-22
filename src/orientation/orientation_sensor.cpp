@@ -43,6 +43,7 @@
 #define INITIAL_VALUE -1
 
 #define MS_TO_US 1000
+#define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
 #define PI 3.141593
 #define AZIMUTH_OFFSET_DEGREES 360
@@ -290,7 +291,6 @@ bool orientation_sensor::delete_interval(int client_id)
 
 void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
 {
-	const float MIN_DELIVERY_DIFF_FACTOR = 0.75f;
 	unsigned long long diff_time;
 
 	sensor_event_t orientation_event;

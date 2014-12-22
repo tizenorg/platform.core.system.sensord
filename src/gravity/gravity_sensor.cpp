@@ -42,6 +42,7 @@
 #define SENSOR_TYPE_ORIENTATION		"ORIENTATION"
 
 #define MS_TO_US 1000
+#define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
 #define ELEMENT_NAME											"NAME"
 #define ELEMENT_VENDOR											"VENDOR"
@@ -172,7 +173,6 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 	pitch = event.data.values[1];
 	roll = event.data.values[2];
 
-	const float MIN_DELIVERY_DIFF_FACTOR = 0.75f;
 	unsigned long long diff_time;
 
 	if(m_orientation_data_unit == "DEGREES") {
