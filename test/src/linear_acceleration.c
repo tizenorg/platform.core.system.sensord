@@ -94,6 +94,8 @@ int main(int argc,char **argv)
 
 	sf_unregister_event(handle, event);
 
+	stop_handle = sf_stop(handle);
+
 	if (stop_handle < 0) {
 		printf("Error\n\n");
 		return -1;
