@@ -227,7 +227,7 @@ bool sensor_plugin_loader::get_paths_from_dir(const string &dir_path, vector<str
 
 	string name;
 
-	while (dir_entry = readdir(dir)) {
+	while ((dir_entry = readdir(dir))) {
 		name = string(dir_entry->d_name);
 
 		if (equal(PLUGIN_POSTFIX.rbegin(), PLUGIN_POSTFIX.rend(), name.rbegin())) {
