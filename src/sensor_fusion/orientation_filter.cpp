@@ -48,6 +48,7 @@
 #define V1x3S	3
 #define V1x4S	4
 #define V1x6S	6
+#define V1x9S	9
 
 template <typename TYPE>
 orientation_filter<TYPE>::orientation_filter()
@@ -311,6 +312,18 @@ rotation_matrix<TYPE> orientation_filter<TYPE>::get_rotation_matrix(const sensor
 	get_orientation(accel, gyro, magnetic);
 
 	return m_rot_matrix;
+}
+
+
+template <typename TYPE>
+vect<TYPE> orientation_filter<TYPE>::get_rotation_vector(const sensor_data<TYPE> accel,
+		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
+{
+	get_orientation(accel, gyro, magnetic);
+
+	vect<float> rot_vect(m_rot_matrix.m_rot_mat);
+
+	return rot_vect;
 }
 
 #endif  //_ORIENTATION_FILTER_H_

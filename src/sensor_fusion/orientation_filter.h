@@ -73,6 +73,8 @@ public:
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
 	rotation_matrix<TYPE> get_rotation_matrix(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
+	vect<TYPE> get_rotation_vector(const sensor_data<TYPE> accel,
+			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
 };
 
 #include "orientation_filter.cpp"

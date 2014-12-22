@@ -36,8 +36,9 @@ int main()
 	float sdata[3];
 	unsigned long long time_stamp;
 	euler_angles<float> orientation;
-	rotation_matrix<float> orientation_mat;
-	orientation_sensor orien_sensor1, orien_sensor2;
+	rotation_matrix<float> rotation_mat;
+	vect<float> rotation_vector;
+	orientation_sensor orien_sensor1, orien_sensor2, orien_sensor3;
 
 	accel_in.open(((string)ORIENTATION_DATA_PATH + (string)"accel.txt").c_str());
 	gyro_in.open(((string)ORIENTATION_DATA_PATH + (string)"gyro.txt").c_str());
@@ -82,9 +83,13 @@ int main()
 
 		cout << "Orientation angles\t" << orientation.m_ang << "\n\n";
 
-		orientation_mat = orien_sensor1.get_rotation_matrix(accel_data, gyro_data, magnetic_data);
+		rotation_mat = orien_sensor2.get_rotation_matrix(accel_data, gyro_data, magnetic_data);
 
-		cout << "Orientation matrix\t" << orientation_mat.m_rot_mat << "\n\n";
+		cout << "Rotation matrix\t" << rotation_mat.m_rot_mat << "\n\n";
+
+		rotation_vector = orien_sensor3.get_rotation_vector(accel_data, gyro_data, magnetic_data);
+
+		cout << "Rotation Vector\t" << rotation_vector << "\n\n";
 	}
 
 	accel_in.close();
