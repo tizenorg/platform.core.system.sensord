@@ -144,6 +144,7 @@ systemctl daemon-reload
 /usr/bin/gyro
 /usr/bin/proxi
 /usr/bin/pressure
+/usr/bin/temperature
 
 %license LICENSE.APLv2
 %{_datadir}/license/test
