@@ -413,7 +413,7 @@ API bool sensord_get_sensor_list(sensor_type_t type, sensor_t **list, int *senso
 	*list = (sensor_t *) malloc(sizeof(sensor_info *) * sensor_infos.size());
 	retvm_if(!*list, false, "Failed to allocate memory");
 
-	for (int i = 0; i < sensor_infos.size(); ++i)
+	for (unsigned int i = 0; i < sensor_infos.size(); ++i)
 		*(*list + i) = sensor_info_to_sensor(sensor_infos[i]);
 
 	*sensor_count = sensor_infos.size();
