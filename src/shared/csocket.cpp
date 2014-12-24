@@ -212,7 +212,7 @@ ssize_t csocket::send_for_stream(void const* buffer, size_t size) const
 {
 	ssize_t len;
 	ssize_t err = 0;
-	ssize_t total_sent_size = 0;
+	size_t total_sent_size = 0;
 
 	do {
 		len = ::send(m_sock_fd, buffer + total_sent_size, size - total_sent_size, m_send_flags);
@@ -239,7 +239,7 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 {
 	ssize_t len;
 	ssize_t err = 0;
-	ssize_t total_recv_size = 0;
+	size_t total_recv_size = 0;
 
 	do {
 		len = ::recv(m_sock_fd, buffer + total_recv_size, size - total_recv_size, m_recv_flags);
