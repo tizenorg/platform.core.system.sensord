@@ -436,7 +436,7 @@ bool orientation_sensor::get_properties(sensor_properties_t &properties)
 		properties.min_range = -PI;
 		properties.max_range = 2 * PI;
 	}
-	properties.resolution = 0.000001;;
+	properties.resolution = 0.000001;
 
 	properties.vendor = m_vendor;
 	properties.name = SENSOR_NAME;
