@@ -28,13 +28,13 @@
 using std::string;
 using std::stringstream;
 
-#define ROOT_ELEMENT	"VIRTUAL_SENSOR"
-#define TEXT_ELEMENT 	"text"
-#define MODEL_ID_ATTR 	"id"
-#define DEFAULT_ATTR	"value"
-#define DEFAULT_ATTR1	"value1"
-#define DEFAULT_ATTR2	"value2"
-#define DEFAULT_ATTR3	"value3"
+#define ROOT_ELEMENT		"VIRTUAL_SENSOR"
+#define DEVICE_TYPE_ATTR 	"type"
+#define TEXT_ELEMENT 		"text"
+#define DEFAULT_ATTR		"value"
+#define DEFAULT_ATTR1		"value1"
+#define DEFAULT_ATTR2		"value2"
+#define DEFAULT_ATTR3		"value3"
 
 cvirtual_sensor_config::cvirtual_sensor_config()
 {
@@ -85,57 +85,78 @@ bool cvirtual_sensor_config::load_config(const string& config_path)
 		return false;
 	}
 
+	xmlNodePtr device_node_ptr;
 	xmlNodePtr virtual_sensor_node_ptr;
 	xmlNodePtr element_node_ptr;
 	xmlAttrPtr attr_ptr;
 	char* prop = NULL;
 
-	virtual_sensor_node_ptr = cur->xmlChildrenNode;
-
-	while (virtual_sensor_node_ptr != NULL) {
+	device_node_ptr = cur->xmlChildrenNode;
+	while (device_node_ptr != NULL){
 		//skip garbage element, [text]
-		if (!xmlStrcmp(virtual_sensor_node_ptr->name,(const xmlChar *)TEXT_ELEMENT)) {
-			virtual_sensor_node_ptr = virtual_sensor_node_ptr->next;
+		if (!xmlStrcmp(device_node_ptr->name,(const xmlChar *)TEXT_ELEMENT)) {
+			device_node_ptr = device_node_ptr->next;
 			continue;
 		}
 
-		//insert Model_list to config map
-		m_virtual_sensor_config[(const char*)virtual_sensor_node_ptr->name];
-		DBG("<%s>\n",(const char*)virtual_sensor_node_ptr->name);
 
-		element_node_ptr = virtual_sensor_node_ptr->xmlChildrenNode;
-		while (element_node_ptr != NULL) {
+		string device_type;
+		prop = (char*)xmlGetProp(device_node_ptr,(const xmlChar*)DEVICE_TYPE_ATTR);
+		device_type = prop;
+		free(prop);
+
+		//insert device to device_list
+		m_virtual_sensor_config[device_type];
+		DBG("<type=\"%s\">\n",device_type.c_str());
+
+		virtual_sensor_node_ptr = device_node_ptr->xmlChildrenNode;
+
+		while (virtual_sensor_node_ptr != NULL) {
 			//skip garbage element, [text]
-			if (!xmlStrcmp(element_node_ptr->name,(const xmlChar *)TEXT_ELEMENT)) {
-				element_node_ptr = element_node_ptr->next;
+			if (!xmlStrcmp(virtual_sensor_node_ptr->name,(const xmlChar *)TEXT_ELEMENT)) {
+				virtual_sensor_node_ptr = virtual_sensor_node_ptr->next;
 				continue;
 			}
 
-			//insert Element to Model
-			m_virtual_sensor_config[(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name];
-			DBG("<%s><%s>\n",(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name);
+			m_virtual_sensor_config[device_type][(const char*)virtual_sensor_node_ptr->name];
+			DBG("<type=\"%s\"><%s>\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name);
 
-			attr_ptr = element_node_ptr->properties;
-			while (attr_ptr != NULL) {
+			element_node_ptr = virtual_sensor_node_ptr->xmlChildrenNode;
+			while (element_node_ptr != NULL) {
+				//skip garbage element, [text]
+				if (!xmlStrcmp(element_node_ptr->name,(const xmlChar *)TEXT_ELEMENT)) {
+					element_node_ptr = element_node_ptr->next;
+					continue;
+				}
 
-				string key,value;
-				key = (char*)attr_ptr->name;
-				prop = (char*)xmlGetProp(element_node_ptr,attr_ptr->name);
-				value = prop;
-				free(prop);
+				//insert Element to Model
+				m_virtual_sensor_config[device_type][(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name];
+				DBG("<type=\"%s\"><%s><%s>\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name);
 
-				//insert attribute to Element
-				m_virtual_sensor_config[(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name][key]=value;
-				DBG("<%s><%s \"%s\"=\"%s\">\n",(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name,key.c_str(),value.c_str());
-				attr_ptr = attr_ptr->next;
+				attr_ptr = element_node_ptr->properties;
+				while (attr_ptr != NULL) {
+
+					string key,value;
+					key = (char*)attr_ptr->name;
+					prop = (char*)xmlGetProp(element_node_ptr,attr_ptr->name);
+					value = prop;
+					free(prop);
+
+					//insert attribute to Element
+					m_virtual_sensor_config[device_type][(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name][key]=value;
+					DBG("<type=\"%s\"><%s><%s \"%s\"=\"%s\">\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name,key.c_str(),value.c_str());
+					attr_ptr = attr_ptr->next;
+				}
+
+
+				element_node_ptr = element_node_ptr->next;
 			}
 
-
-			element_node_ptr = element_node_ptr->next;
+			DBG("\n");
+			virtual_sensor_node_ptr = virtual_sensor_node_ptr->next;
 		}
 
-		DBG("\n");
-		virtual_sensor_node_ptr = virtual_sensor_node_ptr->next;
+		device_node_ptr = device_node_ptr->next;
 	}
 
 	xmlFreeDoc(doc);
@@ -144,10 +165,17 @@ bool cvirtual_sensor_config::load_config(const string& config_path)
 
 bool cvirtual_sensor_config::get(const string& sensor_type, const string& element, const string& attr, string& value)
 {
-	auto it_virtual_sensor_list = m_virtual_sensor_config.find(sensor_type);
+	auto it_device_list = m_virtual_sensor_config.find(m_device_id);
 
-	if (it_virtual_sensor_list == m_virtual_sensor_config.end())	{
-		ERR("There is no <%s> element\n",sensor_type.c_str());
+	if (it_device_list == m_virtual_sensor_config.end())	{
+		ERR("There is no <%s> device\n",m_device_id.c_str());
+		return false;
+	}
+
+	auto it_virtual_sensor_list = it_device_list->second.find(sensor_type);
+
+	if (it_virtual_sensor_list == it_device_list->second.end())	{
+		ERR("There is no <%s> sensor\n",sensor_type.c_str());
 		return false;
 	}
 
@@ -272,9 +300,14 @@ bool cvirtual_sensor_config::get(const string& sensor_type, const string& elemen
 
 bool cvirtual_sensor_config::is_supported(const string& sensor_type)
 {
-	auto it_virtual_sensor_list = m_virtual_sensor_config.find(sensor_type);
+	auto it_device_list = m_virtual_sensor_config.find(m_device_id);
 
-	if (it_virtual_sensor_list == m_virtual_sensor_config.end())
+	if (it_device_list == m_virtual_sensor_config.end())
+		return false;
+
+	auto it_virtual_sensor_list = it_device_list->second.find(sensor_type);
+
+	if (it_virtual_sensor_list == it_device_list->second.end())
 		return false;
 
 	return true;
