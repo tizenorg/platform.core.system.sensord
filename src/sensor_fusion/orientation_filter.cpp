@@ -40,6 +40,10 @@
 #define QWB_CONST	((2 * (ZIGMA_W * ZIGMA_W)) / TAU_W)
 #define F_CONST		(-1 / TAU_W)
 
+#define NEGLIGIBLE_VAL 0.0000001
+
+#define ABS(val) (((val) < 0) ? -(val) : (val))
+
 // M-matrix, V-vector, MxN=> matrix dimension, R-RowCount, C-Column count
 #define M3X3R	3
 #define M3X3C	3
@@ -96,8 +100,6 @@ template <typename TYPE>
 inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<TYPE> accel,
 		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
 {
-	vect<TYPE> acc_data(V1x3S);
-	vect<TYPE> gyr_data(V1x3S);
 	unsigned long long sample_interval_gyro = SAMPLE_INTV;
 
 	m_accel.m_data = accel.m_data;
@@ -258,10 +260,8 @@ inline void orientation_filter<TYPE>::measurement_update()
 	matrix<TYPE> gain(M6X6R, M6X6C);
 	TYPE iden = 0;
 
-	for (int j = 0; j < M6X6C; j++)
-	{
-		for (int i = 0; i < M6X6R; i++)
-		{
+	for (int j=0; j<M6X6C; ++j) {
+		for (int i=0; i<M6X6R; ++i)	{
 			gain.m_mat[i][j] = m_pred_cov.m_mat[j][i] / (m_pred_cov.m_mat[j][j] + m_aid_cov.m_mat[j][j]);
 
 			m_state_new.m_vec[i] = m_state_new.m_vec[i] + gain.m_mat[i][j] * m_state_error.m_vec[j];
@@ -271,8 +271,11 @@ inline void orientation_filter<TYPE>::measurement_update()
 			else
 				iden = 0;
 
-			m_pred_cov.m_mat[i][j] = (iden - (gain.m_mat[i][j] * m_measure_mat.m_mat[j][i])) *
-					m_pred_cov.m_mat[i][j];
+			m_pred_cov.m_mat[j][i] = (iden - (gain.m_mat[i][j] * m_measure_mat.m_mat[j][i])) *
+					m_pred_cov.m_mat[j][i];
+
+			if (ABS(m_pred_cov.m_mat[j][i]) < NEGLIGIBLE_VAL)
+				m_pred_cov.m_mat[j][i] = NEGLIGIBLE_VAL;
 		}
 	}
 
