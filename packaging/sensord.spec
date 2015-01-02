@@ -18,6 +18,7 @@ Source2:    sensord.socket
 %define orientation_state ON
 %define gravity_state ON
 %define linear_accel_state ON
+%define rv_state ON
 
 %define build_test_suite OFF
 
@@ -79,7 +80,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGYRO=%{gyro_state} -DPROXI=%{proxi_state} -DLIGHT=%{light_state} \
 	-DGEO=%{geo_state} -DPRESSURE=%{pressure_state} -DTEMPERATURE=%{temperature_state} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
-	-DLINEAR_ACCEL=%{linear_accel_state} \
+	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
 	-DTEST_SUITE=%{build_test_suite}
 
 make %{?jobs:-j%jobs}
