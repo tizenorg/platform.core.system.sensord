@@ -49,6 +49,7 @@ extern "C"
 #include <sensor_gravity.h>
 #include <sensor_linear_accel.h>
 #include <sensor_orientation.h>
+#include <sensor_rv.h>
 #include <sensor_temperature.h>
 
 
