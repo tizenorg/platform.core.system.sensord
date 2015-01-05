@@ -103,7 +103,9 @@ int add_channel_to_array(const char *device_dir, const char *ch_name, struct cha
 	if (i == 0)
 		return -1;
 
-	asprintf(&(channel->prefix_str), "%s", ch_name);
+	if (asprintf(&(channel->prefix_str), "%s", ch_name) == -1)
+		return -1;
+
 	channel->is_en = 1;
 	channel->scale = 1.0;
 	channel->offset = 0.0;
