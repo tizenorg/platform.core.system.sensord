@@ -20,6 +20,7 @@
 #include <sf_common.h>
 #include <sensor_internal_deprecated.h>
 #include <sensor_internal.h>
+#include <sensor.h>
 #include <csensor_event_listener.h>
 #include <client_common.h>
 #include <vconf.h>
@@ -379,6 +380,12 @@ API int sf_send_sensorhub_data(int handle, const char* data, int data_len)
 API int sf_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data)
 {
 	return sensord_get_data(handle, data_id, sensor_data) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_check_rotation(unsigned long *rotation)
+{
+	rotation = 0;
+	return 0;
 }
 
 static bool get_sensor_list(void)
