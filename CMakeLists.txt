@@ -16,6 +16,7 @@ set(PROJECT_RELEASE_VERSION "1")
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 add_definitions(-Wall -O3 -omit-frame-pointer)
 add_definitions(-DUSE_DLOG_LOG)
+add_definitions(-DLIBDIR="${LIBDIR}")
 #add_definitions(-Wall -g -D_DEBUG)
 
 FIND_PROGRAM(UNAME NAMES uname)
