@@ -236,13 +236,13 @@ bool orientation_sensor::on_start(void)
 	AUTOLOCK(m_mutex);
 
 	m_accel_sensor->add_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_accel_sensor->add_interval((int)this, (m_interval/MS_TO_US), true);
+	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), true);
 	m_accel_sensor->start();
 	m_gyro_sensor->add_client(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_gyro_sensor->add_interval((int)this, (m_interval/MS_TO_US), true);
+	m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), true);
 	m_gyro_sensor->start();
 	m_magnetic_sensor->add_client(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_magnetic_sensor->add_interval((int)this, (m_interval/MS_TO_US), true);
+	m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), true);
 	m_magnetic_sensor->start();
 
 	activate();
@@ -254,13 +254,13 @@ bool orientation_sensor::on_stop(void)
 	AUTOLOCK(m_mutex);
 
 	m_accel_sensor->delete_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_accel_sensor->delete_interval((int)this, true);
+	m_accel_sensor->delete_interval((intptr_t)this, true);
 	m_accel_sensor->stop();
 	m_gyro_sensor->delete_client(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_gyro_sensor->delete_interval((int)this, true);
+	m_gyro_sensor->delete_interval((intptr_t)this, true);
 	m_gyro_sensor->stop();
 	m_magnetic_sensor->delete_client(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_magnetic_sensor->delete_interval((int)this, true);
+	m_magnetic_sensor->delete_interval((intptr_t)this, true);
 	m_magnetic_sensor->stop();
 
 	deactivate();
