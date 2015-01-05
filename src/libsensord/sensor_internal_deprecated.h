@@ -69,6 +69,22 @@ typedef struct {
 	int z;
 } sensor_panning_data_t;
 
+#define ACCELEROMETER_EVENT_ROTATION_CHECK ((ACCELEROMETER_SENSOR << 16) | 0x0001)
+
+enum accelerometer_rotate_state {
+	ROTATION_UNKNOWN = 0,
+	ROTATION_LANDSCAPE_LEFT = 1,
+	ROTATION_PORTRAIT_TOP = 2,
+	ROTATION_PORTRAIT_BTM = 3,
+	ROTATION_LANDSCAPE_RIGHT = 4,
+	ROTATION_EVENT_0 = 2,
+	ROTATION_EVENT_90 = 1,
+	ROTATION_EVENT_180 = 3,
+	ROTATION_EVENT_270 = 4,
+};
+
+int sf_check_rotation(unsigned long *rotation);
+
 /**
  * @fn int sf_connect(sensor_type_t sensor)
  * @brief  This API connects a sensor type to respective sensor. The application calls with the type of the sensor (ex. ACCELEROMETER_SENSOR) and on basis of that server takes decision of which plug-in to be connected. Once sensor connected application can proceed for data processing. This API returns a positive handle which should be used by application to communicate on sensor type.

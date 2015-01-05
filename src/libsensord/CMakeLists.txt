@@ -50,6 +50,7 @@ configure_file(${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}
 #install(DIRECTORY include/ DESTINATION ${INCLUDEDIR} FILES_MATCHING PATTERN "*.h")
 install(TARGETS ${PROJECT_NAME} DESTINATION ${LIBDIR} COMPONENT RuntimeLibraries)
 
+install(FILES sensor.h DESTINATION ${INCLUDEDIR}/sensor/)
 install(FILES sensor_internal_deprecated.h DESTINATION ${INCLUDEDIR}/sensor/)
 install(FILES sensor_internal.h DESTINATION ${INCLUDEDIR}/sensor/)
 install(FILES poller.h DESTINATION ${INCLUDEDIR}/sensor/)
