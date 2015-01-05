@@ -343,7 +343,10 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		m_orientation.m_azimuth_phase_compensation = m_azimuth_rotation_compensation;
 		m_orientation.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
 
-		euler_orientation = m_orientation.get_orientation(m_accel, m_gyro, m_magnetic);
+		{
+			AUTOLOCK(m_fusion_mutex);
+			euler_orientation = m_orientation.get_orientation(m_accel, m_gyro, m_magnetic);
+		}
 
 		if(m_raw_data_unit == "DEGREES") {
 			euler_orientation = rad2deg(euler_orientation);
@@ -403,7 +406,10 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 	m_orientation.m_azimuth_phase_compensation = m_azimuth_rotation_compensation;
 	m_orientation.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
 
-	euler_orientation = m_orientation.get_orientation(accel, gyro, magnetic);
+	{
+		AUTOLOCK(m_fusion_mutex);
+		euler_orientation = m_orientation.get_orientation(m_accel, m_gyro, m_magnetic);
+	}
 
 	if(m_raw_data_unit == "DEGREES") {
 		euler_orientation = rad2deg(euler_orientation);

@@ -341,18 +341,44 @@ void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &
 
 int rv_sensor::get_sensor_data(unsigned int data_id, sensor_data_t &data)
 {
-	if (data_id != ROTATION_VECTOR_BASE_DATA_SET)
-		return -1;
+	sensor_data<float> accel;
+	sensor_data<float> gyro;
+	sensor_data<float> magnetic;
+
+	sensor_data_t accel_data;
+	sensor_data_t gyro_data;
+	sensor_data_t magnetic_data;
+
+	quaternion<float> quaternion_orientation;
+
+	m_accel_sensor->get_sensor_data(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME, accel_data);
+	m_gyro_sensor->get_sensor_data(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME, gyro_data);
+	m_magnetic_sensor->get_sensor_data(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME, magnetic_data);
+
+	pre_process_data(accel, accel_data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);
+	pre_process_data(gyro, gyro_data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, m_gyro_scale);
+	pre_process_data(magnetic, magnetic_data.values, m_geomagnetic_static_bias, m_geomagnetic_rotation_direction_compensation, m_geomagnetic_scale);
+	accel.m_time_stamp = accel_data.timestamp;
+	gyro.m_time_stamp = gyro_data.timestamp;
+	magnetic.m_time_stamp = magnetic_data.timestamp;
+
+	m_orientation.m_pitch_phase_compensation = m_pitch_rotation_compensation;
+	m_orientation.m_roll_phase_compensation = m_roll_rotation_compensation;
+	m_orientation.m_azimuth_phase_compensation = m_azimuth_rotation_compensation;
+	m_orientation.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
+
+	{
+		AUTOLOCK(m_fusion_mutex);
+		quaternion_orientation = m_orientation.get_quaternion(m_accel, m_gyro, m_magnetic);
+	}
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
-
-	AUTOLOCK(m_value_mutex);
 	data.timestamp = m_time;
-	data.values[0] = m_x;
-	data.values[1] = m_y;
-	data.values[2] = m_z;
-	data.values[3] = m_w;
 	data.value_count = 4;
+	data.values[0] = quaternion_orientation.m_quat.m_vec[1];
+	data.values[1] = quaternion_orientation.m_quat.m_vec[2];
+	data.values[2] = quaternion_orientation.m_quat.m_vec[3];
+	data.values[3] = quaternion_orientation.m_quat.m_vec[0];
 
 	return 0;
 }
