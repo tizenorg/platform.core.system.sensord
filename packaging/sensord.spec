@@ -81,7 +81,8 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGEO=%{geo_state} -DPRESSURE=%{pressure_state} -DTEMPERATURE=%{temperature_state} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
-	-DTEST_SUITE=%{build_test_suite}
+	-DTEST_SUITE=%{build_test_suite} \
+	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
 
 make %{?jobs:-j%jobs}
 
