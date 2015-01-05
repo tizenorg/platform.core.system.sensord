@@ -27,7 +27,6 @@ int handle;
 int main(int argc, char* argv[])
 {
 	int result;
-	event_condition_t event_condition;
 
 	printf("start test!\n");
 
