@@ -55,7 +55,8 @@ typedef enum {
 	GRAVITY_SENSOR,
 	LINEAR_ACCEL_SENSOR,
 	ORIENTATION_SENSOR,
-	TEMPERATURE_SENSOR
+	TEMPERATURE_SENSOR,
+	ROTATION_VECTOR_SENSOR
 } sensor_type_t;
 
 typedef unsigned int sensor_id_t;

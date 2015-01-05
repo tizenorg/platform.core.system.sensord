@@ -33,16 +33,20 @@ ENDIF("${ARCH}" MATCHES "^arm.*")
 IF("${ARCH}" MATCHES "^arm.*")
 	CONFIGURE_FILE(sensor_plugins.xml.in sensor_plugins.xml @ONLY)
 	CONFIGURE_FILE(sensors.xml.in sensors.xml @ONLY)
+	CONFIGURE_FILE(virtual_sensors.xml.in virtual_sensors.xml @ONLY)
 	install(FILES
 		sensor_plugins.xml
 		sensors.xml
+		virtual_sensors.xml
 		DESTINATION etc)
 ELSE("${ARCH}" MATCHES "^arm.*")
 	CONFIGURE_FILE(sensor_plugins_sim.xml.in sensor_plugins.xml @ONLY)
 	CONFIGURE_FILE(sensors.xml.in sensors.xml @ONLY)
+	CONFIGURE_FILE(virtual_sensors.xml.in virtual_sensors.xml @ONLY)
 	install(FILES
 		sensor_plugins.xml
 		sensors.xml
+		virtual_sensors.xml
 		DESTINATION etc)
 ENDIF("${ARCH}" MATCHES "^arm.*")
 

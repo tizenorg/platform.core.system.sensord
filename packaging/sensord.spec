@@ -108,6 +108,7 @@ systemctl daemon-reload
 %{_bindir}/sensord
 %attr(0644,root,root)/usr/etc/sensor_plugins.xml
 %attr(0644,root,root)/usr/etc/sensors.xml
+%attr(0644,root,root)/usr/etc/virtual_sensors.xml
 %{_unitdir}/sensord.service
 %{_unitdir}/sensord.socket
 %{_unitdir}/multi-user.target.wants/sensord.service
