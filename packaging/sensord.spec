@@ -148,6 +148,7 @@ systemctl daemon-reload
 /usr/bin/pressure
 /usr/bin/temperature
 /usr/bin/light
+/usr/bin/rotation_vector
 
 %license LICENSE.APLv2
 %{_datadir}/license/test
