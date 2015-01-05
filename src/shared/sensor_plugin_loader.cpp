@@ -373,7 +373,7 @@ sensor_base* sensor_plugin_loader::get_sensor(sensor_id_t id)
 	vector<sensor_base *> sensors;
 
 	sensor_type_t type = (sensor_type_t) (id & SENSOR_TYPE_MASK);
-	int index = id >> SENSOR_INDEX_SHIFT;
+	unsigned int index = id >> SENSOR_INDEX_SHIFT;
 
 	sensors = get_sensors(type);
 
