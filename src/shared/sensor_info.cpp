@@ -237,7 +237,8 @@ void sensor_info::put(raw_data_t &data, int value)
 {
 	char buffer[sizeof(value)];
 
-	(*(int *) buffer) = value;
+	int *temp = (int *) buffer;
+	*temp = value;
 
 	copy(&buffer[0], &buffer[sizeof(buffer)], back_inserter(data));
 }
@@ -246,7 +247,8 @@ void sensor_info::put(raw_data_t &data, float value)
 {
 	char buffer[sizeof(value)];
 
-	(*(float *) buffer) = value;
+	float *temp = (float *) buffer;
+	*temp = value;
 
 	copy(&buffer[0], &buffer[sizeof(buffer)], back_inserter(data));
 }
