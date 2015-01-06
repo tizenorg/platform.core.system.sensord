@@ -1,27 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 project(sensord_src CXX)
 
-# to install pkgconfig setup file.
-SET(EXEC_PREFIX "\${prefix}")
-SET(VERSION 1.0)
-
 include_directories(${CMAKE_SOURCE_DIR}/src/shared)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-include(FindPkgConfig)
-pkg_check_modules(rpkgs REQUIRED glib-2.0 gio-2.0 vconf)
-add_definitions(${rpkgs_CFLAGS} -DUSE_ONLY_ONE_MODULE)
-add_definitions(-Wall -std=gnu++0x)
-
-set(PROJECT_MAJOR_VERSION "0")
-set(PROJECT_MINOR_VERSION "0")
-set(PROJECT_RELEASE_VERSION "1")
-set(CMAKE_VERBOSE_MAKEFILE OFF)
-
-set(SENSOR_FUSION_ENABLE "0")
-set(ORIENTATION_ENABLE "0")
-set(GRAVITY_ENABLE "0")
-set(LINEAR_ACCELERATION_ENABLE "0")
 
 IF("${ACCEL}" STREQUAL "ON")
 add_subdirectory(accel)
