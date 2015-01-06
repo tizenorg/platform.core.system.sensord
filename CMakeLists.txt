@@ -56,6 +56,7 @@ IF("${TEST_SUITE}" STREQUAL "ON")
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.APLv2 DESTINATION share/license RENAME test)
 ENDIF()
 
+add_subdirectory(systemd)
 add_subdirectory(src)
 
 IF("${TEST_SUITE}" STREQUAL "ON")
