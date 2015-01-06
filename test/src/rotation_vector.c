@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <sensor_common.h>
 #include <unistd.h>
+#include <string.h>
 
 static GMainLoop *mainloop;
 
