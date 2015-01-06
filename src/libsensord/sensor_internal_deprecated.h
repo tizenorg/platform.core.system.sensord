@@ -49,6 +49,7 @@ extern "C"
 #include <sensor_orientation.h>
 #include <sensor_temperature.h>
 #include <sensor_rv.h>
+#include <sensor_motion.h>
 
 typedef struct {
 	condition_op_t cond_op;
