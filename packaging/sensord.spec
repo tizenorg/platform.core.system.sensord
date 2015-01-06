@@ -8,6 +8,16 @@ Source0:    %{name}-%{version}.tar.gz
 Source1:	sensord.manifest
 Source2:	libsensord.manifest
 
+BuildRequires:  cmake
+BuildRequires:  vconf-keys-devel
+BuildRequires:  libattr-devel
+BuildRequires:  pkgconfig(dlog)
+BuildRequires:  pkgconfig(libxml-2.0)
+BuildRequires:  pkgconfig(glib-2.0)
+BuildRequires:  pkgconfig(vconf)
+BuildRequires:  pkgconfig(libsystemd-daemon)
+BuildRequires:  pkgconfig(capi-system-info)
+
 %define accel_state ON
 %define gyro_state ON
 %define proxi_state ON
@@ -19,18 +29,7 @@ Source2:	libsensord.manifest
 %define gravity_state ON
 %define linear_accel_state ON
 %define rv_state ON
-
 %define build_test_suite OFF
-
-BuildRequires:  cmake
-BuildRequires:  vconf-keys-devel
-BuildRequires:  libattr-devel
-BuildRequires:  pkgconfig(dlog)
-BuildRequires:  pkgconfig(libxml-2.0)
-BuildRequires:  pkgconfig(glib-2.0)
-BuildRequires:  pkgconfig(vconf)
-BuildRequires:  pkgconfig(libsystemd-daemon)
-BuildRequires:  pkgconfig(capi-system-info)
 
 %description
 Sensor daemon
@@ -60,12 +59,12 @@ Requires:   %{name} = %{version}-%{release}
 Sensord library (devel)
 
 %if %{build_test_suite} == "ON"
-%package -n sensor-tc
+%package -n sensor-test
 Summary:    Sensord library
 Group:      System/Testing
 Requires:   %{name} = %{version}-%{release}
 
-%description -n sensor-tc
+%description -n sensor-test
 Sensor functional testing
 
 %endif
@@ -75,9 +74,6 @@ Sensor functional testing
 cp %{SOURCE1} .
 cp %{SOURCE2} .
 
-%build
-#CFLAGS+=" -fvisibility=hidden "; export CFLAGS
-#CXXFLAGS+=" -fvisibility=hidden -fvisibility-inlines-hidden ";export CXXFLAGS
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGYRO=%{gyro_state} -DPROXI=%{proxi_state} -DLIGHT=%{light_state} \
 	-DGEO=%{geo_state} -DPRESSURE=%{pressure_state} -DTEMPERATURE=%{temperature_state} \
@@ -86,32 +82,32 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DTEST_SUITE=%{build_test_suite} \
 	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
 
+%build
 make %{?jobs:-j%jobs}
 
 %install
 rm -rf %{buildroot}
 %make_install
 
-mkdir -p %{buildroot}/usr/share/license
-mkdir -p %{buildroot}%{_unitdir}/sockets.target.wants
-mkdir -p %{buildroot}%{_unitdir}/multi-user.target.wants
-install -m 0644 %SOURCE1 %{buildroot}%{_unitdir}
-install -m 0644 %SOURCE2 %{buildroot}%{_unitdir}
-ln -s ../sensord.socket  %{buildroot}%{_unitdir}/sockets.target.wants/sensord.socket
-ln -s ../sensord.service  %{buildroot}%{_unitdir}/multi-user.target.wants/sensord.service
+%install_service multi-user.target.wants sensord.service
+%install_service sockets.target.wants sensord.socket
 
-%post -p /sbin/ldconfig
+%post
 systemctl daemon-reload
 
-%postun -p /sbin/ldconfig
+%postun
 systemctl daemon-reload
+
+%post -n libsensord -p /sbin/ldconfig
+
+%postun -n libsensord -p /sbin/ldconfig
 
 %files -n sensord
-%{_bindir}/sensord
 %attr(0644,root,root)/usr/etc/sensor_plugins.xml
 %attr(0644,root,root)/usr/etc/sensors.xml
 %attr(0644,root,root)/usr/etc/virtual_sensors.xml
 %manifest sensord.manifest
+%{_bindir}/sensord
 %{_unitdir}/sensord.service
 %{_unitdir}/sensord.socket
 %{_unitdir}/multi-user.target.wants/sensord.service
@@ -139,20 +135,19 @@ systemctl daemon-reload
 %{_libdir}/pkgconfig/sensord-server.pc
 
 %if %{build_test_suite} == "ON"
-%files -n sensor-tc
+%files -n sensor-test
 %defattr(-,root,root,-)
-/usr/bin/accelerometer
-/usr/bin/geomagnetic
-/usr/bin/orientation
-/usr/bin/gravity
-/usr/bin/linear_acceleration
-/usr/bin/gyro
-/usr/bin/proxi
-/usr/bin/pressure
-/usr/bin/temperature
-/usr/bin/light
-/usr/bin/rotation_vector
-
+%{_bindir}/accelerometer
+%{_bindir}/geomagnetic
+%{_bindir}/orientation
+%{_bindir}/gravity
+%{_bindir}/linear_acceleration
+%{_bindir}/gyro
+%{_bindir}/proxi
+%{_bindir}/pressure
+%{_bindir}/temperature
+%{_bindir}/light
+%{_bindir}/rotation_vector
 %license LICENSE.APLv2
 %{_datadir}/license/test
 %endif
