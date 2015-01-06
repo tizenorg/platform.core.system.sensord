@@ -18,17 +18,13 @@
 %
 % - Orientation Estimation using Gyroscope as the driving system and Accelerometer+Geo-Magnetic Sensors as Aiding System.
 % - Quaternion based approach
-% - Estimation and correction of Euler errors and bias errors for gyroscope using Kalman filter
+% - Estimation and correction of orientation errors and bias errors for gyroscope using Kalman filter
 
-function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data, Mag_data)
-
-	LOW_PASS_FILTERING_ON = 0;
+function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, Gyro_data, Mag_data)
 	PLOT_SCALED_SENSOR_COMPARISON_DATA = 0;
 	PLOT_INDIVIDUAL_SENSOR_INPUT_DATA = 0;
+
 	MAGNETIC_ALIGNMENT_FACTOR = -1;
-	PITCH_PHASE_CORRECTION = -1;
-	ROLL_PHASE_CORRECTION = -1;
-	YAW_PHASE_CORRECTION = -1;
 
 	GRAVITY = 9.80665;
 	PI = 3.141593;
@@ -89,18 +85,9 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 	var_Gy = zeros(1,BUFFER_SIZE);
 	var_Gz = zeros(1,BUFFER_SIZE);
 
-	roll = zeros(1,BUFFER_SIZE);
-	pitch = zeros(1,BUFFER_SIZE);
-	yaw = zeros(1,BUFFER_SIZE);
 	quat_driv = zeros(BUFFER_SIZE,4);
 	quat_aid = zeros(BUFFER_SIZE,4);
 	quat_error = zeros(BUFFER_SIZE,4);
-	euler = zeros(BUFFER_SIZE,3);
-	Ro = zeros(3, 3, BUFFER_SIZE);
-
-	OR_driv = zeros(3,BUFFER_SIZE);
-	OR_aid = zeros(3,BUFFER_SIZE);
-	OR_err = zeros(3,BUFFER_SIZE);
 
 	% system covariance matrix
 	Q = zeros(6,6);
@@ -159,11 +146,6 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 		M_e = [acc_e acc_e_x_mag_e cross(acc_e_x_mag_e,acc_e)];
 		Rot_m = M_e * M_b';
 		quat_aid(i,:) = rot_mat2quat(Rot_m);
-
-		euler = quat2euler(quat_aid(i,:));
-		roll(i) = euler(2);
-		pitch(i) = euler(1);
-		yaw(i) = euler(3);
 
 		if i <= MOVING_AVERAGE_WINDOW_LENGTH
 			var_Gx(i) = NON_ZERO_VAL;
@@ -252,21 +234,6 @@ function [OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data
 		By = x(5,i);
 		Bz = x(6,i);
 	end
-
-	OR_aid(1,:) = roll * RAD2DEG;
-	OR_aid(2,:) = pitch * RAD2DEG;
-	OR_aid(3,:) = yaw * RAD2DEG;
-
-	euler = quat2euler(quat_driv);
-	OR_driv(1,:) = ROLL_PHASE_CORRECTION * euler(:,2)' * RAD2DEG;
-	OR_driv(2,:) = PITCH_PHASE_CORRECTION * euler(:,1)' * RAD2DEG;
-	OR_driv(3,:) = YAW_PHASE_CORRECTION * euler(:,3)' * RAD2DEG;
-
-	euler = quat2euler(quat_error);
-	OR_err(1,:) = euler(:,2)' * RAD2DEG;
-	OR_err(2,:) = euler(:,1)' * RAD2DEG;
-	OR_err(3,:) = euler(:,3)' * RAD2DEG;
-
 	if PLOT_SCALED_SENSOR_COMPARISON_DATA == 1
 		% Accelerometer/Gyroscope/Magnetometer scaled Plot results
 		hfig=(figure);
