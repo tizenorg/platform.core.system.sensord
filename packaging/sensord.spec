@@ -45,7 +45,7 @@ Sensor daemon
 
 %package -n libsensord
 Summary:    Sensord library
-Group:      System/Sensor Framework
+Group:      System/Libraries
 Requires:   %{name} = %{version}-%{release}
 
 %description -n libsensord
@@ -53,7 +53,7 @@ Sensord library
 
 %package -n libsensord-devel
 Summary:    Sensord library (devel)
-Group:      System/Sensor Framework
+Group:      System/Development
 Requires:   %{name} = %{version}-%{release}
 
 %description -n libsensord-devel
@@ -62,7 +62,7 @@ Sensord library (devel)
 %if %{build_test_suite} == "ON"
 %package -n sensor-tc
 Summary:    Sensord library
-Group:      System/Sensor Framework
+Group:      System/Testing
 Requires:   %{name} = %{version}-%{release}
 
 %description -n sensor-tc
