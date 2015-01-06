@@ -24,17 +24,33 @@
 function [Gravity]  = estimate_gravity(Accel_data, Gyro_data, Mag_data)
 
 GRAVITY = 9.80665;
+RAD2DEG = 57.2957795;
+
+PITCH_PHASE_CORRECTION = -1;
+ROLL_PHASE_CORRECTION = -1;
+YAW_PHASE_CORRECTION = -1;
 
 BUFFER_SIZE = size(Accel_data,2);
 
 OR_driv = zeros(3,BUFFER_SIZE);
-OR_aid = zeros(3,BUFFER_SIZE);
-OR_err = zeros(3,BUFFER_SIZE);
 
 Gravity = zeros(3,BUFFER_SIZE);
 
+OR_driv = zeros(3,BUFFER_SIZE);
+
+Quat_driv = zeros(4,BUFFER_SIZE);
+Quat_aid = zeros(4,BUFFER_SIZE);
+Quat_err = zeros(4,BUFFER_SIZE);
+
+euler = zeros(BUFFER_SIZE,3);
+
 % estimate orientation
-[OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data, Mag_data);
+[Quat_driv, Quat_aid, Quat_err]  = estimate_orientation(Accel_data, Gyro_data, Mag_data);
+
+euler = quat2euler(Quat_driv);
+OR_driv(1,:) = ROLL_PHASE_CORRECTION * euler(:,2)' * RAD2DEG;
+OR_driv(2,:) = PITCH_PHASE_CORRECTION * euler(:,1)' * RAD2DEG;
+OR_driv(3,:) = YAW_PHASE_CORRECTION * euler(:,3)' * RAD2DEG;
 
 Gx = GRAVITY * sind(OR_driv(1,:));
 Gy = GRAVITY * sind(OR_driv(2,:));
