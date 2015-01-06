@@ -50,7 +50,13 @@ EXTAPI void sf_log(int type , int priority , const char *tag , const char *fmt ,
 			sf_debug_file_fd = open(SF_SERVER_MSG_LOG_FILE, O_WRONLY|O_CREAT|O_APPEND, 0644);
 			if (sf_debug_file_fd != -1) {
 				vsnprintf(sf_debug_file_buf,255, fmt , ap );
-				write(sf_debug_file_fd, sf_debug_file_buf, strlen(sf_debug_file_buf));
+				int total_bytes_written = 0;
+				while (total_bytes_written < (int) strlen(sf_debug_file_buf)){
+					int bytes_written = write(sf_debug_file_fd, (sf_debug_file_buf + total_bytes_written), strlen(sf_debug_file_buf) - total_bytes_written);
+					if (bytes_written == -1)
+						break;
+					total_bytes_written = total_bytes_written + bytes_written;
+				}
 				close(sf_debug_file_fd);
 			}
 			break;
