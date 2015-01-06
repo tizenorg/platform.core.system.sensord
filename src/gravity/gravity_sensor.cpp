@@ -42,7 +42,6 @@
 #define SENSOR_TYPE_ORIENTATION		"ORIENTATION"
 
 #define MS_TO_US 1000
-#define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
 #define ELEMENT_NAME											"NAME"
 #define ELEMENT_VENDOR											"VENDOR"

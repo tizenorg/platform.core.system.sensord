@@ -258,7 +258,6 @@ bool rv_sensor::delete_interval(int client_id)
 
 void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &outs)
 {
-	const float MIN_DELIVERY_DIFF_FACTOR = 0.75f;
 	unsigned long long diff_time;
 
 	sensor_event_t rv_event;

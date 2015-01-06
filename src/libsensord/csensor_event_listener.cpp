@@ -26,7 +26,6 @@
 #include <chrono>
 
 #define MS_TO_US 1000
-#define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
 using std::thread;
 using std::pair;

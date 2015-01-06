@@ -40,6 +40,9 @@ extern "C"
 #define NAME_MAX 256
 #endif
 
+#if !defined(MIN_DELIVERY_DIFF_FACTOR)
+#define MIN_DELIVERY_DIFF_FACTOR 0.75f
+#endif
 
 #define SENSOR_TYPE_SHIFT 16
 
