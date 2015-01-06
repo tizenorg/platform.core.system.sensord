@@ -5,8 +5,8 @@ Release:    0
 Group:     	System/Sensor Framework
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
-Source1:    sensord.service
-Source2:    sensord.socket
+Source1:	sensord.manifest
+Source2:	libsensord.manifest
 
 %define accel_state ON
 %define gyro_state ON
@@ -72,6 +72,8 @@ Sensor functional testing
 
 %prep
 %setup -q
+cp %{SOURCE1} .
+cp %{SOURCE2} .
 
 %build
 #CFLAGS+=" -fvisibility=hidden "; export CFLAGS
@@ -105,11 +107,11 @@ systemctl daemon-reload
 systemctl daemon-reload
 
 %files -n sensord
-%manifest sensord.manifest
 %{_bindir}/sensord
 %attr(0644,root,root)/usr/etc/sensor_plugins.xml
 %attr(0644,root,root)/usr/etc/sensors.xml
 %attr(0644,root,root)/usr/etc/virtual_sensors.xml
+%manifest sensord.manifest
 %{_unitdir}/sensord.service
 %{_unitdir}/sensord.socket
 %{_unitdir}/multi-user.target.wants/sensord.service
@@ -118,8 +120,8 @@ systemctl daemon-reload
 %{_datadir}/license/sensord
 
 %files -n libsensord
-%manifest libsensord.manifest
 %defattr(-,root,root,-)
+%manifest libsensord.manifest
 %{_libdir}/libsensor.so.*
 %{_libdir}/sensord/*.so*
 %{_libdir}/libsensord-share.so
