@@ -36,6 +36,7 @@ gyro_sensor::gyro_sensor()
 	m_name = string(SENSOR_NAME);
 
 	register_supported_event(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+	register_supported_event(GYROSCOPE_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME);
 
 	physical_sensor::set_poller(gyro_sensor::working, this);
 }
@@ -89,6 +90,12 @@ bool gyro_sensor::process_event(void)
 	m_sensor_hal->get_sensor_data(event.data);
 
 	AUTOLOCK(m_client_info_mutex);
+
+	if (get_client_cnt(GYROSCOPE_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME)) {
+		event.sensor_id = get_id();
+		event.event_type = GYROSCOPE_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME;
+		push(event);
+	}
 
 	if (get_client_cnt(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME)) {
 		event.sensor_id = get_id();
@@ -161,21 +168,20 @@ void gyro_sensor::raw_to_base(sensor_data_t &data)
 	data.values[2] = data.values[2] * m_resolution;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	gyro_sensor *inst;
+	gyro_sensor *sensor;
 
 	try {
-		inst = new gyro_sensor();
+		sensor = new(std::nothrow) gyro_sensor;
 	} catch (int err) {
-		ERR("gyro_sensor class create fail , errno : %d , errstr : %s\n", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void*)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (gyro_sensor*)inst;;
+	module->sensors.push_back(sensor);
+	return module;
 }

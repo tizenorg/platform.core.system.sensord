@@ -60,6 +60,5 @@ private:
 	cmutex m_value_mutex;
 
 	bool update_value(bool wait);
-	bool enable_resource(bool enable);
 };
 #endif /*_PROXI_SENSOR_HAL_H_*/

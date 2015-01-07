@@ -56,11 +56,11 @@ gravity_sensor::gravity_sensor()
 , m_x(INITIAL_VALUE)
 , m_y(INITIAL_VALUE)
 , m_z(INITIAL_VALUE)
+, m_time(0)
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
-	m_name = string(SENSOR_NAME);
-	m_timestamp = get_timestamp();
+	m_name = std::string(SENSOR_NAME);
 	register_supported_event(GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME);
 
 	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_VENDOR, m_vendor)) {
@@ -129,7 +129,7 @@ bool gravity_sensor::on_start(void)
 	AUTOLOCK(m_mutex);
 
 	m_orientation_sensor->add_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_orientation_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), true);
+	m_orientation_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_orientation_sensor->start();
 
 	activate();
@@ -141,7 +141,7 @@ bool gravity_sensor::on_stop(void)
 	AUTOLOCK(m_mutex);
 
 	m_orientation_sensor->delete_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_orientation_sensor->delete_interval((intptr_t)this, true);
+	m_orientation_sensor->delete_interval((intptr_t)this, false);
 	m_orientation_sensor->stop();
 
 	deactivate();
@@ -151,17 +151,17 @@ bool gravity_sensor::on_stop(void)
 bool gravity_sensor::add_interval(int client_id, unsigned int interval)
 {
 	AUTOLOCK(m_mutex);
-	m_orientation_sensor->add_interval(client_id , interval, true);
+	m_orientation_sensor->add_interval(client_id , interval, false);
 
-	return sensor_base::add_interval(client_id, interval, true);
+	return sensor_base::add_interval(client_id, interval, false);
 }
 
 bool gravity_sensor::delete_interval(int client_id)
 {
 	AUTOLOCK(m_mutex);
-	m_orientation_sensor->delete_interval(client_id , true);
+	m_orientation_sensor->delete_interval(client_id , false);
 
-	return sensor_base::delete_interval(client_id, true);
+	return sensor_base::delete_interval(client_id, false);
 }
 
 void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
@@ -182,14 +182,13 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 	}
 
 	if (event.event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
-		diff_time = event.data.timestamp - m_timestamp;
+		diff_time = event.data.timestamp - m_time;
 
-		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
+		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
 		gravity_event.sensor_id = get_id();
 		gravity_event.event_type = GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME;
-		m_timestamp = get_timestamp();
 		if ((roll >= (M_PI/2)-DEVIATION && roll <= (M_PI/2)+DEVIATION) ||
 				(roll >= -(M_PI/2)-DEVIATION && roll <= -(M_PI/2)+DEVIATION)) {
 			gravity_event.data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(roll) * cos(azimuth);
@@ -206,10 +205,19 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 			gravity_event.data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(roll) * cos(pitch);
 		}
 		gravity_event.data.value_count = 3;
-		gravity_event.data.timestamp = m_timestamp;
+		gravity_event.data.timestamp = get_timestamp();
 		gravity_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 
 		push(gravity_event);
+
+		{
+			AUTOLOCK(m_value_mutex);
+
+			m_time = gravity_event.data.timestamp;
+			m_x = gravity_event.data.values[0];
+			m_y = gravity_event.data.values[1];
+			m_z = gravity_event.data.values[2];
+		}
 	}
 }
 
@@ -262,25 +270,27 @@ bool gravity_sensor::get_properties(sensor_properties_s &properties)
 	properties.resolution = 0.000001;
 	properties.vendor = m_vendor;
 	properties.name = SENSOR_NAME;
+	properties.fifo_count = 0;
+	properties.max_batch_count = 0;
+	properties.min_interval = 1;
 
 	return true;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	gravity_sensor *inst;
+	gravity_sensor *sensor;
 
 	try {
-		inst = new gravity_sensor();
+		sensor = new(std::nothrow) gravity_sensor;
 	} catch (int err) {
-		ERR("Failed to create gravity_sensor class, errno : %d, errstr : %s", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void *)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (gravity_sensor *)inst;
+	module->sensors.push_back(sensor);
+	return module;
 }

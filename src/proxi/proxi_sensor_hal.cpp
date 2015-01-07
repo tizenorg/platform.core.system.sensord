@@ -24,15 +24,8 @@
 #include <proxi_sensor_hal.h>
 #include <sys/ioctl.h>
 #include <fstream>
-#include <iio_common.h>
 
 using std::ifstream;
-
-#define NO_FLAG			0
-#define PROXIMITY_TYPE	8
-
-#define EVENT_DIR		"events/"
-#define EVENT_EN_NODE	"in_proximity_thresh_either_en"
 
 #define SENSOR_TYPE_PROXI		"PROXI"
 #define ELEMENT_NAME 			"NAME"
@@ -49,33 +42,30 @@ proxi_sensor_hal::proxi_sensor_hal()
 	const string sensorhub_interval_node_name = "prox_poll_delay";
 	csensor_config &config = csensor_config::get_instance();
 
-	node_path_info_query query;
-	node_path_info info;
-	int input_method = IIO_METHOD;
+	node_info_query query;
+	node_info info;
 
-	if (!get_model_properties(SENSOR_TYPE_PROXI, m_model_id, input_method)) {
-		ERR("Failed to find model_properties");
+	if (!find_model_id(SENSOR_TYPE_PROXI, m_model_id)) {
+		ERR("Failed to find model id");
 		throw ENXIO;
 
 	}
 
-	query.input_method = input_method;
-	query.sensorhub_controlled = m_sensorhub_controlled = false;
+	query.sensorhub_controlled = m_sensorhub_controlled = is_sensorhub_controlled(sensorhub_interval_node_name);
 	query.sensor_type = SENSOR_TYPE_PROXI;
-	query.input_event_key = "proximity_sensor";
+	query.key = "proximity_sensor";
 	query.iio_enable_node_name = "proximity_enable";
 	query.sensorhub_interval_node_name = sensorhub_interval_node_name;
 
-	if (!get_node_path_info(query, info)) {
+	if (!get_node_info(query, info)) {
 		ERR("Failed to get node info");
 		throw ENXIO;
 	}
 
-	m_data_node = info.data_node_path;
-	m_enable_node = info.base_dir + string(EVENT_DIR) + string(EVENT_EN_NODE);
+	show_node_info(info);
 
-	INFO("data node: %s",m_data_node.c_str());
-	INFO("enable node: %s",m_enable_node.c_str());
+	m_data_node = info.data_node_path;
+	m_enable_node = info.enable_node_path;
 
 	if (!config.get(SENSOR_TYPE_PROXI, m_model_id, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
@@ -91,21 +81,14 @@ proxi_sensor_hal::proxi_sensor_hal()
 
 	INFO("m_chip_name = %s\n",m_chip_name.c_str());
 
-	int fd, ret;
-	fd = open(m_data_node.c_str(), NO_FLAG);
-	if (fd == -1) {
-		ERR("Could not open event resource");
+	if ((m_node_handle = open(m_data_node.c_str(), O_RDWR)) < 0) {
+		ERR("Proxi handle(%d) open fail", m_node_handle);
 		throw ENXIO;
 	}
 
-	ret = ioctl(fd, IOCTL_IIO_EVENT_FD, &m_node_handle);
-
-	close(fd);
-
-	if ((ret == -1) || (m_node_handle == -1)) {
-		ERR("Failed to retrieve event fd");
-		throw ENXIO;
-	}
+	int clockId = CLOCK_MONOTONIC;
+	if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0)
+		ERR("Fail to set monotonic timestamp for %s", m_data_node.c_str());
 
 	INFO("Proxi_sensor_hal is created!\n");
 
@@ -129,17 +112,11 @@ sensor_type_t proxi_sensor_hal::get_type(void)
 	return PROXIMITY_SENSOR;
 }
 
-bool proxi_sensor_hal::enable_resource(bool enable)
-{
-	update_sysfs_num(m_enable_node.c_str(), enable);
-	return true;
-}
-
 bool proxi_sensor_hal::enable(void)
 {
 	AUTOLOCK(m_mutex);
 
-	enable_resource(true);
+	set_enable_node(m_enable_node, m_sensorhub_controlled, true, SENSORHUB_PROXIMITY_ENABLE_BIT);
 
 	m_fired_time = 0;
 	INFO("Proxi sensor real starting");
@@ -150,7 +127,7 @@ bool proxi_sensor_hal::disable(void)
 {
 	AUTOLOCK(m_mutex);
 
-	enable_resource(true);
+	set_enable_node(m_enable_node, m_sensorhub_controlled, false, SENSORHUB_PROXIMITY_ENABLE_BIT);
 
 	INFO("Proxi sensor real stopping");
 	return true;
@@ -158,63 +135,31 @@ bool proxi_sensor_hal::disable(void)
 
 bool proxi_sensor_hal::update_value(bool wait)
 {
-	iio_event_t proxi_event;
-	fd_set readfds, exceptfds;
+	struct input_event proxi_event;
+	INFO("proxi event detection!");
 
-	FD_ZERO(&readfds);
-	FD_ZERO(&exceptfds);
-	FD_SET(m_node_handle, &readfds);
-	FD_SET(m_node_handle, &exceptfds);
+	int len = read(m_node_handle, &proxi_event, sizeof(proxi_event));
 
-	int ret;
-	ret = select(m_node_handle + 1, &readfds, NULL, &exceptfds, NULL);
-
-	if (ret == -1) {
-		ERR("select error:%s m_node_handle:%d", strerror(errno), m_node_handle);
-		return false;
-	}
-	else if (!ret) {
-		DBG("select timeout");
+	if (len == -1) {
+		DBG("read(m_node_handle) is error:%s.\n", strerror(errno));
 		return false;
 	}
 
-	if (FD_ISSET(m_node_handle, &exceptfds)) {
-		ERR("select exception occurred!");
-		return false;
-	}
-
-	if (FD_ISSET(m_node_handle, &readfds)) {
-		INFO("proximity event detection!");
-		int len = read(m_node_handle, &proxi_event, sizeof(proxi_event));
-
-		if (len == -1) {
-			DBG("Error in read(m_node_handle):%s.", strerror(errno));
+	DBG("read event,  len : %d , type : %x , code : %x , value : %x", len, proxi_event.type, proxi_event.code, proxi_event.value);
+	if ((proxi_event.type == EV_ABS) && (proxi_event.code == PROXI_CODE)) {
+		AUTOLOCK(m_value_mutex);
+		if (proxi_event.value == PROXIMITY_NODE_STATE_FAR) {
+			INFO("PROXIMITY_STATE_FAR state occured\n");
+			m_state = PROXIMITY_STATE_FAR;
+		} else if (proxi_event.value == PROXIMITY_NODE_STATE_NEAR) {
+			INFO("PROXIMITY_STATE_NEAR state occured\n");
+			m_state = PROXIMITY_STATE_NEAR;
+		} else {
+			ERR("PROXIMITY_STATE Unknown: %d\n",proxi_event.value);
 			return false;
 		}
-
-		ull_bytes_t ev_data;
-		ev_data.num = proxi_event.event_id;
-		if (ev_data.bytes[CH_TYPE] == PROXIMITY_TYPE) {
-			AUTOLOCK(m_value_mutex);
-			int temp;
-			temp = GET_DIR_VAL(ev_data.bytes[DIRECTION]);
-			if (temp == PROXIMITY_NODE_STATE_FAR) {
-				INFO("PROXIMITY_STATE_FAR state occurred");
-				m_state = PROXIMITY_STATE_FAR;
-			}
-			else if (temp == PROXIMITY_NODE_STATE_NEAR) {
-				INFO("PROXIMITY_STATE_NEAR state occurred");
-				m_state = PROXIMITY_STATE_NEAR;
-			}
-			else {
-				ERR("PROXIMITY_STATE Unknown: %d", proxi_event.event_id);
-				return false;
-			}
-		}
-		m_fired_time = proxi_event.timestamp;
-	}
-	else {
-		ERR("No proximity event data available to read");
+		m_fired_time = sensor_hal::get_timestamp(&proxi_event.time);
+	} else {
 		return false;
 	}
 	return true;
@@ -251,21 +196,20 @@ bool proxi_sensor_hal::get_properties(sensor_properties_s &properties)
 	return true;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	proxi_sensor_hal *inst;
+	proxi_sensor_hal *sensor;
 
 	try {
-		inst = new proxi_sensor_hal();
+		sensor = new(std::nothrow) proxi_sensor_hal;
 	} catch (int err) {
-		ERR("proxi_sensor class create fail , errno : %d , errstr : %s\n", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void*)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (proxi_sensor_hal*)inst;
+	module->sensors.push_back(sensor);
+	return module;
 }

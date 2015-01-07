@@ -59,11 +59,11 @@ linear_accel_sensor::linear_accel_sensor()
 , m_x(INITIAL_VALUE)
 , m_y(INITIAL_VALUE)
 , m_z(INITIAL_VALUE)
+, m_time(0)
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
 	m_name = string(SENSOR_NAME);
-	m_timestamp = get_timestamp();
 	m_enable_linear_accel = 0;
 	register_supported_event(LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME);
 
@@ -150,11 +150,11 @@ bool linear_accel_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
 	m_gravity_sensor->add_client(GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_gravity_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), true);
+	m_gravity_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_gravity_sensor->start();
 
 	m_accel_sensor->add_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), true);
+	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_accel_sensor->start();
 
 	activate();
@@ -165,11 +165,11 @@ bool linear_accel_sensor::on_stop(void)
 {
 	AUTOLOCK(m_mutex);
 	m_gravity_sensor->delete_client(GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_gravity_sensor->delete_interval((intptr_t)this, true);
+	m_gravity_sensor->delete_interval((intptr_t)this, false);
 	m_gravity_sensor->stop();
 
 	m_accel_sensor->delete_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_accel_sensor->delete_interval((intptr_t)this, true);
+	m_accel_sensor->delete_interval((intptr_t)this, false);
 	m_accel_sensor->stop();
 
 	deactivate();
@@ -179,19 +179,19 @@ bool linear_accel_sensor::on_stop(void)
 bool linear_accel_sensor::add_interval(int client_id, unsigned int interval)
 {
 	AUTOLOCK(m_mutex);
-	m_gravity_sensor->add_interval(client_id, interval, true);
-	m_accel_sensor->add_interval((intptr_t)this , interval, true);
+	m_gravity_sensor->add_interval(client_id, interval, false);
+	m_accel_sensor->add_interval(client_id, interval, false);
 
-	return sensor_base::add_interval(client_id, interval, true);
+	return sensor_base::add_interval(client_id, interval, false);
 }
 
 bool linear_accel_sensor::delete_interval(int client_id)
 {
 	AUTOLOCK(m_mutex);
-	m_gravity_sensor->delete_interval(client_id, true);
-	m_accel_sensor->delete_interval(client_id, true);
+	m_gravity_sensor->delete_interval(client_id, false);
+	m_accel_sensor->delete_interval(client_id, false);
 
-	return sensor_base::delete_interval(client_id, true);
+	return sensor_base::delete_interval(client_id, false);
 }
 
 void linear_accel_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
@@ -201,9 +201,9 @@ void linear_accel_sensor::synthesize(const sensor_event_t &event, vector<sensor_
 	unsigned long long diff_time;
 
 	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
-		diff_time = event.data.timestamp - m_timestamp;
+		diff_time = event.data.timestamp - m_time;
 
-		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
+		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
 		m_accel.m_data.m_vec[0] = m_accel_rotation_direction_compensation[0] * (event.data.values[0] - m_accel_static_bias[0]) / m_accel_scale;
@@ -215,9 +215,9 @@ void linear_accel_sensor::synthesize(const sensor_event_t &event, vector<sensor_
 		m_enable_linear_accel |= ACCELEROMETER_ENABLED;
 	}
 	else if (event.event_type == GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME) {
-		diff_time = event.data.timestamp - m_timestamp;
+		diff_time = event.data.timestamp - m_time;
 
-		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
+		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
 		m_gravity.m_data.m_vec[0] = event.data.values[0];
@@ -231,19 +231,24 @@ void linear_accel_sensor::synthesize(const sensor_event_t &event, vector<sensor_
 
 	if (m_enable_linear_accel == LINEAR_ACCEL_ENABLED) {
 		m_enable_linear_accel = 0;
-		m_timestamp = get_timestamp();
-
-		AUTOLOCK(m_value_mutex);
 
 		lin_accel_event.sensor_id = get_id();
 		lin_accel_event.event_type = LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME;
 		lin_accel_event.data.value_count = 3;
-		lin_accel_event.data.timestamp = m_timestamp;
+		lin_accel_event.data.timestamp = get_timestamp();
 		lin_accel_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 		lin_accel_event.data.values[0] = m_linear_accel_sign_compensation[0] * (m_accel.m_data.m_vec[0] - m_gravity.m_data.m_vec[0]);
 		lin_accel_event.data.values[1] = m_linear_accel_sign_compensation[1] * (m_accel.m_data.m_vec[1] - m_gravity.m_data.m_vec[1]);
 		lin_accel_event.data.values[2] = m_linear_accel_sign_compensation[2] * (m_accel.m_data.m_vec[2] - m_gravity.m_data.m_vec[2]);
 		push(lin_accel_event);
+
+		{
+			AUTOLOCK(m_value_mutex);
+			m_time = lin_accel_event.data.timestamp;
+			m_x = lin_accel_event.data.values[0];
+			m_y = lin_accel_event.data.values[1];
+			m_z = lin_accel_event.data.values[2];
+		}
 	}
 
 	return;
@@ -281,21 +286,20 @@ bool linear_accel_sensor::get_properties(sensor_properties_s &properties)
 	return true;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	linear_accel_sensor *inst;
+	linear_accel_sensor *sensor;
 
 	try {
-		inst = new linear_accel_sensor();
+		sensor = new(std::nothrow) linear_accel_sensor;
 	} catch (int err) {
-		ERR("Failed to create linear_accel_sensor class, errno : %d, errstr : %s", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void *)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (linear_accel_sensor *)inst;
+	module->sensors.push_back(sensor);
+	return module;
 }
