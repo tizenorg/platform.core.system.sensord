@@ -18,15 +18,10 @@
  */
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <dirent.h>
 #include <linux/input.h>
 #include <csensor_config.h>
-#include <fstream>
 #include <temperature_sensor_hal.h>
 #include <sys/ioctl.h>
-#include <iio_common.h>
-
-using std::ifstream;
 
 #define SENSOR_TYPE_TEMPERATURE		"TEMPERATURE"
 #define ELEMENT_NAME				"NAME"
@@ -45,40 +40,32 @@ temperature_sensor_hal::temperature_sensor_hal()
 , m_fired_time(INITIAL_TIME)
 {
 	const string sensorhub_interval_node_name = TEMP_SENSORHUB_POLL_NODE_NAME;
-	string file_name;
-	node_path_info_query query;
-	node_path_info info;
-	int input_method = IIO_METHOD;
 
-	if (!get_model_properties(SENSOR_TYPE_TEMPERATURE, m_model_id, input_method)) {
-		ERR("Failed to find model_properties");
+	node_info_query query;
+	node_info info;
+
+	if (!find_model_id(SENSOR_TYPE_TEMPERATURE, m_model_id)) {
+		ERR("Failed to find model id");
 		throw ENXIO;
 	}
 
-	query.input_method = input_method;
 	query.sensorhub_controlled = is_sensorhub_controlled(sensorhub_interval_node_name);
 	query.sensor_type = SENSOR_TYPE_TEMPERATURE;
-	query.input_event_key = TEMP_INPUT_NAME;
+	query.key = TEMP_INPUT_NAME;
 	query.iio_enable_node_name = TEMP_IIO_ENABLE_NODE_NAME;
 	query.sensorhub_interval_node_name = sensorhub_interval_node_name;
 
-	if (!get_node_path_info(query, info)) {
+	if (!get_node_info(query, info)) {
 		ERR("Failed to get node info");
 		throw ENXIO;
 	}
 
-	show_node_path_info(info);
+	show_node_info(info);
 
 	m_data_node = info.data_node_path;
 	m_enable_node = info.enable_node_path;
 	m_interval_node = info.interval_node_path;
 
-	if(input_method == IIO_METHOD) {
-		m_temperature_dir=info.base_dir;
-		m_temp_node = m_temperature_dir + string(TEMP_RAW);
-		INFO("m_temperature_dir = %s", m_temperature_dir.c_str());
-		INFO("m_temp_node = %s", m_temp_node.c_str());
-	}
 	csensor_config &config = csensor_config::get_instance();
 
 	if (!config.get(SENSOR_TYPE_TEMPERATURE, m_model_id, ELEMENT_VENDOR, m_vendor)) {
@@ -100,26 +87,15 @@ temperature_sensor_hal::temperature_sensor_hal()
 
 	m_raw_data_unit = (float)(raw_data_unit);
 
-	INFO("m_data_node = %s\n",m_data_node.c_str());
-
-	if ((m_node_handle = open(m_temp_node.c_str(),O_RDWR)) < 0) {
+	if ((m_node_handle = open(m_data_node.c_str(),O_RDWR)) < 0) {
 		ERR("Failed to open handle(%d)", m_node_handle);
 		throw ENXIO;
 	}
 
-	INFO("m_data_node = %s\n",m_data_node.c_str());
-	INFO("m_raw_data_unit = %f\n", m_raw_data_unit);
+	int clockId = CLOCK_MONOTONIC;
+	if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0)
+		ERR("Fail to set monotonic timestamp for %s", m_data_node.c_str());
 
-	file_name = m_temperature_dir + string(TEMP_SCALE);
-	if (!read_node_value<int>(file_name, m_temp_scale))
-		throw ENXIO;
-
-	file_name = m_temperature_dir + string(TEMP_OFFSET);
-	if (!read_node_value<float>(file_name, m_temp_offset))
-		throw ENXIO;
-
-	INFO("m_temp_offset %f",m_temp_offset);
-	INFO("m_temp_scale %d",m_temp_scale);
 	INFO("m_vendor = %s", m_vendor.c_str());
 	INFO("m_chip_name = %s", m_chip_name.c_str());
 	INFO("m_raw_data_unit = %f\n", m_raw_data_unit);
@@ -146,34 +122,102 @@ sensor_type_t temperature_sensor_hal::get_type(void)
 
 bool temperature_sensor_hal::enable(void)
 {
-	m_fired_time = INITIAL_TIME;
+	AUTOLOCK(m_mutex);
+
+	set_enable_node(m_enable_node, m_sensorhub_controlled, true,
+			SENSORHUB_TEMPERATURE_HUMIDITY_ENABLE_BIT);
+	set_interval(m_polling_interval);
+
+	m_fired_time = 0;
 	INFO("Temperature sensor real starting");
 	return true;
 }
 
 bool temperature_sensor_hal::disable(void)
 {
+	AUTOLOCK(m_mutex);
+
+	set_enable_node(m_enable_node, m_sensorhub_controlled, false,
+			SENSORHUB_TEMPERATURE_HUMIDITY_ENABLE_BIT);
+
 	INFO("Temperature sensor real stopping");
 	return true;
 }
 
 bool temperature_sensor_hal::set_interval(unsigned long val)
 {
+	unsigned long long polling_interval_ns;
+
+	AUTOLOCK(m_mutex);
+
+	polling_interval_ns = ((unsigned long long)(val) * 1000llu * 1000llu);
+
+	if (!set_node_value(m_interval_node, polling_interval_ns)) {
+		ERR("Failed to set polling node: %s\n", m_interval_node.c_str());
+		return false;
+	}
+
+	INFO("Interval is changed from %dms to %dms]", m_polling_interval, val);
+	m_polling_interval = val;
 	return true;
 
 }
 
 bool temperature_sensor_hal::update_value(bool wait)
 {
-	int raw_temp_count;
+	int temperature_raw = 0;
+	bool temperature = false;
+	int read_input_cnt = 0;
+	const int INPUT_MAX_BEFORE_SYN = 10;
+	unsigned long long fired_time = 0;
+	bool syn = false;
 
-	if (!read_node_value<int>(m_temp_node, raw_temp_count))
+	struct input_event temperature_event;
+	DBG("temperature event detection!");
+
+	while ((syn == false) && (read_input_cnt < INPUT_MAX_BEFORE_SYN)) {
+		int len = read(m_node_handle, &temperature_event, sizeof(temperature_event));
+		if (len != sizeof(temperature_event)) {
+			ERR("temperature_file read fail, read_len = %d\n",len);
+			return false;
+		}
+
+		++read_input_cnt;
+
+		if (temperature_event.type == EV_REL) {
+			switch (temperature_event.code) {
+				case REL_HWHEEL:
+					temperature_raw = (int)temperature_event.value;
+					temperature = true;
+					break;
+				default:
+					ERR("temperature_event event[type = %d, code = %d] is unknown.", temperature_event.type, temperature_event.code);
+					return false;
+					break;
+			}
+		} else if (temperature_event.type == EV_SYN) {
+			syn = true;
+			fired_time = sensor_hal::get_timestamp(&temperature_event.time);
+		} else {
+			ERR("temperature_event event[type = %d, code = %d] is unknown.", temperature_event.type, temperature_event.code);
+			return false;
+		}
+	}
+
+	if (syn == false) {
+		ERR("EV_SYN didn't come until %d inputs had come", read_input_cnt);
 		return false;
-	m_temperature = m_temp_offset + ((float)raw_temp_count)/((float)m_temp_scale);
-	INFO("m_temperature %f",m_temperature);
-	INFO("m_temp_offset %f",m_temp_offset);
-	INFO("raw_temp_count %d",raw_temp_count);
-	INFO("m_temp_scale %d",m_temp_scale);
+	}
+
+	AUTOLOCK(m_value_mutex);
+
+	if (temperature)
+		m_temperature = temperature_raw;
+
+	m_fired_time = fired_time;
+
+	DBG("m_temperature = %d, time = %lluus", m_temperature, m_fired_time);
+
 	return true;
 }
 
@@ -210,21 +254,20 @@ bool temperature_sensor_hal::get_properties(sensor_properties_s &properties)
 	return true;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	temperature_sensor_hal *inst;
+	temperature_sensor_hal *sensor;
 
 	try {
-		inst = new temperature_sensor_hal();
+		sensor = new(std::nothrow) temperature_sensor_hal;
 	} catch (int err) {
-		ERR("temperature_sensor_hal class create fail , errno : %d , errstr : %s\n", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void*)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (temperature_sensor_hal*)inst;
+	module->sensors.push_back(sensor);
+	return module;
 }

@@ -22,6 +22,7 @@ SET(SERVER_SRCS
 	dbus_util.cpp
 	server.cpp
 	command_worker.cpp
+	permission_checker.cpp
 	main.cpp
 )
 

@@ -81,12 +81,12 @@ orientation_sensor::orientation_sensor()
 , m_roll(INITIAL_VALUE)
 , m_pitch(INITIAL_VALUE)
 , m_azimuth(INITIAL_VALUE)
+, m_time(0)
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
 	m_name = string(SENSOR_NAME);
 	register_supported_event(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_timestamp = get_timestamp();
 	m_enable_orientation = 0;
 
 	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_VENDOR, m_vendor)) {
@@ -236,13 +236,13 @@ bool orientation_sensor::on_start(void)
 	AUTOLOCK(m_mutex);
 
 	m_accel_sensor->add_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), true);
+	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_accel_sensor->start();
 	m_gyro_sensor->add_client(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), true);
+	m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_gyro_sensor->start();
 	m_magnetic_sensor->add_client(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), true);
+	m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_magnetic_sensor->start();
 
 	activate();
@@ -254,13 +254,13 @@ bool orientation_sensor::on_stop(void)
 	AUTOLOCK(m_mutex);
 
 	m_accel_sensor->delete_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_accel_sensor->delete_interval((intptr_t)this, true);
+	m_accel_sensor->delete_interval((intptr_t)this, false);
 	m_accel_sensor->stop();
 	m_gyro_sensor->delete_client(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_gyro_sensor->delete_interval((intptr_t)this, true);
+	m_gyro_sensor->delete_interval((intptr_t)this, false);
 	m_gyro_sensor->stop();
 	m_magnetic_sensor->delete_client(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
-	m_magnetic_sensor->delete_interval((intptr_t)this, true);
+	m_magnetic_sensor->delete_interval((intptr_t)this, false);
 	m_magnetic_sensor->stop();
 
 	deactivate();
@@ -271,22 +271,22 @@ bool orientation_sensor::add_interval(int client_id, unsigned int interval)
 {
 	AUTOLOCK(m_mutex);
 
-	m_accel_sensor->add_interval(client_id, interval, true);
-	m_gyro_sensor->add_interval(client_id, interval, true);
-	m_magnetic_sensor->add_interval(client_id, interval, true);
+	m_accel_sensor->add_interval(client_id, interval, false);
+	m_gyro_sensor->add_interval(client_id, interval, false);
+	m_magnetic_sensor->add_interval(client_id, interval, false);
 
-	return sensor_base::add_interval(client_id, interval, true);
+	return sensor_base::add_interval(client_id, interval, false);
 }
 
 bool orientation_sensor::delete_interval(int client_id)
 {
 	AUTOLOCK(m_mutex);
 
-	m_accel_sensor->delete_interval(client_id, true);
-	m_gyro_sensor->delete_interval(client_id, true);
-	m_magnetic_sensor->delete_interval(client_id, true);
+	m_accel_sensor->delete_interval(client_id, false);
+	m_gyro_sensor->delete_interval(client_id, false);
+	m_magnetic_sensor->delete_interval(client_id, false);
 
-	return sensor_base::delete_interval(client_id, true);
+	return sensor_base::delete_interval(client_id, false);
 }
 
 void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
@@ -298,9 +298,9 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 	float azimuth_offset;
 
 	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
-		diff_time = event.data.timestamp - m_timestamp;
+		diff_time = event.data.timestamp - m_time;
 
-		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
+		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
 		pre_process_data(m_accel, event.data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);
@@ -310,9 +310,9 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		m_enable_orientation |= ACCELEROMETER_ENABLED;
 	}
 	else if (event.event_type == GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME) {
-		diff_time = event.data.timestamp - m_timestamp;
+		diff_time = event.data.timestamp - m_time;
 
-		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
+		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
 		pre_process_data(m_gyro, event.data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, m_gyro_scale);
@@ -322,9 +322,9 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		m_enable_orientation |= GYROSCOPE_ENABLED;
 	}
 	else if (event.event_type == GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME) {
-		diff_time = event.data.timestamp - m_timestamp;
+		diff_time = event.data.timestamp - m_time;
 
-		if (m_timestamp && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
+		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
 		pre_process_data(m_magnetic, event.data.values, m_geomagnetic_static_bias, m_geomagnetic_rotation_direction_compensation, m_geomagnetic_scale);
@@ -336,7 +336,6 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 
 	if (m_enable_orientation == ORIENTATION_ENABLED) {
 		m_enable_orientation = 0;
-		m_timestamp = get_timestamp();
 
 		m_orientation.m_pitch_phase_compensation = m_pitch_rotation_compensation;
 		m_orientation.m_roll_phase_compensation = m_roll_rotation_compensation;
@@ -359,7 +358,7 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		orientation_event.sensor_id = get_id();
 		orientation_event.event_type = ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME;
 		orientation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
-		orientation_event.data.timestamp = m_timestamp;
+		orientation_event.data.timestamp = get_timestamp();
 		orientation_event.data.value_count = 3;
 		orientation_event.data.values[1] = euler_orientation.m_ang.m_vec[0];
 		orientation_event.data.values[2] = euler_orientation.m_ang.m_vec[1];
@@ -367,6 +366,14 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 			orientation_event.data.values[0] = euler_orientation.m_ang.m_vec[2];
 		else
 			orientation_event.data.values[0] = euler_orientation.m_ang.m_vec[2] + azimuth_offset;
+
+		{
+			AUTOLOCK(m_value_mutex);
+			m_time = orientation_event.data.timestamp;
+			m_azimuth = orientation_event.data.values[0];
+			m_pitch = orientation_event.data.values[1];
+			m_roll = orientation_event.data.values[2];
+		}
 
 		push(orientation_event);
 	}
@@ -443,28 +450,29 @@ bool orientation_sensor::get_properties(sensor_properties_s &properties)
 		properties.max_range = 2 * PI;
 	}
 	properties.resolution = 0.000001;
-
 	properties.vendor = m_vendor;
 	properties.name = SENSOR_NAME;
+	properties.min_interval = 1;
+	properties.fifo_count = 0;
+	properties.max_batch_count = 0;
 
 	return true;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	orientation_sensor *inst;
+	orientation_sensor *sensor;
 
 	try {
-		inst = new orientation_sensor();
+		sensor = new(std::nothrow) orientation_sensor;
 	} catch (int err) {
-		ERR("orientation_sensor class create fail , errno : %d , errstr : %s", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void *)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (orientation_sensor *)inst;
+	module->sensors.push_back(sensor);
+	return module;
 }

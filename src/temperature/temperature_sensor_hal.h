@@ -22,13 +22,6 @@
 
 #include <sensor_hal.h>
 #include <string>
-#define IIO_DIR				"/sys/bus/iio/devices/"
-#define IIO_DEV_BASE_NAME	"iio:device"
-#define IIO_DEV_STR_LEN		10
-#define NAME_NODE			"/name"
-#define TEMP_OFFSET			"in_temp_offset"
-#define TEMP_SCALE			"in_temp_scale"
-#define TEMP_RAW			"in_temp_raw"
 
 using std::string;
 
@@ -55,15 +48,11 @@ private:
 	string m_vendor;
 	string m_chip_name;
 
-	int m_temp_scale;
 	float m_raw_data_unit;
-	float m_temp_offset;
 
 	string m_data_node;
 	string m_enable_node;
 	string m_interval_node;
-	string m_temperature_dir;
-	string m_temp_node;
 
 	bool m_sensorhub_controlled;
 

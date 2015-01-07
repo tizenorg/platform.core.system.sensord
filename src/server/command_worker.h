@@ -33,9 +33,6 @@ typedef multimap<int, raw_data_t> sensor_raw_data_map;
 class command_worker {
 private:
 	typedef bool (command_worker::*cmd_handler_t)(void *payload);
-	typedef int (*security_server_check_privilege_by_sockfd_t)(int sockfd,
-				  const char *object,
-				  const char *access_rights);
 
 	static const int OP_ERROR = -1;
 	static const int OP_SUCCESS = 0;
@@ -45,13 +42,10 @@ private:
 	csocket m_socket;
 	worker_thread m_worker;
 	sensor_base *m_module;
-	static void *m_security_handle;
-	static security_server_check_privilege_by_sockfd_t security_server_check_privilege_by_sockfd;
 	static cmd_handler_t m_cmd_handlers[CMD_CNT];
 	static cpacket m_sensor_list;
 	static sensor_raw_data_map m_sensor_raw_data_map;
 
-	static void init_security_lib(void);
 	static void init_cmd_handlers(void);
 	static void make_sensor_raw_data_map(void);
 	static void get_sensor_list(int permissions, cpacket &sensor_list);

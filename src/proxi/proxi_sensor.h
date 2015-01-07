@@ -52,4 +52,4 @@ private:
 	bool process_event(void);
 };
 
-#endif
+#endif // _PROXI_SENSOR_H_
