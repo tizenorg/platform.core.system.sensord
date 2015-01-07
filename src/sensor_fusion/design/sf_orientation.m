@@ -62,7 +62,9 @@ OR_driv = zeros(3,BUFFER_SIZE);
 OR_aid = zeros(3,BUFFER_SIZE);
 OR_err = zeros(3,BUFFER_SIZE);
 
-euler = zeros(BUFFER_SIZE,3);
+euler_driv = zeros(BUFFER_SIZE,3);
+euler_aid = zeros(BUFFER_SIZE,3);
+euler_err = zeros(BUFFER_SIZE,3);
 
 % Sensor Data simulating orientation motions
 
@@ -92,20 +94,22 @@ Mag_data(4,:) = ((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(
 % estimate orientation
 [Quat_driv, Quat_aid, Quat_err]  = estimate_orientation(Accel_data, Gyro_data, Mag_data);
 
-euler = quat2euler(Quat_aid);
-OR_aid(1,:) = euler(:,2)' * RAD2DEG;
-OR_aid(2,:) = euler(:,1)' * RAD2DEG;
-OR_aid(3,:) = euler(:,3)' * RAD2DEG;
+for i = 1:BUFFER_SIZE
+	euler_aid(i,:) = quat2euler(Quat_aid(i,:));
+	OR_aid(1,i) = euler_aid(i,2)' * RAD2DEG;
+	OR_aid(2,i) = euler_aid(i,1)' * RAD2DEG;
+	OR_aid(3,i) = euler_aid(i,3)' * RAD2DEG;
 
-euler = quat2euler(Quat_driv);
-OR_driv(1,:) = ROLL_PHASE_CORRECTION * euler(:,2)' * RAD2DEG;
-OR_driv(2,:) = PITCH_PHASE_CORRECTION * euler(:,1)' * RAD2DEG;
-OR_driv(3,:) = YAW_PHASE_CORRECTION * euler(:,3)' * RAD2DEG;
+	euler_driv(i,:) = quat2euler(Quat_driv(i,:));
+	OR_driv(1,i) = ROLL_PHASE_CORRECTION * euler_driv(i,2)' * RAD2DEG;
+	OR_driv(2,i) = PITCH_PHASE_CORRECTION * euler_driv(i,1)' * RAD2DEG;
+	OR_driv(3,i) = YAW_PHASE_CORRECTION * euler_driv(i,3)' * RAD2DEG;
 
-euler = quat2euler(Quat_err);
-OR_err(1,:) = euler(:,2)' * RAD2DEG;
-OR_err(2,:) = euler(:,1)' * RAD2DEG;
-OR_err(3,:) = euler(:,3)' * RAD2DEG;
+	euler_err(i,:) = quat2euler(Quat_err(i,:));
+	OR_err(1,i) = euler_err(i,2)' * RAD2DEG;
+	OR_err(2,i) = euler_err(i,1)' * RAD2DEG;
+	OR_err(3,i) = euler_err(i,3)' * RAD2DEG;
+end
 
 % Rotation Plot Results
 hfig=(figure);
