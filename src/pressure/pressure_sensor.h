@@ -25,8 +25,7 @@
 #include <physical_sensor.h>
 #include <sensor_hal.h>
 
-class pressure_sensor : public physical_sensor
-{
+class pressure_sensor : public physical_sensor {
 public:
 	pressure_sensor();
 	virtual ~pressure_sensor();

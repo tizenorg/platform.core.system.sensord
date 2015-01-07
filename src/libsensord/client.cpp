@@ -432,10 +432,13 @@ API bool sensord_get_sensor_list(sensor_type_t type, sensor_t **list, int *senso
 	retvm_if (!get_sensor_list(), false, "Fail to get sensor list from server");
 
 	vector<sensor_info *> sensor_infos = sensor_info_manager::get_instance().get_infos(type);
-	*list = (sensor_t *) malloc(sizeof(sensor_info *) * sensor_infos.size());
-	retvm_if(!*list, false, "Failed to allocate memory");
 
-	for (unsigned int i = 0; i < sensor_infos.size(); ++i)
+	if (!sensor_infos.empty()) {
+		*list = (sensor_t *) malloc(sizeof(sensor_info *) * sensor_infos.size());
+		retvm_if(!*list, false, "Failed to allocate memory");
+	}
+
+	for (int i = 0; i < sensor_infos.size(); ++i)
 		*(*list + i) = sensor_info_to_sensor(sensor_infos[i]);
 
 	*sensor_count = sensor_infos.size();
@@ -1028,7 +1031,7 @@ API bool sensord_set_option(int handle, int option)
 
 }
 
-bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
+API bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
 {
 	sensor_id_t sensor_id;
 	command_channel *cmd_channel;
@@ -1099,7 +1102,7 @@ API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* senso
 	}
 
 	if(!cmd_channel->cmd_get_data(data_id, sensor_data)) {
-		ERR("Cmd_get_struct(%d, %d, 0x%x) failed for %s", client_id, data_id, sensor_data, get_client_name());
+		ERR("cmd_get_data(%d, %d, 0x%x) failed for %s", client_id, data_id, sensor_data, get_client_name());
 		return false;
 	}
 

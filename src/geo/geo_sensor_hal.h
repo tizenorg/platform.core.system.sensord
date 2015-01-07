@@ -23,13 +23,6 @@
 #include <sensor_hal.h>
 #include <string>
 
-#define X_RAW_VAL_NODE	"in_magn_x_raw"
-#define Y_RAW_VAL_NODE	"in_magn_y_raw"
-#define Z_RAW_VAL_NODE	"in_magn_z_raw"
-#define X_SCALE_NODE	"in_magn_x_scale"
-#define Y_SCALE_NODE	"in_magn_y_scale"
-#define Z_SCALE_NODE	"in_magn_z_scale"
-
 using std::string;
 
 class geo_sensor_hal : public sensor_hal
@@ -54,40 +47,24 @@ private:
 	float m_max_range;
 	float m_raw_data_unit;
 
-	unsigned long m_polling_interval;
-
 	double m_x;
 	double m_y;
 	double m_z;
-	double m_x_scale;
-	double m_y_scale;
-	double m_z_scale;
 
 	int m_hdst;
 
 	unsigned long long m_fired_time;
 	int m_node_handle;
+	unsigned long m_polling_interval;
 
 	string m_enable_node;
-
-	/*For Input Method*/
 	string m_data_node;
 	string m_interval_node;
-
-	/*For IIO method*/
-	string m_geo_dir;
-	string m_x_node;
-	string m_y_node;
-	string m_z_node;
-	string m_x_scale_node;
-	string m_y_scale_node;
-	string m_z_scale_node;
 
 	bool m_sensorhub_controlled;
 
 	cmutex m_value_mutex;
 
-	bool update_value(void);
-	bool init_resources(void);
+	bool update_value(bool wait);
 };
 #endif /*_GEO_SENSOR_HAL_H_*/

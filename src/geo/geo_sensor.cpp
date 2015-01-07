@@ -33,6 +33,7 @@ geo_sensor::geo_sensor()
 
 	register_supported_event(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
 	register_supported_event(GEOMAGNETIC_EVENT_CALIBRATION_NEEDED);
+	register_supported_event(GEOMAGNETIC_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME);
 
 	physical_sensor::set_poller(geo_sensor::working, this);
 }
@@ -88,6 +89,12 @@ bool geo_sensor::process_event(void)
 	AUTOLOCK(m_client_info_mutex);
 	AUTOLOCK(m_mutex);
 
+	if (get_client_cnt(GEOMAGNETIC_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME)) {
+		event.sensor_id = get_id();
+		event.event_type = GEOMAGNETIC_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME;
+		push(event);
+	}
+
 	if (get_client_cnt(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME)) {
 		event.sensor_id = get_id();
 		event.event_type = GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME;
@@ -131,6 +138,7 @@ int geo_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 		return -1;
 
 	state = m_sensor_hal->get_sensor_data(data);
+	raw_to_base(data);
 
 	if (state < 0) {
 		ERR("m_sensor_hal get struct_data fail\n");
@@ -157,21 +165,20 @@ void geo_sensor::raw_to_base(sensor_data_t &data)
 	data.values[2] = data.values[2] * m_resolution;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	geo_sensor *inst;
+	geo_sensor *sensor;
 
 	try {
-		inst = new geo_sensor();
+		sensor = new(std::nothrow) geo_sensor;
 	} catch (int err) {
-		ERR("geo_sensor class create fail , errno : %d , errstr : %s\n", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void*)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (geo_sensor*)inst;;
+	module->sensors.push_back(sensor);
+	return module;
 }

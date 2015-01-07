@@ -1,4 +1,6 @@
 IF("${RV}" STREQUAL "ON")
 add_subdirectory(rv)
 ENDIF()
-
+IF("${RV_RAW}" STREQUAL "ON")
+	#add_subdirectory(rv_raw)
+ENDIF()

@@ -62,14 +62,14 @@ typedef multimap<sensor_type_t, sensor_base*> sensor_plugins;
 class sensor_plugin_loader
 {
 private:
-	enum plugin_type {
+	typedef enum plugin_type {
 		PLUGIN_TYPE_HAL,
 		PLUGIN_TYPE_SENSOR,
-	};
+	} plugin_type;
 
 	sensor_plugin_loader();
 
-	bool load_module(const string &path, void** module, void** handle);
+	bool load_module(const string &path, vector<void*> &sensors, void* &handle);
 	bool insert_module(plugin_type type, const string &path);
 	void show_sensor_info(void);
 	bool get_paths_from_dir(const string &dir_path, vector<string> &hal_paths, vector<string> &sensor_paths);
