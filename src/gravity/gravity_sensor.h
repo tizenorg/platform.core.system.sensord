@@ -22,9 +22,6 @@
 
 #include <sensor_internal.h>
 #include <virtual_sensor.h>
-#include <string>
-
-using std::string;
 
 class gravity_sensor : public virtual_sensor {
 public:
@@ -48,7 +45,8 @@ private:
 	float m_x;
 	float m_y;
 	float m_z;
-	unsigned long long m_timestamp;
+	int m_accuracy;
+	unsigned long long m_time;
 	unsigned int m_interval;
 
 	string m_vendor;
@@ -61,4 +59,4 @@ private:
 	bool on_stop(void);
 };
 
-#endif
+#endif /* _GRAVITY_SENSOR_H_ */

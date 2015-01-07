@@ -22,10 +22,6 @@
 
 #include <sensor_hal.h>
 #include <string>
-#include <iio_common.h>
-
-#define MAX_FREQ_COUNT		16
-#define MAX_SCALING_COUNT	16
 
 using std::string;
 
@@ -51,31 +47,17 @@ private:
 	unsigned long m_polling_interval;
 	unsigned long long m_fired_time;
 
-	int m_scale_factor_count;
-	int m_sample_freq_count;
-	int m_sample_freq[MAX_FREQ_COUNT];
-	double m_scale_factor[MAX_SCALING_COUNT];
-	char *m_data;
-	int m_scan_size;
-	struct channel_parameters *m_channels;
-
-	string m_trigger_name;
-	string m_trigger_path;
-	string m_buffer_enable_node_path;
-	string m_buffer_length_node_path;
-	string m_available_freq_node_path;
-	string m_available_scale_node_path;
-	string m_gyro_dir;
-	vector<string> m_generic_channel_names;
-
 	string m_model_id;
 	string m_vendor;
 	string m_chip_name;
 
+	float m_min_range;
+	float m_max_range;
 	int m_resolution;
 	float m_raw_data_unit;
 
 	string m_data_node;
+	string m_enable_node;
 	string m_interval_node;
 
 	bool m_sensorhub_controlled;
@@ -83,13 +65,5 @@ private:
 	cmutex m_value_mutex;
 
 	bool update_value(bool wait);
-	bool setup_trigger(const char* trig_name, bool verify);
-	bool setup_buffer(int enable);
-	bool enable_resource(bool enable);
-	bool add_gyro_channels_to_array(void);
-	bool setup_channels(void);
-	bool setup_trigger(char* trig_name, bool verify);
-	void decode_data(void);
-
 };
 #endif /*_GYRO_SENSOR_HAL_CLASS_H_*/

@@ -273,7 +273,7 @@ void sensor_base::get_sensor_info(sensor_info &info)
 
 bool sensor_base::get_properties(sensor_properties_s &properties)
 {
-	return true;
+	return false;
 }
 
 bool sensor_base::is_supported(unsigned int event_type)

@@ -46,6 +46,7 @@ extern "C"
 #include <sensor_gyro.h>
 #include <sensor_pressure.h>
 #include <sensor_context.h>
+#include <sensor_auto_rotation.h>
 #include <sensor_gravity.h>
 #include <sensor_linear_accel.h>
 #include <sensor_orientation.h>
