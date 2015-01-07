@@ -42,7 +42,7 @@ Sign_Mx = 1;
 Sign_My = 1;
 Sign_Mz = 1;
 
-BUFFER_SIZE = 100;
+BUFFER_SIZE = 1095;
 
 Accel_data = zeros(4,BUFFER_SIZE);
 Mag_data =  zeros(4,BUFFER_SIZE);
@@ -67,13 +67,14 @@ Mag_data(4,:) = ((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(
 % estimate orientation
 Geo_RV = estimate_geomagnetic_rv(Accel_data, Mag_data);
 
-Orientation_RV = quat2euler(Geo_RV);
+for i = 1:BUFFER_SIZE
+	Orientation_RV(:,i) = quat2euler(Geo_RV(i,:));
+end
 
 hfig=(figure);
 scrsz = get(0,'ScreenSize');
 set(hfig,'position',scrsz);
 % Geomagnetic Rotation Vector Plot Results
-subplot(2,1,2)
 UA = Orientation_RV(1,:);
 p1 = plot(1:length(UA),UA(1,1:length(UA)),'k');
 hold on;
@@ -86,7 +87,4 @@ UA = Orientation_RV(3,:);
 p3 = plot(1:length(UA),UA(1,1:length(UA)),'r');
 title(['Geomagnetic Rotation Vector']);
 legend([p1 p2 p3],'x-axis', 'y-axis', 'z-axis');
-
-
-
 

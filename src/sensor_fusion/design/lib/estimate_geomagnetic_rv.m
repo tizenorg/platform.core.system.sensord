@@ -26,16 +26,12 @@ function [Quat_aid]  = estimate_geomagnetic_rv(Accel_data, Mag_data)
 GRAVITY = 9.80665;
 RAD2DEG = 57.2957795;
 
-PITCH_PHASE_CORRECTION = -1;
-ROLL_PHASE_CORRECTION = -1;
-YAW_PHASE_CORRECTION = -1;
-
 BUFFER_SIZE = size(Accel_data,2);
 
 Gravity = zeros(3,BUFFER_SIZE);
 
 OR_driv = zeros(3,BUFFER_SIZE);
-Gyro_data = zeros(3,BUFFER_SIZE);
+Gyro_data = zeros(4,BUFFER_SIZE);
 
 Quat_driv = zeros(4,BUFFER_SIZE);
 Quat_aid = zeros(4,BUFFER_SIZE);
