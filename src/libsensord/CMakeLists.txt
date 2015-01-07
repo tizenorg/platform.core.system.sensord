@@ -57,4 +57,5 @@ install(FILES sensor_orientation.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/senso
 install(FILES sensor_rv.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_temperature.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_motion.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
+install(FILES sensor_deprecated.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES ${PROJECT_NAME}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)

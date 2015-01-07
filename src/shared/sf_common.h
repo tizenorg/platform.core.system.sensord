@@ -162,7 +162,7 @@ typedef struct {
 	int min_interval;
 	int fifo_count;
 	int max_batch_count;
-} sensor_properties_t;
+} sensor_properties_s;
 
 
 /*

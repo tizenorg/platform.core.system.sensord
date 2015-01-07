@@ -41,7 +41,7 @@ public:
 	bool set_interval(unsigned long ms_interval);
 	bool is_data_ready(bool wait);
 	virtual int get_sensor_data(sensor_data_t &data);
-	virtual bool get_properties(sensor_properties_t &properties);
+	virtual bool get_properties(sensor_properties_s &properties);
 
 private:
 	int m_x;

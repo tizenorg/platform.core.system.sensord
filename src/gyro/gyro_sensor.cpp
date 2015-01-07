@@ -54,7 +54,7 @@ bool gyro_sensor::init()
 		return false;
 	}
 
-	sensor_properties_t properties;
+	sensor_properties_s properties;
 
 	if (m_sensor_hal->get_properties(properties) == false) {
 		ERR("sensor->get_properties() is failed!\n");
@@ -120,7 +120,7 @@ bool gyro_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool gyro_sensor::get_properties(sensor_properties_t &properties)
+bool gyro_sensor::get_properties(sensor_properties_s &properties)
 {
 	return m_sensor_hal->get_properties(properties);
 }

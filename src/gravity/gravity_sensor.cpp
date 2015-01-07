@@ -255,7 +255,7 @@ int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t
 	return 0;
 }
 
-bool gravity_sensor::get_properties(sensor_properties_t &properties)
+bool gravity_sensor::get_properties(sensor_properties_s &properties)
 {
 	properties.min_range = -GRAVITY;
 	properties.max_range = GRAVITY;

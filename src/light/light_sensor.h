@@ -39,7 +39,7 @@ public:
 	virtual bool on_stop(void);
 
 	virtual bool set_interval(unsigned long interval);
-	virtual bool get_properties(const unsigned int type, sensor_properties_t &properties);
+	virtual bool get_properties(const unsigned int type, sensor_properties_s &properties);
 	int get_sensor_data(const unsigned int type, sensor_data_t &data);
 
 private:

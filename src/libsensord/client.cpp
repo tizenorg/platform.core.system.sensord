@@ -388,6 +388,21 @@ API int sf_check_rotation(unsigned long *rotation)
 	return 0;
 }
 
+int sf_is_sensor_event_available(sensor_type_t sensor_type, unsigned int event_type)
+{
+	return 0;
+}
+
+int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties)
+{
+	return 0;
+}
+
+int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties)
+{
+	return 0;
+}
+
 static bool get_sensor_list(void)
 {
 	static cmutex l;

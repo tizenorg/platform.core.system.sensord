@@ -238,7 +238,7 @@ int proxi_sensor_hal::get_sensor_data(sensor_data_t &data)
 	return 0;
 }
 
-bool proxi_sensor_hal::get_properties(sensor_properties_t &properties)
+bool proxi_sensor_hal::get_properties(sensor_properties_s &properties)
 {
 	properties.name = m_chip_name;
 	properties.vendor = m_vendor;

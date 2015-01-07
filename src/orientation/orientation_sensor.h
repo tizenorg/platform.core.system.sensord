@@ -35,7 +35,7 @@ public:
 
 	bool add_interval(int client_id, unsigned int interval);
 	bool delete_interval(int client_id);
-	bool get_properties(sensor_properties_t &properties);
+	bool get_properties(sensor_properties_s &properties);
 	sensor_type_t get_type(void);
 
 	int get_sensor_data(const unsigned int data_id, sensor_data_t &data);

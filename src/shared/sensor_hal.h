@@ -79,7 +79,7 @@ public:
 	virtual bool disable(void) = 0;
 	virtual bool set_interval(unsigned long val);
 	virtual bool is_data_ready(bool wait) = 0;
-	virtual bool get_properties(sensor_properties_t &properties) = 0;
+	virtual bool get_properties(sensor_properties_s &properties) = 0;
 	virtual int get_sensor_data(sensor_data_t &data);
 	virtual int get_sensor_data(sensorhub_data_t &data);
 	virtual long set_command(unsigned int cmd, long val);

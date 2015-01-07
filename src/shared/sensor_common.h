@@ -56,7 +56,8 @@ typedef enum {
 	LINEAR_ACCEL_SENSOR,
 	ORIENTATION_SENSOR,
 	TEMPERATURE_SENSOR,
-	ROTATION_VECTOR_SENSOR
+	ROTATION_VECTOR_SENSOR,
+	MOTION_SENSOR
 } sensor_type_t;
 
 typedef unsigned int sensor_id_t;
@@ -84,7 +85,10 @@ typedef struct sensor_data_t {
 		int data_accuracy; //deprecated
 	};
 
-	unsigned long long timestamp;
+	union {
+		unsigned long long timestamp;
+		unsigned long long time_stamp; //deprecated
+	};
 
 /*
  * 	Use "value_count" instead of "values_num"

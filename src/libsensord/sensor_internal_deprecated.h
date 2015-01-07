@@ -50,6 +50,9 @@ extern "C"
 #include <sensor_temperature.h>
 #include <sensor_rv.h>
 #include <sensor_motion.h>
+#include <sensor_deprecated.h>
+
+#define MAX_KEY_LEN 30
 
 typedef struct {
 	condition_op_t cond_op;
@@ -70,19 +73,27 @@ typedef struct {
 	int z;
 } sensor_panning_data_t;
 
-#define ACCELEROMETER_EVENT_ROTATION_CHECK ((ACCELEROMETER_SENSOR << 16) | 0x0001)
+typedef struct {
+	int sensor_unit_idx;
+	float sensor_min_range;
+	float sensor_max_range;
+	float sensor_resolution;
+	char sensor_name[MAX_KEY_LEN];
+	char sensor_vendor[MAX_KEY_LEN];
+} sensor_properties_t;
 
-enum accelerometer_rotate_state {
-	ROTATION_UNKNOWN = 0,
-	ROTATION_LANDSCAPE_LEFT = 1,
-	ROTATION_PORTRAIT_TOP = 2,
-	ROTATION_PORTRAIT_BTM = 3,
-	ROTATION_LANDSCAPE_RIGHT = 4,
-	ROTATION_EVENT_0 = 2,
-	ROTATION_EVENT_90 = 1,
-	ROTATION_EVENT_180 = 3,
-	ROTATION_EVENT_270 = 4,
-};
+typedef struct {
+	int sensor_unit_idx;
+	float sensor_min_range;
+	float sensor_max_range;
+	float sensor_resolution;
+} sensor_data_properties_t;
+
+int sf_is_sensor_event_available(sensor_type_t sensor_type , unsigned int event_type);
+
+int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties);
+
+int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties);
 
 int sf_check_rotation(unsigned long *rotation);
 

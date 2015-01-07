@@ -40,7 +40,7 @@ public:
 	bool delete_interval(int client_id);
 
 	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
-	bool get_properties(sensor_properties_t &properties);
+	bool get_properties(sensor_properties_s &properties);
 private:
 	sensor_base *m_orientation_sensor;
 	cmutex m_value_mutex;

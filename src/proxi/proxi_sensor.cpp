@@ -122,7 +122,7 @@ bool proxi_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool proxi_sensor::get_properties(sensor_properties_t &properties)
+bool proxi_sensor::get_properties(sensor_properties_s &properties)
 {
 	m_sensor_hal->get_properties(properties);
 

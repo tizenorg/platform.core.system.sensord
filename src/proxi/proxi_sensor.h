@@ -34,7 +34,7 @@ public:
 
 	static bool working(void *inst);
 
-	virtual bool get_properties(sensor_properties_t &properties);
+	virtual bool get_properties(sensor_properties_s &properties);
 	int get_sensor_data(unsigned int type, sensor_data_t &data);
 private:
 	sensor_hal *m_sensor_hal;

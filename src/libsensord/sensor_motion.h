@@ -28,8 +28,6 @@ extern "C"
 {
 #endif
 
-#define MOTION_SENSOR 0xFF
-
 enum motion_event_type {
 	MOTION_ENGINE_EVENT_SNAP				= (MOTION_SENSOR << 16) | 0x0001,
 	MOTION_ENGINE_EVENT_SHAKE				= (MOTION_SENSOR << 16) | 0x0002,

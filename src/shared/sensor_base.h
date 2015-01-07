@@ -76,7 +76,7 @@ public:
 
 
 	void get_sensor_info(sensor_info &info);
-	virtual bool get_properties(sensor_properties_t &properties);
+	virtual bool get_properties(sensor_properties_s &properties);
 	bool is_supported(unsigned int event_type);
 
 	virtual long set_command(unsigned int cmd, long value);

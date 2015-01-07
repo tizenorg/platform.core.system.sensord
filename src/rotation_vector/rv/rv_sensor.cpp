@@ -383,7 +383,7 @@ int rv_sensor::get_sensor_data(unsigned int data_id, sensor_data_t &data)
 	return 0;
 }
 
-bool rv_sensor::get_properties(sensor_properties_t &properties)
+bool rv_sensor::get_properties(sensor_properties_s &properties)
 {
 	properties.vendor = m_vendor;
 	properties.name = SENSOR_NAME;

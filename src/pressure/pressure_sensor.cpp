@@ -62,7 +62,7 @@ bool pressure_sensor::init()
 		return false;
 	}
 
-	sensor_properties_t properties;
+	sensor_properties_s properties;
 
 	if (!m_sensor_hal->get_properties(properties)) {
 		ERR("sensor->get_properties() is failed!\n");
@@ -152,7 +152,7 @@ bool pressure_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool pressure_sensor::get_properties(sensor_properties_t &properties)
+bool pressure_sensor::get_properties(sensor_properties_s &properties)
 {
 	return m_sensor_hal->get_properties(properties);
 }

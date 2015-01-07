@@ -151,7 +151,7 @@ bool light_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool light_sensor::get_properties(const unsigned int type, sensor_properties_t &properties)
+bool light_sensor::get_properties(const unsigned int type, sensor_properties_s &properties)
 {
 	m_sensor_hal->get_properties(properties);
 

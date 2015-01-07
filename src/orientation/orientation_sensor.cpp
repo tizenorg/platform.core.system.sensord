@@ -432,7 +432,7 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 	return 0;
 }
 
-bool orientation_sensor::get_properties(sensor_properties_t &properties)
+bool orientation_sensor::get_properties(sensor_properties_s &properties)
 {
 	if(m_raw_data_unit == "DEGREES") {
 		properties.min_range = -180;

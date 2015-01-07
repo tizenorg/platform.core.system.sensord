@@ -41,7 +41,7 @@ public:
 	bool set_interval(unsigned long val);
 	bool is_data_ready(bool wait);
 	virtual int get_sensor_data(sensor_data_t &data);
-	bool get_properties(sensor_properties_t &properties);
+	bool get_properties(sensor_properties_s &properties);
 //	bool check_hw_node(void);
 
 private:

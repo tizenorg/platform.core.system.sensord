@@ -51,7 +51,7 @@ bool temperature_sensor::init()
 		return false;
 	}
 
-	sensor_properties_t properties;
+	sensor_properties_s properties;
 
 	if (!m_sensor_hal->get_properties(properties))
 	{
@@ -120,7 +120,7 @@ bool temperature_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool temperature_sensor::get_properties(sensor_properties_t &properties)
+bool temperature_sensor::get_properties(sensor_properties_s &properties)
 {
 	return m_sensor_hal->get_properties(properties);
 }

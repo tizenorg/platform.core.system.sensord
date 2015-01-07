@@ -271,7 +271,7 @@ int linear_accel_sensor::get_sensor_data(const unsigned int event_type, sensor_d
 	return 0;
 }
 
-bool linear_accel_sensor::get_properties(sensor_properties_t &properties)
+bool linear_accel_sensor::get_properties(sensor_properties_s &properties)
 {
 	m_accel_sensor->get_properties(properties);
 	properties.name = "Linear Acceleration Sensor";
