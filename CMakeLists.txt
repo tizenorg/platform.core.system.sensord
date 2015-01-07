@@ -17,6 +17,7 @@ MESSAGE("FLAGS: ${CMAKE_CXX_FLAGS}")
 MESSAGE("FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
 
 add_definitions(-DUSE_DLOG_LOG)
+add_definitions(-DLIBDIR="${CMAKE_INSTALL_LIBDIR}")
 
 # Internal Debugging Options
 #add_definitions(-Wall -g -D_DEBUG)
@@ -35,8 +36,10 @@ ENDIF("${ARCH}" MATCHES "^arm.*")
 # Installing files
 CONFIGURE_FILE(sensor_plugins.xml.in sensor_plugins.xml @ONLY)
 CONFIGURE_FILE(sensors.xml.in sensors.xml @ONLY)
+CONFIGURE_FILE(virtual_sensors.xml.in virtual_sensors.xml @ONLY)
 
 INSTALL(FILES sensor_plugins.xml sensors.xml DESTINATION etc)
+INSTALL(FILES virtual_sensors.xml virtual_sensors.xml DESTINATION etc)
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.APLv2 DESTINATION share/license RENAME sensord)
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.APLv2 DESTINATION share/license RENAME libsensord)
 
