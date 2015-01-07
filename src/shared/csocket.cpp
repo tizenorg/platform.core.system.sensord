@@ -103,7 +103,9 @@ bool csocket::bind (const char *sock_path)
 	}
 
 	m_addr.sun_family = AF_UNIX;
-	strcpy(m_addr.sun_path, sock_path);
+	int path_size = strlen(sock_path);
+	strncpy(m_addr.sun_path, sock_path, path_size);
+	m_addr.sun_path[path_size - 1] = '\0';
 
 	length = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 
@@ -301,7 +303,10 @@ bool csocket::connect(const char *sock_path)
 	set_blocking_mode(false);
 
 	m_addr.sun_family = AF_UNIX;
-	strcpy(m_addr.sun_path, sock_path);
+	int path_size = strlen(sock_path);
+	strncpy(m_addr.sun_path, sock_path, path_size);
+	m_addr.sun_path[path_size - 1] = '\0';
+
 	addr_len = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 
 	if (::connect(m_sock_fd,(sockaddr *) &m_addr, addr_len) < 0) {

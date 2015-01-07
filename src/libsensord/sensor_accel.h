@@ -42,6 +42,7 @@ enum accelerometer_data_id {
 
 enum accelerometer_event_type {
 	ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME					= (ACCELEROMETER_SENSOR << 16) | 0x0001,
+	ACCELEROMETER_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME			= (ACCELEROMETER_SENSOR << 16) | 0x0002,
 };
 
 /**

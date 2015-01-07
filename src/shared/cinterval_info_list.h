@@ -43,9 +43,9 @@ private:
 	list<cinterval_info> m_list;
 
 public:
-	bool add_interval(int client_id, unsigned int interval, bool is_processor = false);
-	bool delete_interval(int client_id, bool is_processor = false);
-	unsigned int get_interval(int client_id, bool is_processor = false);
+	bool add_interval(int client_id, unsigned int interval, bool is_processor);
+	bool delete_interval(int client_id, bool is_processor);
+	unsigned int get_interval(int client_id, bool is_processor);
 	unsigned int get_min(void);
 };
 #endif

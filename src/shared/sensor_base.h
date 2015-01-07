@@ -70,9 +70,9 @@ public:
 	virtual bool add_client(unsigned int event_type);
 	virtual bool delete_client(unsigned int event_type);
 
-	virtual bool add_interval(int client_id, unsigned int interval, bool is_processor = false);
-	virtual bool delete_interval(int client_id, bool is_processor = false);
-	unsigned int get_interval(int client_id, bool is_processor = false);
+	virtual bool add_interval(int client_id, unsigned int interval, bool is_processor);
+	virtual bool delete_interval(int client_id, bool is_processor);
+	unsigned int get_interval(int client_id, bool is_processor);
 
 
 	void get_sensor_info(sensor_info &info);

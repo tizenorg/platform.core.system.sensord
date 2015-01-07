@@ -190,26 +190,27 @@ float pressure_sensor::pressure_to_altitude(float pressure)
 
 void pressure_sensor::raw_to_base(sensor_data_t &data)
 {
+	data.values[0] = data.values[0] * m_resolution;
 	m_sea_level_pressure = data.values[1] * SEA_LEVEL_RESOLUTION;
 	data.values[1] = pressure_to_altitude(data.values[0]);
+	data.values[2] = data.values[2] * m_temperature_resolution + m_temperature_offset;
 	data.value_count = 3;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	pressure_sensor *inst;
+	pressure_sensor *sensor;
 
 	try {
-		inst = new pressure_sensor();
+		sensor = new(std::nothrow) pressure_sensor;
 	} catch (int err) {
-		ERR("pressure_sensor class create fail , errno : %d , errstr : %s\n", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void*)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (pressure_sensor*)inst;;
+	module->sensors.push_back(sensor);
+	return module;
 }
