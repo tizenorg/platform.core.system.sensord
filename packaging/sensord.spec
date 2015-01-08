@@ -113,7 +113,6 @@ systemctl daemon-reload
 %{_unitdir}/multi-user.target.wants/sensord.service
 %{_unitdir}/sockets.target.wants/sensord.socket
 %license LICENSE.APLv2
-%{_datadir}/license/sensord
 
 %files -n libsensord
 %defattr(-,root,root,-)
@@ -123,7 +122,6 @@ systemctl daemon-reload
 %{_libdir}/libsensord-share.so
 %{_libdir}/libsensord-server.so
 %license LICENSE.APLv2
-%{_datadir}/license/libsensord
 
 %files -n libsensord-devel
 %defattr(-,root,root,-)
@@ -149,6 +147,5 @@ systemctl daemon-reload
 %{_bindir}/light
 %{_bindir}/rotation_vector
 %license LICENSE.APLv2
-%{_datadir}/license/test
 %endif
 
