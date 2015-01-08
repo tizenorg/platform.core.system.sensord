@@ -2,11 +2,11 @@ Name:       sensord
 Summary:    Sensor daemon
 Version:    1.0.0
 Release:    0
-Group:     	System/Sensor Framework
+Group:      System/Sensor Framework
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
-Source1:	sensord.manifest
-Source2:	libsensord.manifest
+Source1:    sensord.manifest
+Source2:    libsensord.manifest
 
 BuildRequires:  cmake
 BuildRequires:  vconf-keys-devel
@@ -79,8 +79,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGEO=%{geo_state} -DPRESSURE=%{pressure_state} -DTEMPERATURE=%{temperature_state} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
-	-DTEST_SUITE=%{build_test_suite} \
-	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
+	-DTEST_SUITE=%{build_test_suite}
 
 %build
 make %{?jobs:-j%jobs}
