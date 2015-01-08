@@ -29,7 +29,6 @@ template <typename TYPE>
 vect<TYPE>::vect(const int size)
 {
 	m_size = size;
-	m_vec = NULL;
 	m_vec = new TYPE [m_size]();
 }
 
@@ -37,7 +36,6 @@ template <typename TYPE>
 vect<TYPE>::vect(const int size, TYPE *vec_data)
 {
 	m_size = size;
-	m_vec = NULL;
 	m_vec = new TYPE [m_size];
 
 	for (int j = 0; j < m_size; j++)
@@ -48,7 +46,6 @@ template <typename TYPE>
 vect<TYPE>::vect(const vect<TYPE>& v)
 {
 	m_size = v.m_size;
-	m_vec = NULL;
 	m_vec = new TYPE [m_size];
 
 	for (int q = 0; q < m_size; q++)
