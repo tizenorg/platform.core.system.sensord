@@ -33,6 +33,8 @@ public:
 			sensor_data<float> gyro, sensor_data<float> magnetic);
 	quaternion<float> get_9axis_quaternion(sensor_data<float> accel,
 			sensor_data<float> gyro, sensor_data<float> magnetic);
+	quaternion<float> get_geomagnetic_quaternion(sensor_data<float> accel,
+			sensor_data<float> magnetic);
 };
 
 #include "orientation_sensor.cpp"

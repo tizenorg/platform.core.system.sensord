@@ -65,6 +65,8 @@ public:
 
 	inline void initialize_sensor_data(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
+	inline void initialize_sensor_data(const sensor_data<TYPE> accel,
+			const sensor_data<TYPE> magnetic);
 	inline void orientation_triad_algorithm();
 	inline void compute_covariance();
 	inline void time_update();
@@ -76,6 +78,8 @@ public:
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
 	quaternion<TYPE> get_9axis_quaternion(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
+	quaternion<TYPE> get_geomagnetic_quaternion(const sensor_data<TYPE> accel,
+			const sensor_data<TYPE> magnetic);
 };
 
 #include "orientation_filter.cpp"
