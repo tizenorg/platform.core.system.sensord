@@ -535,11 +535,13 @@ bool command_worker::cmd_register_event(void *payload)
 		ret_value = OP_ERROR;
 		goto out;
 	}
-		if (cmd->event_type == GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME || cmd->event_type ==  LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME || cmd->event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
+
+	insert_priority_list(cmd->event_type);
+		/*if (cmd->event_type == GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME || cmd->event_type ==  LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME || cmd->event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
 			priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
 			priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
 			priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
-	}
+	}*/
 
 	m_module->add_client(cmd->event_type);
 
@@ -849,3 +851,24 @@ csensor_event_dispatcher& command_worker::get_event_dispathcher(void)
 	return csensor_event_dispatcher::get_instance();
 }
 
+void insert_priority_list(unsigned int event_type)
+{
+		if (event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
+			priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+			priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+			priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
+	        }
+
+		if (event_type == LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME) {
+			priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+			priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+			priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
+	        }
+
+		if (event_type == GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME) {
+			priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+			priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+			priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
+	        }		
+
+}
