@@ -16,49 +16,125 @@
  * limitations under the License.
  *
  */
-
+#include <time.h>
+#include <glib.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <sensor_internal.h>
-#include <glib.h>
+#include <stdbool.h>
+#include <sensor_common.h>
 #include <unistd.h>
 
-int handle;
+static GMainLoop *mainloop;
 
-int main(int argc, char* argv[])
+void callback(unsigned int event_type, sensor_event_data_t *event, void *user_data)
 {
-	int result;
+	sensor_data_t *data = (sensor_data_t *)event->event_data;
+	printf("Geomagnetic [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+}
 
-	printf("start test!\n");
+void printformat()
+{
+	printf("Usage : ./geomagnetic <mode>(optional) <event> <interval>(optional)\n\n");
 
-	handle = sf_connect(GEOMAGNETIC_SENSOR);
+	printf("mode:");
+	printf("[-p]\n");
+	printf("p is for polling based,default mode is event driven\n");
 
-	result = sf_start(handle, 1);
+	printf("event:");
+	printf("[RAW_DATA_REPORT_ON_TIME]\n");
 
-	if (result < 0) {
-		printf("can't start Geo SENSOR\n");
-		return -1;
-         }
-	else
-		printf("Started Geo Sensor\n");
+	printf("interval:\n");
+	printf("The time interval should be entered based on the sampling frequency supported by geomagnetic driver on the device in ms.If no value for sensor is entered default value by the driver will be used.\n");
+}
 
-	sensor_data_t values;
+int main(int argc,char **argv)
+{
+	int result, handle, start_handle, stop_handle;
+	unsigned int event;
+	mainloop = g_main_loop_new(NULL, FALSE);
+	event = GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME;
+	event_condition_t *event_condition = (event_condition_t*) malloc(sizeof(event_condition_t));
+	event_condition->cond_op = CONDITION_EQUAL;
 
-	while(1)
-	{
-		result = sf_get_data(handle, GEOMAGNETIC_BASE_DATA_SET, &values);
-		if (result < 0) {
-			printf("Failed to read data\n");
-			return -1;
-		}
-		else
-			printf("Geomagnetic : [%f] [%f] [%f]\n", values.values[0], values.values[1], values.values[2]);
-		usleep(100000);
+	sensor_type_t type = GEOMAGNETIC_SENSOR;
+
+	if (argc != 2 && argc != 3 && argc!=4) {
+		printformat();
+		free(event_condition);
+		return 0;
 	}
 
-	result = sf_disconnect(handle);
+	else if (argc>=3 && strcmp(argv[1], "-p") == 0 && strcmp(argv[2], "RAW_DATA_REPORT_ON_TIME") == 0) {
+		printf("Polling based\n");
+		handle = sf_connect(type);
+		result = sf_start(handle, 1);
 
-	if (result < 0)
-		printf("can't disconnect Geo SENSOR\n");
+		if (result < 0) {
+			printf("Can't start geomagnetic SENSOR\n");
+			printf("Error\n\n\n\n");
+			return -1;
+		}
+
+		sensor_data_t data;
+
+		while(1) {
+			result = sf_get_data(handle, GEOMAGNETIC_BASE_DATA_SET , &data);
+			printf("Geomagnetic [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
+			usleep(100000);
+		}
+
+		result = sf_disconnect(handle);
+
+		if (result < 0) {
+			printf("Can't disconnect geomagnetic sensor\n");
+			printf("Error\n\n\n\n");
+			return -1;
+		}
+	}
+
+	else if (strcmp(argv[1], "RAW_DATA_REPORT_ON_TIME") == 0) {
+		printf("Event based\n");
+
+		event_condition->cond_value1 = 100;
+		if (argc == 3)
+			event_condition->cond_value1 = atof(argv[2]);
+
+		handle = sf_connect(type);
+		result = sf_register_event(handle, event, event_condition, callback, NULL);
+
+		if (result < 0)
+			printf("Can't register geomagnetic\n");
+
+		start_handle = sf_start(handle,0);
+
+		if (start_handle < 0) {
+			printf("Error\n\n\n\n");
+			sf_unregister_event(handle, event);
+			sf_disconnect(handle);
+			return -1;
+		}
+
+		g_main_loop_run(mainloop);
+		g_main_loop_unref(mainloop);
+
+		sf_unregister_event(handle, event);
+
+		stop_handle = sf_stop(handle);
+
+		if (stop_handle < 0) {
+			printf("Error\n\n");
+			return -1;
+		}
+
+		sf_disconnect(handle);
+		free(event_condition);
+	}
+
+	else {
+		printformat();
+	}
 
 	return 0;
 }
+
