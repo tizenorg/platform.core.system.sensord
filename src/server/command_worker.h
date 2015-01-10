@@ -29,6 +29,7 @@
 using std::multimap;
 
 typedef multimap<int, raw_data_t> sensor_raw_data_map;
+void insert_priority_list(unsigned int);
 
 class command_worker {
 private:
