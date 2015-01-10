@@ -37,7 +37,7 @@ int main()
 	unsigned long long time_stamp;
 	euler_angles<float> orientation;
 	rotation_matrix<float> orientation_mat;
-	quaternion<float> orientation_quat;
+	quaternion<float> orientation_9axis_quat;
 	orientation_sensor orien_sensor1, orien_sensor2, orien_sensor3;
 
 	accel_in.open(((string)ORIENTATION_DATA_PATH + (string)"accel.txt").c_str());
@@ -87,9 +87,9 @@ int main()
 
 		cout << "Orientation matrix\t" << orientation_mat.m_rot_mat << "\n\n";
 
-		orientation_quat = orien_sensor3.get_quaternion(accel_data, gyro_data, magnetic_data);
+		orientation_9axis_quat = orien_sensor3.get_9axis_quaternion(accel_data, gyro_data, magnetic_data);
 
-		cout << "Orientation quaternion\t" << orientation_quat.m_quat << "\n\n";
+		cout << "Orientation 9-axis quaternion\t" << orientation_9axis_quat.m_quat << "\n\n";
 	}
 
 	accel_in.close();

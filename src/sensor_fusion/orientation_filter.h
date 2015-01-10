@@ -52,7 +52,7 @@ public:
 	quaternion<TYPE> m_quat_driv;
 	rotation_matrix<TYPE> m_rot_matrix;
 	euler_angles<TYPE> m_orientation;
-	quaternion<TYPE> m_quaternion;
+	quaternion<TYPE> m_quat_9axis;
 	TYPE m_gyro_dt;
 
 	int m_pitch_phase_compensation;
@@ -74,7 +74,7 @@ public:
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
 	rotation_matrix<TYPE> get_rotation_matrix(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
-	quaternion<TYPE> get_quaternion(const sensor_data<TYPE> accel,
+	quaternion<TYPE> get_9axis_quaternion(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
 };
 
