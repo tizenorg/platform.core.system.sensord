@@ -90,6 +90,7 @@ int main(int argc,char **argv)
 		if (result < 0) {
 			printf("Can't start proximity SENSOR\n");
 			printf("Error\n\n\n\n");
+			free(event_condition);
 			return -1;
 		}
 
@@ -106,6 +107,7 @@ int main(int argc,char **argv)
 		if (result < 0) {
 			printf("Can't disconnect proximity sensor\n");
 			printf("Error\n\n\n\n");
+			free(event_condition);
 			return -1;
 		}
 	}
@@ -144,6 +146,7 @@ int main(int argc,char **argv)
 			printf("Error\n\n\n\n");
 			sf_unregister_event(handle, event);
 			sf_disconnect(handle);
+			free(event_condition);
 			return -1;
 		}
 
@@ -156,6 +159,7 @@ int main(int argc,char **argv)
 
 		if (stop_handle < 0) {
 			printf("Error\n\n");
+			free(event_condition);
 			return -1;
 		}
 
