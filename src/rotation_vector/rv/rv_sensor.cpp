@@ -311,7 +311,7 @@ void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &
 
 		{
 			AUTOLOCK(m_fusion_mutex);
-			quaternion_orientation = m_orientation.get_quaternion(m_accel, m_gyro, m_magnetic);
+			quaternion_orientation = m_orientation.get_9axis_quaternion(m_accel, m_gyro, m_magnetic);
 		}
 
 		rv_event.sensor_id = get_id();
@@ -369,7 +369,7 @@ int rv_sensor::get_sensor_data(unsigned int data_id, sensor_data_t &data)
 
 	{
 		AUTOLOCK(m_fusion_mutex);
-		quaternion_orientation = m_orientation.get_quaternion(m_accel, m_gyro, m_magnetic);
+		quaternion_orientation = m_orientation.get_9axis_quaternion(m_accel, m_gyro, m_magnetic);
 	}
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
