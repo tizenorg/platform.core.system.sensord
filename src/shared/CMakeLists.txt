@@ -1,34 +1,18 @@
 cmake_minimum_required(VERSION 2.6)
 project(sf_common CXX)
-# to install pkgconfig setup file.
-SET(PREFIX ${CMAKE_INSTALL_PREFIX})
-SET(EXEC_PREFIX "\${prefix}")
-SET(VERSION 1.0)
 
-#set(CMAKE_INSTALL_PREFIX "$ENV{DATAFS}")
-set(PROJECT_MAJOR_VERSION "0")
-set(PROJECT_MINOR_VERSION "2")
-set(PROJECT_RELEASE_VERSION "1")
-set(CMAKE_VERBOSE_MAKEFILE OFF)
+INCLUDE(FindPkgConfig)
+PKG_CHECK_MODULES(shared_pkgs REQUIRED vconf dlog libxml-2.0)
 
-include(FindPkgConfig)
-pkg_check_modules(rpkgs REQUIRED dlog libxml-2.0)
-add_definitions(${rpkgs_CFLAGS})
+FOREACH(flag ${shared_pkgs_LDFLAGS})
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
+ENDFOREACH(flag)
 
-add_definitions(-DPREFIX="${CMAKE_INSTALL_PREFIX}")
-add_definitions(-DLOCALEDIR="$ENV{DATAFS}/share/locale")
-add_definitions(-DFACTORYFS="$ENV{FACTORYFS}")
-add_definitions(-DDATAFS="$ENV{DATAFS}")
-add_definitions(-Wall -fPIC -std=gnu++0x)
-add_definitions(-DUSE_DLOG_LOG)
-#add_definitions(-DX1_PROF)
-#add_definitions(-D_GETTEXT)
-#add_definitions(-Wall -O3 -omit-frame-pointer)
-#add_definitions(-D_DEFAULT_FONT_NAME="Vera")
-#add_definitions(-Wall -g -DUSE_FILE_DEBUG)
-#add_definitions(-Wall -g -D_DEBUG)
-#add_definitions(-Wl,--as-needed -Wl,-O1)
-#add_definitions(-finstrument-functions)
+FOREACH(flag ${shared_pkgs_CFLAGS})
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
+ENDFOREACH(flag)
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
@@ -62,15 +46,15 @@ add_library(sensord-share SHARED
 	sensor_info.cpp
 )
 
-target_link_libraries(sensord-server ${rpkgs_LDFLAGS} "-lrt -ldl -pthread" "sensord-share")
-target_link_libraries(sensord-share ${rpkgs_LDFLAGS} "-lrt -ldl -pthread")
+target_link_libraries(sensord-server ${shared_pkgs_LDFLAGS} "-lrt -ldl -pthread" "sensord-share")
+target_link_libraries(sensord-share ${shared_pkgs_LDFLAGS} "-lrt -ldl -pthread")
 configure_file(sensord-server.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/sensord-server.pc @ONLY)
 configure_file(${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc @ONLY)
 
-install(TARGETS sensord-server DESTINATION ${LIBDIR})
-install(TARGETS sensord-share DESTINATION ${LIBDIR})
-install(FILES sensord-server.pc DESTINATION ${LIBDIR}/pkgconfig)
-install(FILES ${PROJECT_NAME}.pc DESTINATION ${LIBDIR}/pkgconfig)
+install(TARGETS sensord-server DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS sensord-share DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES sensord-server.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(FILES ${PROJECT_NAME}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(FILES
 	crw_lock.h
 	worker_thread.h
@@ -92,11 +76,11 @@ install(FILES
 	common.h
 	sensor_info.h
 	iio_common.h
-	DESTINATION ${INCLUDEDIR}/${PROJECT_NAME}
+	DESTINATION include/${PROJECT_NAME}
 )
 
 install(FILES
 	sensor_common.h
-	DESTINATION ${INCLUDEDIR}/sensor
+	DESTINATION include/sensor
 )
 

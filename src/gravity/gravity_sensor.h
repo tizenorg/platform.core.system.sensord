@@ -22,9 +22,6 @@
 
 #include <sensor_internal.h>
 #include <virtual_sensor.h>
-#include <string>
-
-using std::string;
 
 class gravity_sensor : public virtual_sensor {
 public:
@@ -40,7 +37,7 @@ public:
 	bool delete_interval(int client_id);
 
 	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
-	bool get_properties(sensor_properties_t &properties);
+	bool get_properties(sensor_properties_s &properties);
 private:
 	sensor_base *m_orientation_sensor;
 	cmutex m_value_mutex;
@@ -48,7 +45,8 @@ private:
 	float m_x;
 	float m_y;
 	float m_z;
-	unsigned long long m_timestamp;
+	int m_accuracy;
+	unsigned long long m_time;
 	unsigned int m_interval;
 
 	string m_vendor;
@@ -61,4 +59,4 @@ private:
 	bool on_stop(void);
 };
 
-#endif
+#endif /* _GRAVITY_SENSOR_H_ */

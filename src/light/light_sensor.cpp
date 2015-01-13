@@ -91,6 +91,7 @@ bool light_sensor::process_event(void)
 
 	AUTOLOCK(m_client_info_mutex);
 
+	event.sensor_id = get_id();
 	if (get_client_cnt(LIGHT_EVENT_LUX_DATA_REPORT_ON_TIME)) {
 		event.event_type = LIGHT_EVENT_LUX_DATA_REPORT_ON_TIME;
 		push(event);
@@ -129,8 +130,6 @@ int light_sensor::adc_to_light_level(int adc)
 
 bool light_sensor::on_start(void)
 {
-	AUTOLOCK(m_mutex);
-
 	if (!m_sensor_hal->enable()) {
 		ERR("m_sensor_hal start fail");
 		return false;
@@ -141,8 +140,6 @@ bool light_sensor::on_start(void)
 
 bool light_sensor::on_stop(void)
 {
-	AUTOLOCK(m_mutex);
-
 	if (!m_sensor_hal->disable()) {
 		ERR("m_sensor_hal stop fail");
 		return false;
@@ -151,24 +148,13 @@ bool light_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool light_sensor::get_properties(const unsigned int type, sensor_properties_t &properties)
+bool light_sensor::get_properties(sensor_properties_s &properties)
 {
 	m_sensor_hal->get_properties(properties);
-
-	if (type == LIGHT_LUX_DATA_SET)
-		return 0;
-
-	if (type == LIGHT_BASE_DATA_SET) {
-		properties.min_range = 0;
-		properties.max_range = sizeof(m_light_level) / sizeof(m_light_level[0]) - 1;
-		properties.resolution = 1;
-		return 0;
-	}
-
-	return -1;
+	return true;
 }
 
-int light_sensor::get_sensor_data(const unsigned int type, sensor_data_t &data)
+int light_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 {
 	int ret;
 	ret = m_sensor_hal->get_sensor_data(data);
@@ -192,30 +178,30 @@ bool light_sensor::set_interval(unsigned long interval)
 	AUTOLOCK(m_mutex);
 
 	INFO("Polling interval is set to %dms", interval);
+
 	return m_sensor_hal->set_interval(interval);
 }
 
 void light_sensor::raw_to_level(sensor_data_t &data)
 {
 	data.values[0] = (int) adc_to_light_level((int)data.values[0]);
-	data.values_num = 1;
+	data.value_count = 1;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	light_sensor *inst;
+	light_sensor *sensor;
 
 	try {
-		inst = new light_sensor();
+		sensor = new(std::nothrow) light_sensor;
 	} catch (int err) {
-		ERR("Failed to create light_sensor class, errno : %d, errstr : %s", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void *)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (light_sensor *)inst;
+	module->sensors.push_back(sensor);
+	return module;
 }

@@ -40,6 +40,10 @@
 #define QWB_CONST	((2 * (ZIGMA_W * ZIGMA_W)) / TAU_W)
 #define F_CONST		(-1 / TAU_W)
 
+#define NEGLIGIBLE_VAL 0.0000001
+
+#define ABS(val) (((val) < 0) ? -(val) : (val))
+
 // M-matrix, V-vector, MxN=> matrix dimension, R-RowCount, C-Column count
 #define M3X3R	3
 #define M3X3C	3
@@ -96,8 +100,6 @@ template <typename TYPE>
 inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<TYPE> accel,
 		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
 {
-	vect<TYPE> acc_data(V1x3S);
-	vect<TYPE> gyr_data(V1x3S);
 	unsigned long long sample_interval_gyro = SAMPLE_INTV;
 
 	m_accel.m_data = accel.m_data;
@@ -114,6 +116,17 @@ inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<T
 	m_magnetic.m_time_stamp = magnetic.m_time_stamp;
 
 	m_gyro.m_data = m_gyro.m_data - m_bias_correction;
+}
+
+template <typename TYPE>
+inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<TYPE> accel,
+		const sensor_data<TYPE> magnetic)
+{
+	m_accel.m_data = accel.m_data;
+	m_magnetic.m_data = magnetic.m_data;
+
+	m_accel.m_time_stamp = accel.m_time_stamp;
+	m_magnetic.m_time_stamp = magnetic.m_time_stamp;
 }
 
 template <typename TYPE>
@@ -218,7 +231,10 @@ inline void orientation_filter<TYPE>::time_update()
 
 	m_quat_driv = m_quat_driv + (quat_diff * (TYPE) m_gyro_dt * (TYPE) PI);
 	m_quat_driv.quat_normalize();
+
 	quat_output = phase_correction(m_quat_driv, m_quat_aid);
+
+	m_quat_9axis = quat_output;
 
 	orientation = quat2euler(quat_output);
 
@@ -255,10 +271,8 @@ inline void orientation_filter<TYPE>::measurement_update()
 	matrix<TYPE> gain(M6X6R, M6X6C);
 	TYPE iden = 0;
 
-	for (int j = 0; j < M6X6C; j++)
-	{
-		for (int i = 0; i < M6X6R; i++)
-		{
+	for (int j=0; j<M6X6C; ++j) {
+		for (int i=0; i<M6X6R; ++i)	{
 			gain.m_mat[i][j] = m_pred_cov.m_mat[j][i] / (m_pred_cov.m_mat[j][j] + m_aid_cov.m_mat[j][j]);
 
 			m_state_new.m_vec[i] = m_state_new.m_vec[i] + gain.m_mat[i][j] * m_state_error.m_vec[j];
@@ -268,8 +282,11 @@ inline void orientation_filter<TYPE>::measurement_update()
 			else
 				iden = 0;
 
-			m_pred_cov.m_mat[i][j] = (iden - (gain.m_mat[i][j] * m_measure_mat.m_mat[j][i])) *
-					m_pred_cov.m_mat[i][j];
+			m_pred_cov.m_mat[j][i] = (iden - (gain.m_mat[i][j] * m_measure_mat.m_mat[j][i])) *
+					m_pred_cov.m_mat[j][i];
+
+			if (ABS(m_pred_cov.m_mat[j][i]) < NEGLIGIBLE_VAL)
+				m_pred_cov.m_mat[j][i] = NEGLIGIBLE_VAL;
 		}
 	}
 
@@ -313,4 +330,27 @@ rotation_matrix<TYPE> orientation_filter<TYPE>::get_rotation_matrix(const sensor
 	return m_rot_matrix;
 }
 
+template <typename TYPE>
+quaternion<TYPE> orientation_filter<TYPE>::get_9axis_quaternion(const sensor_data<TYPE> accel,
+		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
+{
+
+	get_orientation(accel, gyro, magnetic);
+
+	return m_quat_9axis;
+}
+
+template <typename TYPE>
+quaternion<TYPE> orientation_filter<TYPE>::get_geomagnetic_quaternion(const sensor_data<TYPE> accel,
+		const sensor_data<TYPE> magnetic)
+{
+	initialize_sensor_data(accel, magnetic);
+
+	normalize(m_accel);
+	normalize(m_magnetic);
+
+	orientation_triad_algorithm();
+
+	return m_quat_aid;
+}
 #endif  //_ORIENTATION_FILTER_H_

@@ -1,5 +1,5 @@
 /*
- * sensord
+ * libsensord
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -17,22 +17,9 @@
  *
  */
 
-#ifndef _ORIENTATION_SENSOR_H_
-#define _ORIENTATION_SENSOR_H_
+#ifndef __SENSOR_IN_H__
+#define __SENSOR_IN_H__
 
-#include "../orientation_filter.h"
+#include <sensor_internal.h>
 
-class orientation_sensor
-{
-public:
-	orientation_filter<float> orien_filter;
-
-	euler_angles<float> get_orientation(sensor_data<float> accel,
-			sensor_data<float> gyro, sensor_data<float> magnetic);
-	rotation_matrix<float> get_rotation_matrix(sensor_data<float> accel,
-			sensor_data<float> gyro, sensor_data<float> magnetic);
-};
-
-#include "orientation_sensor.cpp"
-
-#endif /* _ORIENTATION_SENSOR_H_ */
+#endif

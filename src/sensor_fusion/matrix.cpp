@@ -30,7 +30,6 @@ matrix<TYPE>::matrix(const int rows, const int cols)
 {
 	m_rows = rows;
 	m_cols = cols;
-	m_mat = NULL;
 	m_mat = new TYPE *[m_rows];
 
 	for (int i = 0; i < m_rows; i++)
@@ -42,7 +41,6 @@ matrix<TYPE>::matrix(const matrix<TYPE>& m)
 {
 	m_rows = m.m_rows;
 	m_cols = m.m_cols;
-	m_mat = NULL;
 	m_mat = new TYPE *[m_rows];
 
 	for (int i = 0; i < m_rows; i++)
@@ -58,7 +56,6 @@ matrix<TYPE>::matrix(const int rows, const int cols, TYPE *mat_data)
 {
 	m_rows = rows;
 	m_cols = cols;
-	m_mat = NULL;
 	m_mat = new TYPE *[m_rows];
 
 	for (int i = 0; i < m_rows; i++)

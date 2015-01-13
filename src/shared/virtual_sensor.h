@@ -33,6 +33,8 @@ public:
 	bool is_virtual(void);
 
 protected:
+	cmutex m_fusion_mutex;
+
 	bool activate(void);
 	bool deactivate(void);
 

@@ -24,76 +24,58 @@
 #include <geo_sensor_hal.h>
 #include <sys/ioctl.h>
 #include <fstream>
-#include <iio_common.h>
 
 using std::ifstream;
 
 #define SENSOR_TYPE_MAGNETIC	"MAGNETIC"
-#define ELEMENT_NAME			"NAME"
+#define ELEMENT_NAME				"NAME"
 #define ELEMENT_VENDOR			"VENDOR"
 #define ELEMENT_RAW_DATA_UNIT	"RAW_DATA_UNIT"
 #define ELEMENT_MIN_RANGE		"MIN_RANGE"
 #define ELEMENT_MAX_RANGE		"MAX_RANGE"
 #define ATTR_VALUE				"value"
 
-#define INITIAL_TIME			-1
-#define GAUSS_TO_UTESLA(val)	((val) * 100.0f)
-
 geo_sensor_hal::geo_sensor_hal()
 : m_x(0)
 , m_y(0)
 , m_z(0)
 , m_hdst(0)
+, m_fired_time(0)
 , m_node_handle(-1)
 , m_polling_interval(POLL_1HZ_MS)
-, m_fired_time(INITIAL_TIME)
 {
 	const string sensorhub_interval_node_name = "mag_poll_delay";
 	csensor_config &config = csensor_config::get_instance();
 
-	node_path_info_query query;
-	node_path_info info;
-	int input_method = IIO_METHOD;
+	node_info_query query;
+	node_info info;
 
-	if (!get_model_properties(SENSOR_TYPE_MAGNETIC, m_model_id, input_method)) {
-		ERR("Failed to find model_properties");
+	if (!find_model_id(SENSOR_TYPE_MAGNETIC, m_model_id)) {
+		ERR("Failed to find model id");
 		throw ENXIO;
-
 	}
 
-	query.input_method = input_method;
 	query.sensorhub_controlled = m_sensorhub_controlled = is_sensorhub_controlled(sensorhub_interval_node_name);
 	query.sensor_type = SENSOR_TYPE_MAGNETIC;
-	query.input_event_key = "geomagnetic_sensor";
+	query.key = "geomagnetic_sensor";
 	query.iio_enable_node_name = "geomagnetic_enable";
 	query.sensorhub_interval_node_name = sensorhub_interval_node_name;
 
-	if (!get_node_path_info(query, info)) {
+	bool error = get_node_info(query, info);
+
+	query.key = "magnetic_sensor";
+	error |= get_node_info(query, info);
+
+	if (!error) {
 		ERR("Failed to get node info");
 		throw ENXIO;
 	}
 
-	show_node_path_info(info);
+	show_node_info(info);
 
 	m_data_node = info.data_node_path;
 	m_enable_node = info.enable_node_path;
 	m_interval_node = info.interval_node_path;
-
-	if (input_method == IIO_METHOD) {
-		m_geo_dir = info.base_dir;
-		m_x_node = m_geo_dir + string(X_RAW_VAL_NODE);
-		m_y_node = m_geo_dir + string(Y_RAW_VAL_NODE);
-		m_z_node = m_geo_dir + string(Z_RAW_VAL_NODE);
-		m_x_scale_node = m_geo_dir + string(X_SCALE_NODE);
-		m_y_scale_node = m_geo_dir + string(Y_SCALE_NODE);
-		m_z_scale_node = m_geo_dir + string(Z_SCALE_NODE);
-		INFO("Raw data node X: %s", m_x_node.c_str());
-		INFO("Raw data node Y: %s", m_y_node.c_str());
-		INFO("Raw data node Z: %s", m_z_node.c_str());
-		INFO("scale node X: %s", m_x_scale_node.c_str());
-		INFO("scale node Y: %s", m_y_scale_node.c_str());
-		INFO("scale node Z: %s", m_z_scale_node.c_str());
-	}
 
 	if (!config.get(SENSOR_TYPE_MAGNETIC, m_model_id, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
@@ -107,9 +89,46 @@ geo_sensor_hal::geo_sensor_hal()
 		throw ENXIO;
 	}
 
-	init_resources();
-
 	INFO("m_chip_name = %s\n",m_chip_name.c_str());
+
+	double min_range;
+
+	if (!config.get(SENSOR_TYPE_MAGNETIC, m_model_id, ELEMENT_MIN_RANGE, min_range)) {
+		ERR("[MIN_RANGE] is empty\n");
+		throw ENXIO;
+	}
+
+	m_min_range = (float)min_range;
+	INFO("m_min_range = %f\n",m_min_range);
+
+	double max_range;
+
+	if (!config.get(SENSOR_TYPE_MAGNETIC, m_model_id, ELEMENT_MAX_RANGE, max_range)) {
+		ERR("[MAX_RANGE] is empty\n");
+		throw ENXIO;
+	}
+
+	m_max_range = (float)max_range;
+	INFO("m_max_range = %f\n",m_max_range);
+
+	double raw_data_unit;
+
+	if (!config.get(SENSOR_TYPE_MAGNETIC, m_model_id, ELEMENT_RAW_DATA_UNIT, raw_data_unit)) {
+		ERR("[RAW_DATA_UNIT] is empty\n");
+		throw ENXIO;
+	}
+
+	m_raw_data_unit = (float)(raw_data_unit);
+
+	if ((m_node_handle = open(m_data_node.c_str(),O_RDWR)) < 0) {
+		ERR("Failed to open handle(%d)", m_node_handle);
+		throw ENXIO;
+	}
+
+	int clockId = CLOCK_MONOTONIC;
+	if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0)
+		ERR("Fail to set monotonic timestamp for %s", m_data_node.c_str());
+
 	INFO("m_raw_data_unit = %f\n", m_raw_data_unit);
 	INFO("geo_sensor_hal is created!\n");
 
@@ -117,8 +136,7 @@ geo_sensor_hal::geo_sensor_hal()
 
 geo_sensor_hal::~geo_sensor_hal()
 {
-	if (m_node_handle > 0)
-		close(m_node_handle);
+	close(m_node_handle);
 	m_node_handle = -1;
 
 	INFO("geo_sensor is destroyed!\n");
@@ -136,43 +154,114 @@ sensor_type_t geo_sensor_hal::get_type(void)
 
 bool geo_sensor_hal::enable(void)
 {
-	m_fired_time = INITIAL_TIME;
+	AUTOLOCK(m_mutex);
+
+	set_enable_node(m_enable_node, m_sensorhub_controlled, true, SENSORHUB_GEOMAGNETIC_ENABLE_BIT);
+	set_interval(m_polling_interval);
+
+	m_fired_time = 0;
 	INFO("Geo sensor real starting");
 	return true;
 }
 
 bool geo_sensor_hal::disable(void)
 {
+	AUTOLOCK(m_mutex);
+
+	set_enable_node(m_enable_node, m_sensorhub_controlled, false, SENSORHUB_GEOMAGNETIC_ENABLE_BIT);
+
 	INFO("Geo sensor real stopping");
 	return true;
 }
 
 bool geo_sensor_hal::set_interval(unsigned long val)
 {
-	INFO("Polling interval cannot be changed.");
+	unsigned long long polling_interval_ns;
+
+	AUTOLOCK(m_mutex);
+
+	polling_interval_ns = ((unsigned long long)(val) * 1000llu * 1000llu);
+
+	if (!set_node_value(m_interval_node, polling_interval_ns)) {
+		ERR("Failed to set polling resource: %s\n", m_interval_node.c_str());
+		return false;
+	}
+
+	INFO("Interval is changed from %dms to %dms]", m_polling_interval, val);
+	m_polling_interval = val;
 	return true;
 
 }
 
-bool geo_sensor_hal::update_value(void)
+bool geo_sensor_hal::update_value(bool wait)
 {
-	int raw_values[3] = {0,};
-	ifstream temp_handle;
+	int geo_raw[4] = {0,};
+	bool x,y,z,hdst;
+	int read_input_cnt = 0;
+	const int INPUT_MAX_BEFORE_SYN = 10;
+	unsigned long long fired_time = 0;
+	bool syn = false;
 
-	if (!read_node_value<int>(m_x_node, raw_values[0]))
-		return false;
-	if (!read_node_value<int>(m_y_node, raw_values[1]))
-		return false;
-	if (!read_node_value<int>(m_z_node, raw_values[2]))
-		return false;
+	x = y = z = hdst = false;
 
-	m_x = GAUSS_TO_UTESLA(raw_values[0] * m_x_scale);
-	m_y = GAUSS_TO_UTESLA(raw_values[1] * m_y_scale);
-	m_z = GAUSS_TO_UTESLA(raw_values[2] * m_z_scale);
+	struct input_event geo_input;
+	DBG("geo event detection!");
 
-	m_fired_time = INITIAL_TIME;
-	INFO("x = %d, y = %d, z = %d, time = %lluus", raw_values[0], raw_values[1], raw_values[2], m_fired_time);
-	INFO("x = %f, y = %f, z = %f, time = %lluus", m_x, m_y, m_z, m_fired_time);
+	while ((syn == false) && (read_input_cnt < INPUT_MAX_BEFORE_SYN)) {
+		int len = read(m_node_handle, &geo_input, sizeof(geo_input));
+		if (len != sizeof(geo_input)) {
+			ERR("geo_file read fail, read_len = %d\n",len);
+			return false;
+		}
+
+		++read_input_cnt;
+
+		if (geo_input.type == EV_REL) {
+			switch (geo_input.code) {
+				case REL_RX:
+					geo_raw[0] = (int)geo_input.value;
+					x = true;
+					break;
+				case REL_RY:
+					geo_raw[1] = (int)geo_input.value;
+					y = true;
+					break;
+				case REL_RZ:
+					geo_raw[2] = (int)geo_input.value;
+					z = true;
+					break;
+				case REL_HWHEEL:
+					geo_raw[3] = (int)geo_input.value;
+					hdst = true;
+					break;
+				default:
+					ERR("geo_input event[type = %d, code = %d] is unknown.", geo_input.type, geo_input.code);
+					return false;
+					break;
+			}
+		} else if (geo_input.type == EV_SYN) {
+			syn = true;
+			fired_time = get_timestamp(&geo_input.time);
+		} else {
+			ERR("geo_input event[type = %d, code = %d] is unknown.", geo_input.type, geo_input.code);
+			return false;
+		}
+	}
+
+	AUTOLOCK(m_value_mutex);
+
+	if (x)
+		m_x =  geo_raw[0];
+	if (y)
+		m_y =  geo_raw[1];
+	if (z)
+		m_z =  geo_raw[2];
+	if (hdst)
+		m_hdst = geo_raw[3] - 1; /* accuracy bias: -1 */
+
+	m_fired_time = fired_time;
+
+	DBG("m_x = %d, m_y = %d, m_z = %d, m_hdst = %d, time = %lluus", m_x, m_y, m_z, m_hdst, m_fired_time);
 
 	return true;
 }
@@ -180,13 +269,13 @@ bool geo_sensor_hal::update_value(void)
 bool geo_sensor_hal::is_data_ready(bool wait)
 {
 	bool ret;
-	ret = update_value();
+	ret = update_value(wait);
 	return ret;
 }
 
 int geo_sensor_hal::get_sensor_data(sensor_data_t &data)
 {
-	data.accuracy = SENSOR_ACCURACY_GOOD;
+	data.accuracy = (m_hdst == 1) ? 0 : m_hdst; /* hdst 0 and 1 are needed to calibrate */
 	data.timestamp = m_fired_time;
 	data.value_count = 3;
 	data.values[0] = (float)m_x;
@@ -195,7 +284,7 @@ int geo_sensor_hal::get_sensor_data(sensor_data_t &data)
 	return 0;
 }
 
-bool geo_sensor_hal::get_properties(sensor_properties_t &properties)
+bool geo_sensor_hal::get_properties(sensor_properties_s &properties)
 {
 	properties.name = m_chip_name;
 	properties.vendor = m_vendor;
@@ -208,41 +297,20 @@ bool geo_sensor_hal::get_properties(sensor_properties_t &properties)
 	return true;
 }
 
-bool geo_sensor_hal::init_resources(void)
+extern "C" sensor_module* create(void)
 {
-	ifstream temp_handle;
-
-	if (!read_node_value<double>(m_x_scale_node, m_x_scale)) {
-		ERR("Failed to read x scale node");
-		return false;
-	}
-	if (!read_node_value<double>(m_y_scale_node, m_y_scale)) {
-		ERR("Failed to read y scale node");
-		return false;
-	}
-	if (!read_node_value<double>(m_z_scale_node, m_z_scale)) {
-		ERR("Failed to read y scale node");
-		return false;
-	}
-	INFO("Scale Values: %f, %f, %f", m_x_scale, m_y_scale, m_z_scale);
-	return true;
-}
-
-extern "C" void *create(void)
-{
-	geo_sensor_hal *inst;
+	geo_sensor_hal *sensor;
 
 	try {
-		inst = new geo_sensor_hal();
+		sensor = new(std::nothrow) geo_sensor_hal;
 	} catch (int err) {
-		ERR("geo_sensor_hal class create fail , errno : %d , errstr : %s\n", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void*)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (geo_sensor_hal*)inst;
+	module->sensors.push_back(sensor);
+	return module;
 }

@@ -49,13 +49,30 @@ typedef enum {
 	GEOMAGNETIC_SENSOR,
 	LIGHT_SENSOR,
 	PROXIMITY_SENSOR,
+	THERMOMETER_SENSOR,
 	GYROSCOPE_SENSOR,
 	PRESSURE_SENSOR,
+	MOTION_SENSOR,
+	FUSION_SENSOR,
+	PEDOMETER_SENSOR,
 	CONTEXT_SENSOR,
+	FLAT_SENSOR,
+	BIO_SENSOR,
+	BIO_HRM_SENSOR,
+	AUTO_ROTATION_SENSOR,
 	GRAVITY_SENSOR,
 	LINEAR_ACCEL_SENSOR,
+	ROTATION_VECTOR_SENSOR,
 	ORIENTATION_SENSOR,
-	TEMPERATURE_SENSOR
+	PIR_SENSOR,
+	PIR_LONG_SENSOR,
+	TEMPERATURE_SENSOR,
+	HUMIDITY_SENSOR,
+	ULTRAVIOLET_SENSOR,
+	DUST_SENSOR,
+	RV_RAW_SENSOR,
+	UNCAL_GYROSCOPE_SENSOR,
+	UNCAL_GEOMAGNETIC_SENSOR
 } sensor_type_t;
 
 typedef unsigned int sensor_id_t;
@@ -83,7 +100,10 @@ typedef struct sensor_data_t {
 		int data_accuracy; //deprecated
 	};
 
-	unsigned long long timestamp;
+	union {
+		unsigned long long timestamp;
+		unsigned long long time_stamp; //deprecated
+	};
 
 /*
  * 	Use "value_count" instead of "values_num"

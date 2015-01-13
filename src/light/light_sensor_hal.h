@@ -19,7 +19,7 @@
 
 #ifndef _LIGHT_SENSOR_HAL_H_
 #define _LIGHT_SENSOR_HAL_H_
-#define ILL_CLEAR_NODE	"in_illuminance_clear_raw"
+
 #include <sensor_hal.h>
 #include <string>
 
@@ -37,7 +37,7 @@ public:
 	bool set_interval(unsigned long val);
 	bool is_data_ready(bool wait);
 	virtual int get_sensor_data(sensor_data_t &data);
-	bool get_properties(sensor_properties_t &properties);
+	bool get_properties(sensor_properties_s &properties);
 private:
 	string m_model_id;
 	string m_vendor;
@@ -53,9 +53,6 @@ private:
 	string m_enable_node;
 	string m_data_node;
 	string m_interval_node;
-	string m_clear_raw_node;
-	string m_light_dir;
-	string m_light_node;
 
 	bool m_sensorhub_controlled;
 

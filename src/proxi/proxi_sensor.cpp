@@ -94,7 +94,7 @@ bool proxi_sensor::process_event(void)
 
 		if (get_client_cnt(PROXIMITY_EVENT_CHANGE_STATE)) {
 			event.event_type = PROXIMITY_EVENT_CHANGE_STATE;
-			raw_to_state(event.data);
+			raw_to_base(event.data);
 			push(event);
 		}
 	}
@@ -122,7 +122,7 @@ bool proxi_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool proxi_sensor::get_properties(sensor_properties_t &properties)
+bool proxi_sensor::get_properties(sensor_properties_s &properties)
 {
 	m_sensor_hal->get_properties(properties);
 
@@ -146,39 +146,31 @@ int proxi_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 		return -1;
 	}
 
-	if (type == PROXIMITY_DISTANCE_DATA_SET) {
-		raw_to_base(data);
-		return 0;
-	}
+	raw_to_base(data);
 
 	return 0;
 }
 
 void proxi_sensor::raw_to_base(sensor_data_t &data)
 {
-	data.values[0] = (float)((PROXIMITY_STATE_NEAR - data.values[0]) * 5);
-}
-
-void proxi_sensor::raw_to_state(sensor_data_t &data)
-{
+	data.values[0] = (float)(data.values[0] * 5);
 	data.value_count = 1;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	proxi_sensor *inst;
+	proxi_sensor *sensor;
 
 	try {
-		inst = new proxi_sensor();
+		sensor = new(std::nothrow) proxi_sensor;
 	} catch (int err) {
-		ERR("proxi_sensor class create fail , errno : %d , errstr : %s\n", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void*)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (proxi_sensor*)inst;
+	module->sensors.push_back(sensor);
+	return module;
 }

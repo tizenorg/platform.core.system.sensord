@@ -26,10 +26,15 @@ close all
 clc
 
 GRAVITY = 9.80665;
+RAD2DEG = 57.2957795;
 
 Max_Range_Accel = 39.203407; Min_Range_Accel = -39.204006; Res_Accel = 0.000598;
 Max_Range_Gyro = 1146.862549; Min_Range_Gyro = -1146.880005; Res_Gyro = 0.017500;
 Max_Range_Magnetic = 1200; Min_Range_Magnetic = -1200; Res_Magnetic = 1;
+
+PITCH_PHASE_CORRECTION = -1;
+ROLL_PHASE_CORRECTION = -1;
+YAW_PHASE_CORRECTION = -1;
 
 Bias_Ax = 0.098586;
 Bias_Ay = 0.18385;
@@ -57,6 +62,10 @@ OR_driv = zeros(3,BUFFER_SIZE);
 OR_aid = zeros(3,BUFFER_SIZE);
 OR_err = zeros(3,BUFFER_SIZE);
 
+euler_driv = zeros(BUFFER_SIZE,3);
+euler_aid = zeros(BUFFER_SIZE,3);
+euler_err = zeros(BUFFER_SIZE,3);
+
 % Sensor Data simulating orientation motions
 
 % get accel x,y,z axis data from stored file
@@ -83,7 +92,24 @@ Mag_data(3,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")
 Mag_data(4,:) = ((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,4))')(1:BUFFER_SIZE);
 
 % estimate orientation
-[OR_driv, OR_aid, OR_err]  = estimate_orientation(Accel_data, Gyro_data, Mag_data);
+[Quat_driv, Quat_aid, Quat_err]  = estimate_orientation(Accel_data, Gyro_data, Mag_data);
+
+for i = 1:BUFFER_SIZE
+	euler_aid(i,:) = quat2euler(Quat_aid(i,:));
+	OR_aid(1,i) = euler_aid(i,2)' * RAD2DEG;
+	OR_aid(2,i) = euler_aid(i,1)' * RAD2DEG;
+	OR_aid(3,i) = euler_aid(i,3)' * RAD2DEG;
+
+	euler_driv(i,:) = quat2euler(Quat_driv(i,:));
+	OR_driv(1,i) = ROLL_PHASE_CORRECTION * euler_driv(i,2)' * RAD2DEG;
+	OR_driv(2,i) = PITCH_PHASE_CORRECTION * euler_driv(i,1)' * RAD2DEG;
+	OR_driv(3,i) = YAW_PHASE_CORRECTION * euler_driv(i,3)' * RAD2DEG;
+
+	euler_err(i,:) = quat2euler(Quat_err(i,:));
+	OR_err(1,i) = euler_err(i,2)' * RAD2DEG;
+	OR_err(2,i) = euler_err(i,1)' * RAD2DEG;
+	OR_err(3,i) = euler_err(i,3)' * RAD2DEG;
+end
 
 % Rotation Plot Results
 hfig=(figure);

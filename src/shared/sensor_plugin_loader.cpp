@@ -39,8 +39,7 @@ using std::unordered_set;
 #define SENSOR_ELEMENT "SENSOR"
 
 #define PLUGINS_CONFIG_PATH "/usr/etc/sensor_plugins.xml"
-#define PLUGINS_DIR_PATH "/usr/lib/sensord"
-#define PLUGINS_DIR_PATH_64 "/usr/lib64/sensord"
+#define PLUGINS_DIR_PATH "/sensord"
 
 #define SENSOR_INDEX_SHIFT 16
 
@@ -54,47 +53,38 @@ sensor_plugin_loader& sensor_plugin_loader::get_instance()
 	return inst;
 }
 
-bool sensor_plugin_loader::load_module(const string &path, void** module, void** handle)
+bool sensor_plugin_loader::load_module(const string &path, vector<void*> &sensors, void* &handle)
 {
 	void *_handle = dlopen(path.c_str(), RTLD_NOW);
 
 	if (!_handle) {
-		ERR("Failed with dlopen(%s), dlerror : %s", path.c_str(), dlerror());
+		ERR("Failed to dlopen(%s), dlerror : %s", path.c_str(), dlerror());
 		return false;
 	}
 
 	dlerror();
 
-	typedef void* create_t(void);
-	typedef void destroy_t(void *);
+	create_t create_module = (create_t) dlsym(_handle, "create");
 
-	create_t* init_module = (create_t*) dlsym(_handle, "create");
-
-	if (!init_module) {
-		ERR("Failed to find \"create\" symbol");
+	if (!create_module) {
+		ERR("Failed to find symbols in %s", path.c_str());
 		dlclose(_handle);
 		return false;
 	}
 
-	destroy_t* exit_module = (destroy_t*) dlsym(_handle, "destroy");
+	sensor_module *module = create_module();
 
-	if (!exit_module) {
-		ERR("Failed to find \"destroy\" symbol");
+	if (!module) {
+		ERR("Failed to create module, path is %s\n", path.c_str());
 		dlclose(_handle);
 		return false;
 	}
 
-	void *_module = init_module();
+	sensors.clear();
+	sensors.swap(module->sensors);
 
-	if (!_module) {
-		ERR("Failed to init the module, Target file is %s\n", path.c_str());
-		exit_module(_module);
-		dlclose(_handle);
-		return false;
-	}
-
-	*module = _module;
-	*handle = _handle;
+	delete module;
+	handle = _handle;
 
 	return true;
 }
@@ -102,37 +92,50 @@ bool sensor_plugin_loader::load_module(const string &path, void** module, void**
 bool sensor_plugin_loader::insert_module(plugin_type type, const string &path)
 {
 	if (type == PLUGIN_TYPE_HAL) {
-		DBG("insert sensor plugin [%s]", path.c_str());
-		sensor_hal *module;
+		DBG("Insert HAL plugin [%s]", path.c_str());
+
+		std::vector<void *>hals;
 		void *handle;
 
-		if (!load_module(path, (void **)&module, &handle))
+		if (!load_module(path, hals, handle))
 			return false;
 
-		sensor_type_t sensor_type = module->get_type();
-		m_sensor_hals.insert(make_pair(sensor_type, module));
-	} else if (type == PLUGIN_TYPE_SENSOR) {
-		DBG("insert sensor plugin [%s]", path.c_str());
-		sensor_base *module;
-		void *handle;
+		sensor_hal* hal;
 
-		if (!load_module(path, (void**)&module, &handle))
-			return false;
-
-		if (!module->init()) {
-			ERR("Failed to init [%s] module\n", module->get_name());
-			delete module;
-			dlclose(handle);
-			return false;
+		for (unsigned int i = 0; i < hals.size(); ++i) {
+			hal = static_cast<sensor_hal*> (hals[i]);
+			sensor_type_t sensor_type = hal->get_type();
+			m_sensor_hals.insert(make_pair(sensor_type, hal));
 		}
-		DBG("init [%s] module", module->get_name());
+	} else if (type == PLUGIN_TYPE_SENSOR) {
+		DBG("Insert Sensor plugin [%s]", path.c_str());
 
-		sensor_type_t sensor_type = module->get_type();
+		std::vector<void *> sensors;
+		void *handle;
 
-		int idx;
-		idx = m_sensors.count(sensor_type);
-		module->set_id(idx << SENSOR_INDEX_SHIFT | sensor_type);
-		m_sensors.insert(make_pair(sensor_type, module));
+		if (!load_module(path, sensors, handle))
+			return false;
+
+		sensor_base* sensor;
+
+		for (unsigned int i = 0; i < sensors.size(); ++i) {
+			sensor = static_cast<sensor_base*> (sensors[i]);
+
+			if (!sensor->init()) {
+				ERR("Failed to init [%s] module\n", sensor->get_name());
+				delete sensor;
+				continue;
+			}
+
+			DBG("init [%s] module", sensor->get_name());
+
+			sensor_type_t sensor_type = sensor->get_type();
+
+			int idx;
+			idx = m_sensors.count(sensor_type);
+			sensor->set_id(idx << SENSOR_INDEX_SHIFT | sensor_type);
+			m_sensors.insert(make_pair(sensor_type, sensor));
+		}
 	}else {
 		ERR("Not supported type: %d", type);
 		return false;
@@ -147,8 +150,7 @@ bool sensor_plugin_loader::load_plugins(void)
 	vector<string> unique_hal_paths, unique_sensor_paths;
 
 	get_paths_from_config(string(PLUGINS_CONFIG_PATH), hal_paths, sensor_paths);
-	get_paths_from_dir(string(PLUGINS_DIR_PATH), hal_paths, sensor_paths);
-	get_paths_from_dir(string(PLUGINS_DIR_PATH_64), hal_paths, sensor_paths);
+	get_paths_from_dir(string(LIBDIR) + string(PLUGINS_DIR_PATH), hal_paths, sensor_paths);
 
 	//remove duplicates while keeping the original ordering => unique_*_paths
 	unordered_set<string> s;
@@ -229,7 +231,7 @@ bool sensor_plugin_loader::get_paths_from_dir(const string &dir_path, vector<str
 
 	string name;
 
-	while (dir_entry = readdir(dir)) {
+	while ((dir_entry = readdir(dir))) {
 		name = string(dir_entry->d_name);
 
 		if (equal(PLUGIN_POSTFIX.rbegin(), PLUGIN_POSTFIX.rend(), name.rbegin())) {
@@ -375,7 +377,7 @@ sensor_base* sensor_plugin_loader::get_sensor(sensor_id_t id)
 	vector<sensor_base *> sensors;
 
 	sensor_type_t type = (sensor_type_t) (id & SENSOR_TYPE_MASK);
-	int index = id >> SENSOR_INDEX_SHIFT;
+	unsigned int index = id >> SENSOR_INDEX_SHIFT;
 
 	sensors = get_sensors(type);
 

@@ -252,7 +252,7 @@ unsigned int sensor_base::get_interval(int client_id, bool is_processor)
 
 void sensor_base::get_sensor_info(sensor_info &info)
 {
-	sensor_properties_t properties;
+	sensor_properties_s properties;
 	get_properties(properties);
 
 	info.set_type(get_type());
@@ -271,9 +271,9 @@ void sensor_base::get_sensor_info(sensor_info &info)
 	return;
 }
 
-bool sensor_base::get_properties(sensor_properties_t &properties)
+bool sensor_base::get_properties(sensor_properties_s &properties)
 {
-	return true;
+	return false;
 }
 
 bool sensor_base::is_supported(unsigned int event_type)

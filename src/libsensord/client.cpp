@@ -20,6 +20,7 @@
 #include <sf_common.h>
 #include <sensor_internal_deprecated.h>
 #include <sensor_internal.h>
+#include <sensor.h>
 #include <csensor_event_listener.h>
 #include <client_common.h>
 #include <vconf.h>
@@ -108,7 +109,7 @@ static void clean_up(void)
 static int get_power_save_state (void)
 {
 	int state = 0;
-	int pm_state, ps_state;
+	int pm_state;
 
 	vconf_get_int(VCONFKEY_PM_STATE, &pm_state);
 
@@ -381,6 +382,27 @@ API int sf_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data
 	return sensord_get_data(handle, data_id, sensor_data) ? OP_SUCCESS : OP_ERROR;
 }
 
+API int sf_check_rotation(unsigned long *rotation)
+{
+	rotation = 0;
+	return 0;
+}
+
+int sf_is_sensor_event_available(sensor_type_t sensor_type, unsigned int event_type)
+{
+	return 0;
+}
+
+int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties)
+{
+	return 0;
+}
+
+int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties)
+{
+	return 0;
+}
+
 static bool get_sensor_list(void)
 {
 	static cmutex l;
@@ -410,8 +432,11 @@ API bool sensord_get_sensor_list(sensor_type_t type, sensor_t **list, int *senso
 	retvm_if (!get_sensor_list(), false, "Fail to get sensor list from server");
 
 	vector<sensor_info *> sensor_infos = sensor_info_manager::get_instance().get_infos(type);
-	*list = (sensor_t *) malloc(sizeof(sensor_info *) * sensor_infos.size());
-	retvm_if(!*list, false, "Failed to allocate memory");
+
+	if (!sensor_infos.empty()) {
+		*list = (sensor_t *) malloc(sizeof(sensor_info *) * sensor_infos.size());
+		retvm_if(!*list, false, "Failed to allocate memory");
+	}
 
 	for (int i = 0; i < sensor_infos.size(); ++i)
 		*(*list + i) = sensor_info_to_sensor(sensor_infos[i]);
@@ -423,7 +448,7 @@ API bool sensord_get_sensor_list(sensor_type_t type, sensor_t **list, int *senso
 
 API sensor_t sensord_get_sensor(sensor_type_t type)
 {
-	retvm_if (!get_sensor_list(), false, "Fail to get sensor list from server");
+	retvm_if (!get_sensor_list(), NULL, "Fail to get sensor list from server");
 
 	const sensor_info *info;
 
@@ -1006,7 +1031,7 @@ API bool sensord_set_option(int handle, int option)
 
 }
 
-bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
+API bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
 {
 	sensor_id_t sensor_id;
 	command_channel *cmd_channel;
@@ -1077,7 +1102,7 @@ API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* senso
 	}
 
 	if(!cmd_channel->cmd_get_data(data_id, sensor_data)) {
-		ERR("Cmd_get_struct(%d, %d, 0x%x) failed for %s", client_id, data_id, sensor_data, get_client_name());
+		ERR("cmd_get_data(%d, %d, 0x%x) failed for %s", client_id, data_id, sensor_data, get_client_name());
 		return false;
 	}
 

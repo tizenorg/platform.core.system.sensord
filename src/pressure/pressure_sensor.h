@@ -25,8 +25,7 @@
 #include <physical_sensor.h>
 #include <sensor_hal.h>
 
-class pressure_sensor : public physical_sensor
-{
+class pressure_sensor : public physical_sensor {
 public:
 	pressure_sensor();
 	virtual ~pressure_sensor();
@@ -37,7 +36,7 @@ public:
 	static bool working(void *inst);
 
 	bool set_interval(unsigned long interval);
-	virtual bool get_properties(sensor_properties_t &properties);
+	virtual bool get_properties(sensor_properties_s &properties);
 	int get_sensor_data(unsigned int type, sensor_data_t &data);
 
 private:

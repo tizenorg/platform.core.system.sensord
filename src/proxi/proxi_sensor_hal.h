@@ -42,7 +42,7 @@ public:
 	bool disable(void);
 	bool is_data_ready(bool wait);
 	virtual int get_sensor_data(sensor_data_t &data);
-	virtual bool get_properties(sensor_properties_t &properties);
+	virtual bool get_properties(sensor_properties_s &properties);
 private:
 	string m_model_id;
 	string m_vendor;
@@ -60,6 +60,5 @@ private:
 	cmutex m_value_mutex;
 
 	bool update_value(bool wait);
-	bool enable_resource(bool enable);
 };
 #endif /*_PROXI_SENSOR_HAL_H_*/

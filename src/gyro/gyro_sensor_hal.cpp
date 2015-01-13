@@ -24,7 +24,6 @@
 #include <gyro_sensor_hal.h>
 #include <sys/ioctl.h>
 #include <fstream>
-#include <sys/poll.h>
 
 using std::ifstream;
 
@@ -41,14 +40,6 @@ using std::ifstream;
 
 #define ATTR_VALUE 				"value"
 
-#define SCALE_AVAILABLE_NODE	"in_anglvel_scale_available"
-#define SCAN_EL_DIR				"scan_elements/"
-#define TRIG_SUFFIX				"-trigger"
-#define GYRO_RINGBUF_LEN		32
-#define SEC_MSEC				1000
-#define MSEC_TO_FREQ(VAL)		((SEC_MSEC) / (VAL))
-#define NSEC_TO_MUSEC(VAL)		((VAL) / 1000)
-
 gyro_sensor_hal::gyro_sensor_hal()
 : m_x(-1)
 , m_y(-1)
@@ -61,38 +52,31 @@ gyro_sensor_hal::gyro_sensor_hal()
 	const string sensorhub_interval_node_name = "gyro_poll_delay";
 	csensor_config &config = csensor_config::get_instance();
 
-	node_path_info_query query;
-	node_path_info info;
-	int input_method = IIO_METHOD;
+	node_info_query query;
+	node_info info;
 
-	if (!get_model_properties(SENSOR_TYPE_GYRO, m_model_id, input_method)) {
-		ERR("Failed to find model_properties");
+	if (!find_model_id(SENSOR_TYPE_GYRO, m_model_id)) {
+		ERR("Failed to find model id");
 		throw ENXIO;
 
 	}
 
-	query.input_method = input_method;
 	query.sensorhub_controlled = m_sensorhub_controlled = is_sensorhub_controlled(sensorhub_interval_node_name);
 	query.sensor_type = SENSOR_TYPE_GYRO;
-	query.input_event_key = "gyro_sensor";
+	query.key = "gyro_sensor";
 	query.iio_enable_node_name = "gyro_enable";
 	query.sensorhub_interval_node_name = sensorhub_interval_node_name;
 
-	if (!get_node_path_info(query, info)) {
+	if (!get_node_info(query, info)) {
 		ERR("Failed to get node info");
 		throw ENXIO;
 	}
 
-	show_node_path_info(info);
+	show_node_info(info);
 
 	m_data_node = info.data_node_path;
+	m_enable_node = info.enable_node_path;
 	m_interval_node = info.interval_node_path;
-	m_gyro_dir = info.base_dir;
-	m_trigger_path = info.trigger_node_path;
-	m_buffer_enable_node_path = info.buffer_enable_node_path;
-	m_buffer_length_node_path = info.buffer_length_node_path;
-	m_available_freq_node_path = info.available_freq_node_path;
-	m_available_scale_node_path = m_gyro_dir + string(SCALE_AVAILABLE_NODE);
 
 	if (!config.get(SENSOR_TYPE_GYRO, m_model_id, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
@@ -107,24 +91,6 @@ gyro_sensor_hal::gyro_sensor_hal()
 	}
 
 	INFO("m_chip_name = %s\n",m_chip_name.c_str());
-
-	if (input_method == IIO_METHOD) {
-		m_trigger_name = m_model_id + TRIG_SUFFIX;
-		if (!verify_iio_trigger(m_trigger_name)) {
-			ERR("Failed verify trigger");
-			throw ENXIO;
-		}
-		string scan_dir = m_gyro_dir + SCAN_EL_DIR;
-		if (!get_generic_channel_names(scan_dir, string("_type"), m_generic_channel_names))
-			ERR ("Failed to find any input channels");
-		else {
-			INFO ("generic channel names:");
-			for (vector <string>::iterator it = m_generic_channel_names.begin();
-					it != m_generic_channel_names.end(); ++it) {
-				INFO ("%s", it->c_str());
-			}
-		}
-	}
 
 	long resolution;
 
@@ -149,12 +115,9 @@ gyro_sensor_hal::gyro_sensor_hal()
 		throw ENXIO;
 	}
 
-	if (setup_channels() == true)
-		INFO("IIO channel setup successful");
-	else {
-		ERR("IIO channel setup failed");
-		throw ENXIO;
-	}
+	int clockId = CLOCK_MONOTONIC;
+	if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0)
+		ERR("Fail to set monotonic timestamp for %s", m_data_node.c_str());
 
 	INFO("m_raw_data_unit = %f\n",m_raw_data_unit);
 	INFO("RAW_DATA_TO_DPS_UNIT(m_raw_data_unit) = [%f]",RAW_DATA_TO_DPS_UNIT(m_raw_data_unit));
@@ -163,10 +126,6 @@ gyro_sensor_hal::gyro_sensor_hal()
 
 gyro_sensor_hal::~gyro_sensor_hal()
 {
-	enable_resource(false);
-	if (m_data != NULL)
-		delete []m_data;
-
 	close(m_node_handle);
 	m_node_handle = -1;
 
@@ -187,9 +146,7 @@ bool gyro_sensor_hal::enable(void)
 {
 	AUTOLOCK(m_mutex);
 
-	if (!enable_resource(true))
-		return false;
-
+	set_enable_node(m_enable_node, m_sensorhub_controlled, true, SENSORHUB_GYROSCOPE_ENABLE_BIT);
 	set_interval(m_polling_interval);
 
 	m_fired_time = 0;
@@ -201,62 +158,96 @@ bool gyro_sensor_hal::disable(void)
 {
 	AUTOLOCK(m_mutex);
 
-	if (!enable_resource(false))
-		return false;
+	set_enable_node(m_enable_node, m_sensorhub_controlled, false, SENSORHUB_GYROSCOPE_ENABLE_BIT);
 
 	INFO("Gyro sensor real stopping");
 	return true;
 
 }
 
-bool gyro_sensor_hal::set_interval(unsigned long ms_interval)
+bool gyro_sensor_hal::set_interval(unsigned long val)
 {
-	int freq, i;
+	unsigned long long polling_interval_ns;
 
-	freq = (int)(MSEC_TO_FREQ(ms_interval));
+	AUTOLOCK(m_mutex);
 
-	for (i=0; i < m_sample_freq_count; i++) {
-		if (freq == m_sample_freq[i]) {
-			if (update_sysfs_num(m_interval_node.c_str(), freq, true) == 0) {
-				INFO("Interval is changed from %lums to %lums]", m_polling_interval, ms_interval);
-				m_polling_interval = ms_interval;
-				return true;
-			}
-			else {
-				ERR("Failed to set data %lu\n", ms_interval);
-				return false;
-			}
-		}
+	polling_interval_ns = ((unsigned long long)(val) * 1000llu * 1000llu);
+
+	if (!set_node_value(m_interval_node, polling_interval_ns)) {
+		ERR("Failed to set polling resource: %s\n", m_interval_node.c_str());
+		return false;
 	}
 
-	DBG("The interval not supported: %lu\n", ms_interval);
-	ERR("Failed to set data %lu\n", ms_interval);
-	return false;
+	INFO("Interval is changed from %dms to %dms]", m_polling_interval, val);
+	m_polling_interval = val;
+	return true;
 }
+
 
 bool gyro_sensor_hal::update_value(bool wait)
 {
-	int i;
-	struct pollfd pfd;
-	ssize_t read_size;
-	const int TIMEOUT = 1000;
+	int gyro_raw[3] = {0,};
+	bool x,y,z;
+	int read_input_cnt = 0;
+	const int INPUT_MAX_BEFORE_SYN = 10;
+	unsigned long long fired_time = 0;
+	bool syn = false;
 
-	pfd.fd = m_node_handle;
-	pfd.events = POLLIN;
-	if (wait)
-		poll(&pfd, 1, TIMEOUT);
-	else
-		poll(&pfd, 1, 0);
+	x = y = z = false;
 
-	read_size = read(m_node_handle, m_data, GYRO_RINGBUF_LEN * m_scan_size);
-	if (read_size <= 0) {
-		ERR("Gyro:No data available\n");
-		return false;
+	struct input_event gyro_input;
+	DBG("gyro event detection!");
+
+	while ((syn == false) && (read_input_cnt < INPUT_MAX_BEFORE_SYN)) {
+		int len = read(m_node_handle, &gyro_input, sizeof(gyro_input));
+		if (len != sizeof(gyro_input)) {
+			ERR("gyro_file read fail, read_len = %d\n, %s",len, strerror(errno));
+			return false;
+		}
+
+		++read_input_cnt;
+
+		if (gyro_input.type == EV_REL) {
+			switch (gyro_input.code) {
+				case REL_RX:
+					gyro_raw[0] = (int)gyro_input.value;
+					x = true;
+					break;
+				case REL_RY:
+					gyro_raw[1] = (int)gyro_input.value;
+					y = true;
+					break;
+				case REL_RZ:
+					gyro_raw[2] = (int)gyro_input.value;
+					z = true;
+					break;
+				default:
+					ERR("gyro_input event[type = %d, code = %d] is unknown.", gyro_input.type, gyro_input.code);
+					return false;
+					break;
+			}
+		} else if (gyro_input.type == EV_SYN) {
+			syn = true;
+			fired_time = sensor_hal::get_timestamp(&gyro_input.time);
+		} else {
+			ERR("gyro_input event[type = %d, code = %d] is unknown.", gyro_input.type, gyro_input.code);
+			return false;
+		}
 	}
-	else {
-		for (i = 0; i < (read_size / m_scan_size); i++)
-			decode_data();
-	}
+
+	AUTOLOCK(m_value_mutex);
+
+	if (x)
+		m_x =  gyro_raw[0];
+	if (y)
+		m_y =  gyro_raw[1];
+	if (z)
+		m_z =  gyro_raw[2];
+
+	m_fired_time = fired_time;
+
+	DBG("m_x = %d, m_y = %d, m_z = %d, time = %lluus", m_x, m_y, m_z, m_fired_time);
+
 	return true;
 }
 
@@ -281,7 +272,7 @@ int gyro_sensor_hal::get_sensor_data(sensor_data_t &data)
 	return 0;
 }
 
-bool gyro_sensor_hal::get_properties(sensor_properties_t &properties)
+bool gyro_sensor_hal::get_properties(sensor_properties_s &properties)
 {
 	properties.name = m_chip_name;
 	properties.vendor = m_vendor;
@@ -295,169 +286,20 @@ bool gyro_sensor_hal::get_properties(sensor_properties_t &properties)
 
 }
 
-bool gyro_sensor_hal::add_gyro_channels_to_array(void)
+extern "C" sensor_module* create(void)
 {
-	int i = 0;
-	m_channels = (struct channel_parameters*) malloc(sizeof(struct channel_parameters) * m_generic_channel_names.size());
-	for (vector <string>::iterator it = m_generic_channel_names.begin();
-			it != m_generic_channel_names.end(); ++it) {
-		if (add_channel_to_array(m_gyro_dir.c_str(), it->c_str() , &m_channels[i++]) < 0) {
-			ERR("Failed to add channel %s to channel array", it->c_str());
-			return false;
-		}
-	}
-	return true;
-}
-
-bool gyro_sensor_hal::setup_channels(void)
-{
-	int freq, i;
-	double sf;
-
-	enable_resource(true);
-
-	if (!add_gyro_channels_to_array()) {
-		ERR("Failed to add channels to array!");
-		return false;
-	}
-
-	INFO("Sorting channels by index");
-	sort_channels_by_index(m_channels, m_generic_channel_names.size());
-	INFO("Sorting channels by index completed");
-
-	m_scan_size = get_channel_array_size(m_channels, m_generic_channel_names.size());
-	if (m_scan_size == 0) {
-		ERR("Channel array size is zero");
-		return false;
-	}
-
-	m_data = new (std::nothrow) char[m_scan_size * GYRO_RINGBUF_LEN];
-	if (m_data == NULL) {
-		ERR("Couldn't create data buffer\n");
-		return false;
-	}
-
-	FILE *fp = NULL;
-	fp = fopen(m_available_freq_node_path.c_str(), "r");
-	if (!fp) {
-		ERR("Fail to open available frequencies file:%s\n", m_available_freq_node_path.c_str());
-		return false;
-	}
-
-	for (i = 0; i < MAX_FREQ_COUNT; i++)
-		m_sample_freq[i] = 0;
-
-	i = 0;
-
-	while (fscanf(fp, "%d", &freq) > 0)
-		m_sample_freq[i++] = freq;
-
-	m_sample_freq_count = i;
-
-	fp = fopen(m_available_scale_node_path.c_str(), "r");
-	if (!fp) {
-		ERR("Fail to open available scale factors file:%s\n", m_available_scale_node_path.c_str());
-		return false;
-	}
-
-	for (i = 0; i < MAX_SCALING_COUNT; i++)
-		m_scale_factor[i] = 0;
-
-	i = 0;
-
-	while (fscanf(fp, "%lf", &sf) > 0)
-		m_scale_factor[i++] = sf;
-
-	m_scale_factor_count = i;
-
-	return true;
-}
-
-void gyro_sensor_hal::decode_data(void)
-{
-	AUTOLOCK(m_value_mutex);
-
-	m_x = convert_bytes_to_int(*(unsigned short int *)(m_data + m_channels[0].buf_index), &m_channels[0]);
-	m_y = convert_bytes_to_int(*(unsigned short int *)(m_data + m_channels[1].buf_index), &m_channels[1]);
-	m_z = convert_bytes_to_int(*(unsigned short int *)(m_data + m_channels[2].buf_index), &m_channels[2]);
-
-	long long int val = *(long long int *)(m_data + m_channels[3].buf_index);
-	if ((val >> m_channels[3].valid_bits) & 1)
-		val = (val & m_channels[3].mask) | ~m_channels[3].mask;
-
-	m_fired_time = (unsigned long long int)(NSEC_TO_MUSEC(val));
-	INFO("m_x = %d, m_y = %d, m_z = %d, time = %lluus", m_x, m_y, m_z, m_fired_time);
-}
-
-bool gyro_sensor_hal::setup_trigger(const char* trig_name, bool verify)
-{
-	int ret = 0;
-
-	ret = update_sysfs_string(m_trigger_path.c_str(), trig_name);
-	if (ret < 0) {
-		ERR("failed to write to current_trigger,%s,%s\n", m_trigger_path.c_str(), trig_name);
-		return false;
-	}
-	INFO("current_trigger setup successfully\n");
-	return true;
-}
-
-bool gyro_sensor_hal::setup_buffer(int enable)
-{
-	int ret;
-	ret = update_sysfs_num(m_buffer_length_node_path.c_str(), GYRO_RINGBUF_LEN, true);
-	if (ret < 0) {
-		ERR("failed to write to buffer/length\n");
-		return false;
-	}
-	INFO("buffer/length setup successfully\n");
-
-	ret = update_sysfs_num(m_buffer_enable_node_path.c_str(), enable, true);
-	if (ret < 0) {
-		ERR("failed to write to buffer/enable\n");
-		return false;
-	}
-
-	if (enable)
-		INFO("buffer enabled\n");
-	else
-		INFO("buffer disabled\n");
-	return true;
-}
-
-bool gyro_sensor_hal::enable_resource(bool enable)
-{
-	string temp;
-	if(enable)
-		setup_trigger(m_trigger_name.c_str(), enable);
-	else
-		setup_trigger("NULL", enable);
-
-	for (vector <string>::iterator it = m_generic_channel_names.begin();
-			it != m_generic_channel_names.end(); ++it) {
-		temp = m_gyro_dir + string(SCAN_EL_DIR) + *it + string("_en");
-		if (update_sysfs_num(temp.c_str(), enable) < 0)
-			return false;
-	}
-	setup_buffer(enable);
-	return true;
-}
-
-extern "C" void *create(void)
-{
-	gyro_sensor_hal *inst;
+	gyro_sensor_hal *sensor;
 
 	try {
-		inst = new gyro_sensor_hal();
+		sensor = new(std::nothrow) gyro_sensor_hal;
 	} catch (int err) {
-		ERR("gyro_sensor class create fail , errno : %d , errstr : %s\n", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void*)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (gyro_sensor_hal*)inst;
+	module->sensors.push_back(sensor);
+	return module;
 }

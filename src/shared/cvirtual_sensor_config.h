@@ -40,12 +40,20 @@ typedef unordered_map<string,Element> Virtual_sensor;
 *		...
 */
 
-typedef unordered_map<string,Virtual_sensor> Virtual_sensor_config;
+typedef unordered_map<string,Virtual_sensor> virtual_sensor_config;
 /*
 * a Virtual_sensor_config represents virtual_sensors.xml
 * <ORIENTATION/>
 * <GRAVITY/>
 * <LINEAR_ACCELERATION/>
+*
+*/
+
+typedef unordered_map<string,virtual_sensor_config> virtual_sensor_device_config;
+/*
+* a virtual_sensor_device_config represents virtual_sensors.xml
+* <emulator/>
+* <RD_PQ/>
 *
 */
 
@@ -58,7 +66,8 @@ private:
 
 	bool load_config(const string& config_path);
 
-	Virtual_sensor_config m_virtual_sensor_config;
+	virtual_sensor_device_config m_virtual_sensor_config;
+
 public:
 	static cvirtual_sensor_config& get_instance(void);
 

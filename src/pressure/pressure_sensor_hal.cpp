@@ -21,16 +21,13 @@
 #include <dirent.h>
 #include <linux/input.h>
 #include <csensor_config.h>
-#include <sys/ioctl.h>
 #include <pressure_sensor_hal.h>
+#include <sys/ioctl.h>
 #include <fstream>
-#include <string>
-#include <iio_common.h>
 
 using std::ifstream;
-using std::string;
 
-#define SENSOR_TYPE_PRESSURE	"PRESSURE"
+#define SENSOR_TYPE_PRESSURE		"PRESSURE"
 #define ELEMENT_NAME			"NAME"
 #define ELEMENT_VENDOR			"VENDOR"
 #define ELEMENT_RAW_DATA_UNIT	"RAW_DATA_UNIT"
@@ -43,17 +40,9 @@ using std::string;
 
 #define SEA_LEVEL_PRESSURE 101325.0
 
-#define EVENT_EN_NODE	"events/in_pressure_mag_either_en"
-#define PRESSURE_SCALE	"/in_pressure_scale"
-#define PRESSURE_RAW	"/in_pressure_raw"
-#define TEMP_OFFSET		"/in_temp_offset"
-#define TEMP_SCALE		"/in_temp_scale"
-#define TEMP_RAW		"/in_temp_raw"
-#define NO_FLAG			0
-#define TIMEOUT			1
-
 pressure_sensor_hal::pressure_sensor_hal()
 : m_pressure(0)
+, m_sea_level_pressure(SEA_LEVEL_PRESSURE)
 , m_temperature(0)
 , m_polling_interval(POLL_1HZ_MS)
 , m_fired_time(0)
@@ -62,36 +51,36 @@ pressure_sensor_hal::pressure_sensor_hal()
 	const string sensorhub_interval_node_name = "pressure_poll_delay";
 	csensor_config &config = csensor_config::get_instance();
 
-	node_path_info_query query;
-	node_path_info info;
-	int input_method = IIO_METHOD;
+	node_info_query query;
+	node_info info;
 
-	if (!get_model_properties(SENSOR_TYPE_PRESSURE, m_model_id, input_method)) {
-		ERR("Failed to find model_properties");
+	if (!find_model_id(SENSOR_TYPE_PRESSURE, m_model_id)) {
+		ERR("Failed to find model id");
 		throw ENXIO;
 
 	}
 
-	query.input_method = input_method;
 	query.sensorhub_controlled = m_sensorhub_controlled = is_sensorhub_controlled(sensorhub_interval_node_name);
 	query.sensor_type = SENSOR_TYPE_PRESSURE;
-	query.input_event_key = "pressure_sensor";
-	query.iio_enable_node_name = EVENT_EN_NODE;
+	query.key = "pressure_sensor";
+	query.iio_enable_node_name = "pressure_enable";
 	query.sensorhub_interval_node_name = sensorhub_interval_node_name;
 
-	if (!get_node_path_info(query, info)) {
+	bool error = get_node_info(query, info);
+
+	query.key = "barometer_sensor";
+	error |= get_node_info(query, info);
+
+	if (!error) {
 		ERR("Failed to get node info");
 		throw ENXIO;
 	}
-	m_data_node = info.data_node_path;
-	m_pressure_dir = info.base_dir;
-	m_enable_node = info.enable_node_path;
-	m_pressure_node = m_pressure_dir + string(PRESSURE_RAW);
-	m_temp_node = m_pressure_dir + string(TEMP_RAW);
 
-	INFO("m_data_node:%s",m_data_node.c_str());
-	INFO("m_pressure_dir:%s",m_pressure_dir.c_str());
-	INFO("m_enable_node:%s",m_enable_node.c_str());
+	show_node_info(info);
+
+	m_data_node = info.data_node_path;
+	m_enable_node = info.enable_node_path;
+	m_interval_node = info.interval_node_path;
 
 	if (!config.get(SENSOR_TYPE_PRESSURE, m_model_id, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
@@ -137,39 +126,14 @@ pressure_sensor_hal::pressure_sensor_hal()
 	m_raw_data_unit = (float)(raw_data_unit);
 	INFO("m_raw_data_unit = %f\n", m_raw_data_unit);
 
-	string file_name;
-
-	file_name = m_pressure_dir + string(TEMP_SCALE);
-	if (!read_node_value<int>(file_name, m_temp_scale))
-		throw ENXIO;
-
-	file_name = m_pressure_dir + string(TEMP_OFFSET);
-	if (!read_node_value<float>(file_name, m_temp_offset))
-		throw ENXIO;
-
-	file_name = m_pressure_dir + string(PRESSURE_SCALE);
-	if (!read_node_value<int>(file_name, m_pressure_scale))
-		throw ENXIO;
-
-	INFO("Temperature scale:%d", m_temp_scale);
-	INFO("Temperature offset:%f", m_temp_offset);
-	INFO("Pressure scale:%d", m_pressure_scale);
-
-	int fd, ret;
-	fd = open(m_data_node.c_str(), NO_FLAG);
-	if (fd == -1) {
-		ERR("Could not open event resource");
+	if ((m_node_handle = open(m_data_node.c_str(),O_RDWR)) < 0) {
+		ERR("Failed to open handle(%d)", m_node_handle);
 		throw ENXIO;
 	}
 
-	ret = ioctl(fd, IOCTL_IIO_EVENT_FD, &m_node_handle);
-
-	close(fd);
-
-	if ((ret == -1) || (m_node_handle == -1)) {
-		ERR("Failed to retrieve node handle from event node: %s", m_data_node.c_str());
-		throw ENXIO;
-	}
+	int clockId = CLOCK_MONOTONIC;
+	if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0)
+		ERR("Fail to set monotonic timestamp for %s", m_data_node.c_str());
 
 	INFO("pressure_sensor_hal is created!\n");
 }
@@ -195,7 +159,9 @@ sensor_type_t pressure_sensor_hal::get_type(void)
 bool pressure_sensor_hal::enable(void)
 {
 	AUTOLOCK(m_mutex);
-	update_sysfs_num(m_enable_node.c_str(), true);
+
+	set_enable_node(m_enable_node, m_sensorhub_controlled, true, SENSORHUB_PRESSURE_ENABLE_BIT);
+
 	set_interval(m_polling_interval);
 
 	m_fired_time = 0;
@@ -207,7 +173,7 @@ bool pressure_sensor_hal::disable(void)
 {
 	AUTOLOCK(m_mutex);
 
-	update_sysfs_num(m_enable_node.c_str(), false);
+	set_enable_node(m_enable_node, m_sensorhub_controlled, false, SENSORHUB_PRESSURE_ENABLE_BIT);
 
 	INFO("Pressure sensor real stopping");
 	return true;
@@ -215,71 +181,90 @@ bool pressure_sensor_hal::disable(void)
 
 bool pressure_sensor_hal::set_interval(unsigned long val)
 {
-	INFO("set_interval not supported");
+	unsigned long long polling_interval_ns;
+
+	AUTOLOCK(m_mutex);
+
+	polling_interval_ns = ((unsigned long long)(val) * 1000llu * 1000llu);
+
+	if (!set_node_value(m_interval_node, polling_interval_ns)) {
+		ERR("Failed to set polling resource: %s\n", m_interval_node.c_str());
+		return false;
+	}
+
+	INFO("Interval is changed from %dms to %dms]", m_polling_interval, val);
+	m_polling_interval = val;
 	return true;
 }
 
 bool pressure_sensor_hal::update_value(bool wait)
 {
-	iio_event_t pressure_event;
-	fd_set readfds, exceptfds;
-	struct timeval tv;
-	int raw_pressure_count;
-	int raw_temp_count;
-	int ret;
+	int pressure_raw[3] = {0,};
+	bool pressure = false;
+	bool sea_level = false;
+	bool temperature = false;
+	int read_input_cnt = 0;
+	const int INPUT_MAX_BEFORE_SYN = 10;
+	unsigned long long fired_time = 0;
+	bool syn = false;
 
-	FD_ZERO(&readfds);
-	FD_ZERO(&exceptfds);
-	FD_SET(m_node_handle, &readfds);
-	FD_SET(m_node_handle, &exceptfds);
+	struct input_event pressure_event;
+	DBG("pressure event detection!");
 
-	if (wait) {
-		tv.tv_sec = TIMEOUT;
-		tv.tv_usec = 0;
-	}
-	else {
-		tv.tv_sec = 0;
-		tv.tv_usec = 0;
-	}
-
-	ret = select(m_node_handle + 1, &readfds, NULL, &exceptfds, &tv);
-
-	if (ret == -1) {
-		ERR("select error:%s m_node_handle:d", strerror(errno), m_node_handle);
-		return false;
-	}
-	else if (!ret) {
-		DBG("select timeout");
-		return false;
-	}
-
-	if (FD_ISSET(m_node_handle, &exceptfds)) {
-		ERR("select exception occurred!");
-		return false;
-	}
-
-	if (FD_ISSET(m_node_handle, &readfds)) {
-		INFO("pressure event detection!");
+	while ((syn == false) && (read_input_cnt < INPUT_MAX_BEFORE_SYN)) {
 		int len = read(m_node_handle, &pressure_event, sizeof(pressure_event));
-
-		if (len == -1) {
-			ERR("Error in read(m_event_fd):%s.", strerror(errno));
+		if (len != sizeof(pressure_event)) {
+			ERR("pressure_file read fail, read_len = %d\n",len);
 			return false;
 		}
-		m_fired_time = pressure_event.timestamp;
-		if (!read_node_value<int>(m_pressure_node, raw_pressure_count))
-			return false;
-		if (!read_node_value<int>(m_temp_node, raw_temp_count))
-			return false;
-		m_pressure = ((float)raw_pressure_count)/((float)m_pressure_scale);
-		m_temperature = m_temp_offset + ((float)raw_temp_count)/((float)m_temp_scale);
-	}
-	else {
-		ERR("No pressure event data available to read");
-		return false;
-	}
-	return true;
 
+		++read_input_cnt;
+
+		if (pressure_event.type == EV_REL) {
+			switch (pressure_event.code) {
+				case REL_X:
+				case REL_HWHEEL:
+					pressure_raw[0] = (int)pressure_event.value;
+					pressure = true;
+					break;
+				case REL_Y:
+				case REL_DIAL:
+					pressure_raw[1] = (int)pressure_event.value;
+					sea_level = true;
+					break;
+				case REL_Z:
+				case REL_WHEEL:
+					pressure_raw[2] = (int)pressure_event.value;
+					temperature = true;
+					break;
+				default:
+					ERR("pressure_event event[type = %d, code = %d] is unknown.", pressure_event.type, pressure_event.code);
+					return false;
+					break;
+			}
+		} else if (pressure_event.type == EV_SYN) {
+			syn = true;
+			fired_time = sensor_hal::get_timestamp(&pressure_event.time);
+		} else {
+			ERR("pressure_event event[type = %d, code = %d] is unknown.", pressure_event.type, pressure_event.code);
+			return false;
+		}
+	}
+
+	AUTOLOCK(m_value_mutex);
+
+	if (pressure)
+		m_pressure = pressure_raw[0];
+	if (sea_level)
+		m_sea_level_pressure = pressure_raw[1];
+	if (temperature)
+		m_temperature = pressure_raw[2];
+
+	m_fired_time = fired_time;
+
+	DBG("m_pressure = %d, sea_level = %d, temperature = %d, time = %lluus", m_pressure, m_sea_level_pressure, m_temperature, m_fired_time);
+
+	return true;
 }
 
 bool pressure_sensor_hal::is_data_ready(bool wait)
@@ -296,14 +281,14 @@ int pressure_sensor_hal::get_sensor_data(sensor_data_t &data)
 	data.timestamp = m_fired_time ;
 	data.value_count = 3;
 	data.values[0] = m_pressure;
-	data.values[1] = SEA_LEVEL_PRESSURE;
+	data.values[1] = m_sea_level_pressure;
 	data.values[2] = m_temperature;
 
 	return 0;
 }
 
 
-bool pressure_sensor_hal::get_properties(sensor_properties_t &properties)
+bool pressure_sensor_hal::get_properties(sensor_properties_s &properties)
 {
 	properties.name = m_chip_name;
 	properties.vendor = m_vendor;
@@ -316,21 +301,20 @@ bool pressure_sensor_hal::get_properties(sensor_properties_t &properties)
 	return true;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	pressure_sensor_hal *inst;
+	pressure_sensor_hal *sensor;
 
 	try {
-		inst = new pressure_sensor_hal();
+		sensor = new(std::nothrow) pressure_sensor_hal;
 	} catch (int err) {
-		ERR("pressure_sensor_hal class create fail , errno : %d , errstr : %s\n", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void*)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (pressure_sensor_hal*)inst;
+	module->sensors.push_back(sensor);
+	return module;
 }

@@ -38,7 +38,7 @@ public:
 	bool delete_interval(int client_id);
 
 	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
-	bool get_properties(sensor_properties_t &properties);
+	bool get_properties(sensor_properties_s &properties);
 private:
 	sensor_base *m_accel_sensor;
 	sensor_base *m_gravity_sensor;
@@ -50,7 +50,7 @@ private:
 	float m_x;
 	float m_y;
 	float m_z;
-	unsigned long long m_timestamp;
+	unsigned long long m_time;
 	unsigned int m_interval;
 
 	unsigned int m_enable_linear_accel;

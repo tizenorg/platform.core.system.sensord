@@ -171,7 +171,7 @@ void csensor_event_dispatcher::dispatch_event(void)
 
 			sort_sensor_events(sensor_events, event_cnt);
 
-			for (int i = 0; i < event_cnt; ++i) {
+			for (unsigned int i = 0; i < event_cnt; ++i) {
 				if (is_record_event(sensor_events[i].event_type))
 					put_last_event(sensor_events[i].event_type, sensor_events[i]);
 			}
@@ -189,8 +189,8 @@ void csensor_event_dispatcher::dispatch_event(void)
 
 void csensor_event_dispatcher::send_sensor_events(void* events, int event_cnt, bool is_hub_event)
 {
-	sensor_event_t *sensor_events;
-	sensorhub_event_t *sensor_hub_events;
+	sensor_event_t *sensor_events = NULL;
+	sensorhub_event_t *sensor_hub_events = NULL;
 	cclient_info_manager& client_info_manager = get_client_info_manager();
 
 	const int RESERVED_CLIENT_CNT = 20;

@@ -24,6 +24,7 @@
 #include <vector>
 #include <sensor_common.h>
 #include <string>
+#include <vector>
 
 #define COMMAND_CHANNEL_PATH			"/tmp/sf_command_socket"
 #define EVENT_CHANNEL_PATH				"/tmp/sf_event_socket"
@@ -162,7 +163,7 @@ typedef struct {
 	int min_interval;
 	int fifo_count;
 	int max_batch_count;
-} sensor_properties_t;
+} sensor_properties_s;
 
 
 /*
@@ -181,6 +182,11 @@ typedef struct sensorhub_event_t {
 	sensorhub_data_t data;
 } sensorhub_event_t;
 
+typedef struct sensor_module{
+	std::vector<void*> sensors;
+} sensor_module;
+
+typedef sensor_module* (*create_t)(void);
 
 typedef void *(*cmd_func_t)(void *data, void *cb_data);
 
@@ -216,7 +222,11 @@ enum sensorhub_enable_bit {
 
 enum sensor_permission_t {
 	SENSOR_PERMISSION_NONE	= 0,
-	SENSOR_PERMISSION_STANDARD = 1,
+	SENSOR_PERMISSION_STANDARD = (1 << 0),
+	SENSOR_PERMISSION_BIO	=  (1 << 1),
 };
+
+#define BIO_SENSOR_PRIVELEGE_NAME "sensord::bio"
+#define BIO_SENSOR_ACCESS_RIGHT "rw"
 
 #endif

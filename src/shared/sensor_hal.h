@@ -25,10 +25,8 @@
 #include <common.h>
 #include <sensor_internal.h>
 #include <string>
-#include <vector>
 
 using std::string;
-using std::vector;
 
 /*
 * As of Linux 3.4, there is a new EVIOCSCLOCKID ioctl to set the desired clock
@@ -40,29 +38,33 @@ using std::vector;
 #endif
 
 typedef struct {
+	int method;
 	string data_node_path;
 	string enable_node_path;
 	string interval_node_path;
 	string buffer_enable_node_path;
 	string buffer_length_node_path;
 	string trigger_node_path;
-	string available_freq_node_path;
-	string base_dir;
-} node_path_info;
+} node_info;
 
 typedef struct {
-	int input_method;
 	bool sensorhub_controlled;
 	string sensor_type;
-	string input_event_key;
+	string key;
 	string iio_enable_node_name;
 	string sensorhub_interval_node_name;
-} node_path_info_query;
+} node_info_query;
 
 enum input_method {
-	IIO_METHOD,
-	INPUT_EVENT_METHOD,
+	IIO_METHOD = 0,
+	INPUT_EVENT_METHOD = 1,
 };
+
+typedef struct {
+	int method;
+	std::string dir_path;
+	std::string prefix;
+} input_method_info;
 
 #define DEFAULT_WAIT_TIME 0
 
@@ -79,7 +81,7 @@ public:
 	virtual bool disable(void) = 0;
 	virtual bool set_interval(unsigned long val);
 	virtual bool is_data_ready(bool wait) = 0;
-	virtual bool get_properties(sensor_properties_t &properties) = 0;
+	virtual bool get_properties(sensor_properties_s &properties) = 0;
 	virtual int get_sensor_data(sensor_data_t &data);
 	virtual int get_sensor_data(sensorhub_data_t &data);
 	virtual long set_command(unsigned int cmd, long val);
@@ -93,23 +95,20 @@ protected:
 
 	static unsigned long long get_timestamp(void);
 	static unsigned long long get_timestamp(timeval *t);
+	static bool find_model_id(const string &sensor_type, string &model_id);
 	static bool is_sensorhub_controlled(const string &key);
-	static bool get_model_properties(const string &sensor_type, string &model_id, int &input_method);
-	static bool get_node_path_info(const node_path_info_query &query, node_path_info &info);
-	static void show_node_path_info(node_path_info &info);
+	static bool get_node_info(const node_info_query &query, node_info &info);
+	static void show_node_info(node_info &info);
 	static bool set_node_value(const string &node_path, int value);
 	static bool set_node_value(const string &node_path, unsigned long long value);
 	static bool get_node_value(const string &node_path, int &value);
-	static bool verify_iio_trigger(const string &trigger_name);
-	static bool get_generic_channel_names(const string &scan_dir, const string &suffix, vector<string> &generic_channel_names);
-
 private:
-	static bool find_model_id(int method, const string &sensor_type, string &model_id);
 	static bool get_event_num(const string &node_path, string &event_num);
-	static bool get_device_num(int method, const string &key, string &device_num);
-	static bool get_iio_node_info(const string &key, const string& enable_node_name, node_path_info &info);
-	static bool get_sensorhub_iio_node_info(const string &key, const string &interval_node_name, node_path_info &info);
-	static bool get_input_event_node_info(const string &key, node_path_info &info);
-	static bool get_sensorhub_input_event_node_info(const string &key, const string &interval_node_name, node_path_info &info);
+	static bool get_input_method(const string &key, int &method, string &device_num);
+
+	static bool get_iio_node_info(const string& enable_node_name, const string& device_num, node_info &info);
+	static bool get_sensorhub_iio_node_info(const string &interval_node_name, const string& device_num, node_info &info);
+	static bool get_input_event_node_info(const string& device_num, node_info &info);
+	static bool get_sensorhub_input_event_node_info(const string &interval_node_name, const string& device_num, node_info &info);
 };
 #endif /*_SENSOR_HAL_CLASS_H_*/

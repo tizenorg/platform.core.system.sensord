@@ -140,9 +140,9 @@ previous time instant and a '0' specifies it as an initialization value.</p>
 </center>
 </FIGURE>
 
-<p>The accelerometer and magnetometer data are  normalized based on equations (3) 
+<p>The accelerometer and magnetometer data are normalized based on equations (3)
 and (4) to obtain the calibrated accelerometer data (Ax, Ay, Az) and magnetometer
-data (Mx, My, Mz).</p> 
+data (Mx, My, Mz).</p>
 
 <FIGURE>
 <center>
@@ -426,6 +426,12 @@ apriori state vector error &Delta;x- and prediction covariance P- based in [1].<
 
 
 <h3>3.5. Measurement Update System</h3>
+<p>The measurement update system is used to determine the bias value that would be
+deducted from the Gyroscope values (6). The equations (31), (32) and (33) are used to
+compute the Kalman gain K, aposteriori state error computation &Delta;x+(i) and
+aposteriori prediction covariance P+, as shown in [4]. In equation (33), I denotes the
+identity matrix H denotes the measurement matrix (identity matrix is used here) and the
+apriori prediction covariance estimate P- (33).</p>
 
 <FIGURE>
 <center>
@@ -444,6 +450,12 @@ apriori state vector error &Delta;x- and prediction covariance P- based in [1].<
 <img src="./equation/equation_33.png" width="35%" height="4%">
 </center>
 </FIGURE>
+
+<p>The bias compensation (Bx, By, Bz) obtained from &Delta;x+(i) is used for removing
+dynamic bias from the calibrated gyroscope values as shown in (6). The corrected
+orientation that is determined using the above sensor fusion method, is obtained from
+(22) by using the conversion function quat2euler [9] as shown in (34). This estimated
+orientation is used in Section 3 to compute Gravity virtual sensor data.</p>
 
 <FIGURE>
 <center>
@@ -500,18 +512,20 @@ gravitational effect on the devices reference axis.</p>
 </FIGURE>
 
 <p>When the device tilt values (pitch,roll) are changed from (0,0) to (0,&Pi;/2),
-phone is rotated around x-axis, the y-axis gets aligned to earth's gravitational field
-after rotation instead of the z-axis.  When this rotation is applied to the equations
-given above, the values (GRx,GRy,GRz) are converted from (0,0,G) to (0,G,0) due to the
+phone is rotated around y-axis, the x-axis gets aligned to earth's gravitational field
+after rotation instead of the z-axis. When this rotation is applied to the equations
+given above, the values (GRx,GRy,GRz) are converted from (0,0,G) to (G,0,0) due to the
 shift in the axis which experiences the gravitational field (G is measure of Earth's
 gravity).</p>
 
 <h2>Determination of Linear Acceleration</h2>
 
-<p>Linear Acceleration virtual sensor data provides the measure of the acceleration of
-a device after removing the Gravity components on the 3-axes. Accurate linear
-acceleration data are calculated by subtracting gravity components from the 3-axes
-calibrated accelerometer data.</p>
+<p>Accurate linear acceleration data are calculated by subtracting gravity components
+from the 3-axes calibrated accelerometer data as shown in (38), (39) and (40). As shown
+in (38) the rotation of the device on y-axis (GRy) reflects on the accelerometer x-axis
+sensor data (Ax). The linear acceleration measurement on x-axis (LAx) directly
+corresponds to the accelerometer x-axis sensor data (Ax) meaning linear motion along
+x-axis is directly measured on the accelerometer x-axis.</p>
 
 
 <FIGURE>
@@ -534,21 +548,53 @@ calibrated accelerometer data.</p>
 
 <h1>References</h1>
 
-<p>[1] Gebre-Egziabher, H., Rhayward, R. C. &amp; Powell, J. D. Design
-of Multi-Sensor Attitude Determination Systems. IEEE Transactions on
-Aerospace and Electronic Systems, (Volume: 40, Issue: 2), 627 - 649 (2004)</p>
+<p>[1] Gebre-Egziabher, H., Rhayward, R. C. &amp; Powell, J. D. Design of Multi-Sensor
+Attitude Determination Systems. IEEE Transactions on AESS, 40(2), 627 - 649 (2004)</p>
 
-<p>[2] Abyarjoo1, F., Barreto1, A., Cofino1, J. &amp; Ortega, F. R., Implementing
-a Sensor Fusion Algorithm for 3D Orientation Detection with Inertial/Magnetic
-Sensors. The International Joint Conferences on CISSE (2012)</p>
+<p>[2] Abyarjoo1, et al. Implementing a Sensor Fusion Algorithm for 3D Orientation
+Detection with Inertial/Magnetic Sensors. The International Joint Conferences on CISSE
+(2012)</p>
 
 <p>[3] Marcard, T. V., Design and Implementation of an attitude estimation system to
-control orthopedic components. Chalmers University. Master thesis published on
-the university link http://publications.lib.chalmers.se/records/fulltext/125985.pdf(2010)</p>
+control orthopedic components. Chalmers University. Master thesis published on the
+university link http://publications.lib.chalmers.se/records/fulltext/125985.pdf(2010)</p>
 
-<p>[4] Welch, G., Bishop, G. An introduction to the Kalman Filter: SIGGRAPH (2001)</p>
+<p>[4] Welch, G. &amp; Bishop, G. An introduction to the Kalman Filter. SIGGRAPH 2001</p>
 
-<p>[5] Grewal, M. S., Weill, L. R., Andrews, A. P., Global Positioning Systems,
-Inertial Navigation, and Integration (John Wiley &amp; Sons., 2001)</p>
+<p>[5] Grewal, M. S., et al. Global Positioning Systems, Inertial Navigation, and
+Integration (John Wiley &amp; Sons., 2001)</p>
+
+<p>[6] Greenberg, M. J., Euclidean and non-Euclidean geometry: Development and History
+(Freeman, 1980)</p>
+
+<p>[7] Conway, J. H &amp; Smith, D. A. On Quaternions and Octonions: Their Geometry,
+Arithmetic, and Symmetry (Peters, 2003)</p>
+
+<p>[8] Zill, D. G &amp; Cullen, M. R. "Definition 7.4: Cross product of two vectors".
+Advanced engineering mathematics (Jones &amp; Bartlett Learning, 2006)</p>
+
+<p>[9] NASA Mission Planning and Analysis Division. Euler Angles, Quaternions, and
+Transformation Matrices. Document Link-
+http://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19770024290.pdf. Last Accessed
+- July 2014.</p>
+
+<p>[10] Android Sensor Fusion Library. Source code link:
+https://android.googlesource.com/platform/frameworks/native/+/b398927/services/sensorservice/.
+Last Accessed - July 2014.</p>
+
+<p>[11] GNU Octave High Level Interpreter. Software Link: http://www.gnu.org/software/octave/.
+Last Accessed - July 2014.</p>
+
+<p>[12] Tizen OS - https://www.tizen.org/. Last Accessed - July 2014.</p>
+
+<p>[13] Marins, J. L., et al. An Extended Kalman Filter for Quaternion-Based Orientation
+Estimation Using MARG Sensors. IEEE/RSJ International Conference on Intelligent Robots and
+Systems (2001)</p>
+
+<p>[14] Favre, J., et al. Quaternion-based fusion of gyroscopes and accelerometers to improve
+3D angle measurement. ELECTRONICS LETTERS, 25th May 2006, Vol. 42 No. 11</p>
+
+<p>[15] Sabatini, A.M., Quaternion based attitude estimation algorithm applied to signals
+from body-mounted gyroscopes.  ELECTRONICS LETTERS, 13th May 2004, Vol. 40 No. 10</p>
 
 </html>

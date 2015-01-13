@@ -43,6 +43,7 @@ accel_sensor::accel_sensor()
 
 	vector<unsigned int> supported_events = {
 		ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME,
+		ACCELEROMETER_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME,
 	};
 
 	for_each(supported_events.begin(), supported_events.end(),
@@ -65,7 +66,7 @@ bool accel_sensor::init()
 		return false;
 	}
 
-	sensor_properties_t properties;
+	sensor_properties_s properties;
 
 	if (m_sensor_hal->get_properties(properties) == false) {
 		ERR("sensor->get_properties() is failed!\n");
@@ -103,6 +104,12 @@ bool accel_sensor::process_event(void)
 	AUTOLOCK(m_mutex);
 	AUTOLOCK(m_client_info_mutex);
 
+	if (get_client_cnt(ACCELEROMETER_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME)) {
+		base_event.sensor_id = get_id();
+		base_event.event_type = ACCELEROMETER_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME;
+		push(base_event);
+	}
+
 	if (get_client_cnt(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME)) {
 		base_event.sensor_id = get_id();
 		base_event.event_type = ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME;
@@ -133,7 +140,7 @@ bool accel_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool accel_sensor::get_properties(sensor_properties_t &properties)
+bool accel_sensor::get_properties(sensor_properties_s &properties)
 {
 	return m_sensor_hal->get_properties(properties);
 }
@@ -174,21 +181,20 @@ void accel_sensor::raw_to_base(sensor_data_t &data)
 	data.values[2] = RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(data.values[2] * m_raw_data_unit);
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	accel_sensor *inst;
+	accel_sensor *sensor;
 
 	try {
-		inst = new accel_sensor();
+		sensor = new(std::nothrow) accel_sensor;
 	} catch (int err) {
-		ERR("accel_sensor class create fail , errno : %d , errstr : %s\n", err, strerror(err));
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void*)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (accel_sensor*)inst;;
+	module->sensors.push_back(sensor);
+	return module;
 }

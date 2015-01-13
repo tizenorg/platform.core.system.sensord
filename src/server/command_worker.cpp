@@ -29,23 +29,16 @@
 #include <thread>
 #include <string>
 #include <utility>
-#include <dlfcn.h>
-#include <set>
+#include <permission_checker.h>
 
-using namespace std;
 using std::string;
-using std::set;
 using std::make_pair;
 
-#define SECURITY_LIB "/usr/lib/libsecurity-server-client.so.1"
-
-set<unsigned int> priority_list;
-
-void *command_worker::m_security_handle  = NULL;
-command_worker::security_server_check_privilege_by_sockfd_t command_worker::security_server_check_privilege_by_sockfd = NULL;
 command_worker::cmd_handler_t command_worker::m_cmd_handlers[];
 sensor_raw_data_map command_worker::m_sensor_raw_data_map;
 cpacket command_worker::m_sensor_list;
+
+set<unsigned int> priority_list;
 
 command_worker::command_worker(const csocket& socket)
 : m_client_id(CLIENT_ID_INVALID)
@@ -56,7 +49,6 @@ command_worker::command_worker(const csocket& socket)
 	static bool init = false;
 
 	if (!init) {
-		init_security_lib();
 		init_cmd_handlers();
 		make_sensor_raw_data_map();
 
@@ -77,26 +69,6 @@ command_worker::~command_worker()
 bool command_worker::start(void)
 {
 	return m_worker.start();
-}
-
-void command_worker::init_security_lib(void)
-{
-	m_security_handle = dlopen(SECURITY_LIB, RTLD_LAZY);
-
-	if (!m_security_handle) {
-		ERR("dlopen(%s) error, cause: %s", SECURITY_LIB, dlerror());
-		return;
-	}
-
-	security_server_check_privilege_by_sockfd =
-		(security_server_check_privilege_by_sockfd_t) dlsym(m_security_handle, "security_server_check_privilege_by_sockfd");
-
-	if (!security_server_check_privilege_by_sockfd) {
-		ERR("Failed to load symbol");
-		dlclose(m_security_handle);
-		m_security_handle = NULL;
-		return;
-	}
 }
 
 void command_worker::init_cmd_handlers(void)
@@ -199,7 +171,7 @@ bool command_worker::working(void *ctx)
 	if (inst->m_socket.recv(&header, sizeof(header)) <= 0) {
 		string info;
 		inst->get_info(info);
-		DBG("%s failed to receive header", info);
+		DBG("%s failed to receive header", info.c_str());
 		return false;
 	}
 
@@ -211,7 +183,7 @@ bool command_worker::working(void *ctx)
 		if (inst->m_socket.recv(payload, header.size) <= 0) {
 			string info;
 			inst->get_info(info);
-			DBG("%s failed to receive data of packet", info);
+			DBG("%s failed to receive data of packet", info.c_str());
 			delete[] payload;
 			return false;
 		}
@@ -563,12 +535,8 @@ bool command_worker::cmd_register_event(void *payload)
 		ret_value = OP_ERROR;
 		goto out;
 	}
-		if (cmd->event_type == GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME || cmd->event_type ==  LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME || cmd->event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
-			priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
-			priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
-			priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
-	}
 
+	insert_priority_list(cmd->event_type);
 	m_module->add_client(cmd->event_type);
 
 	ret_value = OP_SUCCESS;
@@ -852,9 +820,7 @@ void command_worker::get_info(string &info)
 
 int command_worker::get_permission(void)
 {
-	int permission = SENSOR_PERMISSION_STANDARD;
-
-	return permission;
+	return permission_checker::get_instance().get_permission(m_socket.get_socket_fd());
 }
 
 bool command_worker::is_permission_allowed(void)
@@ -879,3 +845,23 @@ csensor_event_dispatcher& command_worker::get_event_dispathcher(void)
 	return csensor_event_dispatcher::get_instance();
 }
 
+void insert_priority_list(unsigned int event_type)
+{
+	if (event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
+		priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+		priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+		priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
+        }
+
+	if (event_type == LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME) {
+		priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+		priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+		priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
+        }
+
+	if (event_type == GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME) {
+		priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+		priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+		priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
+        }
+}

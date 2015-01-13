@@ -32,23 +32,20 @@ public:
 	virtual ~pressure_sensor_hal();
 	string get_model_id(void);
 	sensor_type_t get_type(void);
+
 	bool enable(void);
 	bool disable(void);
 	bool set_interval(unsigned long val);
 	bool is_data_ready(bool wait);
 	virtual int get_sensor_data(sensor_data_t &data);
-	virtual bool get_properties(sensor_properties_t &properties);
-
+	virtual bool get_properties(sensor_properties_s &properties);
 private:
 	string m_model_id;
 	string m_vendor;
 	string m_chip_name;
 
-	int m_pressure_scale;
 	float m_pressure;
-
-	int m_temp_scale;
-	float m_temp_offset;
+	float m_sea_level_pressure;
 	float m_temperature;
 
 	int m_resolution;
@@ -56,7 +53,8 @@ private:
 	float m_min_range;
 	float m_max_range;
 	float m_raw_data_unit;
-
+	float m_temp_resolution;
+	float m_temp_offset;
 	unsigned long m_polling_interval;
 
 	unsigned long long m_fired_time;
@@ -65,10 +63,6 @@ private:
 	string m_enable_node;
 	string m_data_node;
 	string m_interval_node;
-
-	string m_pressure_dir;
-	string m_pressure_node;
-	string m_temp_node;
 
 	bool m_sensorhub_controlled;
 

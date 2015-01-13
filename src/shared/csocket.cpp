@@ -103,7 +103,9 @@ bool csocket::bind (const char *sock_path)
 	}
 
 	m_addr.sun_family = AF_UNIX;
-	strcpy(m_addr.sun_path, sock_path);
+	int path_size = strlen(sock_path);
+	strncpy(m_addr.sun_path, sock_path, path_size);
+	m_addr.sun_path[path_size - 1] = '\0';
 
 	length = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 
@@ -212,10 +214,10 @@ ssize_t csocket::send_for_stream(void const* buffer, size_t size) const
 {
 	ssize_t len;
 	ssize_t err = 0;
-	ssize_t total_sent_size = 0;
+	size_t total_sent_size = 0;
 
 	do {
-		len = ::send(m_sock_fd, buffer + total_sent_size, size - total_sent_size, m_send_flags);
+		len = ::send(m_sock_fd, (void const*)((uint8_t *)buffer + total_sent_size), size - total_sent_size, m_send_flags);
 
 		if (len >= 0) {
 			total_sent_size += len;
@@ -239,10 +241,10 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 {
 	ssize_t len;
 	ssize_t err = 0;
-	ssize_t total_recv_size = 0;
+	size_t total_recv_size = 0;
 
 	do {
-		len = ::recv(m_sock_fd, buffer + total_recv_size, size - total_recv_size, m_recv_flags);
+		len = ::recv(m_sock_fd, (void *)((uint8_t *)buffer + total_recv_size), size - total_recv_size, m_recv_flags);
 
 		if (len > 0) {
 			total_recv_size += len;
@@ -301,7 +303,10 @@ bool csocket::connect(const char *sock_path)
 	set_blocking_mode(false);
 
 	m_addr.sun_family = AF_UNIX;
-	strcpy(m_addr.sun_path, sock_path);
+	int path_size = strlen(sock_path);
+	strncpy(m_addr.sun_path, sock_path, path_size);
+	m_addr.sun_path[path_size - 1] = '\0';
+
 	addr_len = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 
 	if (::connect(m_sock_fd,(sockaddr *) &m_addr, addr_len) < 0) {

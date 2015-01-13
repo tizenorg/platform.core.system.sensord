@@ -24,8 +24,7 @@
 #include <physical_sensor.h>
 #include <sensor_hal.h>
 
-class light_sensor : public physical_sensor
-{
+class light_sensor : public physical_sensor {
 public:
 	light_sensor();
 	virtual ~light_sensor();
@@ -35,21 +34,23 @@ public:
 
 	static bool working(void *inst);
 
-	virtual bool on_start(void);
-	virtual bool on_stop(void);
-
 	virtual bool set_interval(unsigned long interval);
-	virtual bool get_properties(const unsigned int type, sensor_properties_t &properties);
+	virtual bool get_properties(sensor_properties_s &properties);
 	int get_sensor_data(const unsigned int type, sensor_data_t &data);
 
 private:
 	static const int m_light_level[];
+
 	sensor_hal *m_sensor_hal;
 	int m_level;
 
+	virtual bool on_start(void);
+	virtual bool on_stop(void);
+
+	bool process_event(void);
 	int adc_to_light_level(int adc);
+
 	void raw_to_level(sensor_data_t &data);
 	void raw_to_state(sensor_data_t &data);
-	bool process_event(void);
 };
 #endif /*_LIGHT_SENSOR_H_*/

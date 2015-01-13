@@ -23,7 +23,6 @@
 #include <sensor_plugin_loader.h>
 
 #define SENSOR_NAME "TEMPERATURE_SENSOR"
-#define NO_OF_DATA_VAL	1
 
 temperature_sensor::temperature_sensor()
 : m_sensor_hal(NULL)
@@ -45,16 +44,14 @@ bool temperature_sensor::init()
 {
 	m_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(TEMPERATURE_SENSOR);
 
-	if (!m_sensor_hal)
-	{
+	if (!m_sensor_hal) {
 		ERR("cannot load sensor_hal[%s]", sensor_base::get_name());
 		return false;
 	}
 
-	sensor_properties_t properties;
+	sensor_properties_s properties;
 
-	if (!m_sensor_hal->get_properties(properties))
-	{
+	if (!m_sensor_hal->get_properties(properties)) {
 		ERR("sensor->get_properties() is failed!\n");
 		return false;
 	}
@@ -88,8 +85,8 @@ bool temperature_sensor::process_event(void)
 
 	AUTOLOCK(m_client_info_mutex);
 
-	if (get_client_cnt(TEMPERATURE_EVENT_RAW_DATA_REPORT_ON_TIME))
-	{
+	if (get_client_cnt(TEMPERATURE_EVENT_RAW_DATA_REPORT_ON_TIME)) {
+		event.sensor_id = get_id();
 		event.event_type = TEMPERATURE_EVENT_RAW_DATA_REPORT_ON_TIME;
 		raw_to_base(event.data);
 		push(event);
@@ -100,8 +97,7 @@ bool temperature_sensor::process_event(void)
 
 bool temperature_sensor::on_start(void)
 {
-	if (!m_sensor_hal->enable())
-	{
+	if (!m_sensor_hal->enable()) {
 		ERR("m_sensor_hal start fail\n");
 		return false;
 	}
@@ -111,8 +107,7 @@ bool temperature_sensor::on_start(void)
 
 bool temperature_sensor::on_stop(void)
 {
-	if (!m_sensor_hal->disable())
-	{
+	if (!m_sensor_hal->disable()) {
 		ERR("m_sensor_hal stop fail\n");
 		return false;
 	}
@@ -120,7 +115,7 @@ bool temperature_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool temperature_sensor::get_properties(sensor_properties_t &properties)
+bool temperature_sensor::get_properties(sensor_properties_s &properties)
 {
 	return m_sensor_hal->get_properties(properties);
 }
@@ -134,8 +129,7 @@ int temperature_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 	if (ret < 0)
 		return -1;
 
-	if (type == TEMPERATURE_BASE_DATA_SET)
-	{
+	if (type == TEMPERATURE_BASE_DATA_SET) {
 		raw_to_base(data);
 		return 0;
 	}
@@ -154,27 +148,24 @@ bool temperature_sensor::set_interval(unsigned long interval)
 
 void temperature_sensor::raw_to_base(sensor_data_t &data)
 {
-	data.values_num = NO_OF_DATA_VAL;
+	data.values[0] = data.values[0] * m_resolution;
+	data.value_count = 1;
 }
 
-extern "C" void *create(void)
+extern "C" sensor_module* create(void)
 {
-	temperature_sensor *inst;
+	temperature_sensor *sensor;
 
-	try
-	{
-		inst = new temperature_sensor();
-	}
-	catch (int err)
-	{
-		ERR("temperature_sensor class create fail , errno : %d , errstr : %s\n", err, strerror(err));
+	try {
+		sensor = new(std::nothrow) temperature_sensor;
+	} catch (int err) {
+		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;
 	}
 
-	return (void*)inst;
-}
+	sensor_module *module = new(std::nothrow) sensor_module;
+	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
 
-extern "C" void destroy(void *inst)
-{
-	delete (temperature_sensor*)inst;;
+	module->sensors.push_back(sensor);
+	return module;
 }
