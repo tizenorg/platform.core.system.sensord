@@ -29,8 +29,8 @@ BuildRequires:  pkgconfig(capi-system-info)
 %define gravity_state ON
 %define linear_accel_state ON
 %define rv_state ON
-%define geomagnetic_rv_state OFF
-%define build_test_suite OFF
+%define geomagnetic_rv_state ON
+%define build_test_suite ON
 
 %description
 Sensor daemon
@@ -148,6 +148,7 @@ systemctl daemon-reload
 %{_bindir}/temperature
 %{_bindir}/light
 %{_bindir}/rotation_vector
+%{_bindir}/geomagnetic_rv
 %license LICENSE.APLv2
 %endif
 
