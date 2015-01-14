@@ -316,7 +316,8 @@ bool accel_sensor_hal::update_value_iio(bool wait)
 
 	AUTOLOCK(m_value_mutex);
 
-	m_x = *((short *)(data));
+	short *short_data = (short *)(data);
+	m_x = *(short_data);
 	m_y = *((short *)(data + 2));
 	m_z = *((short *)(data + 4));
 
