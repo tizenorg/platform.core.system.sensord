@@ -1,3 +1,3 @@
-IF("${RV}" STREQUAL "ON")
+IF("${RV_ENABLE}" STREQUAL "ON")
 add_subdirectory(rv)
 ENDIF()
