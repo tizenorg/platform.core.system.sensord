@@ -22,14 +22,16 @@
 
 #include "vector.h"
 
+#define QUAT_SIZE 4
+
 template <typename TYPE>
 class quaternion {
 public:
-	vect<TYPE> m_quat;
+	vect<TYPE, QUAT_SIZE> m_quat;
 
 	quaternion();
 	quaternion(const TYPE w, const TYPE x, const TYPE y, const TYPE z);
-	quaternion(const vect<TYPE> v);
+	quaternion(const vect<TYPE, QUAT_SIZE> v);
 	quaternion(const quaternion<TYPE>& q);
 	~quaternion();
 
