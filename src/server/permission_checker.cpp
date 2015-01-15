@@ -27,9 +27,9 @@
 #define SECURITY_LIB "/usr/lib/libsecurity-server-client.so.1"
 
 permission_checker::permission_checker()
-: m_permission_set(0)
-, security_server_check_privilege_by_sockfd(NULL)
+: security_server_check_privilege_by_sockfd(NULL)
 , m_security_handle(NULL)
+, m_permission_set(0)
 
 {
 	init();
