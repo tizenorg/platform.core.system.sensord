@@ -94,13 +94,15 @@ euler_angles<T> quat2euler(const quaternion<T> q)
 template <typename T>
 euler_angles<T> rad2deg(const euler_angles<T> e)
 {
-	return (e.m_ang * (T) RAD2DEG);
+	euler_angles<T> result(e.m_ang * (T) RAD2DEG);
+	return result;
 }
 
 template <typename T>
 euler_angles<T> deg2rad(const euler_angles<T> e)
 {
-	return (e.m_ang * (T) DEG2RAD);
+	euler_angles<T> result(e.m_ang * (T) DEG2RAD);
+	return result;
 }
 
 #endif  //_EULER_ANGLES_H_
