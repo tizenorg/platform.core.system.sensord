@@ -22,16 +22,18 @@
 
 #include "vector.h"
 
+#define SENSOR_DATA_SIZE 3
+
 template <typename TYPE>
 class sensor_data {
 public:
-	vect<TYPE> m_data;
+	vect<TYPE,SENSOR_DATA_SIZE> m_data;
 	unsigned long long m_time_stamp;
 
 	sensor_data();
 	sensor_data(const TYPE x, const TYPE y, const TYPE z,
 			const unsigned long long time_stamp);
-	sensor_data(const vect<TYPE> v,
+	sensor_data(const vect<TYPE,SENSOR_DATA_SIZE> v,
 			const unsigned long long time_stamp);
 	sensor_data(const sensor_data<TYPE>& s);
 	~sensor_data();
