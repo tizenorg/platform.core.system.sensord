@@ -77,7 +77,6 @@ log_element g_log_elements[] = {
 	FILL_LOG_ELEMENT(LOG_ID_DATA, ORIENTATION_BASE_DATA_SET, 0, 25),
 	FILL_LOG_ELEMENT(LOG_ID_DATA, PRESSURE_BASE_DATA_SET, 0, 25),
 	FILL_LOG_ELEMENT(LOG_ID_DATA, TEMPERATURE_BASE_DATA_SET, 0, 25),
-	FILL_LOG_ELEMENT(LOG_ID_DATA, ROTATION_VECTOR_BASE_DATA_SET, 0, 25),
 };
 
 typedef unordered_map<unsigned int, log_attr* > log_map;
@@ -198,8 +197,6 @@ unsigned int get_calibration_event_type(unsigned int event_type)
 	switch (sensor) {
 	case GEOMAGNETIC_SENSOR:
 		return GEOMAGNETIC_EVENT_CALIBRATION_NEEDED;
-	case ROTATION_VECTOR_SENSOR:
-		return ROTATION_VECTOR_EVENT_CALIBRATION_NEEDED;
 	case ORIENTATION_SENSOR:
 		return ORIENTATION_EVENT_CALIBRATION_NEEDED;
 	default:
