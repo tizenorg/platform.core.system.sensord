@@ -95,7 +95,9 @@ void quaternion<TYPE>::quat_normalize()
 template <typename T>
 quaternion<T> operator *(const quaternion<T> q, const T val)
 {
-	return (q.m_quat * val);
+	quaternion<T> res;
+	res = q.m_quat * val;
+	return (res);
 }
 
 template <typename T>
