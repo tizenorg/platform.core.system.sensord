@@ -44,14 +44,6 @@
 
 #define ABS(val) (((val) < 0) ? -(val) : (val))
 
-// M-matrix, V-vector, MxN=> matrix dimension, R-RowCount, C-Column count
-#define M3X3R	3
-#define M3X3C	3
-#define M6X6R	6
-#define M6X6C	6
-#define V1x3S	3
-#define V1x4S	4
-#define V1x6S	6
 
 template <typename TYPE>
 orientation_filter<TYPE>::orientation_filter()
@@ -60,10 +52,7 @@ orientation_filter<TYPE>::orientation_filter()
 
 	std::fill_n(arr, MOVING_AVERAGE_WINDOW_LENGTH, NON_ZERO_VAL);
 
-	vect<TYPE> vec(MOVING_AVERAGE_WINDOW_LENGTH, arr);
-	vect<TYPE> vec1x3(V1x3S);
-	vect<TYPE> vec1x6(V1x6S);
-	matrix<TYPE> mat6x6(M6X6R, M6X6C);
+	vect<TYPE, MOVING_AVERAGE_WINDOW_LENGTH> vec(arr);
 
 	m_var_gyr_x = vec;
 	m_var_gyr_y = vec;
@@ -71,17 +60,6 @@ orientation_filter<TYPE>::orientation_filter()
 	m_var_roll = vec;
 	m_var_pitch = vec;
 	m_var_azimuth = vec;
-
-	m_tran_mat = mat6x6;
-	m_measure_mat = mat6x6;
-	m_pred_cov = mat6x6;
-	m_driv_cov = mat6x6;
-	m_aid_cov = mat6x6;
-
-	m_bias_correction = vec1x3;
-	m_state_new = vec1x6;
-	m_state_old = vec1x6;
-	m_state_error = vec1x6;
 
 	m_pitch_phase_compensation = 1;
 	m_roll_phase_compensation = 1;
@@ -135,17 +113,17 @@ inline void orientation_filter<TYPE>::orientation_triad_algorithm()
 	TYPE arr_acc_e[V1x3S] = {0.0, 0.0, 1.0};
 	TYPE arr_mag_e[V1x3S] = {0.0, (TYPE) m_magnetic_alignment_factor, 0.0};
 
-	vect<TYPE> acc_e(V1x3S, arr_acc_e);
-	vect<TYPE> mag_e(V1x3S, arr_mag_e);
+	vect<TYPE, V1x3S> acc_e(arr_acc_e);
+	vect<TYPE, V1x3S> mag_e(arr_mag_e);
 
-	vect<TYPE> acc_b_x_mag_b = cross(m_accel.m_data, m_magnetic.m_data);
-	vect<TYPE> acc_e_x_mag_e = cross(acc_e, mag_e);
+	vect<TYPE, SENSOR_DATA_SIZE> acc_b_x_mag_b = cross(m_accel.m_data, m_magnetic.m_data);
+	vect<TYPE, V1x3S> acc_e_x_mag_e = cross(acc_e, mag_e);
 
-	vect<TYPE> cross1 = cross(acc_b_x_mag_b, m_accel.m_data);
-	vect<TYPE> cross2 = cross(acc_e_x_mag_e, acc_e);
+	vect<TYPE, SENSOR_DATA_SIZE> cross1 = cross(acc_b_x_mag_b, m_accel.m_data);
+	vect<TYPE, V1x3S> cross2 = cross(acc_e_x_mag_e, acc_e);
 
-	matrix<TYPE> mat_b(M3X3R, M3X3C);
-	matrix<TYPE> mat_e(M3X3R, M3X3C);
+	matrix<TYPE, M3X3R, M3X3C> mat_b;
+	matrix<TYPE, M3X3R, M3X3C> mat_e;
 
 	for(int i = 0; i < M3X3R; i++)
 	{
@@ -157,7 +135,7 @@ inline void orientation_filter<TYPE>::orientation_triad_algorithm()
 		mat_e.m_mat[i][2] = cross2.m_vec[i];
 	}
 
-	matrix<TYPE> mat_b_t = tran(mat_b);
+	matrix<TYPE, M3X3R, M3X3C> mat_b_t = tran(mat_b);
 	rotation_matrix<TYPE> rot_mat(mat_e * mat_b_t);
 
 	m_quat_aid = rot_mat2quat(rot_mat);
@@ -268,7 +246,7 @@ inline void orientation_filter<TYPE>::time_update()
 template <typename TYPE>
 inline void orientation_filter<TYPE>::measurement_update()
 {
-	matrix<TYPE> gain(M6X6R, M6X6C);
+	matrix<TYPE, M6X6R, M6X6C> gain;
 	TYPE iden = 0;
 
 	for (int j=0; j<M6X6C; ++j) {
@@ -293,7 +271,7 @@ inline void orientation_filter<TYPE>::measurement_update()
 	m_state_old = m_state_new;
 
 	TYPE arr_bias[V1x3S] = {m_state_new.m_vec[3], m_state_new.m_vec[4], m_state_new.m_vec[5]};
-	vect<TYPE> vec(V1x3S, arr_bias);
+	vect<TYPE, V1x3S> vec(arr_bias);
 
 	m_bias_correction = vec;
 }
