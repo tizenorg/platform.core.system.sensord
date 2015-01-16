@@ -20,12 +20,15 @@
 
 #include <math.h>
 
+#ifndef EULER_SIZE
 #define EULER_SIZE 3
+#endif
+
 #define RAD2DEG 57.2957795
 #define DEG2RAD 0.0174532925
 
 template <typename TYPE>
-euler_angles<TYPE>::euler_angles() : m_ang(EULER_SIZE)
+euler_angles<TYPE>::euler_angles() : m_ang()
 {
 }
 
@@ -34,12 +37,12 @@ euler_angles<TYPE>::euler_angles(const TYPE roll, const TYPE pitch, const TYPE a
 {
 	TYPE euler_data[EULER_SIZE] = {roll, pitch, azimuth};
 
-	vect<TYPE> v(EULER_SIZE, euler_data);
+	vect<TYPE,EULER_SIZE> v(euler_data);
 	m_ang = v;
 }
 
 template <typename TYPE>
-euler_angles<TYPE>::euler_angles(const vect<TYPE> v)
+euler_angles<TYPE>::euler_angles(const vect<TYPE,EULER_SIZE> v)
 {
 	m_ang = v;
 }

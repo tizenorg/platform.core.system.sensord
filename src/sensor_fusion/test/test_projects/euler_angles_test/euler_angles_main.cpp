@@ -17,7 +17,7 @@
  *
  */
 
-#include "../../../euler_angles.h"
+#include "euler_angles.h"
 
 int main()
 {
@@ -26,10 +26,10 @@ int main()
 	float arr2[4] = {0.6, 0.6, -.18, -.44};
 	float arr3[4] = {-0.5, -0.36, .43, .03};
 
-	vect<float> v0(3, arr0);
-	vect<float> v1(3, arr1);
-	vect<float> v2(4, arr2);
-	vect<float> v3(4, arr3);
+	vect<float,3> v0(arr0);
+	vect<float,3> v1(arr1);
+	vect<float,4> v2(arr2);
+	vect<float,4> v3(arr3);
 
 	quaternion<float> q1(v2);
 	quaternion<float> q2(v3);
