@@ -71,7 +71,8 @@ sensor_data<TYPE> sensor_data<TYPE>::operator =(const sensor_data<TYPE>& s)
 template <typename T>
 sensor_data<T> operator +(sensor_data<T> data1, sensor_data<T> data2)
 {
-	return (data1.m_data + data2.m_data);
+	sensor_data<T> result(data1.m_data + data2.m_data, data1.m_time_stamp);
+	return result;
 }
 
 template <typename T>
