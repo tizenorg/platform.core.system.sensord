@@ -20,8 +20,14 @@
 #if defined (_ROTATION_MATRIX_H_) && defined (_MATRIX_H_)
 
 #define QUAT_LEN 4
+
+#ifndef ROT_MAT_ROWS
 #define ROT_MAT_ROWS 3
+#endif
+
+#ifndef ROT_MAT_COLS
 #define ROT_MAT_COLS 3
+#endif
 
 template <typename T> T get_sign(T val)
 {
@@ -29,21 +35,21 @@ template <typename T> T get_sign(T val)
 }
 
 template <typename TYPE>
-rotation_matrix<TYPE>::rotation_matrix() : m_rot_mat(ROT_MAT_ROWS, ROT_MAT_COLS)
+rotation_matrix<TYPE>::rotation_matrix() : m_rot_mat()
 {
 
 }
 
 template <typename TYPE>
-rotation_matrix<TYPE>::rotation_matrix(const matrix<TYPE> m)
+rotation_matrix<TYPE>::rotation_matrix(const matrix<TYPE, ROT_MAT_ROWS, ROT_MAT_COLS> m)
 {
 	m_rot_mat = m;
 }
 
 template <typename TYPE>
-rotation_matrix<TYPE>::rotation_matrix(const int rows, const int cols, TYPE *mat_data)
+rotation_matrix<TYPE>::rotation_matrix(TYPE mat_data[ROT_MAT_ROWS][ROT_MAT_COLS])
 {
-	matrix<TYPE> m(rows, cols, mat_data);
+	matrix<TYPE, ROT_MAT_ROWS, ROT_MAT_COLS> m(mat_data);
 	m_rot_mat = m;
 }
 
@@ -88,7 +94,7 @@ rotation_matrix<T> quat2rot_mat(quaternion<T> q)
 	R[2][1] = 2 * ((y * z) - (w * x));
 	R[2][2] = (2 * w * w) - 1 + (2 * z * z);
 
-	rotation_matrix<T> rm(ROT_MAT_ROWS, ROT_MAT_COLS, &R[0][0]);
+	rotation_matrix<T> rm(R);
 
 	return rm;
 }

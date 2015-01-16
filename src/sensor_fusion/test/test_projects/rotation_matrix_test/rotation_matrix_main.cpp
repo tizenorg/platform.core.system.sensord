@@ -25,15 +25,15 @@ int main()
 	float arr2[3][3] = {{2.24, 0.5, 0.023}, {3.675, 5.32, 0.556}, {1.023, 45.75, 621.6}};
 	float arr3[3][3] = {{4.75, 0.65, 0.123}, {0.075, 5.302, 0.56}, {1.113, 0.475, 2.362}};
 
-	matrix<float> m1(3, 3, (float *) arr1);
-	matrix<float> m2(3, 3, (float *) arr2);
-	matrix<float> m3(3, 3, (float *) arr3);
+	matrix<float, 3, 3> m1(arr1);
+	matrix<float, 3, 3> m2(arr2);
+	matrix<float, 3, 3> m3(arr3);
 
 	rotation_matrix<float> rm0, rm5;
 	rotation_matrix<float> rm1(m1);
 	rotation_matrix<float> rm2(m2);
 	rotation_matrix<float> rm3(m3);
-	rotation_matrix<float> rm4(3, 3, (float *) arr1);
+	rotation_matrix<float> rm4(arr1);
 
 	quaternion<float> q0(-0.612372, 0.456436, 0.456436, 0.456436);
 	quaternion<float> q1;
