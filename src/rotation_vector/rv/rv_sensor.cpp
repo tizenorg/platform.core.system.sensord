@@ -387,7 +387,7 @@ bool rv_sensor::get_properties(sensor_properties_s &properties)
 {
 	properties.vendor = m_vendor;
 	properties.name = SENSOR_NAME;
-	properties.min_range = 0;
+	properties.min_range = -1;
 	properties.max_range = 1;
 	properties.resolution = 0.000001;
 	properties.fifo_count = 0;
