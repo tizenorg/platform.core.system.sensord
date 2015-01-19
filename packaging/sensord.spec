@@ -9,7 +9,6 @@ Source1:	sensord.manifest
 Source2:	libsensord.manifest
 
 BuildRequires:  cmake
-BuildRequires:  vconf-keys-devel
 BuildRequires:  libattr-devel
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(libxml-2.0)
