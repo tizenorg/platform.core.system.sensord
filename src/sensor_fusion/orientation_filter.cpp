@@ -221,6 +221,15 @@ inline void orientation_filter<TYPE>::time_update()
 
 	m_pred_cov = (m_tran_mat * m_pred_cov * tran(m_tran_mat)) + m_driv_cov;
 
+	for (int j=0; j<M6X6C; ++j) {
+		for (int i=0; i<M6X6R; ++i)	{
+			if (ABS(m_pred_cov.m_mat[i][j]) < NEGLIGIBLE_VAL)
+				m_pred_cov.m_mat[i][j] = NEGLIGIBLE_VAL;
+		}
+		if (ABS(m_state_new.m_vec[j]) < NEGLIGIBLE_VAL)
+			m_state_new.m_vec[j] = NEGLIGIBLE_VAL;
+	}
+
 	if(!is_initialized(m_quat_driv.m_quat))
 		m_quat_driv = m_quat_aid;
 
