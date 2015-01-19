@@ -282,11 +282,11 @@ inline void orientation_filter<TYPE>::measurement_update()
 			else
 				iden = 0;
 
-			m_pred_cov.m_mat[j][i] = (iden - (gain.m_mat[i][j] * m_measure_mat.m_mat[j][i])) *
-					m_pred_cov.m_mat[j][i];
+			m_pred_cov.m_mat[i][j] = (iden - (gain.m_mat[i][j] * m_measure_mat.m_mat[j][i])) *
+					m_pred_cov.m_mat[i][j];
 
-			if (ABS(m_pred_cov.m_mat[j][i]) < NEGLIGIBLE_VAL)
-				m_pred_cov.m_mat[j][i] = NEGLIGIBLE_VAL;
+			if (ABS(m_pred_cov.m_mat[i][j]) < NEGLIGIBLE_VAL)
+				m_pred_cov.m_mat[i][j] = NEGLIGIBLE_VAL;
 		}
 	}
 
