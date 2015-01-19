@@ -265,7 +265,7 @@ void geomagnetic_rv_sensor::synthesize(const sensor_event_t& event, vector<senso
 		}
 
 		rv_event.sensor_id = get_id();
-		rv_event.event_type = ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME;
+		rv_event.event_type = GEOMAGNETIC_RV_EVENT_RAW_DATA_REPORT_ON_TIME;
 		rv_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 		rv_event.data.timestamp = get_timestamp();
 		rv_event.data.value_count = 4;
