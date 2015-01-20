@@ -55,10 +55,6 @@ private:
 
 	unsigned int m_enable_orientation;
 
-	float m_x;
-	float m_y;
-	float m_z;
-	float m_w;
 	int m_accuracy;
 	unsigned long long m_time;
 	unsigned int m_interval;

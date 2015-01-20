@@ -53,9 +53,6 @@
 
 gravity_sensor::gravity_sensor()
 : m_orientation_sensor(NULL)
-, m_x(INITIAL_VALUE)
-, m_y(INITIAL_VALUE)
-, m_z(INITIAL_VALUE)
 , m_time(0)
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
@@ -187,6 +184,8 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
+		m_time = get_timestamp();
+
 		gravity_event.sensor_id = get_id();
 		gravity_event.event_type = GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME;
 		if ((roll >= (M_PI/2)-DEVIATION && roll <= (M_PI/2)+DEVIATION) ||
@@ -205,19 +204,10 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 			gravity_event.data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(roll) * cos(pitch);
 		}
 		gravity_event.data.value_count = 3;
-		gravity_event.data.timestamp = get_timestamp();
+		gravity_event.data.timestamp = m_time;
 		gravity_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 
 		push(gravity_event);
-
-		{
-			AUTOLOCK(m_value_mutex);
-
-			m_time = gravity_event.data.timestamp;
-			m_x = gravity_event.data.values[0];
-			m_y = gravity_event.data.values[1];
-			m_z = gravity_event.data.values[2];
-		}
 	}
 }
 

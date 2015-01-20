@@ -47,9 +47,6 @@ private:
 	sensor_data<float> m_accel;
 	sensor_data<float> m_gravity;
 
-	float m_x;
-	float m_y;
-	float m_z;
 	unsigned long long m_time;
 	unsigned int m_interval;
 

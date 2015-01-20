@@ -55,9 +55,6 @@ private:
 
 	unsigned int m_enable_orientation;
 
-	float m_roll;
-	float m_pitch;
-	float m_azimuth;
 	unsigned long long m_time;
 	unsigned int m_interval;
 
