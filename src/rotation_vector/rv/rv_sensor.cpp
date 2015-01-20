@@ -328,7 +328,7 @@ void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &
 	return;
 }
 
-int rv_sensor::get_sensor_data(unsigned int data_id, sensor_data_t &data)
+int rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
 {
 	sensor_data<float> accel;
 	sensor_data<float> gyro;
@@ -339,6 +339,9 @@ int rv_sensor::get_sensor_data(unsigned int data_id, sensor_data_t &data)
 	sensor_data_t magnetic_data;
 
 	quaternion<float> quaternion_orientation;
+
+	if (event_type != ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME)
+		return -1;
 
 	m_accel_sensor->get_sensor_data(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME, accel_data);
 	m_gyro_sensor->get_sensor_data(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME, gyro_data);
