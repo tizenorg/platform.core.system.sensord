@@ -38,7 +38,7 @@ public:
 	bool get_properties(sensor_properties_s &properties);
 	sensor_type_t get_type(void);
 
-	int get_sensor_data(const unsigned int data_id, sensor_data_t &data);
+	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
 
 private:
 	sensor_base *m_accel_sensor;
