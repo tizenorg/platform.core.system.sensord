@@ -78,9 +78,6 @@ orientation_sensor::orientation_sensor()
 : m_accel_sensor(NULL)
 , m_gyro_sensor(NULL)
 , m_magnetic_sensor(NULL)
-, m_roll(INITIAL_VALUE)
-, m_pitch(INITIAL_VALUE)
-, m_azimuth(INITIAL_VALUE)
 , m_time(0)
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
@@ -355,10 +352,12 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 			azimuth_offset = AZIMUTH_OFFSET_RADIANS;
 		}
 
+		m_time = get_timestamp();
+
 		orientation_event.sensor_id = get_id();
 		orientation_event.event_type = ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME;
 		orientation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
-		orientation_event.data.timestamp = get_timestamp();
+		orientation_event.data.timestamp = m_time;
 		orientation_event.data.value_count = 3;
 		orientation_event.data.values[1] = euler_orientation.m_ang.m_vec[0];
 		orientation_event.data.values[2] = euler_orientation.m_ang.m_vec[1];
@@ -366,14 +365,6 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 			orientation_event.data.values[0] = euler_orientation.m_ang.m_vec[2];
 		else
 			orientation_event.data.values[0] = euler_orientation.m_ang.m_vec[2] + azimuth_offset;
-
-		{
-			AUTOLOCK(m_value_mutex);
-			m_time = orientation_event.data.timestamp;
-			m_azimuth = orientation_event.data.values[0];
-			m_pitch = orientation_event.data.values[1];
-			m_roll = orientation_event.data.values[2];
-		}
 
 		push(orientation_event);
 	}

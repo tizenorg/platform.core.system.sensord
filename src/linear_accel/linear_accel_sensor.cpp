@@ -56,9 +56,6 @@
 linear_accel_sensor::linear_accel_sensor()
 : m_accel_sensor(NULL)
 , m_gravity_sensor(NULL)
-, m_x(INITIAL_VALUE)
-, m_y(INITIAL_VALUE)
-, m_z(INITIAL_VALUE)
 , m_time(0)
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
@@ -232,23 +229,16 @@ void linear_accel_sensor::synthesize(const sensor_event_t &event, vector<sensor_
 	if (m_enable_linear_accel == LINEAR_ACCEL_ENABLED) {
 		m_enable_linear_accel = 0;
 
+		m_time = get_timestamp();
 		lin_accel_event.sensor_id = get_id();
 		lin_accel_event.event_type = LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME;
 		lin_accel_event.data.value_count = 3;
-		lin_accel_event.data.timestamp = get_timestamp();
+		lin_accel_event.data.timestamp = m_time;
 		lin_accel_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 		lin_accel_event.data.values[0] = m_linear_accel_sign_compensation[0] * (m_accel.m_data.m_vec[0] - m_gravity.m_data.m_vec[0]);
 		lin_accel_event.data.values[1] = m_linear_accel_sign_compensation[1] * (m_accel.m_data.m_vec[1] - m_gravity.m_data.m_vec[1]);
 		lin_accel_event.data.values[2] = m_linear_accel_sign_compensation[2] * (m_accel.m_data.m_vec[2] - m_gravity.m_data.m_vec[2]);
 		push(lin_accel_event);
-
-		{
-			AUTOLOCK(m_value_mutex);
-			m_time = lin_accel_event.data.timestamp;
-			m_x = lin_accel_event.data.values[0];
-			m_y = lin_accel_event.data.values[1];
-			m_z = lin_accel_event.data.values[2];
-		}
 	}
 
 	return;

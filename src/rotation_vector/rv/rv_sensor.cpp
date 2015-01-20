@@ -70,10 +70,6 @@ rv_sensor::rv_sensor()
 : m_accel_sensor(NULL)
 , m_gyro_sensor(NULL)
 , m_magnetic_sensor(NULL)
-, m_x(-1)
-, m_y(-1)
-, m_z(-1)
-, m_w(-1)
 , m_accuracy(-1)
 , m_time(0)
 {
@@ -314,10 +310,12 @@ void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &
 			quaternion_orientation = m_orientation.get_9axis_quaternion(m_accel, m_gyro, m_magnetic);
 		}
 
+		m_time = get_timestamp();
+
 		rv_event.sensor_id = get_id();
 		rv_event.event_type = ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME;
 		rv_event.data.accuracy = SENSOR_ACCURACY_GOOD;
-		rv_event.data.timestamp = get_timestamp();
+		rv_event.data.timestamp = m_time;
 		rv_event.data.value_count = 4;
 		rv_event.data.values[0] = quaternion_orientation.m_quat.m_vec[1];
 		rv_event.data.values[1] = quaternion_orientation.m_quat.m_vec[2];
@@ -325,15 +323,6 @@ void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &
 		rv_event.data.values[3] = quaternion_orientation.m_quat.m_vec[0];
 
 		push(rv_event);
-
-		{
-			AUTOLOCK(m_value_mutex);
-			m_time = rv_event.data.value_count;
-			m_x = rv_event.data.values[0];
-			m_y = rv_event.data.values[1];
-			m_z = rv_event.data.values[2];
-			m_w = rv_event.data.values[3];
-		}
 	}
 
 	return;
