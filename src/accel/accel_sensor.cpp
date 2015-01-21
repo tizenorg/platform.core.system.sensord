@@ -173,6 +173,11 @@ bool accel_sensor::set_interval(unsigned long interval)
 	return m_sensor_hal->set_interval(interval);
 }
 
+unsigned long accel_sensor::get_interval()
+{
+	return m_interval;
+}
+
 void accel_sensor::raw_to_base(sensor_data_t &data)
 {
 	data.value_count = 3;
