@@ -65,10 +65,6 @@ void pre_process_data(sensor_data<float> &data_out, const float *data_in, float 
 geomagnetic_rv_sensor::geomagnetic_rv_sensor()
 : m_accel_sensor(NULL)
 , m_magnetic_sensor(NULL)
-, m_x(-1)
-, m_y(-1)
-, m_z(-1)
-, m_w(-1)
 , m_accuracy(-1)
 , m_time(0)
 {
@@ -264,10 +260,12 @@ void geomagnetic_rv_sensor::synthesize(const sensor_event_t& event, vector<senso
 			quaternion_geo_rv = m_orientation_filter.get_geomagnetic_quaternion(m_accel, m_magnetic);
 		}
 
+		m_time = get_timestamp();
+
 		rv_event.sensor_id = get_id();
 		rv_event.event_type = GEOMAGNETIC_RV_EVENT_RAW_DATA_REPORT_ON_TIME;
 		rv_event.data.accuracy = SENSOR_ACCURACY_GOOD;
-		rv_event.data.timestamp = get_timestamp();
+		rv_event.data.timestamp = m_time;
 		rv_event.data.value_count = 4;
 		rv_event.data.values[0] = quaternion_geo_rv.m_quat.m_vec[1];
 		rv_event.data.values[1] = quaternion_geo_rv.m_quat.m_vec[2];
@@ -275,21 +273,12 @@ void geomagnetic_rv_sensor::synthesize(const sensor_event_t& event, vector<senso
 		rv_event.data.values[3] = quaternion_geo_rv.m_quat.m_vec[0];
 
 		push(rv_event);
-
-		{
-			AUTOLOCK(m_value_mutex);
-			m_time = rv_event.data.value_count;
-			m_x = rv_event.data.values[0];
-			m_y = rv_event.data.values[1];
-			m_z = rv_event.data.values[2];
-			m_w = rv_event.data.values[3];
-		}
 	}
 
 	return;
 }
 
-int geomagnetic_rv_sensor::get_sensor_data(unsigned int data_id, sensor_data_t &data)
+int geomagnetic_rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
 {
 	sensor_data<float> accel;
 	sensor_data<float> magnetic;
@@ -298,6 +287,9 @@ int geomagnetic_rv_sensor::get_sensor_data(unsigned int data_id, sensor_data_t &
 	sensor_data_t magnetic_data;
 
 	quaternion<float> quaternion_geo_rv;
+
+	if (event_type != GEOMAGNETIC_RV_EVENT_RAW_DATA_REPORT_ON_TIME)
+		return -1;
 
 	m_accel_sensor->get_sensor_data(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME, accel_data);
 	m_magnetic_sensor->get_sensor_data(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME, magnetic_data);
