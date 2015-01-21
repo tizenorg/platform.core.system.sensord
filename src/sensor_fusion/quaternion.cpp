@@ -21,7 +21,9 @@
 
 #include <math.h>
 
+#ifndef QUAT_SIZE
 #define QUAT_SIZE 4
+#endif
 
 template <typename T> int sgn(T val) {
 	if (val >= 0)
@@ -38,7 +40,7 @@ template <typename T> T mag(T val) {
 }
 
 template <typename TYPE>
-quaternion<TYPE>::quaternion() : m_quat(QUAT_SIZE)
+quaternion<TYPE>::quaternion() : m_quat()
 {
 }
 
@@ -47,12 +49,12 @@ quaternion<TYPE>::quaternion(const TYPE w, const TYPE x, const TYPE y, const TYP
 {
 	TYPE vec_data[QUAT_SIZE] = {w, x, y, z};
 
-	vect<TYPE> v(QUAT_SIZE, vec_data);
+	vect<TYPE, QUAT_SIZE> v(vec_data);
 	m_quat = v;
 }
 
 template <typename TYPE>
-quaternion<TYPE>::quaternion(const vect<TYPE> v)
+quaternion<TYPE>::quaternion(const vect<TYPE, QUAT_SIZE> v)
 {
 	m_quat = v;
 }
