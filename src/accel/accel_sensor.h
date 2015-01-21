@@ -35,6 +35,7 @@ public:
 
 	static bool working(void *inst);
 	virtual bool set_interval(unsigned long interval);
+	virtual unsigned long get_interval();
 	virtual bool get_properties(sensor_properties_s &properties);
 	virtual int get_sensor_data(unsigned int type, sensor_data_t &data);
 private:
@@ -42,7 +43,6 @@ private:
 	cmutex m_value_mutex;
 
 	float m_raw_data_unit;
-
 	unsigned long m_interval;
 
 	virtual bool on_start(void);
