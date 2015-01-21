@@ -23,14 +23,16 @@
 #include "vector.h"
 #include "quaternion.h"
 
+#define EULER_SIZE 3
+
 template <typename TYPE>
 class euler_angles {
 public:
-	vect<TYPE> m_ang;
+	vect<TYPE,EULER_SIZE> m_ang;
 
 	euler_angles();
 	euler_angles(const TYPE roll, const TYPE pitch, const TYPE azimuth);
-	euler_angles(const vect<TYPE> v);
+	euler_angles(const vect<TYPE,EULER_SIZE> v);
 	euler_angles(const euler_angles<TYPE>& e);
 	~euler_angles();
 

@@ -27,27 +27,37 @@
 #include "euler_angles.h"
 #include "rotation_matrix.h"
 
+#define MOVING_AVERAGE_WINDOW_LENGTH	20
+
+#define M3X3R	3
+#define M3X3C	3
+#define M6X6R	6
+#define M6X6C	6
+#define V1x3S	3
+#define V1x4S	4
+#define V1x6S	6
+
 template <typename TYPE>
 class orientation_filter {
 public:
 	sensor_data<TYPE> m_accel;
 	sensor_data<TYPE> m_gyro;
 	sensor_data<TYPE> m_magnetic;
-	vect<TYPE> m_var_gyr_x;
-	vect<TYPE> m_var_gyr_y;
-	vect<TYPE> m_var_gyr_z;
-	vect<TYPE> m_var_roll;
-	vect<TYPE> m_var_pitch;
-	vect<TYPE> m_var_azimuth;
-	matrix<TYPE> m_driv_cov;
-	matrix<TYPE> m_aid_cov;
-	matrix<TYPE> m_tran_mat;
-	matrix<TYPE> m_measure_mat;
-	matrix<TYPE> m_pred_cov;
-	vect<TYPE> m_state_new;
-	vect<TYPE> m_state_old;
-	vect<TYPE> m_state_error;
-	vect<TYPE> m_bias_correction;
+	vect<TYPE, MOVING_AVERAGE_WINDOW_LENGTH> m_var_gyr_x;
+	vect<TYPE, MOVING_AVERAGE_WINDOW_LENGTH> m_var_gyr_y;
+	vect<TYPE, MOVING_AVERAGE_WINDOW_LENGTH> m_var_gyr_z;
+	vect<TYPE, MOVING_AVERAGE_WINDOW_LENGTH> m_var_roll;
+	vect<TYPE, MOVING_AVERAGE_WINDOW_LENGTH> m_var_pitch;
+	vect<TYPE, MOVING_AVERAGE_WINDOW_LENGTH> m_var_azimuth;
+	matrix<TYPE, M6X6R, M6X6C> m_driv_cov;
+	matrix<TYPE, M6X6R, M6X6C> m_aid_cov;
+	matrix<TYPE, M6X6R, M6X6C> m_tran_mat;
+	matrix<TYPE, M6X6R, M6X6C> m_measure_mat;
+	matrix<TYPE, M6X6R, M6X6C> m_pred_cov;
+	vect<TYPE, V1x6S> m_state_new;
+	vect<TYPE, V1x6S> m_state_old;
+	vect<TYPE, V1x6S> m_state_error;
+	vect<TYPE, V1x3S> m_bias_correction;
 	quaternion<TYPE> m_quat_aid;
 	quaternion<TYPE> m_quat_driv;
 	rotation_matrix<TYPE> m_rot_matrix;
