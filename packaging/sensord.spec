@@ -148,6 +148,7 @@ systemctl daemon-reload
 %{_bindir}/temperature
 %{_bindir}/light
 %{_bindir}/rotation_vector
+%{_bindir}/geomagnetic_rv
 %license LICENSE.APLv2
 %endif
 
