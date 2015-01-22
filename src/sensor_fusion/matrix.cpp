@@ -19,37 +19,32 @@
 
 #ifdef _MATRIX_H_
 
-template <typename TYPE, size_t ROW, size_t COL>
-matrix<TYPE, ROW, COL>::matrix(void)
+T_MDEF matrix<TYPE, ROW, COL>::matrix(void)
 {
 	for (int i = 0; i < ROW; i++)
 		for (int j = 0; j < COL; j++)
 			m_mat[i][j] = 0;
 }
 
-template <typename TYPE, size_t ROW, size_t COL>
-matrix<TYPE, ROW, COL>::matrix(const matrix<TYPE, ROW, COL>& m)
+T_MDEF matrix<TYPE, ROW, COL>::matrix(const matrix<TYPE, ROW, COL>& m)
 {
 	for (int p = 0; p < ROW; p++)
 		for (int q = 0; q < COL; q++)
 			m_mat[p][q] = m.m_mat[p][q];
 }
 
-template <typename TYPE, size_t ROW, size_t COL>
-matrix<TYPE, ROW, COL>::matrix(TYPE mat_data[ROW][COL])
+T_MDEF matrix<TYPE, ROW, COL>::matrix(TYPE mat_data[ROW][COL])
 {
 	for (int i = 0; i < ROW; i++)
 		for (int j = 0; j < COL; j++)
 			m_mat[i][j] = mat_data[i][j];
 }
 
-template <typename TYPE, size_t ROW, size_t COL>
-matrix<TYPE, ROW, COL>::~matrix()
+T_MDEF matrix<TYPE, ROW, COL>::~matrix()
 {
 }
 
-template <typename TYPE, size_t ROW, size_t COL>
-matrix<TYPE, ROW, COL> matrix<TYPE, ROW, COL>::operator =(const matrix<TYPE, ROW, COL>& m)
+T_MDEF matrix<TYPE, ROW, COL> matrix<TYPE, ROW, COL>::operator =(const matrix<TYPE, ROW, COL>& m)
 {
 	if (this == &m)
 	{
@@ -63,8 +58,7 @@ matrix<TYPE, ROW, COL> matrix<TYPE, ROW, COL>::operator =(const matrix<TYPE, ROW
 	return *this;
 }
 
-template <typename T, size_t R, size_t C>
-ostream& operator <<(ostream& dout, matrix<T, R, C>& m)
+T_MDEF1 ostream& operator <<(ostream& dout, matrix<T, R, C>& m)
 {
 	for (int i = 0; i < R; i++)
 	{
@@ -77,8 +71,7 @@ ostream& operator <<(ostream& dout, matrix<T, R, C>& m)
 	return dout;
 }
 
-template <typename T, size_t R, size_t C>
-matrix<T, R, C> operator +(const matrix<T, R, C> m1, const matrix<T, R, C> m2)
+T_MDEF1 matrix<T, R, C> operator +(const matrix<T, R, C> m1, const matrix<T, R, C> m2)
 {
 	matrix<T, R, C> m3;
 
@@ -89,8 +82,7 @@ matrix<T, R, C> operator +(const matrix<T, R, C> m1, const matrix<T, R, C> m2)
 	return m3;
 }
 
-template <typename T, size_t R, size_t C>
-matrix<T, R, C> operator +(const matrix<T, R, C> m, const T val)
+T_MDEF1 matrix<T, R, C> operator +(const matrix<T, R, C> m, const T val)
 {
 	matrix<T, R, C> m1;
 
@@ -101,8 +93,7 @@ matrix<T, R, C> operator +(const matrix<T, R, C> m, const T val)
 	return m1;
 }
 
-template <typename T, size_t R, size_t C>
-matrix<T, R, C> operator -(const matrix<T, R, C> m1, const matrix<T, R, C> m2)
+T_MDEF1 matrix<T, R, C> operator -(const matrix<T, R, C> m1, const matrix<T, R, C> m2)
 {
 	matrix<T, R, C> m3;
 
@@ -113,8 +104,7 @@ matrix<T, R, C> operator -(const matrix<T, R, C> m1, const matrix<T, R, C> m2)
 	return m3;
 }
 
-template <typename T, size_t R, size_t C>
-matrix<T, R, C> operator -(const matrix<T, R, C> m, const T val)
+T_MDEF1 matrix<T, R, C> operator -(const matrix<T, R, C> m, const T val)
 {
 	matrix<T, R, C> m1;
 
@@ -125,8 +115,7 @@ matrix<T, R, C> operator -(const matrix<T, R, C> m, const T val)
 	return m1;
 }
 
-template <typename T, size_t R, size_t C, size_t C2>
-matrix<T, R, C2> operator *(const matrix<T, R, C> m1, const matrix<T, C, C2> m2)
+T_MDEF2 matrix<T, R, C2> operator *(const matrix<T, R, C> m1, const matrix<T, C, C2> m2)
 {
 	matrix<T, R, C2> m3;
 
@@ -143,8 +132,7 @@ matrix<T, R, C2> operator *(const matrix<T, R, C> m1, const matrix<T, C, C2> m2)
 	return m3;
 }
 
-template <typename T, size_t R, size_t C>
-matrix<T, R, C> operator *(const matrix<T, R, C> m, const T val)
+T_MDEF1 matrix<T, R, C> operator *(const matrix<T, R, C> m, const T val)
 {
 	matrix<T, R, C> m1;
 
@@ -155,8 +143,7 @@ matrix<T, R, C> operator *(const matrix<T, R, C> m, const T val)
 	return m1;
 }
 
-template <typename T, size_t R, size_t C>
-matrix<T, R, C> operator /(const matrix<T, R, C> m1, const T val)
+T_MDEF1 matrix<T, R, C> operator /(const matrix<T, R, C> m1, const T val)
 {
 	matrix<T, R, C> m3;
 
@@ -167,8 +154,7 @@ matrix<T, R, C> operator /(const matrix<T, R, C> m1, const T val)
 	return m3;
 }
 
-template <typename T, size_t R1, size_t C1, size_t R2, size_t C2>
-bool operator ==(const matrix<T, R1, C1> m1, const matrix<T, R2, C2> m2)
+T_MDEF3 bool operator ==(const matrix<T, R1, C1> m1, const matrix<T, R2, C2> m2)
 {
 	if ((R1 == R2) && (C1 == C2))
 	{
@@ -183,14 +169,12 @@ bool operator ==(const matrix<T, R1, C1> m1, const matrix<T, R2, C2> m2)
 	return true;
 }
 
-template <typename T, size_t R1, size_t C1, size_t R2, size_t C2>
-bool operator !=(const matrix<T, R1, C1> m1, const matrix<T, R2, C2> m2)
+T_MDEF3 bool operator !=(const matrix<T, R1, C1> m1, const matrix<T, R2, C2> m2)
 {
 	return (!(m1 == m2));
 }
 
-template <typename T, size_t R, size_t C>
-matrix<T, R, C> tran(const matrix<T, R, C> m)
+T_MDEF1 matrix<T, R, C> tran(const matrix<T, R, C> m)
 {
 	matrix<T, R, C> m1;
 
@@ -202,8 +186,7 @@ matrix<T, R, C> tran(const matrix<T, R, C> m)
 }
 
 
-template <typename T, size_t R, size_t C>
-matrix<T, R, 1> mul(const matrix<T, R, C> m1, const matrix<T, C, 1> m2)
+T_MDEF1 matrix<T, R, 1> mul(const matrix<T, R, C> m1, const matrix<T, C, 1> m2)
 {
 	matrix<T, R, 1> m3;
 
