@@ -22,38 +22,32 @@
 #include <iostream>
 using namespace std;
 
-template <typename TYPE,size_t SIZE>
-vect<TYPE,SIZE>::vect(void)
+T_VDEF vect<TYPE, SIZE>::vect(void)
 {
-	for(size_t i=0;i<SIZE;i++)
+	for(int i=0;i<SIZE;i++)
 		m_vec[i] = 0;
 }
 
-template <typename TYPE,size_t SIZE>
-vect<TYPE,SIZE>::vect(TYPE vec_data[SIZE])
+T_VDEF vect<TYPE, SIZE>::vect(TYPE vec_data[SIZE])
 {
 
 	for (int j = 0; j < SIZE; j++)
 		m_vec[j] = vec_data[j];
 }
 
-template <typename TYPE,size_t SIZE>
-vect<TYPE,SIZE>::vect(const vect<TYPE,SIZE>& v)
+T_VDEF vect<TYPE, SIZE>::vect(const vect<TYPE, SIZE>& v)
 {
 	for (int q = 0; q < SIZE; q++)
 		m_vec[q] = v.m_vec[q];
 }
 
 
-template <typename TYPE,size_t SIZE>
-vect<TYPE,SIZE>::~vect()
+T_VDEF vect<TYPE, SIZE>::~vect()
 {
 }
 
-template <typename TYPE,size_t SIZE>
-vect<TYPE,SIZE> vect<TYPE,SIZE>::operator =(const vect<TYPE,SIZE>& v)
+T_VDEF vect<TYPE, SIZE> vect<TYPE, SIZE>::operator =(const vect<TYPE, SIZE>& v)
 {
-
 	if (this == &v)
 	{
 		return *this;
@@ -63,8 +57,7 @@ vect<TYPE,SIZE> vect<TYPE,SIZE>::operator =(const vect<TYPE,SIZE>& v)
 			return *this;
 }
 
-template <typename TYPE,size_t S>
-ostream& operator <<(ostream& dout, vect<TYPE,S>& v)
+T_VDEF1 ostream& operator <<(ostream& dout, vect<T, S>& v)
 {
 	for (int j = 0; j < S; j++)
 	{
@@ -76,10 +69,9 @@ ostream& operator <<(ostream& dout, vect<TYPE,S>& v)
 	return dout;
 }
 
-template <typename T,size_t S>
-vect<T,S> operator +(const vect<T,S> v1, const vect<T,S> v2)
+T_VDEF1 vect<T, S> operator +(const vect<T, S> v1, const vect<T, S> v2)
 {
-	vect<T,S> v3;
+	vect<T, S> v3;
 
 	for (int j = 0; j < S; j++)
 		v3.m_vec[j] = v1.m_vec[j] + v2.m_vec[j];
@@ -87,10 +79,9 @@ vect<T,S> operator +(const vect<T,S> v1, const vect<T,S> v2)
 	return v3;
 }
 
-template <typename T,size_t S>
-vect<T,S> operator +(const vect<T,S> v, const T val)
+T_VDEF1 vect<T, S> operator +(const vect<T, S> v, const T val)
 {
-	vect<T,S> v1;
+	vect<T, S> v1;
 
 	for (int j = 0; j < S; j++)
 		v1.m_vec[j] = v.m_vec[j] + val;
@@ -98,10 +89,9 @@ vect<T,S> operator +(const vect<T,S> v, const T val)
 	return v1;
 }
 
-template <typename T,size_t S>
-vect<T,S> operator -(const vect<T,S> v1, const vect<T,S> v2)
+T_VDEF1 vect<T, S> operator -(const vect<T, S> v1, const vect<T, S> v2)
 {
-	vect<T,S> v3;
+	vect<T, S> v3;
 
 	for (int j = 0; j < S; j++)
 		v3.m_vec[j] = v1.m_vec[j] - v2.m_vec[j];
@@ -109,10 +99,9 @@ vect<T,S> operator -(const vect<T,S> v1, const vect<T,S> v2)
 	return v3;
 }
 
-template <typename T,size_t S>
-vect<T,S> operator -(const vect<T,S> v, const T val)
+T_VDEF1 vect<T, S> operator -(const vect<T, S> v, const T val)
 {
-	vect<T,S> v1;
+	vect<T, S> v1;
 
 	for (int j = 0; j < S; j++)
 		v1.m_vec[j] = v.m_vec[j] - val;
@@ -120,8 +109,7 @@ vect<T,S> operator -(const vect<T,S> v, const T val)
 	return v1;
 }
 
-template <typename T,size_t S,size_t R,size_t C>
-matrix<T,R,S> operator *(const matrix<T,R,C> m, const vect<T,S> v)
+T_VDEF2 matrix<T, R, S> operator *(const matrix<T, R, C> m, const vect<T, S> v)
 {
 	assert(R == S);
 	assert(C == 1);
@@ -139,8 +127,7 @@ matrix<T,R,S> operator *(const matrix<T,R,C> m, const vect<T,S> v)
 	return m1;
 }
 
-template <typename T,size_t S,size_t R,size_t C>
-vect<T,S> operator *(const vect<T,S> v, const matrix<T,R,C> m)
+T_VDEF2 vect<T, S> operator *(const vect<T, S> v, const matrix<T, R, C> m)
 {
 	assert(R == S);
 	assert(C != 1);
@@ -154,10 +141,9 @@ vect<T,S> operator *(const vect<T,S> v, const matrix<T,R,C> m)
 	}
 }
 
-template <typename T,size_t S>
-vect<T,S> operator *(const vect<T,S> v, const T val)
+T_VDEF1 vect<T, S> operator *(const vect<T, S> v, const T val)
 {
-	vect<T,S> v1;
+	vect<T, S> v1;
 
 	for (int j = 0; j < S; j++)
 		v1.m_vec[j] = v.m_vec[j] * val;
@@ -165,10 +151,9 @@ vect<T,S> operator *(const vect<T,S> v, const T val)
 	return v1;
 }
 
-template <typename T,size_t S>
-vect<T,S> operator /(const vect<T,S> v, const T val)
+T_VDEF1 vect<T, S> operator /(const vect<T, S> v, const T val)
 {
-	vect<T,S> v1;
+	vect<T, S> v1;
 
 	for (int j = 0; j < S; j++)
 		v1.m_vec[j] = v.m_vec[j] / val;
@@ -176,8 +161,7 @@ vect<T,S> operator /(const vect<T,S> v, const T val)
 	return v1;
 }
 
-template <typename T,size_t S1,size_t S2>
-bool operator ==(const vect<T,S1> v1, const vect<T,S2> v2)
+T_VDEF3 bool operator ==(const vect<T, S1> v1, const vect<T, S2> v2)
 {
 	if (S1==S2)
 	{
@@ -191,16 +175,14 @@ bool operator ==(const vect<T,S1> v1, const vect<T,S2> v2)
 	return true;
 }
 
-template <typename T,size_t S>
-bool operator !=(const vect<T,S> v1, const vect<T,S> v2)
+T_VDEF3 bool operator !=(const vect<T, S1> v1, const vect<T, S2> v2)
 {
 	return (!(v1 == v2));
 }
 
-template <typename T,size_t S>
-matrix<T,S,1> transpose(const vect<T,S> v)
+T_VDEF1 matrix<T, S, 1> transpose(const vect<T, S> v)
 {
-	matrix<T,S,1> m;
+	matrix<T, S, 1> m;
 
 	for (int i = 0; i < S; i++)
 		m.m_mat[i][0] = v.m_vec[i];
@@ -208,10 +190,9 @@ matrix<T,S,1> transpose(const vect<T,S> v)
 	return m;
 }
 
-template <typename T,size_t R>
-vect<T,R> transpose(const matrix<T,R,1> m)
+T_VDEF4 vect<T, R> transpose(const matrix<T, R, 1> m)
 {
-	vect<T,R> v;
+	vect<T, R> v;
 
 	for (int i = 0; i < R; i++)
 		v.m_vec[i] = m.m_mat[i][0];
@@ -219,8 +200,7 @@ vect<T,R> transpose(const matrix<T,R,1> m)
 	return v;
 }
 
-template <typename T,size_t S,size_t R,size_t C>
-T mul(const vect<T,S> v, const matrix<T,R,C> m)
+T_VDEF2 T mul(const vect<T, S> v, const matrix<T, R, C> m)
 {
 	assert(R == S);
 	assert(C == 1);
@@ -234,8 +214,7 @@ T mul(const vect<T,S> v, const matrix<T,R,C> m)
 }
 
 
-template <typename T,size_t S>
-void insert_end(vect<T,S>& v, T val)
+T_VDEF1 void insert_end(vect<T, S>& v, T val)
 {
 	for (int i = 0; i < (S - 1); i++)
 		v.m_vec[i] = v.m_vec[i+1];
@@ -243,10 +222,9 @@ void insert_end(vect<T,S>& v, T val)
 	v.m_vec[S-1] = val;
 }
 
-template <typename T,size_t S>
-vect<T,S> cross(const vect<T,S> v1, const vect<T,S> v2)
+T_VDEF1 vect<T, S> cross(const vect<T, S> v1, const vect<T, S> v2)
 {
-	vect<T,S> v3;
+	vect<T, S> v3;
 
 	v3.m_vec[0] = ((v1.m_vec[1] * v2.m_vec[2]) - (v1.m_vec[2] * v2.m_vec[1]));
 	v3.m_vec[1] = ((v1.m_vec[2] * v2.m_vec[0]) - (v1.m_vec[0] * v2.m_vec[2]));
@@ -255,10 +233,9 @@ vect<T,S> cross(const vect<T,S> v1, const vect<T,S> v2)
 	return v3;
 }
 
-template <typename T,size_t S>
-bool is_initialized(const vect<T,S> v)
+T_VDEF1 bool is_initialized(const vect<T, S> v)
 {
-	vect<T,S> v1;
+	vect<T, S> v1;
 	bool retval;
 
 	retval = (v == v1) ? false : true;
@@ -266,8 +243,7 @@ bool is_initialized(const vect<T,S> v)
 	return retval;
 }
 
-template <typename T,size_t S>
-T var(const vect<T,S> v)
+T_VDEF1 T var(const vect<T, S> v)
 {
 	T val = 0;
 	T mean, var, diff;
