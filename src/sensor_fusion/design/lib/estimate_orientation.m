@@ -26,9 +26,14 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 
 	MAGNETIC_ALIGNMENT_FACTOR = -1;
 	GYRO_DATA_DISABLED = 0;
+	MAG_DATA_DISABLED = 0;
 
 	if Gyro_data(4,1) == 0
 		GYRO_DATA_DISABLED = 1;
+	end
+
+	if Mag_data(4,1) == 0
+		MAG_DATA_DISABLED = 1;
 	end
 
 	GRAVITY = 9.80665;
@@ -49,17 +54,21 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 	Az = Accel_data(3,:);
 	ATime = Accel_data(4,:);
 
-	Mx = Mag_data(1,:);
-	My = Mag_data(2,:);
-	Mz = Mag_data(3,:);
-	MTime = Mag_data(4,:);
+	mag_x = zeros(1,BUFFER_SIZE);
+	mag_y = zeros(1,BUFFER_SIZE);
+	mag_z = zeros(1,BUFFER_SIZE);
+	MTime = zeros(1,BUFFER_SIZE);
+
+	if MAG_DATA_DISABLED != 1
+		Mx = Mag_data(1,:);
+		My = Mag_data(2,:);
+		Mz = Mag_data(3,:);
+		MTime = Mag_data(4,:);
+	end
 
 	acc_x = zeros(1,BUFFER_SIZE);
 	acc_y = zeros(1,BUFFER_SIZE);
 	acc_z = zeros(1,BUFFER_SIZE);
-	mag_x = zeros(1,BUFFER_SIZE);
-	mag_y = zeros(1,BUFFER_SIZE);
-	mag_z = zeros(1,BUFFER_SIZE);
 
 	quat_aid = zeros(BUFFER_SIZE,4);
 	quat_driv = zeros(BUFFER_SIZE,4);
@@ -68,7 +77,7 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 	acc_e = [0.0;0.0;1.0]; % gravity vector in earth frame
 	mag_e = [0.0;MAGNETIC_ALIGNMENT_FACTOR;0.0]; % magnetic field vector in earth frame
 
-    if GYRO_DATA_DISABLED != 1
+	if GYRO_DATA_DISABLED != 1
 		% Gyroscope Bias Variables
 		Bx = 0; By = 0; Bz = 0;
 
@@ -122,11 +131,17 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 		acc_y(i) = norm_acc * Ay(i);
 		acc_z(i) = norm_acc * Az(i);
 
-		% normalize magnetometer measurements
-		norm_mag = 1/sqrt(Mx(i)^2 + My(i)^2 + Mz(i)^2);
-		mag_x(i) = norm_mag * Mx(i);
-		mag_y(i) = norm_mag * My(i);
-		mag_z(i) = norm_mag * Mz(i);
+		if MAG_DATA_DISABLED != 1
+			% normalize magnetometer measurements
+			norm_mag = 1/sqrt(Mx(i)^2 + My(i)^2 + Mz(i)^2);
+			mag_x(i) = norm_mag * Mx(i);
+			mag_y(i) = norm_mag * My(i);
+			mag_z(i) = norm_mag * Mz(i);
+		else
+			mag_x(i) = 2*quat_driv(1)*quat_driv(4) - 2*quat_driv(2)*quat_driv(3);
+			mag_y(i) = quat_driv(1)^2 - quat_driv(2)^2 + quat_driv(3)^2 - quat_driv(4)^2;
+			mag_z(i) = -2*quat_driv(1)*quat_driv(2) + 2*quat_driv(3)*quat_driv(4);
+		end
 
 		UA(i) = sqrt(acc_x(i)^2 + acc_y(i)^2 + acc_z(i)^2) - GRAVITY;
 
@@ -248,7 +263,7 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 	end
 
 	if PLOT_SCALED_SENSOR_COMPARISON_DATA == 1
-		% Accelerometer/Gyroscope/Magnetometer scaled Plot results
+		% Accelerometer/Gyroscope scaled Plot results
 		hfig=(figure);
 		scrsz = get(0,'ScreenSize');
 		set(hfig,'position',scrsz);
@@ -256,32 +271,65 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 		p1 = plot(1:BUFFER_SIZE,acc_x(1,1:BUFFER_SIZE),'r');
 		hold on;
 		grid on;
-		p2 = plot(1:BUFFER_SIZE,Gx(1,1:BUFFER_SIZE),'b');
-		hold on;
-		grid on;
-		p3 = plot(1:BUFFER_SIZE,mag_x(1,1:BUFFER_SIZE),'k');
-		title(['Accelerometer/Gyroscope/Magnetometer X-Axis Plot']);
-		legend([p1 p2 p3],'Acc_X', 'Gyr_X', 'Mag_X');
+		if GYRO_DATA_DISABLED != 1
+			p2 = plot(1:BUFFER_SIZE,Gx(1,1:BUFFER_SIZE),'b');
+			if MAG_DATA_DISABLED != 1
+				hold on;
+				grid on;
+				p3 = plot(1:BUFFER_SIZE,mag_x(1,1:BUFFER_SIZE),'k');
+				title(['Accelerometer/Gyroscope/Magnetometer X-Axis Plot']);
+				legend([p1 p2 p3],'Acc_X', 'Gyr_X', 'Mag_X');
+			else
+				title(['Accelerometer/Gyroscope X-Axis Plot']);
+				legend([p1 p2],'Acc_X', 'Gyr_X');
+			end
+		else
+			p2 = plot(1:BUFFER_SIZE,mag_x(1,1:BUFFER_SIZE),'k');
+			title(['Accelerometer/Magnetometer X-Axis Plot']);
+			legend([p1 p2],'Acc_X', 'Mag_X');
+		end
 		subplot(3,1,2)
 		p1 = plot(1:BUFFER_SIZE,acc_y(1,1:BUFFER_SIZE),'r');
 		hold on;
 		grid on;
-		p2 = plot(1:BUFFER_SIZE,Gy(1,1:BUFFER_SIZE),'b');
-		hold on;
-		grid on;
-		p3 = plot(1:BUFFER_SIZE,mag_y(1,1:BUFFER_SIZE),'k');
-		title(['Accelerometer/Gyroscope/Magnetometer Y-Axis Plot']);
-		legend([p1 p2 p3],'Acc_Y', 'Gyr_Y', 'Mag_Y');
+		if GYRO_DATA_DISABLED != 1
+			p2 = plot(1:BUFFER_SIZE,Gy(1,1:BUFFER_SIZE),'b');
+			if MAG_DATA_DISABLED != 1
+				hold on;
+				grid on;
+				p3 = plot(1:BUFFER_SIZE,mag_y(1,1:BUFFER_SIZE),'k');
+				title(['Accelerometer/Gyroscope/Magnetometer Y-Axis Plot']);
+				legend([p1 p2 p3],'Acc_Y', 'Gyr_Y', 'Mag_Y');
+			else
+				title(['Accelerometer/Gyroscope Y-Axis Plot']);
+				legend([p1 p2],'Acc_Y', 'Gyr_Y');
+			end
+		else
+			p2 = plot(1:BUFFER_SIZE,mag_y(1,1:BUFFER_SIZE),'k');
+			title(['Accelerometer/Magnetometer Y-Axis Plot']);
+			legend([p1 p2],'Acc_X', 'Mag_Y');
+		end
 		subplot(3,1,3)
 		p1 = plot(1:BUFFER_SIZE,acc_z(1,1:BUFFER_SIZE),'r');
 		hold on;
 		grid on;
-		p2 = plot(1:BUFFER_SIZE,Gz(1,1:BUFFER_SIZE),'b');
-		hold on;
-		grid on;
-		p3 = plot(1:BUFFER_SIZE,mag_z(1,1:BUFFER_SIZE),'k');
-		title(['Accelerometer/Gyroscope/Magnetometer Z-Axis Plot']);
-		legend([p1 p2 p3],'Acc_Z', 'Gyr_Z', 'Mag_Z');
+		if GYRO_DATA_DISABLED != 1
+			p2 = plot(1:BUFFER_SIZE,Gz(1,1:BUFFER_SIZE),'b');
+			if MAG_DATA_DISABLED != 1
+			hold on;
+			grid on;
+			p3 = plot(1:BUFFER_SIZE,mag_z(1,1:BUFFER_SIZE),'k');
+			title(['Accelerometer/Gyroscope/Magnetometer Z-Axis Plot']);
+			legend([p1 p2 p3],'Acc_Z', 'Gyr_Z', 'Mag_Z');
+			else
+				title(['Accelerometer/Gyroscope Z-Axis Plot']);
+				legend([p1 p2],'Acc_Z', 'Gyr_Z');
+			end
+		else
+			p2 = plot(1:BUFFER_SIZE,mag_z(1,1:BUFFER_SIZE),'k');
+			title(['Accelerometer/Magnetometer Z-Axis Plot']);
+			legend([p1 p2],'Acc_Z', 'Mag_Z');
+		end
 	end
 
 	if PLOT_INDIVIDUAL_SENSOR_INPUT_DATA == 1
@@ -311,56 +359,60 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 		title(['Accelerometer Z-Axis Plot']);
 		legend([p1 p2],'input signal','low-pass filtered signal');
 
-		% Gyroscope Raw (vs) filtered output
-		hfig=(figure);
-		scrsz = get(0,'ScreenSize');
-		set(hfig,'position',scrsz);
-		subplot(3,1,1)
-		p1 = plot(1:BUFFER_SIZE,Gx(1,1:BUFFER_SIZE),'r');
-		hold on;
-		grid on;
-		p2 = plot(1:BUFFER_SIZE,Gx(1,1:BUFFER_SIZE),'b');
-		title(['Gyroscope X-Axis Plot']);
-		legend([p1 p2],'input signal','low-pass filtered signal');
-		subplot(3,1,2)
-		p1 = plot(1:BUFFER_SIZE,Gy(1,1:BUFFER_SIZE),'r');
-		hold on;
-		grid on;
-		p2 = plot(1:BUFFER_SIZE,Gy(1,1:BUFFER_SIZE),'b');
-		title(['Gyroscope Y-Axis Plot']);
-		legend([p1 p2],'input signal','low-pass filtered signal');
-		subplot(3,1,3)
-		p1 = plot(1:BUFFER_SIZE,Gz(1,1:BUFFER_SIZE),'r');
-		hold on;
-		grid on;
-		p2 = plot(1:BUFFER_SIZE,Gz(1,1:BUFFER_SIZE),'b');
-		title(['Gyroscope Z-Axis Plot']);
-		legend([p1 p2],'input signal','low-pass filtered signal');
+		if GYRO_DATA_DISABLED != 1
+			% Gyroscope Raw (vs) filtered output
+			hfig=(figure);
+			scrsz = get(0,'ScreenSize');
+			set(hfig,'position',scrsz);
+			subplot(3,1,1)
+			p1 = plot(1:BUFFER_SIZE,Gx(1,1:BUFFER_SIZE),'r');
+			hold on;
+			grid on;
+			p2 = plot(1:BUFFER_SIZE,Gx(1,1:BUFFER_SIZE),'b');
+			title(['Gyroscope X-Axis Plot']);
+			legend([p1 p2],'input signal','low-pass filtered signal');
+			subplot(3,1,2)
+			p1 = plot(1:BUFFER_SIZE,Gy(1,1:BUFFER_SIZE),'r');
+			hold on;
+			grid on;
+			p2 = plot(1:BUFFER_SIZE,Gy(1,1:BUFFER_SIZE),'b');
+			title(['Gyroscope Y-Axis Plot']);
+			legend([p1 p2],'input signal','low-pass filtered signal');
+			subplot(3,1,3)
+			p1 = plot(1:BUFFER_SIZE,Gz(1,1:BUFFER_SIZE),'r');
+			hold on;
+			grid on;
+			p2 = plot(1:BUFFER_SIZE,Gz(1,1:BUFFER_SIZE),'b');
+			title(['Gyroscope Z-Axis Plot']);
+			legend([p1 p2],'input signal','low-pass filtered signal');
+		end
 
-		% Magnetometer Raw (vs) filtered output
-		hfig=(figure);
-		scrsz = get(0,'ScreenSize');
-		set(hfig,'position',scrsz);
-		subplot(3,1,1)
-		p1 = plot(1:BUFFER_SIZE,Mx(1,1:BUFFER_SIZE),'r');
-		hold on;
-		grid on;
-		p2 = plot(1:BUFFER_SIZE,Mx(1,1:BUFFER_SIZE),'b');
-		title(['Magnetometer X-Axis Plot']);
-		legend([p1 p2],'input signal','low-pass filtered signal');
-		subplot(3,1,2)
-		p1 = plot(1:BUFFER_SIZE,My(1,1:BUFFER_SIZE),'r');
-		hold on;
-		grid on;
-		p2 = plot(1:BUFFER_SIZE,My(1,1:BUFFER_SIZE),'b');
-		title(['Magnetometer Y-Axis Plot']);
-		legend([p1 p2],'input signal','low-pass filtered signal');
-		subplot(3,1,3)
-		p1 = plot(1:BUFFER_SIZE,Mz(1,1:BUFFER_SIZE),'r');
-		hold on;
-		grid on;
-		p2 = plot(1:BUFFER_SIZE,Mz(1,1:BUFFER_SIZE),'b');
-		title(['Magnetometer Z-Axis Plot']);
-		legend([p1 p2],'input signal','low-pass filtered signal');
+		if MAG_DATA_DISABLED != 1
+			% Magnetometer Raw (vs) filtered output
+			hfig=(figure);
+			scrsz = get(0,'ScreenSize');
+			set(hfig,'position',scrsz);
+			subplot(3,1,1)
+			p1 = plot(1:BUFFER_SIZE,Mx(1,1:BUFFER_SIZE),'r');
+			hold on;
+			grid on;
+			p2 = plot(1:BUFFER_SIZE,Mx(1,1:BUFFER_SIZE),'b');
+			title(['Magnetometer X-Axis Plot']);
+			legend([p1 p2],'input signal','low-pass filtered signal');
+			subplot(3,1,2)
+			p1 = plot(1:BUFFER_SIZE,My(1,1:BUFFER_SIZE),'r');
+			hold on;
+			grid on;
+			p2 = plot(1:BUFFER_SIZE,My(1,1:BUFFER_SIZE),'b');
+			title(['Magnetometer Y-Axis Plot']);
+			legend([p1 p2],'input signal','low-pass filtered signal');
+			subplot(3,1,3)
+			p1 = plot(1:BUFFER_SIZE,Mz(1,1:BUFFER_SIZE),'r');
+			hold on;
+			grid on;
+			p2 = plot(1:BUFFER_SIZE,Mz(1,1:BUFFER_SIZE),'b');
+			title(['Magnetometer Z-Axis Plot']);
+			legend([p1 p2],'input signal','low-pass filtered signal');
+		end
 	end
 end
