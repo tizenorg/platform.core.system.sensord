@@ -1,6 +1,6 @@
-% estimate_gravity
+% estimate_geomagnetic_rv
 %
-% Copyright (c) 2014 Samsung Electronics Co., Ltd.
+% Copyright (c) 2015 Samsung Electronics Co., Ltd.
 %
 % Licensed under the Apache License, Version 2.0 (the "License");
 % you may not use this file except in compliance with the License.
@@ -14,23 +14,16 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 
-% Gravitational Force Estimation function
+% Geomagnetic Rotation Vector Estimation function
 %
+% - Input orientation using only Accel and Geomagnetic sensors
 % - Orientation Estimation using estimate_orientation function
-% - Project the orientation on the device reference axes to obtain
-%   gravitational force on specific reference axes
-
+% - Output aiding system quaternion as geomagnetic rotation vector
 
 function [Quat_aid]  = estimate_geomagnetic_rv(Accel_data, Mag_data)
 
-GRAVITY = 9.80665;
-RAD2DEG = 57.2957795;
-
 BUFFER_SIZE = size(Accel_data,2);
 
-Gravity = zeros(3,BUFFER_SIZE);
-
-OR_driv = zeros(3,BUFFER_SIZE);
 Gyro_data = zeros(4,BUFFER_SIZE);
 
 Quat_driv = zeros(4,BUFFER_SIZE);
