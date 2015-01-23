@@ -140,7 +140,7 @@ enum sensor_accuracy_t {
 /*
  *	To prevent naming confliction as using same enums as sensor CAPI use
  */
-#ifndef __SENSORS_H__
+#ifndef __SENSOR_H__
 enum sensor_option_t {
 	SENSOR_OPTION_DEFAULT = 0,
 	SENSOR_OPTION_ON_IN_SCREEN_OFF = 1,
