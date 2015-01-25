@@ -75,16 +75,19 @@ hfig=(figure);
 scrsz = get(0,'ScreenSize');
 set(hfig,'position',scrsz);
 % Geomagnetic Rotation Vector Plot Results
+subplot(3,1,1)
 UA = Orientation_RV(1,:);
 p1 = plot(1:length(UA),UA(1,1:length(UA)),'k');
-hold on;
-grid on;
+legend(p1,'x-axis');
+title(['Pitch']);
+subplot(3,1,2)
 UA = Orientation_RV(2,:);
-p2 = plot(1:length(UA),UA(1,1:length(UA)),'b');
-hold on;
-grid on;
+p1 = plot(1:length(UA),UA(1,1:length(UA)),'b');
+legend(p1,'y-axis');
+title(['Roll']);
+subplot(3,1,3)
 UA = Orientation_RV(3,:);
-p3 = plot(1:length(UA),UA(1,1:length(UA)),'r');
-title(['Geomagnetic Rotation Vector']);
-legend([p1 p2 p3],'x-axis', 'y-axis', 'z-axis');
+p1 = plot(1:length(UA),UA(1,1:length(UA)),'r');
+legend(p1,'z-axis');
+title(['Yaw']);
 
