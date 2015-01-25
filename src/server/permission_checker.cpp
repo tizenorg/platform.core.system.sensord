@@ -78,7 +78,7 @@ void permission_checker::init()
 	vector<sensor_base *> sensors;
 	sensors = sensor_plugin_loader::get_instance().get_sensors(ALL_SENSOR);
 
-	for (int i = 0; i < sensors.size(); ++i)
+	for (unsigned int i = 0; i < sensors.size(); ++i)
 		m_permission_set |= sensors[i]->get_permission();
 
 	INFO("Permission Set = %d", m_permission_set);
@@ -91,7 +91,7 @@ int permission_checker::get_permission(int sock_fd)
 {
 	int permission = SENSOR_PERMISSION_NONE;
 
-	for (int i = 0; i < m_permission_infos.size(); ++i) {
+	for (unsigned int i = 0; i < m_permission_infos.size(); ++i) {
 		if (!m_permission_infos[i]->need_to_check) {
 			permission |= m_permission_infos[i]->permission;
 		} else if ((m_permission_set & m_permission_infos[i]->permission) && security_server_check_privilege_by_sockfd) {
