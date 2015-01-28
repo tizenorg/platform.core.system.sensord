@@ -115,9 +115,6 @@ int main()
 	vect<float,3> v102 = (v22 * m12);
 	cout<< "\n" << v22 << "\n" << m12;
 	cout<< "\nProduct:\n" << v102 << endl;
-	float val = mul(v22, m32);
-	cout<< "\n" << v22 << "\n" << m32;
-	cout<< "\nProduct:\n" << val << endl;
 
 	float z = 3.50;
 	float z1 = -5.567;

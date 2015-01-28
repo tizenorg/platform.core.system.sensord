@@ -50,7 +50,6 @@ public:
 	T_VDEF3 friend bool operator ==(const vect<T, S1> v1, const vect<T, S2> v2);
 	T_VDEF3 friend bool operator !=(const vect<T, S1> v1, const vect<T, S2> v2);
 
-	T_VDEF2 friend T mul(const vect<T, S> v, const matrix<T, R, C> m);
 	T_VDEF1 friend void insert_end(vect<T, S>& v, T val);
 	T_VDEF1 friend matrix<T, S, 1> transpose(const vect<T, S> v);
 	T_VDEF4 friend vect<T, R> transpose(const matrix<T, R, 1> m);
