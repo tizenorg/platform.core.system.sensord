@@ -51,7 +51,6 @@ public:
 	T_MDEF3 friend bool operator ==(const matrix<T, R1, C1> m1, const matrix<T, R2, C2> m2);
 	T_MDEF3 friend bool operator !=(const matrix<T, R1, C1> m1, const matrix<T, R2, C2> m2);
 	T_MDEF1 friend matrix<T, R, C> tran(const matrix<T, R, C> m);
-	T_MDEF1 friend matrix<T, R, 1> mul(const matrix<T, R, C> m1, const matrix<T, R, C> m2);
 };
 
 #include "matrix.cpp"
