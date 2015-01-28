@@ -30,9 +30,11 @@
 #include <string>
 #include <utility>
 #include <permission_checker.h>
+#include <set>
 
 using std::string;
 using std::make_pair;
+using std::set;
 
 command_worker::cmd_handler_t command_worker::m_cmd_handlers[];
 sensor_raw_data_map command_worker::m_sensor_raw_data_map;
