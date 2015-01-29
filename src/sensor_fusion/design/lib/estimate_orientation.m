@@ -1,6 +1,6 @@
 % estimate_orientation
 %
-% Copyright (c) 2014 Samsung Electronics Co., Ltd.
+% Copyright (c) 2015 Samsung Electronics Co., Ltd.
 %
 % Licensed under the Apache License, Version 2.0 (the "License");
 % you may not use this file except in compliance with the License.
@@ -75,6 +75,7 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 
 	quat_aid = zeros(BUFFER_SIZE,4);
 	quat_driv = zeros(BUFFER_SIZE,4);
+	quat_gaming_rv = zeros(BUFFER_SIZE,4);
 	quat_error = zeros(BUFFER_SIZE,4);
 
 	acc_e = [0.0;0.0;1.0]; % gravity vector in earth frame
@@ -136,33 +137,32 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 		acc_y(i) = norm_acc * Ay(i);
 		acc_z(i) = norm_acc * Az(i);
 
+		% gravity vector in body frame
+		acc_b =[acc_x(i);acc_y(i);acc_z(i)];
+
 		if MAG_DATA_DISABLED != 1
 			% normalize magnetometer measurements
 			norm_mag = 1/sqrt(Mx(i)^2 + My(i)^2 + Mz(i)^2);
 			mag_x(i) = norm_mag * Mx(i);
 			mag_y(i) = norm_mag * My(i);
 			mag_z(i) = norm_mag * Mz(i);
+
+			% Aiding System (Accelerometer + Geomagnetic) quaternion generation
+			% magnetic field vector in body frame
+			mag_b =[mag_x(i);mag_y(i);mag_z(i)];
+
+			% compute measurement quaternion with TRIAD algorithm
+			acc_b_x_mag_b = cross(acc_b,mag_b);
+			acc_e_x_mag_e = cross(acc_e,mag_e);
+			M_b = [acc_b acc_b_x_mag_b cross(acc_b_x_mag_b,acc_b)];
+			M_e = [acc_e acc_e_x_mag_e cross(acc_e_x_mag_e,acc_e)];
+			Rot_m = M_e * M_b';
+			quat_aid(i,:) = rot_mat2quat(Rot_m);
 		else
-			mag_x(i) = 2*quat_driv(1)*quat_driv(4) - 2*quat_driv(2)*quat_driv(3);
-			mag_y(i) = quat_driv(1)^2 - quat_driv(2)^2 + quat_driv(3)^2 - quat_driv(4)^2;
-			mag_z(i) = -2*quat_driv(1)*quat_driv(2) + 2*quat_driv(3)*quat_driv(4);
+			axis = cross(acc_b, acc_e);
+			angle = acos(dot(acc_b, acc_e));
+			quat_aid(i,:) = axis_rot2quat(axis, angle);
 		end
-
-		UA(i) = sqrt(acc_x(i)^2 + acc_y(i)^2 + acc_z(i)^2) - GRAVITY;
-
-		% Aiding System (Accelerometer + Geomagnetic) quaternion generation
-		% gravity vector in body frame
-		acc_b =[acc_x(i);acc_y(i);acc_z(i)];
-		% magnetic field vector in body frame
-		mag_b =[mag_x(i);mag_y(i);mag_z(i)];
-
-		% compute measurement quaternion with TRIAD algorithm
-		acc_b_x_mag_b = cross(acc_b,mag_b);
-		acc_e_x_mag_e = cross(acc_e,mag_e);
-		M_b = [acc_b acc_b_x_mag_b cross(acc_b_x_mag_b,acc_b)];
-		M_e = [acc_e acc_e_x_mag_e cross(acc_e_x_mag_e,acc_e)];
-		Rot_m = M_e * M_b';
-		quat_aid(i,:) = rot_mat2quat(Rot_m);
 
 		if GYRO_DATA_DISABLED != 1
 			gyr_x(i) = Gx(i) * PI;
@@ -243,8 +243,16 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 			x2 = euler_e(2)'/PI;
 			x3 = euler_e(3)'/PI;
 
-			q = quat_prod(quat_driv(i,:), [1 x1 x2 x3]) * PI;
-			q = q / norm(q);
+			if MAG_DATA_DISABLED != 1
+				q = quat_prod(quat_driv(i,:), [1 x1 x2 x3]) * PI;
+				q = q / norm(q);
+			else
+				euler_aid = quat2euler(quat_aid(i,:));
+				euler_driv = quat2euler(quat_driv(i,:));
+
+				euler_gaming_rv = [euler_aid(2) euler_aid(1) euler_driv(3)];
+				quat_gaming_rv(i,:) = euler2quat(euler_gaming_rv);
+			end
 
 			if i > 1
 				e = [x1 x2 x3 x(4,i) x(5,i) x(6,i)];
@@ -263,6 +271,10 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 			By = x(5,i);
 			Bz = x(6,i);
 		end
+	end
+
+	if MAG_DATA_DISABLED == 1
+		quat_driv = quat_gaming_rv;
 	end
 
 	if PLOT_SCALED_SENSOR_COMPARISON_DATA == 1
