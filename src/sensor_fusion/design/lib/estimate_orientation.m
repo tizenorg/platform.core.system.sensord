@@ -16,7 +16,10 @@
 
 % Orientation Estimation function
 %
-% - Orientation Estimation using Gyroscope as the driving system and Accelerometer+Geo-Magnetic Sensors as Aiding System.
+% - Orientation and rotation vector Estimation using Gyroscope as the driving system and 
+%   Accelerometer+Geo-Magnetic Sensors as Aiding System.
+% - Gaming rotation vector Estimation using Accelerometer and Gyroscope sensors.
+% - Geomagnetic rotation vector Estimation using Accelerometer and Geomagnetic sensors.
 % - Quaternion based approach
 % - Estimation and correction of orientation errors and bias errors for gyroscope using Kalman filter
 
@@ -123,6 +126,8 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 		quat_driv(1,:) = [1 0 0 0];
 	end
 
+	q = [1 0 0 0];
+
 	% first order filtering
 	for i = 1:BUFFER_SIZE
 		% normalize accelerometer measurements
@@ -210,9 +215,7 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 				q = quat_aid(i,:);
 			end
 
-			q_t = [q(2) q(3) q(4)]';
-			Rtan = (q(1)^2 - q_t'*q_t)*eye(3) + 2*q_t*q_t' - 2*q(1)*[0 -q(4) q(3);q(4) 0 -q(2);-q(3) q(2) 0];
-			F = [[0 gyr_z(i) -gyr_y(i);-gyr_z(i) 0 gyr_x(i);gyr_y(i) -gyr_x(i) 0] Rtan; zeros(3,3) (-(1/TauW) * eye(3))];
+			F = [[0 gyr_z(i) -gyr_y(i);-gyr_z(i) 0 gyr_x(i);gyr_y(i) -gyr_x(i) 0] zeros(3,3); zeros(3,3) (-(1/TauW) * eye(3))];
 
 			% Time Update
 			if i > 1
