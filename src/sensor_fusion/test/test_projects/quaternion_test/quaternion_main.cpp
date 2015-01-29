@@ -23,6 +23,12 @@ int main()
 {
 	float arr0[4] = {2344.98, 345.24, 456.12, 98.33};
 	float arr1[4] = {0.056, 0.34, -0.0076, 0.001};
+	float axis1[3] = {6.5, 7.5, 8.3};
+	float ang1 = 8.4;
+	float axis2[3] = {16.5, 17.5, 18.3};
+	float ang2 = 10.4;
+	float axis3[3] = {4.5, 7.5, 9.3};
+	float ang3 = 11.5;
 
 	vect<float, 4> v0(arr0);
 	vect<float, 4> v1(arr1);
@@ -63,5 +69,19 @@ int main()
 	cout << "input\t" << q1.m_quat << "\n";
 	q1.quat_normalize();
 	cout << "output\t" << q1.m_quat << "\n\n";
+
+	cout << "Axis2quat\n";
+	cout << "input\t" << " " << axis1[0]  << " " << axis1[1] <<" " << axis1[2] << " " << ang1 << endl;
+	cout << endl;
+	quaternion<float> q11 = axis2quat(axis1,ang1);
+	cout << "output\t" << q11.m_quat << "\n\n";
+	cout << "input\t" << " " << axis2[0]  << " " << axis2[1] <<" " << axis2[2] << " " << ang2 << endl;
+	cout << endl;
+	quaternion<float> q21 = axis2quat(axis2,ang2);
+	cout << "output\t" << q21.m_quat << "\n\n";
+	cout << "input\t" << " " << axis3[0]  << " " << axis3[1] <<" " << axis3[2] << " " << ang3 << endl;
+	cout << endl;
+	quaternion<float> q31 = axis2quat(axis3,ang3);
+	cout << "output\t" << q31.m_quat << "\n\n";
 }
 
