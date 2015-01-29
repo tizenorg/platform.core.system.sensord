@@ -89,8 +89,15 @@ make %{?jobs:-j%jobs}
 rm -rf %{buildroot}
 %make_install
 
-%install_service multi-user.target.wants sensord.service
-%install_service sockets.target.wants sensord.socket
+#%install_service multi-user.target.wants sensord.service
+#%install_service sockets.target.wants sensord.socket
+
+mkdir -p %{buildroot}/%{_unitdir}/multi-user.target.wants
+ln -s ../sensord.service %{buildroot}/%{_unitdir}/multi-user.target.wants/sensord.service
+
+mkdir -p %{buildroot}/%{_unitdir}/sockets.target.wants
+ln -s ../sensord.socket %{buildroot}/%{_unitdir}/sockets.target.wants/sensord.socket
+
 
 %post
 systemctl daemon-reload
@@ -112,7 +119,7 @@ systemctl daemon-reload
 %{_unitdir}/sensord.socket
 %{_unitdir}/multi-user.target.wants/sensord.service
 %{_unitdir}/sockets.target.wants/sensord.socket
-%license LICENSE.APLv2
+#%license LICENSE.APLv2
 
 %files -n libsensord
 %defattr(-,root,root,-)
@@ -121,7 +128,7 @@ systemctl daemon-reload
 %{_libdir}/sensord/*.so*
 %{_libdir}/libsensord-share.so
 %{_libdir}/libsensord-server.so
-%license LICENSE.APLv2
+#%license LICENSE.APLv2
 
 %files -n libsensord-devel
 %defattr(-,root,root,-)
@@ -131,6 +138,7 @@ systemctl daemon-reload
 %{_libdir}/pkgconfig/sensor.pc
 %{_libdir}/pkgconfig/sf_common.pc
 %{_libdir}/pkgconfig/sensord-server.pc
+#%license LICENSE.APLv2
 
 %if %{build_test_suite} == "ON"
 %files -n sensor-test
@@ -146,6 +154,6 @@ systemctl daemon-reload
 %{_bindir}/temperature
 %{_bindir}/light
 %{_bindir}/rotation_vector
-%license LICENSE.APLv2
+#%license LICENSE.APLv2
 %endif
 
