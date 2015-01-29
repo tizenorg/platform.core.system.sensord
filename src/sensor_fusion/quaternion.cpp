@@ -21,7 +21,9 @@
 
 #include <math.h>
 
+#ifndef QUAT_SIZE
 #define QUAT_SIZE 4
+#endif
 
 template <typename T> int sgn(T val) {
 	if (val >= 0)
@@ -38,7 +40,7 @@ template <typename T> T mag(T val) {
 }
 
 template <typename TYPE>
-quaternion<TYPE>::quaternion() : m_quat(QUAT_SIZE)
+quaternion<TYPE>::quaternion() : m_quat()
 {
 }
 
@@ -47,12 +49,12 @@ quaternion<TYPE>::quaternion(const TYPE w, const TYPE x, const TYPE y, const TYP
 {
 	TYPE vec_data[QUAT_SIZE] = {w, x, y, z};
 
-	vect<TYPE> v(QUAT_SIZE, vec_data);
+	vect<TYPE, QUAT_SIZE> v(vec_data);
 	m_quat = v;
 }
 
 template <typename TYPE>
-quaternion<TYPE>::quaternion(const vect<TYPE> v)
+quaternion<TYPE>::quaternion(const vect<TYPE, QUAT_SIZE> v)
 {
 	m_quat = v;
 }
@@ -95,9 +97,7 @@ void quaternion<TYPE>::quat_normalize()
 template <typename T>
 quaternion<T> operator *(const quaternion<T> q, const T val)
 {
-	quaternion<T> res;
-	res = q.m_quat * val;
-	return (res);
+	return (q.m_quat * val);
 }
 
 template <typename T>
@@ -142,6 +142,20 @@ quaternion<T> phase_correction(const quaternion<T> q1, const quaternion<T> q2)
 	x = mag(q1.m_quat.m_vec[1]) * sgn(q2.m_quat.m_vec[1]);
 	y = mag(q1.m_quat.m_vec[2]) * sgn(q2.m_quat.m_vec[2]);
 	z = mag(q1.m_quat.m_vec[3]) * sgn(q2.m_quat.m_vec[3]);
+
+	quaternion<T> q(w, x, y, z);
+
+	return q;
+}
+
+template<typename T>
+quaternion<T> axis2quat(const T axis[], const T angle)
+{
+	T w,x,y,z;	
+	w = cos(angle/2);
+	x = -axis[0]*sin(angle/2);
+	y = -axis[1]*sin(angle/2);
+	z = -axis[2]*sin(angle/2);
 
 	quaternion<T> q(w, x, y, z);
 
