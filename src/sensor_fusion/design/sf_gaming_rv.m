@@ -60,7 +60,7 @@ Gyro_data(2,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/gyro.txt")(:,
 Gyro_data(3,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/gyro.txt")(:,3))') - Bias_Gz)(1:BUFFER_SIZE);
 Gyro_data(4,:) = ((dlmread("data/100ms/orientation/roll_pitch_yaw/gyro.txt")(:,4))')(1:BUFFER_SIZE);
 
-scale_Gyro = 575 * 2;
+scale_Gyro = 575;
 Gyro_data(1,:) = Gyro_data(1,:)/scale_Gyro;
 Gyro_data(2,:) = Gyro_data(2,:)/scale_Gyro;
 Gyro_data(3,:) = Gyro_data(3,:)/scale_Gyro;
