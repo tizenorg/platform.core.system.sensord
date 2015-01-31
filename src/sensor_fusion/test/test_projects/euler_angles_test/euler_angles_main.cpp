@@ -60,6 +60,11 @@ int main()
 	cout << "input\t" << q2.m_quat << "\n";
 	cout << "output\t" << e8.m_ang << "\n\n";
 
+	cout << "Euler to Quaternion\n";
+	quaternion<float> q3 = euler2quat(e8);
+	cout << "input\t" << e8.m_ang << "\n";
+	cout << "output\t" << q3.m_quat << "\n\n";
+
 	cout << "Radians to Degrees\n";
 	euler_angles<float> e6 = deg2rad(e0);
 	cout << "input\t" << e0.m_ang << "\n";
