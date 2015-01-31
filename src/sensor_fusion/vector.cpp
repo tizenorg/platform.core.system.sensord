@@ -200,20 +200,6 @@ T_VDEF4 vect<T, R> transpose(const matrix<T, R, 1> m)
 	return v;
 }
 
-T_VDEF2 T mul(const vect<T, S> v, const matrix<T, R, C> m)
-{
-	assert(R == S);
-	assert(C == 1);
-
-	T result = (T) 0;
-
-	for (int k = 0; k < S; k++)
-		result += v.m_vec[k] * m.m_mat[k][0];
-
-	return result;
-}
-
-
 T_VDEF1 void insert_end(vect<T, S>& v, T val)
 {
 	for (int i = 0; i < (S - 1); i++)
