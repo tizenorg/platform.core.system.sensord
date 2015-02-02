@@ -74,7 +74,7 @@ int main()
 	cout<< "\n" << m20 << "\n" << m21;
 	cout<< "\nProduct:\n" << m7 << endl;
 	cout<< "\n" << m9 << "\n" << m21;
-	m21 = mul(m9, m21);
+	m21 = m9 * m21;
 	cout<< "\nProduct:\n" << m21 << endl;
 
 	cout<< "\n\n\nDivision\n";

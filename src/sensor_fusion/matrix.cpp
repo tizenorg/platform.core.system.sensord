@@ -185,19 +185,4 @@ T_R_C matrix<T, R, C> tran(const matrix<T, R, C> m)
 	return m1;
 }
 
-
-T_R_C matrix<T, R, 1> mul(const matrix<T, R, C> m1, const matrix<T, C, 1> m2)
-{
-	matrix<T, R, 1> m3;
-
-	for (int i = 0; i < R; i++)
-	{
-			m3.m_mat[i][0] = 0;
-			for (int k = 0; k < C; k++)
-				m3.m_mat[i][0] += m1.m_mat[i][k] * m2.m_mat[k][0];
-	}
-
-	return m3;
-}
-
 #endif //_MATRIX_H_

@@ -195,7 +195,7 @@ inline void orientation_filter<TYPE>::time_update()
 	m_measure_mat.m_mat[2][2] = 1;
 
 	if (is_initialized(m_state_old))
-		m_state_new = transpose(mul(m_tran_mat, transpose(m_state_old)));
+		m_state_new = transpose(m_tran_mat * transpose(m_state_old));
 
 	m_pred_cov = (m_tran_mat * m_pred_cov * tran(m_tran_mat)) + m_driv_cov;
 
