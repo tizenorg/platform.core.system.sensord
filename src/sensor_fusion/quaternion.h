@@ -23,6 +23,7 @@
 #include "vector.h"
 
 #define QUAT_SIZE 4
+#define REF_VEC_SIZE 3
 
 template <typename TYPE>
 class quaternion {
@@ -46,7 +47,8 @@ public:
 			const quaternion<T> q2);
 	template<typename T> friend quaternion<T> phase_correction(const quaternion<T> q1,
 			const quaternion<T> q2);
-	template<typename T> friend quaternion<T> axis2quat(const T axis[], const T angle);
+	template<typename T> friend quaternion<T> axis2quat(const vect<T, REF_VEC_SIZE> axis,
+			const T angle);
 };
 
 #include "quaternion.cpp"
