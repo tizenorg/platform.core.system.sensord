@@ -21,10 +21,6 @@
 
 #include <math.h>
 
-#ifndef QUAT_SIZE
-#define QUAT_SIZE 4
-#endif
-
 template <typename T> int sgn(T val) {
 	if (val >= 0)
 		return 1;
@@ -149,15 +145,15 @@ quaternion<T> phase_correction(const quaternion<T> q1, const quaternion<T> q2)
 }
 
 template<typename T>
-quaternion<T> axis2quat(const T axis[], const T angle)
+quaternion<T> axis2quat(const vect<T, REF_VEC_SIZE> axis, const T angle)
 {
-	T w,x,y,z;
-	w = cos(angle/2);
-	x = -axis[0]*sin(angle/2);
-	y = -axis[1]*sin(angle/2);
-	z = -axis[2]*sin(angle/2);
+	T w;
+	vect<T, REF_VEC_SIZE> imag;
 
-	quaternion<T> q(w, x, y, z);
+	w = cos(angle/2);
+	imag = axis * (T)(-sin(angle/2));
+
+	quaternion<T> q(w, imag.m_vec[0], imag.m_vec[1], imag.m_vec[2]);
 
 	return q;
 }
