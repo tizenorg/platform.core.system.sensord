@@ -54,6 +54,7 @@ public:
 	T_VDEF1 friend matrix<T, S, 1> transpose(const vect<T, S> v);
 	T_VDEF4 friend vect<T, R> transpose(const matrix<T, R, 1> m);
 	T_VDEF1 friend vect<T, S> cross(const vect<T, S> v1, const vect<T, S> v2);
+	T_VDEF1 friend T dot(const vect<T, S> v1, const vect<T, S> v2);
 	T_VDEF1 friend T var(const vect<T, S> v);
 	T_VDEF1 friend bool is_initialized(const vect<T, S> v);
 };
