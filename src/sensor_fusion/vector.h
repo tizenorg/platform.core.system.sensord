@@ -22,13 +22,12 @@
 
 #include "matrix.h"
 
-#define T_VDEF template<typename TYPE, int SIZE>
-#define T_VDEF1 template<typename T, int S>
-#define T_VDEF2 template<typename T, int S, int R, int C>
-#define T_VDEF3 template<typename T, int S1, int S2>
-#define T_VDEF4 template<typename T, int R>
+#define TYPE_SIZE template<typename TYPE, int SIZE>
+#define T_S template<typename T, int S>
+#define T_S_R_C template<typename T, int S, int R, int C>
+#define T_S1_S2 template<typename T, int S1, int S2>
 
-T_VDEF class vect {
+TYPE_SIZE class vect {
 public:
 	TYPE m_vec[SIZE];
 	vect(void);
@@ -38,24 +37,24 @@ public:
 
 	vect<TYPE,SIZE> operator =(const vect<TYPE, SIZE>& v);
 
-	T_VDEF1 friend ostream& operator << (ostream& dout, vect<T, S>& v);
-	T_VDEF1 friend vect<T, S> operator +(const vect<T, S> v1, const vect<T, S> v2);
-	T_VDEF1 friend vect<T, S> operator +(const vect<T, S> v, const T val);
-	T_VDEF1 friend vect<T, S> operator -(const vect<T,S> v1, const vect<T,S> v2);
-	T_VDEF1 friend vect<T, S> operator -(const vect<T,S> v, const T val);
-	T_VDEF2 friend matrix<T, R, S> operator *(const matrix<T, R, C> v1, const vect<T, S> v2);
-	T_VDEF2 friend vect<T, S> operator *(const vect<T, S> v, const matrix<T, R, C> m);
-	T_VDEF1 friend vect<T, S> operator *(const vect<T, S> v, const T val);
-	T_VDEF1 friend vect<T, S> operator /(const vect<T,S> v1, const T val);
-	T_VDEF3 friend bool operator ==(const vect<T, S1> v1, const vect<T, S2> v2);
-	T_VDEF3 friend bool operator !=(const vect<T, S1> v1, const vect<T, S2> v2);
+	T_S friend ostream& operator << (ostream& dout, vect<T, S>& v);
+	T_S friend vect<T, S> operator +(const vect<T, S> v1, const vect<T, S> v2);
+	T_S friend vect<T, S> operator +(const vect<T, S> v, const T val);
+	T_S friend vect<T, S> operator -(const vect<T,S> v1, const vect<T,S> v2);
+	T_S friend vect<T, S> operator -(const vect<T,S> v, const T val);
+	T_S_R_C friend matrix<T, R, S> operator *(const matrix<T, R, C> v1, const vect<T, S> v2);
+	T_S_R_C friend vect<T, S> operator *(const vect<T, S> v, const matrix<T, R, C> m);
+	T_S friend vect<T, S> operator *(const vect<T, S> v, const T val);
+	T_S friend vect<T, S> operator /(const vect<T,S> v1, const T val);
+	T_S1_S2 friend bool operator ==(const vect<T, S1> v1, const vect<T, S2> v2);
+	T_S1_S2 friend bool operator !=(const vect<T, S1> v1, const vect<T, S2> v2);
 
-	T_VDEF1 friend void insert_end(vect<T, S>& v, T val);
-	T_VDEF1 friend matrix<T, S, 1> transpose(const vect<T, S> v);
-	T_VDEF4 friend vect<T, R> transpose(const matrix<T, R, 1> m);
-	T_VDEF1 friend vect<T, S> cross(const vect<T, S> v1, const vect<T, S> v2);
-	T_VDEF1 friend T var(const vect<T, S> v);
-	T_VDEF1 friend bool is_initialized(const vect<T, S> v);
+	T_S friend void insert_end(vect<T, S>& v, T val);
+	T_S friend matrix<T, S, 1> transpose(const vect<T, S> v);
+	T_S friend vect<T, S> transpose(const matrix<T, S, 1> m);
+	T_S friend vect<T, S> cross(const vect<T, S> v1, const vect<T, S> v2);
+	T_S friend T var(const vect<T, S> v);
+	T_S friend bool is_initialized(const vect<T, S> v);
 };
 
 #include "vector.cpp"
