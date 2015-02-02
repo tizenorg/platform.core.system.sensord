@@ -22,31 +22,31 @@
 #include <iostream>
 using namespace std;
 
-T_VDEF vect<TYPE, SIZE>::vect(void)
+TYPE_SIZE vect<TYPE, SIZE>::vect(void)
 {
 	for(int i=0;i<SIZE;i++)
 		m_vec[i] = 0;
 }
 
-T_VDEF vect<TYPE, SIZE>::vect(TYPE vec_data[SIZE])
+TYPE_SIZE vect<TYPE, SIZE>::vect(TYPE vec_data[SIZE])
 {
 
 	for (int j = 0; j < SIZE; j++)
 		m_vec[j] = vec_data[j];
 }
 
-T_VDEF vect<TYPE, SIZE>::vect(const vect<TYPE, SIZE>& v)
+TYPE_SIZE vect<TYPE, SIZE>::vect(const vect<TYPE, SIZE>& v)
 {
 	for (int q = 0; q < SIZE; q++)
 		m_vec[q] = v.m_vec[q];
 }
 
 
-T_VDEF vect<TYPE, SIZE>::~vect()
+TYPE_SIZE vect<TYPE, SIZE>::~vect()
 {
 }
 
-T_VDEF vect<TYPE, SIZE> vect<TYPE, SIZE>::operator =(const vect<TYPE, SIZE>& v)
+TYPE_SIZE vect<TYPE, SIZE> vect<TYPE, SIZE>::operator =(const vect<TYPE, SIZE>& v)
 {
 	if (this == &v)
 	{
@@ -57,7 +57,7 @@ T_VDEF vect<TYPE, SIZE> vect<TYPE, SIZE>::operator =(const vect<TYPE, SIZE>& v)
 			return *this;
 }
 
-T_VDEF1 ostream& operator <<(ostream& dout, vect<T, S>& v)
+T_S ostream& operator <<(ostream& dout, vect<T, S>& v)
 {
 	for (int j = 0; j < S; j++)
 	{
@@ -69,7 +69,7 @@ T_VDEF1 ostream& operator <<(ostream& dout, vect<T, S>& v)
 	return dout;
 }
 
-T_VDEF1 vect<T, S> operator +(const vect<T, S> v1, const vect<T, S> v2)
+T_S vect<T, S> operator +(const vect<T, S> v1, const vect<T, S> v2)
 {
 	vect<T, S> v3;
 
@@ -79,7 +79,7 @@ T_VDEF1 vect<T, S> operator +(const vect<T, S> v1, const vect<T, S> v2)
 	return v3;
 }
 
-T_VDEF1 vect<T, S> operator +(const vect<T, S> v, const T val)
+T_S vect<T, S> operator +(const vect<T, S> v, const T val)
 {
 	vect<T, S> v1;
 
@@ -89,7 +89,7 @@ T_VDEF1 vect<T, S> operator +(const vect<T, S> v, const T val)
 	return v1;
 }
 
-T_VDEF1 vect<T, S> operator -(const vect<T, S> v1, const vect<T, S> v2)
+T_S vect<T, S> operator -(const vect<T, S> v1, const vect<T, S> v2)
 {
 	vect<T, S> v3;
 
@@ -99,7 +99,7 @@ T_VDEF1 vect<T, S> operator -(const vect<T, S> v1, const vect<T, S> v2)
 	return v3;
 }
 
-T_VDEF1 vect<T, S> operator -(const vect<T, S> v, const T val)
+T_S vect<T, S> operator -(const vect<T, S> v, const T val)
 {
 	vect<T, S> v1;
 
@@ -109,7 +109,7 @@ T_VDEF1 vect<T, S> operator -(const vect<T, S> v, const T val)
 	return v1;
 }
 
-T_VDEF2 matrix<T, R, S> operator *(const matrix<T, R, C> m, const vect<T, S> v)
+T_S_R_C matrix<T, R, S> operator *(const matrix<T, R, C> m, const vect<T, S> v)
 {
 	assert(R == S);
 	assert(C == 1);
@@ -127,7 +127,7 @@ T_VDEF2 matrix<T, R, S> operator *(const matrix<T, R, C> m, const vect<T, S> v)
 	return m1;
 }
 
-T_VDEF2 vect<T, S> operator *(const vect<T, S> v, const matrix<T, R, C> m)
+T_S_R_C vect<T, S> operator *(const vect<T, S> v, const matrix<T, R, C> m)
 {
 	assert(R == S);
 	assert(C != 1);
@@ -139,9 +139,11 @@ T_VDEF2 vect<T, S> operator *(const vect<T, S> v, const matrix<T, R, C> m)
 		for (int k = 0; k < R; k++)
 			v1.m_vec[j] += v.m_vec[k] * m.m_mat[k][j];
 	}
+
+	return v1;
 }
 
-T_VDEF1 vect<T, S> operator *(const vect<T, S> v, const T val)
+T_S vect<T, S> operator *(const vect<T, S> v, const T val)
 {
 	vect<T, S> v1;
 
@@ -151,7 +153,7 @@ T_VDEF1 vect<T, S> operator *(const vect<T, S> v, const T val)
 	return v1;
 }
 
-T_VDEF1 vect<T, S> operator /(const vect<T, S> v, const T val)
+T_S vect<T, S> operator /(const vect<T, S> v, const T val)
 {
 	vect<T, S> v1;
 
@@ -161,7 +163,7 @@ T_VDEF1 vect<T, S> operator /(const vect<T, S> v, const T val)
 	return v1;
 }
 
-T_VDEF3 bool operator ==(const vect<T, S1> v1, const vect<T, S2> v2)
+T_S1_S2 bool operator ==(const vect<T, S1> v1, const vect<T, S2> v2)
 {
 	if (S1==S2)
 	{
@@ -175,12 +177,12 @@ T_VDEF3 bool operator ==(const vect<T, S1> v1, const vect<T, S2> v2)
 	return true;
 }
 
-T_VDEF3 bool operator !=(const vect<T, S1> v1, const vect<T, S2> v2)
+T_S1_S2 bool operator !=(const vect<T, S1> v1, const vect<T, S2> v2)
 {
 	return (!(v1 == v2));
 }
 
-T_VDEF1 matrix<T, S, 1> transpose(const vect<T, S> v)
+T_S matrix<T, S, 1> transpose(const vect<T, S> v)
 {
 	matrix<T, S, 1> m;
 
@@ -190,17 +192,17 @@ T_VDEF1 matrix<T, S, 1> transpose(const vect<T, S> v)
 	return m;
 }
 
-T_VDEF4 vect<T, R> transpose(const matrix<T, R, 1> m)
+T_S vect<T, S> transpose(const matrix<T, S, 1> m)
 {
-	vect<T, R> v;
+	vect<T, S> v;
 
-	for (int i = 0; i < R; i++)
+	for (int i = 0; i < S; i++)
 		v.m_vec[i] = m.m_mat[i][0];
 
 	return v;
 }
 
-T_VDEF1 void insert_end(vect<T, S>& v, T val)
+T_S void insert_end(vect<T, S>& v, T val)
 {
 	for (int i = 0; i < (S - 1); i++)
 		v.m_vec[i] = v.m_vec[i+1];
@@ -208,7 +210,7 @@ T_VDEF1 void insert_end(vect<T, S>& v, T val)
 	v.m_vec[S-1] = val;
 }
 
-T_VDEF1 vect<T, S> cross(const vect<T, S> v1, const vect<T, S> v2)
+T_S vect<T, S> cross(const vect<T, S> v1, const vect<T, S> v2)
 {
 	vect<T, S> v3;
 
@@ -219,7 +221,12 @@ T_VDEF1 vect<T, S> cross(const vect<T, S> v1, const vect<T, S> v2)
 	return v3;
 }
 
-T_VDEF1 bool is_initialized(const vect<T, S> v)
+T_S T dot(const vect<T, S> v1, const vect<T, S> v2)
+{
+	return (v1.m_vec[0] * v2.m_vec[0] + v1.m_vec[1] * v2.m_vec[1] + v1.m_vec[2] * v2.m_vec[2]);
+}
+
+T_S bool is_initialized(const vect<T, S> v)
 {
 	vect<T, S> v1;
 	bool retval;
@@ -229,7 +236,7 @@ T_VDEF1 bool is_initialized(const vect<T, S> v)
 	return retval;
 }
 
-T_VDEF1 T var(const vect<T, S> v)
+T_S T var(const vect<T, S> v)
 {
 	T val = 0;
 	T mean, var, diff;
