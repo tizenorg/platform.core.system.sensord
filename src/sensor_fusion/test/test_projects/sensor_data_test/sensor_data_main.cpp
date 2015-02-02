@@ -22,13 +22,16 @@
 int main()
 {
 	float arr1[3] = {1.04, -4.678, -2.34};
-
+	float arr2[3] = {0, 0, 1};
 	vect<float,3> v1(arr1);
+	vect<float,3> v2(arr2);
 
 	sensor_data<float> sd1(2.0, 3.0, 4.0, 140737488355328);
 	sensor_data<float> sd2(1.04, -4.678, -2.34, 0);
 	sensor_data<float> sd3(0.054, 1.097, 4.456, 140737488355328);
+
 	sensor_data<float> sd10(v1, 140737488355328);
+	sensor_data<float> sd11(0.2, 0.1, 0.3, 140737488355328);
 
 	cout << "Constructor tests\n";
 	cout << "input\t" << v1 << "\n";
@@ -57,5 +60,10 @@ int main()
 	sensor_data<float> sd8 = scale_data(sd2, xx);
 	cout<< "\n" << sd2.m_data << "\n" << xx;
 	cout<< "\nResult:\n" << sd8.m_data << endl;
+
+	cout<<"\n\n\nConvert Sensor Data to Quaternion:\n";
+	quaternion<float> q = sensor_data2quat(sd11, v2);
+	cout<< "\n" << sd11.m_data << "\n" << v2;
+	cout<< "\nResult:\n" << q.m_quat << endl;
 }
 
