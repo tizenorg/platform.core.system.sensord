@@ -21,6 +21,7 @@
 #define _SENSOR_DATA_H_
 
 #include "vector.h"
+#include "quaternion.h"
 
 #define SENSOR_DATA_SIZE 3
 
@@ -46,6 +47,8 @@ public:
 	template<typename T> friend void normalize(sensor_data<T>& data);
 	template<typename T> friend sensor_data<T> scale_data(sensor_data<T> data,
 			T scaling_factor);
+	template<typename T> friend quaternion<T> sensor_data2quat(const sensor_data<T> data,
+			const vect<T, REF_VEC_SIZE> ref_vec);
 };
 
 #include "sensor_data.cpp"

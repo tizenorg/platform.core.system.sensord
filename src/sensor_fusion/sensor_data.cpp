@@ -21,10 +21,6 @@
 
 #include "math.h"
 
-#ifndef SENSOR_DATA_SIZE
-#define SENSOR_DATA_SIZE 3
-#endif
-
 template <typename TYPE>
 sensor_data<TYPE>::sensor_data() : m_data(), m_time_stamp(0)
 {
@@ -105,6 +101,19 @@ sensor_data<T> scale_data(sensor_data<T> data, T scaling_factor)
 	sensor_data<T> s(x, y, z, data.m_time_stamp);
 
 	return s;
+}
+
+
+template<typename T>
+quaternion<T> sensor_data2quat(const sensor_data<T> data, const vect<T, REF_VEC_SIZE> ref_vec)
+{
+	vect<T, REF_VEC_SIZE> axis;
+	T angle;
+
+	axis = cross(data.m_data, ref_vec);
+	angle = acos(dot(data.m_data, ref_vec));
+
+	return axis2quat(axis, angle);
 }
 
 #endif /* _SENSOR_DATA_H_ */
