@@ -63,6 +63,7 @@ public:
 	rotation_matrix<TYPE> m_rot_matrix;
 	euler_angles<TYPE> m_orientation;
 	quaternion<TYPE> m_quat_9axis;
+	quaternion<TYPE> m_quat_gaming_rv;
 	TYPE m_gyro_dt;
 
 	int m_pitch_phase_compensation;
@@ -80,8 +81,10 @@ public:
 	inline void init_accel_gyro_data(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> gyro);
 	inline void orientation_triad_algorithm();
+	inline void compute_accel_orientation();
 	inline void compute_covariance();
 	inline void time_update();
+	inline void time_update_gaming_rv();
 	inline void measurement_update();
 
 	euler_angles<TYPE> get_orientation(const sensor_data<TYPE> accel,
@@ -92,6 +95,8 @@ public:
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
 	quaternion<TYPE> get_geomagnetic_quaternion(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> magnetic);
+	quaternion<TYPE> get_gaming_quaternion(const sensor_data<TYPE> accel,
+			const sensor_data<TYPE> gyro);
 };
 
 #include "orientation_filter.cpp"
