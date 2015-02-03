@@ -149,6 +149,7 @@ systemctl daemon-reload
 %{_bindir}/light
 %{_bindir}/rotation_vector
 %{_bindir}/geomagnetic_rv
+%{_bindir}/tc-common
 %license LICENSE.APLv2
 %endif
 
