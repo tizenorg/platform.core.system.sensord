@@ -73,10 +73,12 @@ public:
 	orientation_filter();
 	~orientation_filter();
 
-	inline void initialize_sensor_data(const sensor_data<TYPE> accel,
+	inline void init_accel_gyro_mag_data(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
-	inline void initialize_sensor_data(const sensor_data<TYPE> accel,
+	inline void init_accel_mag_data(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> magnetic);
+	inline void init_accel_gyro_data(const sensor_data<TYPE> accel,
+			const sensor_data<TYPE> gyro);
 	inline void orientation_triad_algorithm();
 	inline void compute_covariance();
 	inline void time_update();
