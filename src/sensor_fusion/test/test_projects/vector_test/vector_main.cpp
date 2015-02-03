@@ -174,6 +174,11 @@ int main()
 	cout << "\n\n" << v21 << "\n\n" << v22;
 	cout << "\nResult:\n\n" << v111;
 
+	float val = dot(v21, v22);
+	cout<< "\n\n\nDot Product:";
+	cout << "\n\n" << v21 << "\n\n" << v22;
+	cout << "\nResult:\n\n" << val;
+
 	cout <<  "\n\n\nQueue insert function:";
 	cout << "\nInput:\n\n" << v111;
 	insert_end(v111, (float) 0.9191919);

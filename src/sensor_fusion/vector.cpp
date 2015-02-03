@@ -139,6 +139,8 @@ T_S_R_C vect<T, S> operator *(const vect<T, S> v, const matrix<T, R, C> m)
 		for (int k = 0; k < R; k++)
 			v1.m_vec[j] += v.m_vec[k] * m.m_mat[k][j];
 	}
+
+	return v1;
 }
 
 T_S vect<T, S> operator *(const vect<T, S> v, const T val)
@@ -217,6 +219,11 @@ T_S vect<T, S> cross(const vect<T, S> v1, const vect<T, S> v2)
 	v3.m_vec[2] = ((v1.m_vec[0] * v2.m_vec[1]) - (v1.m_vec[1] * v2.m_vec[0]));
 
 	return v3;
+}
+
+T_S T dot(const vect<T, S> v1, const vect<T, S> v2)
+{
+	return (v1.m_vec[0] * v2.m_vec[0] + v1.m_vec[1] * v2.m_vec[1] + v1.m_vec[2] * v2.m_vec[2]);
 }
 
 T_S bool is_initialized(const vect<T, S> v)
