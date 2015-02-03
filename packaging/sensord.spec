@@ -150,6 +150,6 @@ systemctl daemon-reload
 %{_bindir}/rotation_vector
 %{_bindir}/geomagnetic_rv
 %{_bindir}/auto_test
+%{_bindir}/tc-common
 %license LICENSE.APLv2
 %endif
-
