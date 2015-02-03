@@ -53,6 +53,7 @@ public:
 	T_S friend matrix<T, S, 1> transpose(const vect<T, S> v);
 	T_S friend vect<T, S> transpose(const matrix<T, S, 1> m);
 	T_S friend vect<T, S> cross(const vect<T, S> v1, const vect<T, S> v2);
+	T_S friend T dot(const vect<T, S> v1, const vect<T, S> v2);
 	T_S friend T var(const vect<T, S> v);
 	T_S friend bool is_initialized(const vect<T, S> v);
 };
