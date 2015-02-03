@@ -75,7 +75,7 @@ orientation_filter<TYPE>::~orientation_filter()
 }
 
 template <typename TYPE>
-inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<TYPE> accel,
+inline void orientation_filter<TYPE>::init_accel_gyro_mag_data(const sensor_data<TYPE> accel,
 		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
 {
 	unsigned long long sample_interval_gyro = SAMPLE_INTV;
@@ -97,7 +97,7 @@ inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<T
 }
 
 template <typename TYPE>
-inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<TYPE> accel,
+inline void orientation_filter<TYPE>::init_accel_mag_data(const sensor_data<TYPE> accel,
 		const sensor_data<TYPE> magnetic)
 {
 	m_accel.m_data = accel.m_data;
@@ -105,6 +105,26 @@ inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<T
 
 	m_accel.m_time_stamp = accel.m_time_stamp;
 	m_magnetic.m_time_stamp = magnetic.m_time_stamp;
+}
+
+template <typename TYPE>
+inline void orientation_filter<TYPE>::init_accel_gyro_data(const sensor_data<TYPE> accel,
+		const sensor_data<TYPE> gyro)
+{
+	unsigned long long sample_interval_gyro = SAMPLE_INTV;
+
+	m_accel.m_data = accel.m_data;
+	m_gyro.m_data = gyro.m_data;
+
+	if (m_gyro.m_time_stamp != 0 && gyro.m_time_stamp != 0)
+		sample_interval_gyro = 	gyro.m_time_stamp - m_gyro.m_time_stamp;
+
+	m_gyro_dt = sample_interval_gyro * US2S;
+
+	m_accel.m_time_stamp = accel.m_time_stamp;
+	m_gyro.m_time_stamp = gyro.m_time_stamp;
+
+	m_gyro.m_data = m_gyro.m_data - m_bias_correction;
 }
 
 template <typename TYPE>
