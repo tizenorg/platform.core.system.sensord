@@ -149,6 +149,7 @@ systemctl daemon-reload
 %{_bindir}/light
 %{_bindir}/rotation_vector
 %{_bindir}/geomagnetic_rv
+%{_bindir}/auto_test
 %license LICENSE.APLv2
 %endif
 
