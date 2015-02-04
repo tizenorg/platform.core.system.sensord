@@ -37,7 +37,7 @@ void callback_accel(unsigned int event_type, sensor_event_data_t *event, void *u
 
 void printformat()
 {
-	printf("Usage : ./merged <Sensor_name> <event> <interval>(optional)\n\n");
+	printf("Usage : ./tc-common <Sensor_name> <event> <interval>(optional)\n\n");
 
 	printf("Sensor_name:");
 	printf("[accelerometer]\n");
