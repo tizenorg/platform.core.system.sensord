@@ -35,7 +35,8 @@ void printformat()
 	printf("Sensor_name:");
 	printf("[accelerometer] ");
 	printf("[geomagnetic] ");
-	printf("[gyroscope]\n");
+	printf("[gyroscope] ");
+	printf("[light]\n");
 
 	printf("event:");
 	printf("[RAW_DATA_REPORT_ON_TIME]\n");
@@ -57,10 +58,14 @@ float get_interval(sensor_type_t type)
 		case(GYROSCOPE_SENSOR):
 			return 10.52;
 		break;
+		case(LIGHT_SENSOR):
+			return 100.00;
+		break;
 		default:
 			return 100.00;
 		break;
 	}
+	return -1;
 }
 
 int get_event_driven(sensor_type_t type, char str[])
@@ -81,6 +86,12 @@ int get_event_driven(sensor_type_t type, char str[])
 		case(GYROSCOPE_SENSOR):
 			if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
 				return GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME;
+			else
+				printformat();
+		break;
+		case(LIGHT_SENSOR):
+			if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+				return LIGHT_EVENT_LUX_DATA_REPORT_ON_TIME;
 			else
 				printformat();
 		break;
@@ -109,6 +120,12 @@ void callback_gyro(unsigned int event_type, sensor_event_data_t *event, void *us
 	printf("Gyroscope [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 }
 
+void callback_light(unsigned int event_type, sensor_event_data_t *event, void *user_data)
+{
+	sensor_data_t *data = (sensor_data_t *)event->event_data;
+	printf("Light :[%lld] [%6.6f]\n", data->timestamp, data->values[0]);
+}
+
 int main(int argc,char **argv)
 {
 	int result, handle, start_handle, stop_handle;
@@ -130,6 +147,8 @@ int main(int argc,char **argv)
 		type = GEOMAGNETIC_SENSOR;
 	else if (strcmp(argv[1], "gyroscope") == 0)
 		type = GYROSCOPE_SENSOR;
+	else if (strcmp(argv[1], "light") == 0)
+		type = LIGHT_SENSOR;
 	else
 		printformat();
 
@@ -155,6 +174,9 @@ int main(int argc,char **argv)
 		break;
 		case(GYROSCOPE_SENSOR):
 			result = sf_register_event(handle, event, event_condition, callback_gyro, NULL);
+		break;
+		case(LIGHT_SENSOR):
+			result = sf_register_event(handle, event, event_condition, callback_light, NULL);
 		break;
 		default:
 			printformat();
