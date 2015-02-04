@@ -28,13 +28,6 @@
 
 static GMainLoop *mainloop;
 
-void callback_accel(unsigned int event_type, sensor_event_data_t *event, void *user_data)
-{
-	sensor_data_t *data = (sensor_data_t *)event->event_data;
-	printf("Accelerometer [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
-}
-
-
 void printformat()
 {
 	printf("Usage : ./tc-common <Sensor_name> <event> <interval>(optional)\n\n");
@@ -47,6 +40,18 @@ void printformat()
 
 	printf("interval:\n");
 	printf("The time interval should be entered based on the sampling frequency supported by accelerometer driver on the device in ms.If no value for sensor is entered default value by the driver will be used.\n");
+}
+
+float get_interval(sensor_type_t type)
+{
+	switch(type) {
+		case(ACCELEROMETER_SENSOR):
+			return 100.00;
+		break;
+		default:
+			return 100.00;
+		break;
+	}
 }
 
 unsigned int get_event_driven(sensor_type_t type,char str[])
@@ -62,7 +67,11 @@ unsigned int get_event_driven(sensor_type_t type,char str[])
 	}
 }
 
-
+void callback_accel(unsigned int event_type, sensor_event_data_t *event, void *user_data)
+{
+	sensor_data_t *data = (sensor_data_t *)event->event_data;
+	printf("Accelerometer [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+}
 
 int main(int argc,char **argv)
 {
@@ -85,7 +94,7 @@ int main(int argc,char **argv)
 	else
 		 printformat();
 
-	event_condition->cond_value1 = 100.00;
+	event_condition->cond_value1 = get_interval(type);
 
 	event = get_event_driven(type,argv[2]);
 	if (event == -1) {
@@ -140,6 +149,3 @@ int main(int argc,char **argv)
 
 	return 0;
 }
-
-
-
