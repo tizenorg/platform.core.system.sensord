@@ -33,13 +33,15 @@ void printformat()
 	printf("Usage : ./tc-common <Sensor_name> <event> <interval>(optional)\n\n");
 
 	printf("Sensor_name:");
-	printf("[accelerometer]\n");
+	printf("[accelerometer] ");
+	printf("[geomagnetic]\n");
 
 	printf("event:");
 	printf("[RAW_DATA_REPORT_ON_TIME]\n");
 
 	printf("interval:\n");
 	printf("The time interval should be entered based on the sampling frequency supported by accelerometer driver on the device in ms.If no value for sensor is entered default value by the driver will be used.\n");
+	exit(-1);
 }
 
 float get_interval(sensor_type_t type)
@@ -48,29 +50,47 @@ float get_interval(sensor_type_t type)
 		case(ACCELEROMETER_SENSOR):
 			return 100.00;
 		break;
+		case(GEOMAGNETIC_SENSOR):
+			return 100.00;
+		break;
 		default:
 			return 100.00;
 		break;
 	}
 }
 
-unsigned int get_event_driven(sensor_type_t type,char str[])
+int get_event_driven(sensor_type_t type, char str[])
 {
 	switch(type) {
 		case(ACCELEROMETER_SENSOR):
 			if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
 				return ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME;
+			else
+				printformat();
+		break;
+		case(GEOMAGNETIC_SENSOR):
+			if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+				return GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME;
+			else
+				printformat();
 		break;
 		default:
 			return -1;
 		break;
 	}
+	return -1;
 }
 
 void callback_accel(unsigned int event_type, sensor_event_data_t *event, void *user_data)
 {
 	sensor_data_t *data = (sensor_data_t *)event->event_data;
 	printf("Accelerometer [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+}
+
+void callback_geo(unsigned int event_type, sensor_event_data_t *event, void *user_data)
+{
+	sensor_data_t *data = (sensor_data_t *)event->event_data;
+	printf("Geomagnetic [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 }
 
 int main(int argc,char **argv)
@@ -89,10 +109,11 @@ int main(int argc,char **argv)
 	}
 
 	if (strcmp(argv[1], "accelerometer") == 0)
-		 type = ACCELEROMETER_SENSOR;
-
+		type = ACCELEROMETER_SENSOR;
+	else if (strcmp(argv[1], "geomagnetic") == 0)
+		type = GEOMAGNETIC_SENSOR;
 	else
-		 printformat();
+		printformat();
 
 	event_condition->cond_value1 = get_interval(type);
 
@@ -110,6 +131,9 @@ int main(int argc,char **argv)
 	switch(type) {
 		case(ACCELEROMETER_SENSOR):
 			result = sf_register_event(handle, event, event_condition, callback_accel, NULL);
+		break;
+		case(GEOMAGNETIC_SENSOR):
+			result = sf_register_event(handle, event, event_condition, callback_geo, NULL);
 		break;
 		default:
 			printformat();
