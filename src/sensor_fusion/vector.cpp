@@ -19,9 +19,6 @@
 
 #if defined (_VECTOR_H_) && defined (_MATRIX_H_)
 
-#include <iostream>
-using namespace std;
-
 TYPE_SIZE vect<TYPE, SIZE>::vect(void)
 {
 	for(int i=0;i<SIZE;i++)
