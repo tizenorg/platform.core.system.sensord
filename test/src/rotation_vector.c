@@ -83,7 +83,7 @@ int main(int argc,char **argv)
 		sensor_data_t data;
 
 		while(1) {
-			result = sf_get_data(handle, ACCELEROMETER_BASE_DATA_SET , &data);
+			result = sf_get_data(handle, ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME , &data);
 			printf("Rotation Vector [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
 			usleep(100000);
 		}
