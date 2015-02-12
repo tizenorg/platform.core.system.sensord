@@ -22,21 +22,25 @@
 
 #include "vector.h"
 #include "quaternion.h"
+#include "rotation_matrix.h"
+
+#define EULER_SIZE 3
 
 template <typename TYPE>
 class euler_angles {
 public:
-	vect<TYPE> m_ang;
+	vect<TYPE,EULER_SIZE> m_ang;
 
 	euler_angles();
 	euler_angles(const TYPE roll, const TYPE pitch, const TYPE azimuth);
-	euler_angles(const vect<TYPE> v);
+	euler_angles(const vect<TYPE, EULER_SIZE> v);
 	euler_angles(const euler_angles<TYPE>& e);
 	~euler_angles();
 
 	euler_angles<TYPE> operator =(const euler_angles<TYPE>& e);
 
 	template<typename T> friend euler_angles<T> quat2euler(const quaternion<T> q);
+	template<typename T> friend quaternion<T> euler2quat(euler_angles<T> euler);
 	template<typename T> friend euler_angles<T> rad2deg(const euler_angles<T> e);
 	template<typename T> friend euler_angles<T> deg2rad(const euler_angles<T> e);
 };

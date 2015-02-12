@@ -23,14 +23,17 @@
 #include "matrix.h"
 #include "quaternion.h"
 
+#define ROT_MAT_ROWS 3
+#define ROT_MAT_COLS 3
+
 template <typename TYPE>
 class rotation_matrix {
 public:
-	matrix<TYPE> m_rot_mat;
+	matrix<TYPE, ROT_MAT_ROWS, ROT_MAT_COLS> m_rot_mat;
 
 	rotation_matrix();
-	rotation_matrix(const matrix<TYPE> m);
-	rotation_matrix(const int rows, const int cols, TYPE *mat_data);
+	rotation_matrix(const matrix<TYPE, ROT_MAT_ROWS, ROT_MAT_COLS> m);
+	rotation_matrix(TYPE mat_data[ROT_MAT_ROWS][ROT_MAT_COLS]);
 	rotation_matrix(const rotation_matrix<TYPE>& rm);
 	~rotation_matrix();
 

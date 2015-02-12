@@ -21,10 +21,8 @@
 
 #include "math.h"
 
-#define SENSOR_DATA_SIZE 3
-
 template <typename TYPE>
-sensor_data<TYPE>::sensor_data() : m_data(SENSOR_DATA_SIZE), m_time_stamp(0)
+sensor_data<TYPE>::sensor_data() : m_data(), m_time_stamp(0)
 {
 }
 
@@ -34,13 +32,13 @@ sensor_data<TYPE>::sensor_data(const TYPE x, const TYPE y,
 {
 	TYPE vec_data[SENSOR_DATA_SIZE] = {x, y, z};
 
-	vect<TYPE> v(SENSOR_DATA_SIZE, vec_data);
+	vect<TYPE, SENSOR_DATA_SIZE> v(vec_data);
 	m_data = v;
 	m_time_stamp = time_stamp;
 }
 
 template <typename TYPE>
-sensor_data<TYPE>::sensor_data(const vect<TYPE> v,
+sensor_data<TYPE>::sensor_data(const vect<TYPE, SENSOR_DATA_SIZE> v,
 		const unsigned long long time_stamp)
 {
 	m_data = v;
@@ -71,7 +69,7 @@ sensor_data<TYPE> sensor_data<TYPE>::operator =(const sensor_data<TYPE>& s)
 template <typename T>
 sensor_data<T> operator +(sensor_data<T> data1, sensor_data<T> data2)
 {
-	sensor_data<T> result(data1.m_data + data2.m_data, data1.m_time_stamp);
+	sensor_data<T> result(data1.m_data + data2.m_data, 0);
 	return result;
 }
 
@@ -103,6 +101,19 @@ sensor_data<T> scale_data(sensor_data<T> data, T scaling_factor)
 	sensor_data<T> s(x, y, z, data.m_time_stamp);
 
 	return s;
+}
+
+
+template<typename T>
+quaternion<T> sensor_data2quat(const sensor_data<T> data, const vect<T, REF_VEC_SIZE> ref_vec)
+{
+	vect<T, REF_VEC_SIZE> axis;
+	T angle;
+
+	axis = cross(data.m_data, ref_vec);
+	angle = acos(dot(data.m_data, ref_vec));
+
+	return axis2quat(axis, angle);
 }
 
 #endif /* _SENSOR_DATA_H_ */
