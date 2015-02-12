@@ -7,9 +7,6 @@ SET(SENSOR_HAL_NAME ultraviolet_sensor_hal)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
 
-INCLUDE(FindPkgConfig)
-PKG_CHECK_MODULES(uv_pkgs REQUIRED vconf)
-
 FOREACH(flag ${uv_pkgs_LDFLAGS})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
 ENDFOREACH(flag)
