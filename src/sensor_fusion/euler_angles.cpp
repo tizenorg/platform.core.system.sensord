@@ -20,12 +20,11 @@
 
 #include <math.h>
 
-#define EULER_SIZE 3
 #define RAD2DEG 57.2957795
 #define DEG2RAD 0.0174532925
 
 template <typename TYPE>
-euler_angles<TYPE>::euler_angles() : m_ang(EULER_SIZE)
+euler_angles<TYPE>::euler_angles() : m_ang()
 {
 }
 
@@ -34,12 +33,12 @@ euler_angles<TYPE>::euler_angles(const TYPE roll, const TYPE pitch, const TYPE a
 {
 	TYPE euler_data[EULER_SIZE] = {roll, pitch, azimuth};
 
-	vect<TYPE> v(EULER_SIZE, euler_data);
+	vect<TYPE,EULER_SIZE> v(euler_data);
 	m_ang = v;
 }
 
 template <typename TYPE>
-euler_angles<TYPE>::euler_angles(const vect<TYPE> v)
+euler_angles<TYPE>::euler_angles(const vect<TYPE,EULER_SIZE> v)
 {
 	m_ang = v;
 }
@@ -94,15 +93,35 @@ euler_angles<T> quat2euler(const quaternion<T> q)
 template <typename T>
 euler_angles<T> rad2deg(const euler_angles<T> e)
 {
-	euler_angles<T> result(e.m_ang * (T) RAD2DEG);
-	return result;
+	return (e.m_ang * (T) RAD2DEG);
 }
 
 template <typename T>
 euler_angles<T> deg2rad(const euler_angles<T> e)
 {
-	euler_angles<T> result(e.m_ang * (T) DEG2RAD);
-	return result;
+	return (e.m_ang * (T) DEG2RAD);
+}
+
+template<typename T>
+quaternion<T> euler2quat(euler_angles<T> euler) {
+	T theta = euler.m_ang.m_vec[0];
+	T phi = euler.m_ang.m_vec[1];
+	T psi = euler.m_ang.m_vec[2];
+
+	T R[ROT_MAT_ROWS][ROT_MAT_COLS];
+	R[0][0] = cos(psi)*cos(theta);
+	R[0][1] = -sin(psi)*cos(phi) + cos(psi)*sin(theta)*sin(phi);
+	R[0][2] = sin(psi)*sin(phi) + cos(psi)*sin(theta)*cos(phi);
+	R[1][0] = sin(psi)*cos(theta);
+	R[1][1] = cos(psi)*cos(phi) + sin(psi)*sin(theta)*sin(phi);
+	R[1][2] = -cos(psi)*sin(phi) + sin(psi)*sin(theta)*cos(phi);
+	R[2][0] = -sin(theta);
+	R[2][1] = cos(theta)*sin(phi);
+	R[2][2] = cos(theta)*cos(phi);
+
+	rotation_matrix<T> rot_mat(R);
+	quaternion<T> q = rot_mat2quat(rot_mat);
+	return q;
 }
 
 #endif  //_EULER_ANGLES_H_

@@ -32,19 +32,19 @@ int main()
 	float arr8[3][3] = {{4.75, 0.65, 0.123}, {0.075, 5.302, 0.56}, {1.113, 0.475, 2.362}};
 	float arr9[3][3] = {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
 
-	matrix<float> m1(2, 2, (float *) arr0);
-	matrix<float> m2(2, 2, (float *) arr1);
-	matrix<float> m3(2, 2);
-	matrix<float> m10(3, 3, (float *) arr3);
-	matrix<float> m11(3, 2, (float *) arr5);
-	matrix<float> m6(3, 3);
-	matrix<float> m13(3, 2);
-	matrix<float> m12(3, 3, (float *) arr4);
-	matrix<float> m15(3, 3, (float *) arr8);
-	matrix<float> m20(1, 3, (float *) arr11);
-	matrix<float> m21(3, 1, (float *) arr12);
-	matrix<float> m22(2, 3, (float *) arr15);
-	matrix<float> m9(3, 3, (float *) arr9);
+	matrix<float, 2, 2> m1(arr0);
+	matrix<float, 2, 2> m2(arr1);
+	matrix<float, 2, 2> m3;
+	matrix<float, 3, 3> m10(arr3);
+	matrix<float, 3, 2> m11(arr5);
+	matrix<float, 3, 3> m6;
+	matrix<float, 3, 2> m13;
+	matrix<float, 3, 3> m12(arr4);
+	matrix<float, 3, 3> m15(arr8);
+	matrix<float, 1, 3> m20(arr11);
+	matrix<float, 3, 1> m21(arr12);
+	matrix<float, 2, 3> m22(arr15);
+	matrix<float, 3, 3> m9(arr9);
 
 	cout<< "Constructor Test\n";
 	cout<< "\n" << m6;
@@ -65,7 +65,7 @@ int main()
 	cout<< "\n\n\nMultiplication\n";
 	m6 = m10 * m12;
 	m3 = m1 * m2;
-	matrix<float> m7(m20.m_rows, m21.m_cols);
+	matrix<float, 1, 1> m7;
 	m7 = m20 * m21;
 	cout<< "\n" << m10 << "\n" << m12;
 	cout<< "\nProduct:\n" << m6 << endl;
@@ -74,7 +74,7 @@ int main()
 	cout<< "\n" << m20 << "\n" << m21;
 	cout<< "\nProduct:\n" << m7 << endl;
 	cout<< "\n" << m9 << "\n" << m21;
-	m21 = mul(m9, m21);
+	m21 = m9 * m21;
 	cout<< "\nProduct:\n" << m21 << endl;
 
 	cout<< "\n\n\nDivision\n";
@@ -148,8 +148,8 @@ int main()
 
 
 	cout<< "\n\nAssignment\n";
-	m3 = m12;
+	matrix<float, 3, 3> m30 = m12;
 	cout<< "Input \n" << m12;
-	cout<< "\nOutput:\n" << m3 << endl;
+	cout<< "\nOutput:\n" << m30 << endl;
 
 }
