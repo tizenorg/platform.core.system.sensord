@@ -30,9 +30,11 @@
 #include <string>
 #include <utility>
 #include <permission_checker.h>
+#include <set>
 
 using std::string;
 using std::make_pair;
+using std::set;
 
 command_worker::cmd_handler_t command_worker::m_cmd_handlers[];
 sensor_raw_data_map command_worker::m_sensor_raw_data_map;
@@ -864,4 +866,15 @@ void insert_priority_list(unsigned int event_type)
 		priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
 		priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
         }
+
+	if (event_type == ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME) {
+		priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+		priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+		priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
+	}
+
+	if (event_type == GEOMAGNETIC_RV_EVENT_RAW_DATA_REPORT_ON_TIME) {
+		priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+		priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
+	}
 }
