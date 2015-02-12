@@ -23,9 +23,12 @@ int main()
 {
 	float arr0[4] = {2344.98, 345.24, 456.12, 98.33};
 	float arr1[4] = {0.056, 0.34, -0.0076, 0.001};
+	float axis1[3] = {6.5, 7.5, 8.3};
+	float ang1 = 8.4;
 
-	vect<float> v0(4, arr0);
-	vect<float> v1(4, arr1);
+	vect<float, 4> v0(arr0);
+	vect<float, 4> v1(arr1);
+	vect<float, 3> v2(axis1);
 
 	quaternion<float> q0(v0);
 	quaternion<float> q1(v1);
@@ -63,5 +66,13 @@ int main()
 	cout << "input\t" << q1.m_quat << "\n";
 	q1.quat_normalize();
 	cout << "output\t" << q1.m_quat << "\n\n";
+
+	cout << "Axis2quat\n";
+	cout << "input\t" << " " << v2 << endl;
+	cout << endl;
+	quaternion<float> q11 = axis2quat(v2, ang1);
+	cout << "output\t" << q11.m_quat << "\n\n";
+	cout << endl;
+
 }
 

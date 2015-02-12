@@ -24,45 +24,33 @@
 #include <iostream>
 using namespace std;
 
-template <typename TYPE>
-class matrix {
+#define TYPE_ROW_COL template<typename TYPE, int ROW, int COL>
+#define T_R_C template<typename T, int R, int C>
+#define T_R_C_C2 template<typename T, int R, int C, int C2>
+#define T_R1_C1_R2_C2 template<typename T, int R1, int C1, int R2, int C2>
+
+TYPE_ROW_COL class matrix {
 public:
-	int m_rows;
-	int m_cols;
-	TYPE **m_mat;
+	TYPE m_mat[ROW][COL];
 
 	matrix(void);
-	matrix(const int rows, const int cols);
-	matrix(const int rows, const int cols, TYPE *mat_data);
-	matrix(const matrix<TYPE>& m);
+	matrix(TYPE mat_data[ROW][COL]);
+	matrix(const matrix<TYPE, ROW, COL>& m);
 	~matrix();
 
-	matrix<TYPE> operator =(const matrix<TYPE>& m);
+	matrix<TYPE, ROW, COL> operator =(const matrix<TYPE, ROW, COL>& m);
 
-	template<typename T> friend ostream& operator << (ostream& dout,
-			matrix<T>& m);
-	template<typename T> friend matrix<T> operator +(const matrix<T> m1,
-			const matrix<T> m2);
-	template<typename T> friend matrix<T> operator +(const matrix<T> m,
-			const T val);
-	template<typename T> friend matrix<T> operator -(const matrix<T> m1,
-			const matrix<T> m2);
-	template<typename T> friend matrix<T> operator -(const matrix<T> m,
-			const T val);
-	template<typename T> friend matrix<T> operator *(const matrix<T> m1,
-			const matrix<T> m2);
-	template<typename T> friend matrix<T> operator *(const matrix<T> m,
-			const T val);
-	template<typename T> friend matrix<T> operator /(const matrix<T> m1,
-			 const T val);
-	template<typename T> friend bool operator ==(const matrix<T> m1,
-			const matrix<T> m2);
-	template<typename T> friend bool operator !=(const matrix<T> m1,
-			const matrix<T> m2);
-
-	template<typename T> friend matrix<T> tran(const matrix<T> m);
-	template <typename T> friend matrix<T> mul(const matrix<T> m1,
-			const matrix<T> m2);
+	T_R_C friend ostream& operator << (ostream& dout, matrix<T, R, C>& m);
+	T_R_C friend matrix<T, R, C> operator +(const matrix<T, R, C> m1, const matrix<T, R, C> m2);
+	T_R_C friend matrix<T, R, C> operator +(const matrix<T, R, C> m, const T val);
+	T_R_C friend matrix<T, R, C> operator -(const matrix<T, R, C> m1, const matrix<T, R, C> m2);
+	T_R_C friend matrix<T, R, C> operator -(const matrix<T, R, C> m, const T val);
+	T_R_C_C2 friend matrix<T, R, C2> operator *(const matrix<T, R, C> m1, const matrix<T, C, C2> m2);
+	T_R_C friend matrix<T, R, C> operator *(const matrix<T, R, C> m, const T val);
+	T_R_C friend matrix<T, R, C> operator /(const matrix<T, R, C> m1, const T val);
+	T_R1_C1_R2_C2 friend bool operator ==(const matrix<T, R1, C1> m1, const matrix<T, R2, C2> m2);
+	T_R1_C1_R2_C2 friend bool operator !=(const matrix<T, R1, C1> m1, const matrix<T, R2, C2> m2);
+	T_R_C friend matrix<T, R, C> tran(const matrix<T, R, C> m);
 };
 
 #include "matrix.cpp"
