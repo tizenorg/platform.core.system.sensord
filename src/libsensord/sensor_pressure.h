@@ -40,7 +40,7 @@ enum pressure_data_id {
 	PRESSURE_BASE_DATA_SET 		= (PRESSURE_SENSOR << 16) | 0x0001,
 };
 
-enum pressure_evet_type {
+enum pressure_event_type {
 	PRESSURE_EVENT_RAW_DATA_REPORT_ON_TIME 		= (PRESSURE_SENSOR << 16) | 0x0001,
 };
 

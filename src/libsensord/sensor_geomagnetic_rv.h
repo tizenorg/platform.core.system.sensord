@@ -1,7 +1,7 @@
 /*
  * libsensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
  *
  */
 
-#ifndef __SENSOR_TEMPERATURE_H__
-#define __SENSOR_TEMPERATURE_H__
+#ifndef __SENSOR_GEOMAGNETIC_RV_H__
+#define __SENSOR_GEOMAGNETIC_RV_H__
 
-//! Pre-defined events for the temperature scope sensor
+//! Pre-defined events for the geomagnetic rotation vector sensor
 //! Sensor Plugin developer can add more event to their own headers
 
 #ifdef __cplusplus
@@ -29,19 +29,15 @@ extern "C"
 #endif
 
 /**
- * @defgroup SENSOR_TEMPERATURE temperature Sensor
+ * @defgroup SENSOR_GEOMAGNETIC_RV Rotation Vector Sensor
  * @ingroup SENSOR_FRAMEWORK
  *
- * These APIs are used to control the temperature sensor.
+ * These APIs are used to control the Geomagnetic Rotation Vector sensor.
  * @{
  */
 
-enum temperature_data_id {
-	TEMPERATURE_BASE_DATA_SET 		= (TEMPERATURE_SENSOR << 16) | 0x0001,
-};
-
-enum temperature_event_type {
-	TEMPERATURE_EVENT_RAW_DATA_REPORT_ON_TIME 		= (TEMPERATURE_SENSOR << 16) | 0x0001,
+enum geomagnetic_rv_event_type {
+	GEOMAGNETIC_RV_EVENT_RAW_DATA_REPORT_ON_TIME	= (GEOMAGNETIC_RV_SENSOR << 16) | 0x0001,
 };
 
 /**
@@ -54,3 +50,4 @@ enum temperature_event_type {
 
 #endif
 //! End of a file
+

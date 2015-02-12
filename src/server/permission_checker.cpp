@@ -27,10 +27,9 @@
 #define SECURITY_LIB "/usr/lib/libsecurity-server-client.so.1"
 
 permission_checker::permission_checker()
-: security_server_check_privilege_by_sockfd(NULL)
+: m_security_server_check_privilege_by_sockfd(NULL)
 , m_security_handle(NULL)
 , m_permission_set(0)
-
 {
 	init();
 }
@@ -56,10 +55,10 @@ bool permission_checker::init_security_lib(void)
 		return false;
 	}
 
-	security_server_check_privilege_by_sockfd =
+	m_security_server_check_privilege_by_sockfd =
 		(security_server_check_privilege_by_sockfd_t) dlsym(m_security_handle, "security_server_check_privilege_by_sockfd");
 
-	if (!security_server_check_privilege_by_sockfd) {
+	if (!m_security_server_check_privilege_by_sockfd) {
 		ERR("Failed to load symbol");
 		dlclose(m_security_handle);
 		m_security_handle = NULL;
@@ -94,8 +93,8 @@ int permission_checker::get_permission(int sock_fd)
 	for (unsigned int i = 0; i < m_permission_infos.size(); ++i) {
 		if (!m_permission_infos[i]->need_to_check) {
 			permission |= m_permission_infos[i]->permission;
-		} else if ((m_permission_set & m_permission_infos[i]->permission) && security_server_check_privilege_by_sockfd) {
-			if (security_server_check_privilege_by_sockfd(sock_fd, m_permission_infos[i]->name.c_str(), m_permission_infos[i]->access_right.c_str()) == 1) {
+		} else if ((m_permission_set & m_permission_infos[i]->permission) && m_security_server_check_privilege_by_sockfd) {
+			if (m_security_server_check_privilege_by_sockfd(sock_fd, m_permission_infos[i]->name.c_str(), m_permission_infos[i]->access_right.c_str()) == 1) {
 				permission |= m_permission_infos[i]->permission;
 			}
 		}

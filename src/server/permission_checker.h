@@ -55,7 +55,7 @@ private:
 	bool init_security_lib(void);
 	void init();
 
-	security_server_check_privilege_by_sockfd_t security_server_check_privilege_by_sockfd;
+	security_server_check_privilege_by_sockfd_t m_security_server_check_privilege_by_sockfd;
 	void *m_security_handle;
 
 	permission_info_vector m_permission_infos;

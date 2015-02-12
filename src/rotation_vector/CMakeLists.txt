@@ -1,3 +1,6 @@
 IF("${RV}" STREQUAL "ON")
 add_subdirectory(rv)
 ENDIF()
+IF("${GEOMAGNETIC_RV}" STREQUAL "ON")
+add_subdirectory(geomagnetic_rv)
+ENDIF()
