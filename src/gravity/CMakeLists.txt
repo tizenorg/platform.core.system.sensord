@@ -6,9 +6,6 @@ SET(SENSOR_NAME gravity_sensor)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
 
-INCLUDE(FindPkgConfig)
-PKG_CHECK_MODULES(gravity_pkgs REQUIRED vconf)
-
 FOREACH(flag ${gravity_pkgs_LDFLAGS})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
 ENDFOREACH(flag)
