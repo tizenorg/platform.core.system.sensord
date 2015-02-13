@@ -39,7 +39,8 @@ int main()
 	rotation_matrix<float> orientation_mat;
 	quaternion<float> orientation_9axis_quat;
 	quaternion<float> orientation_geomagnetic_quat;
-	orientation_sensor orien_sensor1, orien_sensor2, orien_sensor3, orien_sensor4;
+	quaternion<float> orientation_gaming_quat;
+	orientation_sensor orien_sensor1, orien_sensor2, orien_sensor3, orien_sensor4, orien_sensor5;
 
 	accel_in.open(((string)ORIENTATION_DATA_PATH + (string)"accel.txt").c_str());
 	gyro_in.open(((string)ORIENTATION_DATA_PATH + (string)"gyro.txt").c_str());
@@ -95,6 +96,10 @@ int main()
 		orientation_geomagnetic_quat = orien_sensor4.get_geomagnetic_quaternion(accel_data, magnetic_data);
 
 		cout << "Orientation geomagnetic quaternion\t" << orientation_geomagnetic_quat.m_quat << "\n\n";
+
+		orientation_gaming_quat = orien_sensor5.get_gaming_quaternion(accel_data, gyro_data);
+
+		cout << "Orientation gaming quaternion\t" << orientation_gaming_quat.m_quat << "\n\n";
 	}
 
 	accel_in.close();

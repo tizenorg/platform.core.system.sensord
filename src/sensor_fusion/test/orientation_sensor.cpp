@@ -105,4 +105,15 @@ quaternion<float> orientation_sensor::get_geomagnetic_quaternion(sensor_data<flo
 
 	return orien_filter.get_geomagnetic_quaternion(accel_data, magnetic_data);
 }
+
+
+quaternion<float> orientation_sensor::get_gaming_quaternion(sensor_data<float> accel_data,
+		sensor_data<float> gyro_data)
+{
+	pre_process_data(accel_data, accel_data, bias_accel, sign_accel, scale_accel);
+	normalize(accel_data);
+	pre_process_data(gyro_data, gyro_data, bias_gyro, sign_gyro, scale_gyro);
+
+	return orien_filter.get_gaming_quaternion(accel_data, gyro_data);
+}
 #endif
