@@ -227,6 +227,15 @@ inline void orientation_filter<TYPE>::time_update()
 
 	m_pred_cov = (m_tran_mat * m_pred_cov * tran(m_tran_mat)) + m_driv_cov;
 
+	for (int j=0; j<M6X6C; ++j) {
+		for (int i=0; i<M6X6R; ++i)	{
+			if (ABS(m_pred_cov.m_mat[i][j]) < NEGLIGIBLE_VAL)
+				m_pred_cov.m_mat[i][j] = NEGLIGIBLE_VAL;
+		}
+		if (ABS(m_state_new.m_vec[j]) < NEGLIGIBLE_VAL)
+			m_state_new.m_vec[j] = NEGLIGIBLE_VAL;
+	}
+
 	if(!is_initialized(m_quat_driv.m_quat))
 		m_quat_driv = m_quat_aid;
 
@@ -339,24 +348,28 @@ template <typename TYPE>
 inline void orientation_filter<TYPE>::measurement_update()
 {
 	matrix<TYPE, M6X6R, M6X6C> gain;
-	TYPE iden = 0;
+	matrix<TYPE, M6X6R, M6X6C> iden;
+	iden.m_mat[0][0] = iden.m_mat[1][1] = iden.m_mat[2][2] = 1;
+	iden.m_mat[3][3] = iden.m_mat[4][4] = iden.m_mat[5][5] = 1;
 
 	for (int j=0; j<M6X6C; ++j) {
-		for (int i=0; i<M6X6R; ++i)	{
+		for (int i=0; i<M6X6R; ++i) {
 			gain.m_mat[i][j] = m_pred_cov.m_mat[j][i] / (m_pred_cov.m_mat[j][j] + m_aid_cov.m_mat[j][j]);
-
 			m_state_new.m_vec[i] = m_state_new.m_vec[i] + gain.m_mat[i][j] * m_state_error.m_vec[j];
+		}
 
-			if (i == j)
-				iden = 1;
-			else
-				iden = 0;
+		matrix<TYPE, M6X6R, M6X6C> temp = iden;
 
-			m_pred_cov.m_mat[j][i] = (iden - (gain.m_mat[i][j] * m_measure_mat.m_mat[j][i])) *
-					m_pred_cov.m_mat[j][i];
+		for (int i=0; i<M6X6R; ++i)
+			temp.m_mat[i][j] = iden.m_mat[i][j] - (gain.m_mat[i][j] * m_measure_mat.m_mat[j][i]);
 
-			if (ABS(m_pred_cov.m_mat[j][i]) < NEGLIGIBLE_VAL)
-				m_pred_cov.m_mat[j][i] = NEGLIGIBLE_VAL;
+		m_pred_cov = temp * m_pred_cov;
+	}
+
+	for (int j=0; j<M6X6C; ++j) {
+		for (int i=0; i<M6X6R; ++i) {
+			if (ABS(m_pred_cov.m_mat[i][j]) < NEGLIGIBLE_VAL)
+				m_pred_cov.m_mat[i][j] = NEGLIGIBLE_VAL;
 		}
 	}
 
