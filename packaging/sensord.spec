@@ -137,17 +137,7 @@ systemctl daemon-reload
 %if %{build_test_suite} == "ON"
 %files -n sensor-test
 %defattr(-,root,root,-)
-%{_bindir}/accelerometer
-%{_bindir}/geomagnetic
-%{_bindir}/orientation
-%{_bindir}/gravity
-%{_bindir}/linear_acceleration
-%{_bindir}/gyro
-%{_bindir}/proxi
-%{_bindir}/pressure
-%{_bindir}/temperature
-%{_bindir}/light
-%{_bindir}/rotation_vector
-%{_bindir}/geomagnetic_rv
+%{_bindir}/auto_test
+%{_bindir}/tc-common
 %license LICENSE.APLv2
 %endif
