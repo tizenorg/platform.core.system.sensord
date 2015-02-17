@@ -20,7 +20,6 @@
 #include <sf_common.h>
 #include <sensor_internal_deprecated.h>
 #include <sensor_internal.h>
-#include <sensor.h>
 #include <csensor_event_listener.h>
 #include <client_common.h>
 #include <vconf.h>
