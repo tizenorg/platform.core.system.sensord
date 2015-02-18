@@ -171,7 +171,7 @@ bool geomagnetic_rv_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_accel_sensor->add_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_accel_sensor->start();
 	m_magnetic_sensor->add_client(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
@@ -186,7 +186,7 @@ bool geomagnetic_rv_sensor::on_stop(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_accel_sensor->delete_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->delete_interval((intptr_t)this, false);
 	m_accel_sensor->stop();
 	m_magnetic_sensor->delete_client(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
@@ -225,7 +225,7 @@ void geomagnetic_rv_sensor::synthesize(const sensor_event_t& event, vector<senso
 	sensor_event_t rv_event;
 	quaternion<float> quaternion_geo_rv;
 
-	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
+	if (event.event_type == ACCELEROMETER_RAW_DATA_EVENT) {
 		diff_time = event.data.timestamp - m_time;
 
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
@@ -291,7 +291,7 @@ int geomagnetic_rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_
 	if (event_type != GEOMAGNETIC_RV_EVENT_RAW_DATA_REPORT_ON_TIME)
 		return -1;
 
-	m_accel_sensor->get_sensor_data(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME, accel_data);
+	m_accel_sensor->get_sensor_data(ACCELEROMETER_RAW_DATA_EVENT, accel_data);
 	m_magnetic_sensor->get_sensor_data(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME, magnetic_data);
 
 	pre_process_data(accel, accel_data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);

@@ -198,7 +198,7 @@ bool rv_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_accel_sensor->add_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_accel_sensor->start();
 	m_gyro_sensor->add_client(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
@@ -216,7 +216,7 @@ bool rv_sensor::on_stop(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_accel_sensor->delete_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->delete_interval((intptr_t)this, false);
 	m_accel_sensor->stop();
 	m_gyro_sensor->delete_client(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
@@ -260,7 +260,7 @@ void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &
 	sensor_event_t rv_event;
 	quaternion<float> quaternion_orientation;
 
-	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
+	if (event.event_type == ACCELEROMETER_RAW_DATA_EVENT) {
 		diff_time = event.data.timestamp - m_time;
 
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
@@ -343,7 +343,7 @@ int rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
 	if (event_type != ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME)
 		return -1;
 
-	m_accel_sensor->get_sensor_data(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME, accel_data);
+	m_accel_sensor->get_sensor_data(ACCELEROMETER_RAW_DATA_EVENT, accel_data);
 	m_gyro_sensor->get_sensor_data(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME, gyro_data);
 	m_magnetic_sensor->get_sensor_data(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME, magnetic_data);
 
