@@ -235,7 +235,7 @@ bool orientation_sensor::on_start(void)
 	m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_accel_sensor->start();
-	m_gyro_sensor->add_client(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_gyro_sensor->add_client(GYROSCOPE_RAW_DATA_EVENT);
 	m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_gyro_sensor->start();
 	m_magnetic_sensor->add_client(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
@@ -253,7 +253,7 @@ bool orientation_sensor::on_stop(void)
 	m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->delete_interval((intptr_t)this, false);
 	m_accel_sensor->stop();
-	m_gyro_sensor->delete_client(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_gyro_sensor->delete_client(GYROSCOPE_RAW_DATA_EVENT);
 	m_gyro_sensor->delete_interval((intptr_t)this, false);
 	m_gyro_sensor->stop();
 	m_magnetic_sensor->delete_client(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
@@ -306,7 +306,7 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 
 		m_enable_orientation |= ACCELEROMETER_ENABLED;
 	}
-	else if (event.event_type == GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME) {
+	else if (event.event_type == GYROSCOPE_RAW_DATA_EVENT) {
 		diff_time = event.data.timestamp - m_time;
 
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
@@ -389,7 +389,7 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 		return -1;
 
 	m_accel_sensor->get_sensor_data(ACCELEROMETER_RAW_DATA_EVENT, accel_data);
-	m_gyro_sensor->get_sensor_data(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME, gyro_data);
+	m_gyro_sensor->get_sensor_data(GYROSCOPE_RAW_DATA_EVENT, gyro_data);
 	m_magnetic_sensor->get_sensor_data(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME, magnetic_data);
 
 	pre_process_data(accel, accel_data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);

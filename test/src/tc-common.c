@@ -67,7 +67,7 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		break;
 	case GYROSCOPE_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
-			return GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME;
+			return GYROSCOPE_RAW_DATA_EVENT;
 		break;
 	case PRESSURE_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 	}
 	else if (strcmp(argv[1], "gyroscope") == 0) {
 		 sensor_type = GYROSCOPE_SENSOR;
-		 event = GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME;
+		 event = GYROSCOPE_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "pressure") == 0) {
 		 sensor_type = PRESSURE_SENSOR;
