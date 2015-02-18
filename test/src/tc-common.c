@@ -71,7 +71,7 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		break;
 	case PRESSURE_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
-			return PRESSURE_EVENT_RAW_DATA_REPORT_ON_TIME;
+			return PRESSURE_RAW_DATA_EVENT;
 		break;
 	case GEOMAGNETIC_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 	}
 	else if (strcmp(argv[1], "pressure") == 0) {
 		 sensor_type = PRESSURE_SENSOR;
-		 event = PRESSURE_EVENT_RAW_DATA_REPORT_ON_TIME;
+		 event = PRESSURE_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "temperature") == 0) {
 		 sensor_type = TEMPERATURE_SENSOR;
