@@ -42,8 +42,8 @@ accel_sensor::accel_sensor()
 	m_name = string(SENSOR_NAME);
 
 	vector<unsigned int> supported_events = {
-		ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME,
-		ACCELEROMETER_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME,
+		ACCELEROMETER_EVENT_RAW_DATA,
+		ACCELEROMETER_EVENT_UNPROCESSED_DATA,
 	};
 
 	for_each(supported_events.begin(), supported_events.end(),
@@ -104,15 +104,15 @@ bool accel_sensor::process_event(void)
 	AUTOLOCK(m_mutex);
 	AUTOLOCK(m_client_info_mutex);
 
-	if (get_client_cnt(ACCELEROMETER_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME)) {
+	if (get_client_cnt(ACCELEROMETER_EVENT_UNPROCESSED_DATA)) {
 		base_event.sensor_id = get_id();
-		base_event.event_type = ACCELEROMETER_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME;
+		base_event.event_type = ACCELEROMETER_EVENT_UNPROCESSED_DATA;
 		push(base_event);
 	}
 
-	if (get_client_cnt(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME)) {
+	if (get_client_cnt(ACCELEROMETER_EVENT_RAW_DATA)) {
 		base_event.sensor_id = get_id();
-		base_event.event_type = ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME;
+		base_event.event_type = ACCELEROMETER_EVENT_RAW_DATA;
 		raw_to_base(base_event.data);
 		push(base_event);
 	}
@@ -152,7 +152,7 @@ int accel_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 		return -1;
 	}
 
-	if (type == ACCELEROMETER_BASE_DATA_SET) {
+	if (type == ACCELEROMETER_EVENT_RAW_DATA) {
 		raw_to_base(data);
 	} else {
 		ERR("Does not support type: 0x%x", type);

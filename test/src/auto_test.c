@@ -199,7 +199,7 @@ int main(int argc, char **argv)
 
 	fp = fopen("auto_test.output", "w+");
 
-	result = check_sensor_api(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME, interval);
+	result = check_sensor_api(ACCELEROMETER_EVENT_RAW_DATA, interval);
 	fprintf(fp, "Accelerometer - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
 	result = check_sensor_api(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME, interval);

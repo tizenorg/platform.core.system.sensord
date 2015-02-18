@@ -110,7 +110,7 @@ bool auto_rotation_sensor::on_start(void)
 
 	m_alg->start();
 
-	m_accel_sensor->add_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_accel_sensor->add_client(ACCELEROMETER_EVENT_RAW_DATA);
 	m_accel_sensor->add_interval((int)this , SAMPLING_TIME, true);
 	m_accel_sensor->start();
 
@@ -119,7 +119,7 @@ bool auto_rotation_sensor::on_start(void)
 
 bool auto_rotation_sensor::on_stop(void)
 {
-	m_accel_sensor->delete_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_accel_sensor->delete_client(ACCELEROMETER_EVENT_RAW_DATA);
 	m_accel_sensor->delete_interval((int)this , true);
 	m_accel_sensor->stop();
 
@@ -130,7 +130,7 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event, vector<sensor
 {
 	AUTOLOCK(m_mutex);
 
-	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
+	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA) {
 		int rotation;
 		float acc[3];
 		acc[0] = event.data.values[0];
