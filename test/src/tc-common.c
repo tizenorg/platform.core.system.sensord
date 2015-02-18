@@ -75,7 +75,7 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		break;
 	case GEOMAGNETIC_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
-			return GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME;
+			return GEOMAGNETIC_RAW_DATA_EVENT;
 		break;
 	case LIGHT_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
@@ -193,7 +193,7 @@ int main(int argc, char **argv)
 	}
 	else if (strcmp(argv[1], "geomagnetic") == 0) {
 		 sensor_type = GEOMAGNETIC_SENSOR;
-		 event = GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME;
+		 event = GEOMAGNETIC_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "orientation") == 0) {
 		 sensor_type = ORIENTATION_SENSOR;
