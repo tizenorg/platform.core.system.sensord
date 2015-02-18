@@ -150,7 +150,7 @@ bool linear_accel_sensor::on_start(void)
 	m_gravity_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_gravity_sensor->start();
 
-	m_accel_sensor->add_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_accel_sensor->start();
 
@@ -165,7 +165,7 @@ bool linear_accel_sensor::on_stop(void)
 	m_gravity_sensor->delete_interval((intptr_t)this, false);
 	m_gravity_sensor->stop();
 
-	m_accel_sensor->delete_client(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->delete_interval((intptr_t)this, false);
 	m_accel_sensor->stop();
 
@@ -197,7 +197,7 @@ void linear_accel_sensor::synthesize(const sensor_event_t &event, vector<sensor_
 
 	unsigned long long diff_time;
 
-	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
+	if (event.event_type == ACCELEROMETER_RAW_DATA_EVENT) {
 		diff_time = event.data.timestamp - m_time;
 
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
@@ -248,7 +248,7 @@ int linear_accel_sensor::get_sensor_data(const unsigned int event_type, sensor_d
 {
 	sensor_data_t gravity_data, accel_data;
 	((virtual_sensor *)m_gravity_sensor)->get_sensor_data(GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME, gravity_data);
-	m_accel_sensor->get_sensor_data(ACCELEROMETER_BASE_DATA_SET, accel_data);
+	m_accel_sensor->get_sensor_data(ACCELEROMETER_RAW_DATA_EVENT, accel_data);
 
 	accel_data.values[0] = m_accel_rotation_direction_compensation[0] * (accel_data.values[0] - m_accel_static_bias[0]) / m_accel_scale;
 	accel_data.values[1] = m_accel_rotation_direction_compensation[1] * (accel_data.values[1] - m_accel_static_bias[1]) / m_accel_scale;

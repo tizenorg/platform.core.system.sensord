@@ -853,13 +853,13 @@ void insert_priority_list(unsigned int event_type)
 			event_type == LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME ||
 			event_type == GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME ||
 			event_type == ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME) {
-		priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+		priority_list.insert(ACCELEROMETER_RAW_DATA_EVENT);
 		priority_list.insert(GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME);
 		priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
 	}
 
 	if (event_type == GEOMAGNETIC_RV_EVENT_RAW_DATA_REPORT_ON_TIME) {
-		priority_list.insert(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+		priority_list.insert(ACCELEROMETER_RAW_DATA_EVENT);
 		priority_list.insert(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
 	}
 }

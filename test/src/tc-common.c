@@ -63,7 +63,7 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 	switch (sensor_type) {
 	case ACCELEROMETER_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
-			return ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME;
+			return ACCELEROMETER_RAW_DATA_EVENT;
 		break;
 	case GYROSCOPE_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
@@ -177,7 +177,7 @@ int main(int argc, char **argv)
 
 	if (strcmp(argv[1], "accelerometer") == 0) {
 		 sensor_type = ACCELEROMETER_SENSOR;
-		 event = ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME;
+		 event = ACCELEROMETER_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "gyroscope") == 0) {
 		 sensor_type = GYROSCOPE_SENSOR;
