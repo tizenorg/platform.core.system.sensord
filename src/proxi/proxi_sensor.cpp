@@ -30,9 +30,9 @@ proxi_sensor::proxi_sensor()
 {
 	m_name = string(SENSOR_NAME);
 
-	register_supported_event(PROXIMITY_EVENT_CHANGE_STATE);
-	register_supported_event(PROXIMITY_EVENT_STATE_REPORT_ON_TIME);
-	register_supported_event(PROXIMITY_EVENT_DISTANCE_DATA_REPORT_ON_TIME);
+	register_supported_event(PROXIMITY_CHANGE_STATE_EVENT);
+	register_supported_event(PROXIMITY_STATE_EVENT);
+	register_supported_event(PROXIMITY_DISTANCE_DATA_EVENT);
 
 	physical_sensor::set_poller(proxi_sensor::working, this);
 }
@@ -80,8 +80,8 @@ bool proxi_sensor::process_event(void)
 	AUTOLOCK(m_mutex);
 
 	event.sensor_id = get_id();
-	if (get_client_cnt(PROXIMITY_EVENT_DISTANCE_DATA_REPORT_ON_TIME)) {
-		event.event_type = PROXIMITY_EVENT_DISTANCE_DATA_REPORT_ON_TIME;
+	if (get_client_cnt(PROXIMITY_DISTANCE_DATA_EVENT)) {
+		event.event_type = PROXIMITY_DISTANCE_DATA_EVENT;
 		raw_to_base(event.data);
 		push(event);
 	}
@@ -92,8 +92,8 @@ bool proxi_sensor::process_event(void)
 		AUTOLOCK(m_value_mutex);
 		m_state = state;
 
-		if (get_client_cnt(PROXIMITY_EVENT_CHANGE_STATE)) {
-			event.event_type = PROXIMITY_EVENT_CHANGE_STATE;
+		if (get_client_cnt(PROXIMITY_CHANGE_STATE_EVENT)) {
+			event.event_type = PROXIMITY_CHANGE_STATE_EVENT;
 			raw_to_base(event.data);
 			push(event);
 		}
@@ -136,7 +136,7 @@ int proxi_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 {
 	int state;
 
-	if ((type != PROXIMITY_BASE_DATA_SET) && (type != PROXIMITY_DISTANCE_DATA_SET))
+	if ((type != PROXIMITY_CHANGE_STATE_EVENT) && (type != PROXIMITY_STATE_EVENT))
 		return -1;
 
 	state = m_sensor_hal->get_sensor_data(data);

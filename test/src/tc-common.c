@@ -87,7 +87,7 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		break;
 	case PROXIMITY_SENSOR:
 		if (strcmp(str, "EVENT_CHANGE_STATE") == 0)
-			return PROXIMITY_EVENT_CHANGE_STATE;
+			return PROXIMITY_CHANGE_STATE_EVENT;
 		break;
 	case ORIENTATION_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
@@ -221,7 +221,7 @@ int main(int argc, char **argv)
 	}
 	else if (strcmp(argv[1], "proximity") == 0) {
 		 sensor_type = PROXIMITY_SENSOR;
-		 event = PROXIMITY_EVENT_CHANGE_STATE;
+		 event = PROXIMITY_CHANGE_STATE_EVENT;
 	}
 	else {
 		 usage();
