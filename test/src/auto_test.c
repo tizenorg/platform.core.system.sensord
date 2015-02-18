@@ -202,7 +202,7 @@ int main(int argc, char **argv)
 	result = check_sensor_api(ACCELEROMETER_RAW_DATA_EVENT, interval);
 	fprintf(fp, "Accelerometer - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
-	result = check_sensor_api(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME, interval);
+	result = check_sensor_api(GEOMAGNETIC_RAW_DATA_EVENT, interval);
 	fprintf(fp, "Geomagnetic - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
 	result = check_sensor_api(GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME, interval);
