@@ -43,7 +43,7 @@ pressure_sensor::pressure_sensor()
 {
 	m_name = string(SENSOR_NAME);
 
-	register_supported_event(PRESSURE_EVENT_RAW_DATA_REPORT_ON_TIME);
+	register_supported_event(PRESSURE_RAW_DATA_EVENT);
 
 	physical_sensor::set_poller(pressure_sensor::working, this);
 }
@@ -122,9 +122,9 @@ bool pressure_sensor::process_event(void)
 
 	AUTOLOCK(m_client_info_mutex);
 
-	if (get_client_cnt(PRESSURE_EVENT_RAW_DATA_REPORT_ON_TIME)) {
+	if (get_client_cnt(PRESSURE_RAW_DATA_EVENT)) {
 		event.sensor_id = get_id();
-		event.event_type = PRESSURE_EVENT_RAW_DATA_REPORT_ON_TIME;
+		event.event_type = PRESSURE_RAW_DATA_EVENT;
 		raw_to_base(event.data);
 		push(event);
 	}
@@ -166,7 +166,7 @@ int pressure_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 	if (ret < 0)
 		return -1;
 
-	if (type == PRESSURE_BASE_DATA_SET) {
+	if (type == PRESSURE_RAW_DATA_EVENT) {
 		raw_to_base(data);
 		return 0;
 	}
