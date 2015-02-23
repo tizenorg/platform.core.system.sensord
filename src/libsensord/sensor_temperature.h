@@ -36,12 +36,8 @@ extern "C"
  * @{
  */
 
-enum temperature_data_id {
-	TEMPERATURE_BASE_DATA_SET 		= (TEMPERATURE_SENSOR << 16) | 0x0001,
-};
-
 enum temperature_event_type {
-	TEMPERATURE_EVENT_RAW_DATA_REPORT_ON_TIME 		= (TEMPERATURE_SENSOR << 16) | 0x0001,
+	TEMPERATURE_RAW_DATA_EVENT	= (TEMPERATURE_SENSOR << 16) | 0x0001,
 };
 
 /**
