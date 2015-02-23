@@ -21,7 +21,7 @@
 
 TYPE_SIZE vect<TYPE, SIZE>::vect(void)
 {
-	for(int i=0;i<SIZE;i++)
+	for (int i = 0; i < SIZE; i++)
 		m_vec[i] = 0;
 }
 
@@ -46,20 +46,18 @@ TYPE_SIZE vect<TYPE, SIZE>::~vect()
 TYPE_SIZE vect<TYPE, SIZE> vect<TYPE, SIZE>::operator =(const vect<TYPE, SIZE>& v)
 {
 	if (this == &v)
-	{
 		return *this;
-	}
+
 	for (int q = 0; q < SIZE; q++)
 		m_vec[q] = v.m_vec[q];
-			return *this;
+
+	return *this;
 }
 
 T_S ostream& operator <<(ostream& dout, vect<T, S>& v)
 {
 	for (int j = 0; j < S; j++)
-	{
 		dout << v.m_vec[j] << "\t";
-	}
 
 	dout << endl;
 
@@ -114,12 +112,8 @@ T_S_R_C matrix<T, R, S> operator *(const matrix<T, R, C> m, const vect<T, S> v)
 	matrix<T,R,S> m1;
 
 	for (int i = 0; i < R; i++)
-	{
 		for (int j = 0; j < S; j++)
-		{
 			m1.m_mat[i][j] = m.m_mat[i][0] * v.m_vec[j];
-		}
-	}
 
 	return m1;
 }

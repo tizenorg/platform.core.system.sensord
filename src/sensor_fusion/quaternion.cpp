@@ -30,7 +30,7 @@ template <typename T> int sgn(T val) {
 
 template <typename T> T mag(T val) {
 	if (val < 0)
-		return val * (T)-1;
+		return val * static_cast<T>(-1);
 	else
 		return val;
 }
