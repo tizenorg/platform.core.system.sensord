@@ -83,7 +83,7 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		break;
 	case TEMPERATURE_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
-			return TEMPERATURE_EVENT_RAW_DATA_REPORT_ON_TIME;
+			return TEMPERATURE_RAW_DATA_EVENT;
 		break;
 	case PROXIMITY_SENSOR:
 		if (strcmp(str, "EVENT_CHANGE_STATE") == 0)
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
 	}
 	else if (strcmp(argv[1], "temperature") == 0) {
 		 sensor_type = TEMPERATURE_SENSOR;
-		 event = TEMPERATURE_EVENT_RAW_DATA_REPORT_ON_TIME;
+		 event = TEMPERATURE_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "geomagnetic") == 0) {
 		 sensor_type = GEOMAGNETIC_SENSOR;
