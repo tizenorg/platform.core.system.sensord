@@ -280,7 +280,13 @@ int main(int argc, char **argv)
 	g_main_loop_run(mainloop);
 	g_main_loop_unref(mainloop);
 
-	sensord_unregister_event(handle, event);
+	result = sensord_unregister_event(handle, event);
+
+	if (result < 0) {
+		printf("Error\n\n");
+		return -1;
+	}
+
 	stop_handle = sensord_stop(handle);
 
 	if (stop_handle < 0) {
