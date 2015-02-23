@@ -31,9 +31,9 @@ geo_sensor::geo_sensor()
 {
 	m_name = string(SENSOR_NAME);
 
-	register_supported_event(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME);
-	register_supported_event(GEOMAGNETIC_EVENT_CALIBRATION_NEEDED);
-	register_supported_event(GEOMAGNETIC_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME);
+	register_supported_event(GEOMAGNETIC_RAW_DATA_EVENT);
+	register_supported_event(GEOMAGNETIC_CALIBRATION_NEEDED_EVENT);
+	register_supported_event(GEOMAGNETIC_UNPROCESSED_DATA_EVENT);
 
 	physical_sensor::set_poller(geo_sensor::working, this);
 }
@@ -89,15 +89,15 @@ bool geo_sensor::process_event(void)
 	AUTOLOCK(m_client_info_mutex);
 	AUTOLOCK(m_mutex);
 
-	if (get_client_cnt(GEOMAGNETIC_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME)) {
+	if (get_client_cnt(GEOMAGNETIC_UNPROCESSED_DATA_EVENT)) {
 		event.sensor_id = get_id();
-		event.event_type = GEOMAGNETIC_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME;
+		event.event_type = GEOMAGNETIC_UNPROCESSED_DATA_EVENT;
 		push(event);
 	}
 
-	if (get_client_cnt(GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME)) {
+	if (get_client_cnt(GEOMAGNETIC_RAW_DATA_EVENT)) {
 		event.sensor_id = get_id();
-		event.event_type = GEOMAGNETIC_EVENT_RAW_DATA_REPORT_ON_TIME;
+		event.event_type = GEOMAGNETIC_RAW_DATA_EVENT;
 		raw_to_base(event.data);
 		push(event);
 	}
@@ -134,7 +134,7 @@ int geo_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 {
 	int state;
 
-	if (type != GEOMAGNETIC_BASE_DATA_SET)
+	if (type != GEOMAGNETIC_RAW_DATA_EVENT)
 		return -1;
 
 	state = m_sensor_hal->get_sensor_data(data);
