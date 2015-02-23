@@ -30,7 +30,7 @@ temperature_sensor::temperature_sensor()
 {
 	m_name = string(SENSOR_NAME);
 
-	register_supported_event(TEMPERATURE_EVENT_RAW_DATA_REPORT_ON_TIME);
+	register_supported_event(TEMPERATURE_RAW_DATA_EVENT);
 
 	physical_sensor::set_poller(temperature_sensor::working, this);
 }
@@ -85,9 +85,9 @@ bool temperature_sensor::process_event(void)
 
 	AUTOLOCK(m_client_info_mutex);
 
-	if (get_client_cnt(TEMPERATURE_EVENT_RAW_DATA_REPORT_ON_TIME)) {
+	if (get_client_cnt(TEMPERATURE_RAW_DATA_EVENT)) {
 		event.sensor_id = get_id();
-		event.event_type = TEMPERATURE_EVENT_RAW_DATA_REPORT_ON_TIME;
+		event.event_type = TEMPERATURE_RAW_DATA_EVENT;
 		raw_to_base(event.data);
 		push(event);
 	}
@@ -129,7 +129,7 @@ int temperature_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 	if (ret < 0)
 		return -1;
 
-	if (type == TEMPERATURE_BASE_DATA_SET) {
+	if (type == TEMPERATURE_RAW_DATA_EVENT) {
 		raw_to_base(data);
 		return 0;
 	}
