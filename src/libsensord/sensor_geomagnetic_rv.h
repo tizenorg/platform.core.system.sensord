@@ -48,6 +48,4 @@ enum geomagnetic_rv_event_type {
 }
 #endif
 
-#endif
-//! End of a file
-
+#endif /* __SENSOR_GEOMAGNETIC_RV_H__ */

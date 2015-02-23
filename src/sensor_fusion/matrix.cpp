@@ -51,9 +51,9 @@ TYPE_ROW_COL matrix<TYPE, ROW, COL> matrix<TYPE, ROW, COL>::operator =(const mat
 		return *this;
 	}
 
-	for (int p = 0; p < ROW; p++)
-		for (int q = 0; q < COL; q++)
-			m_mat[p][q] = m.m_mat[p][q];
+	for (int i = 0; i < ROW; i++)
+		for (int j = 0; j < COL; j++)
+			m_mat[i][j] = m.m_mat[i][j];
 
 	return *this;
 }

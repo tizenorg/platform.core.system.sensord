@@ -84,7 +84,7 @@ inline void orientation_filter<TYPE>::init_accel_gyro_mag_data(const sensor_data
 	m_magnetic.m_data = magnetic.m_data;
 
 	if (m_gyro.m_time_stamp != 0 && gyro.m_time_stamp != 0)
-		sample_interval_gyro = 	gyro.m_time_stamp - m_gyro.m_time_stamp;
+		sample_interval_gyro = gyro.m_time_stamp - m_gyro.m_time_stamp;
 
 	m_gyro_dt = sample_interval_gyro * US2S;
 

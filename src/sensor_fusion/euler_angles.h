@@ -29,7 +29,7 @@
 template <typename TYPE>
 class euler_angles {
 public:
-	vect<TYPE,EULER_SIZE> m_ang;
+	vect<TYPE, EULER_SIZE> m_ang;
 
 	euler_angles();
 	euler_angles(const TYPE roll, const TYPE pitch, const TYPE azimuth);
