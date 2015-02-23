@@ -333,8 +333,7 @@ inline void orientation_filter<TYPE>::time_update_gaming_rv()
 
 	m_quat_gaming_rv = euler2quat(euler_gaming_rv);
 
-	if (is_initialized(m_state_new))
-	{
+	if (is_initialized(m_state_new)) {
 		m_state_error.m_vec[0] = euler_error.m_ang.m_vec[0];
 		m_state_error.m_vec[1] = euler_error.m_ang.m_vec[1];
 		m_state_error.m_vec[2] = euler_error.m_ang.m_vec[2];
