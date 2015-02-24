@@ -21,7 +21,6 @@
 #include <sensor_plugin_loader.h>
 #include <common.h>
 #include <sf_common.h>
-#include <vconf.h>
 #include <thread>
 using std::thread;
 
