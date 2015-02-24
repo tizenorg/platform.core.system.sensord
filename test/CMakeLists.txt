@@ -6,7 +6,7 @@ SET(EXEC_PREFIX "\${prefix}")
 SET(VERSION 1.0)
 
 INCLUDE(FindPkgConfig)
-pkg_check_modules(pkgs REQUIRED glib-2.0 dlog)
+pkg_check_modules(pkgs REQUIRED glib-2.0)
 
 add_definitions(${rpkgs_CFLAGS})
 add_definitions(-DPREFIX="${CMAKE_INSTALL_PREFIX}")
