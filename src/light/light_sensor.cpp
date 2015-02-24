@@ -38,9 +38,9 @@ light_sensor::light_sensor()
 	m_name = string(SENSOR_NAME);
 
 	vector<unsigned int> supported_events = {
-		LIGHT_EVENT_CHANGE_LEVEL,
-		LIGHT_EVENT_LEVEL_DATA_REPORT_ON_TIME,
-		LIGHT_EVENT_LUX_DATA_REPORT_ON_TIME,
+		LIGHT_CHANGE_LEVEL_EVENT,
+		LIGHT_LEVEL_DATA_EVENT,
+		LIGHT_LUX_DATA_EVENT,
 	};
 
 	for_each(supported_events.begin(), supported_events.end(),
@@ -92,13 +92,13 @@ bool light_sensor::process_event(void)
 	AUTOLOCK(m_client_info_mutex);
 
 	event.sensor_id = get_id();
-	if (get_client_cnt(LIGHT_EVENT_LUX_DATA_REPORT_ON_TIME)) {
-		event.event_type = LIGHT_EVENT_LUX_DATA_REPORT_ON_TIME;
+	if (get_client_cnt(LIGHT_LUX_DATA_EVENT)) {
+		event.event_type = LIGHT_LUX_DATA_EVENT;
 		push(event);
 	}
 
-	if (get_client_cnt(LIGHT_EVENT_LEVEL_DATA_REPORT_ON_TIME)) {
-		event.event_type = LIGHT_EVENT_LEVEL_DATA_REPORT_ON_TIME;
+	if (get_client_cnt(LIGHT_LEVEL_DATA_EVENT)) {
+		event.event_type = LIGHT_LEVEL_DATA_EVENT;
 		raw_to_level(event.data);
 		push(event);
 	}
@@ -106,8 +106,8 @@ bool light_sensor::process_event(void)
 	if (m_level != level) {
 		m_level = level;
 
-		if (get_client_cnt(LIGHT_EVENT_CHANGE_LEVEL)) {
-			event.event_type = LIGHT_EVENT_CHANGE_LEVEL;
+		if (get_client_cnt(LIGHT_CHANGE_LEVEL_EVENT)) {
+			event.event_type = LIGHT_CHANGE_LEVEL_EVENT;
 			raw_to_level(event.data);
 			push(event);
 		}
@@ -162,10 +162,10 @@ int light_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 	if (ret < 0)
 		return -1;
 
-	if (type == LIGHT_LUX_DATA_SET)
+	if (type == LIGHT_LUX_DATA_EVENT)
 		return 0;
 
-	if (type == LIGHT_BASE_DATA_SET) {
+	if (type == LIGHT_LEVEL_DATA_EVENT) {
 		raw_to_level(data);
 		return 0;
 	}
