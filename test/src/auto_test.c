@@ -226,6 +226,9 @@ int main(int argc, char **argv)
 	result = check_sensor_api(ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME, interval);
 	fprintf(fp, "Rotation Vector - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
+	result = check_sensor_api(GEOMAGNETIC_RV_RAW_DATA_EVENT, interval);
+	fprintf(fp, "Geomagnetic Rotation Vector - RAW_DATA_REPORT_ON_TIME - %d\n", result);
+
 	result = check_sensor_api(TEMPERATURE_EVENT_RAW_DATA_REPORT_ON_TIME, interval);
 	fprintf(fp, "Temperature - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 

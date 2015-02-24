@@ -37,7 +37,7 @@ extern "C"
  */
 
 enum geomagnetic_rv_event_type {
-	GEOMAGNETIC_RV_EVENT_RAW_DATA_REPORT_ON_TIME	= (GEOMAGNETIC_RV_SENSOR << 16) | 0x0001,
+	GEOMAGNETIC_RV_RAW_DATA_EVENT	= (GEOMAGNETIC_RV_SENSOR << 16) | 0x0001,
 };
 
 /**
