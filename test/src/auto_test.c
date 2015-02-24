@@ -211,7 +211,7 @@ int main(int argc, char **argv)
 	result = check_sensor_api(GYROSCOPE_RAW_DATA_EVENT, interval);
 	fprintf(fp, "Gyroscope - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
-	result = check_sensor_api(LIGHT_EVENT_LUX_DATA_REPORT_ON_TIME, interval);
+	result = check_sensor_api(LIGHT_LUX_DATA_EVENT, interval);
 	fprintf(fp, "Light - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
 	result = check_sensor_api(LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME, interval);
