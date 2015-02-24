@@ -36,12 +36,8 @@ extern "C"
  * @{
  */
 
-enum auto_rotation_data_id {
-	AUTO_ROTATION_BASE_DATA_SET	= (AUTO_ROTATION_SENSOR << 16) | 0x0001,
-};
-
 enum auto_rotation_event_type {
-	AUTO_ROTATION_EVENT_CHANGE_STATE = (AUTO_ROTATION_SENSOR << 16) | 0x0001,
+	AUTO_ROTATION_CHANGE_STATE_EVENT = (AUTO_ROTATION_SENSOR << 16) | 0x0001,
 };
 
 enum auto_rotation_state {
