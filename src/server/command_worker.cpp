@@ -862,4 +862,9 @@ void insert_priority_list(unsigned int event_type)
 		priority_list.insert(ACCELEROMETER_RAW_DATA_EVENT);
 		priority_list.insert(GEOMAGNETIC_RAW_DATA_EVENT);
 	}
+
+	if (event_type == GAMING_RV_RAW_DATA_EVENT) {
+		priority_list.insert(ACCELEROMETER_RAW_DATA_EVENT);
+		priority_list.insert(GYROSCOPE_RAW_DATA_EVENT);
+	}
 }
