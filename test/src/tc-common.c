@@ -80,7 +80,7 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		break;
 	case LIGHT_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
-			return LIGHT_EVENT_LUX_DATA_REPORT_ON_TIME;
+			return LIGHT_LUX_DATA_EVENT;
 		break;
 	case TEMPERATURE_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
@@ -229,7 +229,7 @@ int main(int argc, char **argv)
 	}
 	else if (strcmp(argv[1], "light") == 0) {
 		 sensor_type = LIGHT_SENSOR;
-		 event = LIGHT_EVENT_LUX_DATA_REPORT_ON_TIME;
+		 event = LIGHT_LUX_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "proximity") == 0) {
 		 sensor_type = PROXIMITY_SENSOR;
