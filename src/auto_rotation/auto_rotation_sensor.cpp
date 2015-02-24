@@ -49,7 +49,7 @@ auto_rotation_sensor::auto_rotation_sensor()
 {
 	m_name = string(SENSOR_NAME);
 
-	register_supported_event(AUTO_ROTATION_EVENT_CHANGE_STATE);
+	register_supported_event(AUTO_ROTATION_CHANGE_STATE_EVENT);
 }
 
 auto_rotation_sensor::~auto_rotation_sensor()
@@ -146,7 +146,7 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event, vector<sensor
 		INFO("Rotation: %d, ACC[0]: %f, ACC[1]: %f, ACC[2]: %f", rotation, event.data.values[0], event.data.values[1], event.data.values[2]);
 		rotation_event.sensor_id = get_id();
 		rotation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
-		rotation_event.event_type = AUTO_ROTATION_EVENT_CHANGE_STATE;
+		rotation_event.event_type = AUTO_ROTATION_CHANGE_STATE_EVENT;
 		rotation_event.data.timestamp = event.data.timestamp;
 		rotation_event.data.values[0] = rotation;
 		rotation_event.data.value_count = 1;
@@ -161,7 +161,7 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event, vector<sensor
 
 int auto_rotation_sensor::get_sensor_data(unsigned int data_id, sensor_data_t &data)
 {
-	if (data_id != AUTO_ROTATION_BASE_DATA_SET)
+	if (data_id != AUTO_ROTATION_CHANGE_STATE_EVENT)
 		return -1;
 
 	AUTOLOCK(m_value_mutex);
