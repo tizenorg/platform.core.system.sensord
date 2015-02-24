@@ -25,7 +25,6 @@
 #include <cclient_info_manager.h>
 #include <csocket.h>
 #include <virtual_sensor.h>
-#include <vconf.h>
 
 typedef unordered_map<unsigned int, sensor_event_t> event_type_last_event_map;
 typedef list<virtual_sensor *> virtual_sensors;

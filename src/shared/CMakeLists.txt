@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(sf_common CXX)
 
 INCLUDE(FindPkgConfig)
-PKG_CHECK_MODULES(shared_pkgs REQUIRED vconf dlog libxml-2.0)
+PKG_CHECK_MODULES(shared_pkgs REQUIRED dlog libxml-2.0)
 
 FOREACH(flag ${shared_pkgs_LDFLAGS})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
