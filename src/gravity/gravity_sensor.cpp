@@ -58,7 +58,7 @@ gravity_sensor::gravity_sensor()
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
 	m_name = std::string(SENSOR_NAME);
-	register_supported_event(GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME);
+	register_supported_event(GRAVITY_RAW_DATA_EVENT);
 
 	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
@@ -187,7 +187,7 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 		m_time = get_timestamp();
 
 		gravity_event.sensor_id = get_id();
-		gravity_event.event_type = GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME;
+		gravity_event.event_type = GRAVITY_RAW_DATA_EVENT;
 		if ((roll >= (M_PI/2)-DEVIATION && roll <= (M_PI/2)+DEVIATION) ||
 				(roll >= -(M_PI/2)-DEVIATION && roll <= -(M_PI/2)+DEVIATION)) {
 			gravity_event.data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(roll) * cos(azimuth);
@@ -228,7 +228,7 @@ int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t
 		roll *= DEG2RAD;
 	}
 
-	if (event_type != GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME)
+	if (event_type != GRAVITY_RAW_DATA_EVENT)
 		return -1;
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
