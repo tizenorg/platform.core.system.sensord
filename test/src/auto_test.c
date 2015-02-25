@@ -214,7 +214,7 @@ int main(int argc, char **argv)
 	result = check_sensor_api(LIGHT_LUX_DATA_EVENT, interval);
 	fprintf(fp, "Light - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
-	result = check_sensor_api(LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME, interval);
+	result = check_sensor_api(LINEAR_ACCEL_RAW_DATA_EVENT, interval);
 	fprintf(fp, "Linear Accel - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
 	result = check_sensor_api(ORIENTATION_RAW_DATA_EVENT, interval);
