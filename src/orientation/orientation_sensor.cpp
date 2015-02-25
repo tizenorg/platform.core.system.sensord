@@ -83,7 +83,7 @@ orientation_sensor::orientation_sensor()
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
 	m_name = string(SENSOR_NAME);
-	register_supported_event(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
+	register_supported_event(ORIENTATION_RAW_DATA_EVENT);
 	m_enable_orientation = 0;
 
 	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_VENDOR, m_vendor)) {
@@ -355,7 +355,7 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		m_time = get_timestamp();
 
 		orientation_event.sensor_id = get_id();
-		orientation_event.event_type = ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME;
+		orientation_event.event_type = ORIENTATION_RAW_DATA_EVENT;
 		orientation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 		orientation_event.data.timestamp = m_time;
 		orientation_event.data.value_count = 3;
@@ -385,7 +385,7 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 	euler_angles<float> euler_orientation;
 	float azimuth_offset;
 
-	if (event_type != ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME)
+	if (event_type != ORIENTATION_RAW_DATA_EVENT)
 		return -1;
 
 	m_accel_sensor->get_sensor_data(ACCELEROMETER_RAW_DATA_EVENT, accel_data);
