@@ -125,7 +125,7 @@ bool gravity_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_orientation_sensor->add_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_orientation_sensor->add_client(ORIENTATION_RAW_DATA_EVENT);
 	m_orientation_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_orientation_sensor->start();
 
@@ -137,7 +137,7 @@ bool gravity_sensor::on_stop(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_orientation_sensor->delete_client(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME);
+	m_orientation_sensor->delete_client(ORIENTATION_RAW_DATA_EVENT);
 	m_orientation_sensor->delete_interval((intptr_t)this, false);
 	m_orientation_sensor->stop();
 
@@ -178,7 +178,7 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 		roll *= DEG2RAD;
 	}
 
-	if (event.event_type == ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME) {
+	if (event.event_type == ORIENTATION_RAW_DATA_EVENT) {
 		diff_time = event.data.timestamp - m_time;
 
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
@@ -216,7 +216,7 @@ int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t
 	sensor_data_t orientation_data;
 	float pitch, roll, azimuth;
 
-	m_orientation_sensor->get_sensor_data(ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME, orientation_data);
+	m_orientation_sensor->get_sensor_data(ORIENTATION_RAW_DATA_EVENT, orientation_data);
 
 	azimuth = orientation_data.values[0];
 	pitch = orientation_data.values[1];

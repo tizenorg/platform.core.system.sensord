@@ -91,7 +91,7 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		break;
 	case ORIENTATION_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
-			return ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME;
+			return ORIENTATION_RAW_DATA_EVENT;
 		break;
 	case GRAVITY_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
@@ -197,7 +197,7 @@ int main(int argc, char **argv)
 	}
 	else if (strcmp(argv[1], "orientation") == 0) {
 		 sensor_type = ORIENTATION_SENSOR;
-		 event = ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME;
+		 event = ORIENTATION_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "gravity") == 0) {
 		 sensor_type = GRAVITY_SENSOR;
