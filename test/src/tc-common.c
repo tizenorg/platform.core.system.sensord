@@ -100,7 +100,7 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		break;
 	case LINEAR_ACCEL_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
-			return LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME;
+			return LINEAR_ACCEL_RAW_DATA_EVENT;
 		break;
 	case ROTATION_VECTOR_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
 	}
 	else if (strcmp(argv[1], "linear_accel") == 0) {
 		 sensor_type = LINEAR_ACCEL_SENSOR;
-		 event = LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME;
+		 event = LINEAR_ACCEL_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "rotation_vector") == 0) {
 		 sensor_type = ROTATION_VECTOR_SENSOR;
