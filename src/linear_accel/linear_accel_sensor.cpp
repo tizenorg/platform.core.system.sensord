@@ -62,7 +62,7 @@ linear_accel_sensor::linear_accel_sensor()
 
 	m_name = string(SENSOR_NAME);
 	m_enable_linear_accel = 0;
-	register_supported_event(LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME);
+	register_supported_event(LINEAR_ACCEL_RAW_DATA_EVENT);
 
 
 	if (!config.get(SENSOR_TYPE_LINEAR_ACCEL, ELEMENT_VENDOR, m_vendor)) {
@@ -231,7 +231,7 @@ void linear_accel_sensor::synthesize(const sensor_event_t &event, vector<sensor_
 
 		m_time = get_timestamp();
 		lin_accel_event.sensor_id = get_id();
-		lin_accel_event.event_type = LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME;
+		lin_accel_event.event_type = LINEAR_ACCEL_RAW_DATA_EVENT;
 		lin_accel_event.data.value_count = 3;
 		lin_accel_event.data.timestamp = m_time;
 		lin_accel_event.data.accuracy = SENSOR_ACCURACY_GOOD;
@@ -254,7 +254,7 @@ int linear_accel_sensor::get_sensor_data(const unsigned int event_type, sensor_d
 	accel_data.values[1] = m_accel_rotation_direction_compensation[1] * (accel_data.values[1] - m_accel_static_bias[1]) / m_accel_scale;
 	accel_data.values[2] = m_accel_rotation_direction_compensation[2] * (accel_data.values[2] - m_accel_static_bias[2]) / m_accel_scale;
 
-	if (event_type != LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME)
+	if (event_type != LINEAR_ACCEL_RAW_DATA_EVENT)
 		return -1;
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
