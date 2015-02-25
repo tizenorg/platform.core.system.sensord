@@ -96,7 +96,7 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		break;
 	case GRAVITY_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
-			return GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME;
+			return GRAVITY_RAW_DATA_EVENT;
 		break;
 	case LINEAR_ACCEL_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
@@ -209,7 +209,7 @@ int main(int argc, char **argv)
 	}
 	else if (strcmp(argv[1], "gravity") == 0) {
 		 sensor_type = GRAVITY_SENSOR;
-		 event = GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME;
+		 event = GRAVITY_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "linear_accel") == 0) {
 		 sensor_type = LINEAR_ACCEL_SENSOR;
