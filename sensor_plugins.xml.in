@@ -21,5 +21,7 @@
 		<MODULE path = "/usr/lib/sensord/liblinear_accel_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libtemperature_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/librv_sensor.so"/>
+		<MODULE path = "/usr/lib/sensord/libgeomagnetic_rv_sensor.so"/>
+		<MODULE path = "/usr/lib/sensord/libgaming_rv_sensor.so"/>
 	</SENSOR>
 </PLUGIN>
