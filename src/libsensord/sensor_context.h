@@ -36,12 +36,8 @@ extern "C"
  * @{
  */
 
-enum context_data_id {
-	CONTEXT_BASE_DATA_SET	= (CONTEXT_SENSOR << 16) | 0x0001,
-};
-
 enum context_event_type {
-	CONTEXT_EVENT_REPORT	= (CONTEXT_SENSOR << 16) | 0x0001,
+	CONTEXT_REPORT_EVENT	= (CONTEXT_SENSOR << 16) | 0x0001,
 };
 
 enum context_property_id {
