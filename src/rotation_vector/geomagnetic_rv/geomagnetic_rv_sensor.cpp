@@ -71,7 +71,7 @@ geomagnetic_rv_sensor::geomagnetic_rv_sensor()
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
 	m_name = string(SENSOR_NAME);
-	register_supported_event(GEOMAGNETIC_RV_EVENT_RAW_DATA_REPORT_ON_TIME);
+	register_supported_event(GEOMAGNETIC_RV_RAW_DATA_EVENT);
 	m_enable_geomagnetic_rv = 0;
 
 	if (!config.get(SENSOR_TYPE_GEOMAGNETIC_RV, ELEMENT_VENDOR, m_vendor)) {
@@ -263,7 +263,7 @@ void geomagnetic_rv_sensor::synthesize(const sensor_event_t& event, vector<senso
 		m_time = get_timestamp();
 
 		rv_event.sensor_id = get_id();
-		rv_event.event_type = GEOMAGNETIC_RV_EVENT_RAW_DATA_REPORT_ON_TIME;
+		rv_event.event_type = GEOMAGNETIC_RV_RAW_DATA_EVENT;
 		rv_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 		rv_event.data.timestamp = m_time;
 		rv_event.data.value_count = 4;
@@ -288,7 +288,7 @@ int geomagnetic_rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_
 
 	quaternion<float> quaternion_geo_rv;
 
-	if (event_type != GEOMAGNETIC_RV_EVENT_RAW_DATA_REPORT_ON_TIME)
+	if (event_type != GEOMAGNETIC_RV_RAW_DATA_EVENT)
 		return -1;
 
 	m_accel_sensor->get_sensor_data(ACCELEROMETER_RAW_DATA_EVENT, accel_data);
