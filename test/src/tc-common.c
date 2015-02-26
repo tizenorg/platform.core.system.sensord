@@ -45,6 +45,7 @@ void usage()
 	printf("[linear_accel] ");
 	printf("[rotation_vector] ");
 	printf("[geomagnetic_rv] ");
+	printf("[gaming_rv] ");
 	printf("[light]\n");
 	printf("event:");
 	printf("[RAW_DATA_REPORT_ON_TIME]\n");
@@ -109,6 +110,10 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
 			return GEOMAGNETIC_RV_RAW_DATA_EVENT;
 		break;
+	case GAMING_RV_SENSOR:
+		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+			return GAMING_RV_RAW_DATA_EVENT;
+		break;
 	default:
 		return -1;
 	}
@@ -154,6 +159,9 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 		break;
 	case GEOMAGNETIC_RV_SENSOR:
 		printf("Geomagnetic RV [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3]);
+		break;
+	case GAMING_RV_SENSOR:
+		printf("Gaming RV [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3]);
 		break;
 	default:
 		return;
@@ -214,6 +222,10 @@ int main(int argc, char **argv)
 	else if (strcmp(argv[1], "geomagnetic_rv") == 0) {
 		 sensor_type = GEOMAGNETIC_RV_SENSOR;
 		 event = GEOMAGNETIC_RV_RAW_DATA_EVENT;
+	}
+	else if (strcmp(argv[1], "gaming_rv") == 0) {
+		 sensor_type = GAMING_RV_SENSOR;
+		 event = GAMING_RV_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "light") == 0) {
 		 sensor_type = LIGHT_SENSOR;
