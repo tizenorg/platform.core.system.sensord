@@ -311,7 +311,6 @@ void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &
 		}
 
 		m_time = get_timestamp();
-
 		rv_event.sensor_id = get_id();
 		rv_event.event_type = ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME;
 		rv_event.data.accuracy = SENSOR_ACCURACY_GOOD;
@@ -365,7 +364,7 @@ int rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
 	}
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
-	data.timestamp = m_time;
+	data.timestamp = get_timestamp();
 	data.value_count = 4;
 	data.values[0] = quaternion_orientation.m_quat.m_vec[1];
 	data.values[1] = quaternion_orientation.m_quat.m_vec[2];

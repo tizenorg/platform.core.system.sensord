@@ -261,7 +261,6 @@ void geomagnetic_rv_sensor::synthesize(const sensor_event_t& event, vector<senso
 		}
 
 		m_time = get_timestamp();
-
 		rv_event.sensor_id = get_id();
 		rv_event.event_type = GEOMAGNETIC_RV_RAW_DATA_EVENT;
 		rv_event.data.accuracy = SENSOR_ACCURACY_GOOD;
@@ -307,7 +306,7 @@ int geomagnetic_rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_
 	}
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
-	data.timestamp = m_time;
+	data.timestamp = get_timestamp();
 	data.value_count = 4;
 	data.values[0] = quaternion_geo_rv.m_quat.m_vec[1];
 	data.values[1] = quaternion_geo_rv.m_quat.m_vec[2];

@@ -185,7 +185,6 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 			return;
 
 		m_time = get_timestamp();
-
 		gravity_event.sensor_id = get_id();
 		gravity_event.event_type = GRAVITY_RAW_DATA_EVENT;
 		if ((roll >= (M_PI/2)-DEVIATION && roll <= (M_PI/2)+DEVIATION) ||

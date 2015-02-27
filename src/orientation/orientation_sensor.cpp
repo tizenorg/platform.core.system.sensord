@@ -353,7 +353,6 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		}
 
 		m_time = get_timestamp();
-
 		orientation_event.sensor_id = get_id();
 		orientation_event.event_type = ORIENTATION_RAW_DATA_EVENT;
 		orientation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
