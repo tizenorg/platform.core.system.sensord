@@ -255,10 +255,7 @@ void geomagnetic_rv_sensor::synthesize(const sensor_event_t& event, vector<senso
 
 		m_orientation_filter.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
 
-		{
-			AUTOLOCK(m_fusion_mutex);
-			quaternion_geo_rv = m_orientation_filter.get_geomagnetic_quaternion(m_accel, m_magnetic);
-		}
+		quaternion_geo_rv = m_orientation_filter.get_geomagnetic_quaternion(m_accel, m_magnetic);
 
 		m_time = get_timestamp();
 		rv_event.sensor_id = get_id();
@@ -298,12 +295,9 @@ int geomagnetic_rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_
 	accel.m_time_stamp = accel_data.timestamp;
 	magnetic.m_time_stamp = magnetic_data.timestamp;
 
-	m_orientation_filter.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
+	m_orientation_filter_poll.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
 
-	{
-		AUTOLOCK(m_fusion_mutex);
-		quaternion_geo_rv = m_orientation_filter.get_geomagnetic_quaternion(m_accel, m_magnetic);
-	}
+	quaternion_geo_rv = m_orientation_filter_poll.get_geomagnetic_quaternion(m_accel, m_magnetic);
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();

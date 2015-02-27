@@ -244,10 +244,7 @@ void gaming_rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_eve
 	if (m_enable_gaming_rv == GAMING_RV_ENABLED) {
 		m_enable_gaming_rv = 0;
 
-		{
-			AUTOLOCK(m_fusion_mutex);
-			quaternion_gaming_rv = m_orientation_filter.get_gaming_quaternion(m_accel, m_gyro);
-		}
+		quaternion_gaming_rv = m_orientation_filter.get_gaming_quaternion(m_accel, m_gyro);
 
 		m_time = get_timestamp();
 		rv_event.sensor_id = get_id();
@@ -287,10 +284,7 @@ int gaming_rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &da
 	accel.m_time_stamp = accel_data.timestamp;
 	gyro.m_time_stamp = gyro_data.timestamp;
 
-	{
-		AUTOLOCK(m_fusion_mutex);
-		quaternion_gaming_rv = m_orientation_filter.get_gaming_quaternion(m_accel, m_gyro);
-	}
+	quaternion_gaming_rv = m_orientation_filter_poll.get_gaming_quaternion(m_accel, m_gyro);
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();
