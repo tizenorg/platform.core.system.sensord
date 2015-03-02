@@ -79,7 +79,7 @@ int main()
 
 		cout << "Magnetic Data\t" << magnetic_data.m_data << "\t Time Stamp\t" << magnetic_data.m_time_stamp << "\n\n";
 
-		orientation = orien_sensor1.get_orientation(accel_data, gyro_data, magnetic_data);
+		orientation = orien_sensor1.get_orientation(&accel_data, &gyro_data, &magnetic_data);
 
 		orien_file << orientation.m_ang;
 
