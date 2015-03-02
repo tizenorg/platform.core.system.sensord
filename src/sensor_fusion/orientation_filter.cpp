@@ -420,9 +420,6 @@ euler_angles<TYPE> orientation_filter<TYPE>::get_device_rotation(const sensor_da
 {
 	initialize_sensor_data(accel, gyro, magnetic);
 
-	const sensor_data<TYPE> accel_in, gyro_in, magnetic_in;
-	euler_angles<TYPE> cor_euler_ang;
-
 	if (magnetic != NULL)
 		orientation_triad_algorithm();
 
@@ -441,24 +438,10 @@ euler_angles<TYPE> orientation_filter<TYPE>::get_device_rotation(const sensor_da
 }
 
 template <typename TYPE>
-euler_angles<TYPE> orientation_filter<TYPE>::get_orientation(const sensor_data<TYPE> accel,
-		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
+euler_angles<TYPE> orientation_filter<TYPE>::get_orientation(const sensor_data<TYPE> *accel,
+		const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic)
 {
-	euler_angles<TYPE> cor_euler_ang;
-
-	init_accel_gyro_mag_data(accel, gyro, magnetic);
-
-	normalize(m_accel);
-	m_gyro.m_data = m_gyro.m_data * (TYPE) PI;
-	normalize(m_magnetic);
-
-	orientation_triad_algorithm();
-
-	compute_covariance();
-
-	time_update();
-
-	measurement_update();
+	get_device_rotation(accel, gyro, magnetic);
 
 	return m_orientation;
 }
@@ -477,7 +460,7 @@ quaternion<TYPE> orientation_filter<TYPE>::get_9axis_quaternion(const sensor_dat
 		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
 {
 
-	get_orientation(accel, gyro, magnetic);
+	get_orientation(&accel, &gyro, &magnetic);
 
 	return m_quat_9axis;
 }

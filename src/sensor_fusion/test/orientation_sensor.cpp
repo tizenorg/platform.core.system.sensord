@@ -43,15 +43,15 @@ void pre_process_data(sensor_data<float> *data_out, sensor_data<float> *data_in,
 	data_out->m_time_stamp = data_in->m_time_stamp;
 }
 
-euler_angles<float> orientation_sensor::get_orientation(sensor_data<float> accel_data,
-		sensor_data<float> gyro_data, sensor_data<float> magnetic_data)
+euler_angles<float> orientation_sensor::get_orientation(sensor_data<float> *accel_data,
+		sensor_data<float> *gyro_data, sensor_data<float> *magnetic_data)
 {
 
-	pre_process_data(&accel_data, &accel_data, bias_accel, sign_accel, scale_accel);
-	normalize(accel_data);
-	pre_process_data(&gyro_data, &gyro_data, bias_gyro, sign_gyro, scale_gyro);
-	pre_process_data(&magnetic_data, &magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
-	normalize(magnetic_data);
+	pre_process_data(accel_data, accel_data, bias_accel, sign_accel, scale_accel);
+	normalize(*accel_data);
+	pre_process_data(gyro_data, gyro_data, bias_gyro, sign_gyro, scale_gyro);
+	pre_process_data(magnetic_data, magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
+	normalize(*magnetic_data);
 
 	orien_filter.m_pitch_phase_compensation = pitch_phase_compensation;
 	orien_filter.m_roll_phase_compensation = roll_phase_compensation;

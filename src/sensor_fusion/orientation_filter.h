@@ -89,8 +89,8 @@ public:
 	inline void time_update_gaming_rv();
 	inline void measurement_update();
 
-	euler_angles<TYPE> get_orientation(const sensor_data<TYPE> accel,
-			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
+	euler_angles<TYPE> get_orientation(const sensor_data<TYPE> *accel,
+			const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic);
 	rotation_matrix<TYPE> get_rotation_matrix(const sensor_data<TYPE> *accel,
 			const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic);
 	quaternion<TYPE> get_9axis_quaternion(const sensor_data<TYPE> accel,
