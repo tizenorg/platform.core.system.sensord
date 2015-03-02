@@ -75,6 +75,38 @@ orientation_filter<TYPE>::~orientation_filter()
 }
 
 template <typename TYPE>
+inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<TYPE> *accel,
+		const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic)
+{
+	if (accel != NULL) {
+		m_accel.m_data = accel->m_data;
+		m_accel.m_time_stamp = accel->m_time_stamp;
+
+		normalize(m_accel);
+	}
+
+	if (gyro != NULL) {
+		unsigned long long sample_interval_gyro = SAMPLE_INTV;
+
+		if (m_gyro.m_time_stamp != 0 && gyro->m_time_stamp != 0)
+			sample_interval_gyro = gyro->m_time_stamp - m_gyro.m_time_stamp;
+
+		m_gyro_dt = sample_interval_gyro * US2S;
+		m_gyro.m_time_stamp = gyro->m_time_stamp;
+
+		m_gyro.m_data = m_gyro.m_data * (TYPE) PI;
+
+		m_gyro.m_data = gyro->m_data - m_bias_correction;
+	}
+
+	if (magnetic != NULL) {
+		m_magnetic.m_data = magnetic->m_data;
+		m_magnetic.m_time_stamp = magnetic->m_time_stamp;
+	}
+
+}
+
+template <typename TYPE>
 inline void orientation_filter<TYPE>::init_accel_gyro_mag_data(const sensor_data<TYPE> accel,
 		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
 {
@@ -104,6 +136,8 @@ inline void orientation_filter<TYPE>::init_accel_mag_data(const sensor_data<TYPE
 
 	m_accel.m_time_stamp = accel.m_time_stamp;
 	m_magnetic.m_time_stamp = magnetic.m_time_stamp;
+
+	normalize(m_magnetic);
 }
 
 template <typename TYPE>
@@ -381,6 +415,32 @@ inline void orientation_filter<TYPE>::measurement_update()
 }
 
 template <typename TYPE>
+euler_angles<TYPE> orientation_filter<TYPE>::get_device_rotation(const sensor_data<TYPE> *accel,
+		const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic)
+{
+	initialize_sensor_data(accel, gyro, magnetic);
+
+	const sensor_data<TYPE> accel_in, gyro_in, magnetic_in;
+	euler_angles<TYPE> cor_euler_ang;
+
+	if (magnetic != NULL)
+		orientation_triad_algorithm();
+
+	if (gyro != NULL) {
+		compute_covariance();
+
+		if(magnetic != NULL)
+			time_update();
+		else
+			time_update_gaming_rv();
+
+		measurement_update();
+	}
+
+	return m_orientation;
+}
+
+template <typename TYPE>
 euler_angles<TYPE> orientation_filter<TYPE>::get_orientation(const sensor_data<TYPE> accel,
 		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
 {
@@ -404,10 +464,10 @@ euler_angles<TYPE> orientation_filter<TYPE>::get_orientation(const sensor_data<T
 }
 
 template <typename TYPE>
-rotation_matrix<TYPE> orientation_filter<TYPE>::get_rotation_matrix(const sensor_data<TYPE> accel,
-		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
+rotation_matrix<TYPE> orientation_filter<TYPE>::get_rotation_matrix(const sensor_data<TYPE> *accel,
+		const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic)
 {
-	get_orientation(accel, gyro, magnetic);
+	get_device_rotation(accel, gyro, magnetic);
 
 	return m_rot_matrix;
 }

@@ -85,7 +85,7 @@ int main()
 
 		cout << "Orientation angles\t" << orientation.m_ang << "\n\n";
 
-		orientation_mat = orien_sensor2.get_rotation_matrix(accel_data, gyro_data, magnetic_data);
+		orientation_mat = orien_sensor2.get_rotation_matrix(&accel_data, &gyro_data, &magnetic_data);
 
 		cout << "Orientation matrix\t" << orientation_mat.m_rot_mat << "\n\n";
 

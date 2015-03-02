@@ -34,23 +34,23 @@ int roll_phase_compensation = -1;
 int azimuth_phase_compensation = -1;
 int magnetic_alignment_factor = -1;
 
-void pre_process_data(sensor_data<float> &data_out, sensor_data<float> &data_in, float *bias, int *sign, float scale)
+void pre_process_data(sensor_data<float> *data_out, sensor_data<float> *data_in, float *bias, int *sign, float scale)
 {
-	data_out.m_data.m_vec[0] = sign[0] * (data_in.m_data.m_vec[0] - bias[0]) / scale;
-	data_out.m_data.m_vec[1] = sign[1] * (data_in.m_data.m_vec[1] - bias[1]) / scale;
-	data_out.m_data.m_vec[2] = sign[2] * (data_in.m_data.m_vec[2] - bias[2]) / scale;
+	data_out->m_data.m_vec[0] = sign[0] * (data_in->m_data.m_vec[0] - bias[0]) / scale;
+	data_out->m_data.m_vec[1] = sign[1] * (data_in->m_data.m_vec[1] - bias[1]) / scale;
+	data_out->m_data.m_vec[2] = sign[2] * (data_in->m_data.m_vec[2] - bias[2]) / scale;
 
-	data_out.m_time_stamp = data_in.m_time_stamp;
+	data_out->m_time_stamp = data_in->m_time_stamp;
 }
 
 euler_angles<float> orientation_sensor::get_orientation(sensor_data<float> accel_data,
 		sensor_data<float> gyro_data, sensor_data<float> magnetic_data)
 {
 
-	pre_process_data(accel_data, accel_data, bias_accel, sign_accel, scale_accel);
+	pre_process_data(&accel_data, &accel_data, bias_accel, sign_accel, scale_accel);
 	normalize(accel_data);
-	pre_process_data(gyro_data, gyro_data, bias_gyro, sign_gyro, scale_gyro);
-	pre_process_data(magnetic_data, magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
+	pre_process_data(&gyro_data, &gyro_data, bias_gyro, sign_gyro, scale_gyro);
+	pre_process_data(&magnetic_data, &magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
 	normalize(magnetic_data);
 
 	orien_filter.m_pitch_phase_compensation = pitch_phase_compensation;
@@ -61,14 +61,14 @@ euler_angles<float> orientation_sensor::get_orientation(sensor_data<float> accel
 	return orien_filter.get_orientation(accel_data, gyro_data, magnetic_data);
 }
 
-rotation_matrix<float> orientation_sensor::get_rotation_matrix(sensor_data<float> accel_data,
-		sensor_data<float> gyro_data, sensor_data<float> magnetic_data)
+rotation_matrix<float> orientation_sensor::get_rotation_matrix(sensor_data<float> *accel_data,
+		sensor_data<float> *gyro_data, sensor_data<float> *magnetic_data)
 {
 	pre_process_data(accel_data, accel_data, bias_accel, sign_accel, scale_accel);
-	normalize(accel_data);
+	normalize(*accel_data);
 	pre_process_data(gyro_data, gyro_data, bias_gyro, sign_gyro, scale_gyro);
 	pre_process_data(magnetic_data, magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
-	normalize(magnetic_data);
+	normalize(*magnetic_data);
 
 	orien_filter.m_pitch_phase_compensation = pitch_phase_compensation;
 	orien_filter.m_roll_phase_compensation = roll_phase_compensation;
@@ -81,10 +81,10 @@ rotation_matrix<float> orientation_sensor::get_rotation_matrix(sensor_data<float
 quaternion<float> orientation_sensor::get_9axis_quaternion(sensor_data<float> accel_data,
 		sensor_data<float> gyro_data, sensor_data<float> magnetic_data)
 {
-	pre_process_data(accel_data, accel_data, bias_accel, sign_accel, scale_accel);
+	pre_process_data(&accel_data, &accel_data, bias_accel, sign_accel, scale_accel);
 	normalize(accel_data);
-	pre_process_data(gyro_data, gyro_data, bias_gyro, sign_gyro, scale_gyro);
-	pre_process_data(magnetic_data, magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
+	pre_process_data(&gyro_data, &gyro_data, bias_gyro, sign_gyro, scale_gyro);
+	pre_process_data(&magnetic_data, &magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
 	normalize(magnetic_data);
 
 	orien_filter.m_pitch_phase_compensation = pitch_phase_compensation;
@@ -98,9 +98,9 @@ quaternion<float> orientation_sensor::get_9axis_quaternion(sensor_data<float> ac
 quaternion<float> orientation_sensor::get_geomagnetic_quaternion(sensor_data<float> accel_data,
 		sensor_data<float> magnetic_data)
 {
-	pre_process_data(accel_data, accel_data, bias_accel, sign_accel, scale_accel);
+	pre_process_data(&accel_data, &accel_data, bias_accel, sign_accel, scale_accel);
 	normalize(accel_data);
-	pre_process_data(magnetic_data, magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
+	pre_process_data(&magnetic_data, &magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
 	normalize(magnetic_data);
 
 	return orien_filter.get_geomagnetic_quaternion(accel_data, magnetic_data);
@@ -110,9 +110,9 @@ quaternion<float> orientation_sensor::get_geomagnetic_quaternion(sensor_data<flo
 quaternion<float> orientation_sensor::get_gaming_quaternion(sensor_data<float> accel_data,
 		sensor_data<float> gyro_data)
 {
-	pre_process_data(accel_data, accel_data, bias_accel, sign_accel, scale_accel);
+	pre_process_data(&accel_data, &accel_data, bias_accel, sign_accel, scale_accel);
 	normalize(accel_data);
-	pre_process_data(gyro_data, gyro_data, bias_gyro, sign_gyro, scale_gyro);
+	pre_process_data(&gyro_data, &gyro_data, bias_gyro, sign_gyro, scale_gyro);
 
 	return orien_filter.get_gaming_quaternion(accel_data, gyro_data);
 }

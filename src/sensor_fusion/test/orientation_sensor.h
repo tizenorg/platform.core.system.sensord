@@ -29,8 +29,8 @@ public:
 
 	euler_angles<float> get_orientation(sensor_data<float> accel,
 			sensor_data<float> gyro, sensor_data<float> magnetic);
-	rotation_matrix<float> get_rotation_matrix(sensor_data<float> accel,
-			sensor_data<float> gyro, sensor_data<float> magnetic);
+	rotation_matrix<float> get_rotation_matrix(sensor_data<float> *accel,
+			sensor_data<float> *gyro, sensor_data<float> *magnetic);
 	quaternion<float> get_9axis_quaternion(sensor_data<float> accel,
 			sensor_data<float> gyro, sensor_data<float> magnetic);
 	quaternion<float> get_geomagnetic_quaternion(sensor_data<float> accel,
