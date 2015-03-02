@@ -59,7 +59,7 @@ void usage()
 	printf("The time interval should be entered based on the sampling frequency supported by accelerometer driver on the device in ms.If no value for sensor is entered default value by the driver will be used.\n");
 }
 
-unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
+int get_event_driven(sensor_type_t sensor_type, char str[])
 {
 	switch (sensor_type) {
 	case ACCELEROMETER_SENSOR:
@@ -114,9 +114,9 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
 			return GAMING_RV_RAW_DATA_EVENT;
 		break;
-	default:
-		return -1;
 	}
+
+	return -1;
 }
 
 void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, void *user_data)
@@ -125,43 +125,43 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 
 	switch (sensor_type) {
 	case ACCELEROMETER_SENSOR:
-		printf("Accelerometer [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+		printf("Accelerometer [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 		break;
 	case GYROSCOPE_SENSOR:
-		printf("Gyroscope [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+		printf("Gyroscope [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 		break;
 	case PRESSURE_SENSOR:
-		printf("Pressure [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+		printf("Pressure [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 		break;
 	case GEOMAGNETIC_SENSOR:
-		printf("Geomagnetic [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+		printf("Geomagnetic [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 		break;
 	case LIGHT_SENSOR:
-		printf("Light [%lld] [%6.6f]\n\n", data->timestamp, data->values[0]);
+		printf("Light [%lld] [%6.6f]\n", data->timestamp, data->values[0]);
 		break;
 	case TEMPERATURE_SENSOR :
-		printf("Temperature [%lld] [%6.6f]\n\n", data->timestamp, data->values[0]);
+		printf("Temperature [%lld] [%6.6f]\n", data->timestamp, data->values[0]);
 		break;
 	case PROXIMITY_SENSOR:
-		printf("Proximity [%lld] [%6.6f]\n\n", data->timestamp, data->values[0]);
+		printf("Proximity [%lld] [%6.6f]\n", data->timestamp, data->values[0]);
 		break;
 	case ORIENTATION_SENSOR :
-		printf("Orientation [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+		printf("Orientation [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 		break;
 	case GRAVITY_SENSOR:
-		printf("Gravity [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+		printf("Gravity [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 		break;
 	case LINEAR_ACCEL_SENSOR:
-		printf("Linear acceleration [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+		printf("Linear acceleration [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 		break;
 	case ROTATION_VECTOR_SENSOR:
-		printf("Rotation vector [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3]);
+		printf("Rotation vector [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3]);
 		break;
 	case GEOMAGNETIC_RV_SENSOR:
-		printf("Geomagnetic RV [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3]);
+		printf("Geomagnetic RV [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3]);
 		break;
 	case GAMING_RV_SENSOR:
-		printf("Gaming RV [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3]);
+		printf("Gaming RV [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3]);
 		break;
 	default:
 		return;
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 {
 	int result, handle, start_handle, stop_handle, interval;
 	char *end1, *end2;
-	unsigned int event;
+	int event;
 	bool EVENT_NOT_ENTERED = TRUE;
 	sensor_type_t sensor_type;
 	mainloop = g_main_loop_new(NULL, FALSE);
