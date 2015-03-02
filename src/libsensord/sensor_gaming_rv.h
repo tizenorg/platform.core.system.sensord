@@ -11,7 +11,7 @@ extern "C"
 #endif
 
 /**
- * @defgroup SENSOR_GEOMAGNETIC_RV Rotation Vector Sensor
+ * @defgroup SENSOR_GAMING_RV Gaming Rotation Vector Sensor
  * @ingroup SENSOR_FRAMEWORK
  *
  * These APIs are used to control the Gaming Rotation Vector sensor.

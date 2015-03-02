@@ -29,7 +29,7 @@ extern "C"
 #endif
 
 /**
- * @defgroup SENSOR_GEOMAGNETIC_RV Rotation Vector Sensor
+ * @defgroup SENSOR_GEOMAGNETIC_RV Geomagnetic Rotation Vector Sensor
  * @ingroup SENSOR_FRAMEWORK
  *
  * These APIs are used to control the Geomagnetic Rotation Vector sensor.
