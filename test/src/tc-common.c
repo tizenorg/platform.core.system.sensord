@@ -59,7 +59,7 @@ void usage()
 	printf("The time interval should be entered based on the sampling frequency supported by accelerometer driver on the device in ms.If no value for sensor is entered default value by the driver will be used.\n");
 }
 
-unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
+int get_event_driven(sensor_type_t sensor_type, char str[])
 {
 	switch (sensor_type) {
 	case ACCELEROMETER_SENSOR:
@@ -114,9 +114,9 @@ unsigned int get_event_driven(sensor_type_t sensor_type, char str[])
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
 			return GAMING_RV_RAW_DATA_EVENT;
 		break;
-	default:
-		return -1;
 	}
+
+	return -1;
 }
 
 void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, void *user_data)
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 {
 	int result, handle, start_handle, stop_handle, interval;
 	char *end1, *end2;
-	unsigned int event;
+	int event;
 	bool EVENT_NOT_ENTERED = TRUE;
 	sensor_type_t sensor_type;
 	mainloop = g_main_loop_new(NULL, FALSE);
