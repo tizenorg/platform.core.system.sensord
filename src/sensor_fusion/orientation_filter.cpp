@@ -107,25 +107,6 @@ inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<T
 }
 
 template <typename TYPE>
-inline void orientation_filter<TYPE>::init_accel_gyro_data(const sensor_data<TYPE> accel,
-		const sensor_data<TYPE> gyro)
-{
-	unsigned long long sample_interval_gyro = SAMPLE_INTV;
-
-	m_accel.m_data = accel.m_data;
-
-	if (m_gyro.m_time_stamp != 0 && gyro.m_time_stamp != 0)
-		sample_interval_gyro = gyro.m_time_stamp - m_gyro.m_time_stamp;
-
-	m_gyro_dt = sample_interval_gyro * US2S;
-
-	m_accel.m_time_stamp = accel.m_time_stamp;
-	m_gyro.m_time_stamp = gyro.m_time_stamp;
-
-	m_gyro.m_data = gyro.m_data - m_bias_correction;
-}
-
-template <typename TYPE>
 inline void orientation_filter<TYPE>::orientation_triad_algorithm()
 {
 	TYPE arr_acc_e[V1x3S] = {0.0, 0.0, 1.0};
@@ -391,6 +372,8 @@ euler_angles<TYPE> orientation_filter<TYPE>::get_device_rotation(const sensor_da
 
 	if (magnetic != NULL)
 		orientation_triad_algorithm();
+	else if(gyro != NULL)
+		compute_accel_orientation();
 
 	if (gyro != NULL) {
 		compute_covariance();
@@ -444,23 +427,10 @@ quaternion<TYPE> orientation_filter<TYPE>::get_geomagnetic_quaternion(const sens
 }
 
 template <typename TYPE>
-quaternion<TYPE> orientation_filter<TYPE>::get_gaming_quaternion(const sensor_data<TYPE> accel,
-		const sensor_data<TYPE> gyro)
+quaternion<TYPE> orientation_filter<TYPE>::get_gaming_quaternion(const sensor_data<TYPE> *accel,
+		const sensor_data<TYPE> *gyro)
 {
-	euler_angles<TYPE> cor_euler_ang;
-
-	init_accel_gyro_data(accel, gyro);
-
-	normalize(m_accel);
-	m_gyro.m_data = m_gyro.m_data * (TYPE) PI;
-
-	compute_accel_orientation();
-
-	compute_covariance();
-
-	time_update_gaming_rv();
-
-	measurement_update();
+	get_device_rotation(accel, gyro, NULL);
 
 	return m_quat_gaming_rv;
 }

@@ -97,7 +97,7 @@ int main()
 
 		cout << "Orientation geomagnetic quaternion\t" << orientation_geomagnetic_quat.m_quat << "\n\n";
 
-		orientation_gaming_quat = orien_sensor5.get_gaming_quaternion(accel_data, gyro_data);
+		orientation_gaming_quat = orien_sensor5.get_gaming_quaternion(&accel_data, &gyro_data);
 
 		cout << "Orientation gaming quaternion\t" << orientation_gaming_quat.m_quat << "\n\n";
 	}

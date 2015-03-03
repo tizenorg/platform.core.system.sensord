@@ -76,8 +76,6 @@ public:
 
 	inline void initialize_sensor_data(const sensor_data<TYPE> *accel,
 			const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic);
-	inline void init_accel_gyro_data(const sensor_data<TYPE> accel,
-			const sensor_data<TYPE> gyro);
 	inline void orientation_triad_algorithm();
 	inline void compute_accel_orientation();
 	inline void compute_covariance();
@@ -93,8 +91,8 @@ public:
 			const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic);
 	quaternion<TYPE> get_geomagnetic_quaternion(const sensor_data<TYPE> *accel,
 			const sensor_data<TYPE> *magnetic);
-	quaternion<TYPE> get_gaming_quaternion(const sensor_data<TYPE> accel,
-			const sensor_data<TYPE> gyro);
+	quaternion<TYPE> get_gaming_quaternion(const sensor_data<TYPE> *accel,
+			const sensor_data<TYPE> *gyro);
 	euler_angles<TYPE> get_device_rotation(const sensor_data<TYPE> *accel,
 			const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic);
 };
