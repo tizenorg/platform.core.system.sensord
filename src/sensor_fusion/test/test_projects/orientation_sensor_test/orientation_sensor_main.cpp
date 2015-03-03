@@ -93,7 +93,7 @@ int main()
 
 		cout << "Orientation 9-axis quaternion\t" << orientation_9axis_quat.m_quat << "\n\n";
 
-		orientation_geomagnetic_quat = orien_sensor4.get_geomagnetic_quaternion(accel_data, magnetic_data);
+		orientation_geomagnetic_quat = orien_sensor4.get_geomagnetic_quaternion(&accel_data, &magnetic_data);
 
 		cout << "Orientation geomagnetic quaternion\t" << orientation_geomagnetic_quat.m_quat << "\n\n";
 

@@ -107,19 +107,6 @@ inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<T
 }
 
 template <typename TYPE>
-inline void orientation_filter<TYPE>::init_accel_mag_data(const sensor_data<TYPE> accel,
-		const sensor_data<TYPE> magnetic)
-{
-	m_accel.m_data = accel.m_data;
-	m_magnetic.m_data = magnetic.m_data;
-
-	m_accel.m_time_stamp = accel.m_time_stamp;
-	m_magnetic.m_time_stamp = magnetic.m_time_stamp;
-
-	normalize(m_magnetic);
-}
-
-template <typename TYPE>
 inline void orientation_filter<TYPE>::init_accel_gyro_data(const sensor_data<TYPE> accel,
 		const sensor_data<TYPE> gyro)
 {
@@ -445,15 +432,10 @@ quaternion<TYPE> orientation_filter<TYPE>::get_9axis_quaternion(const sensor_dat
 }
 
 template <typename TYPE>
-quaternion<TYPE> orientation_filter<TYPE>::get_geomagnetic_quaternion(const sensor_data<TYPE> accel,
-		const sensor_data<TYPE> magnetic)
+quaternion<TYPE> orientation_filter<TYPE>::get_geomagnetic_quaternion(const sensor_data<TYPE> *accel,
+		const sensor_data<TYPE> *magnetic)
 {
-	init_accel_mag_data(accel, magnetic);
-
-	normalize(m_accel);
-	normalize(m_magnetic);
-
-	orientation_triad_algorithm();
+	get_device_rotation(accel, NULL, magnetic);
 
 	return m_quat_aid;
 }
