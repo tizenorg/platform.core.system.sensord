@@ -93,8 +93,8 @@ public:
 			const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic);
 	rotation_matrix<TYPE> get_rotation_matrix(const sensor_data<TYPE> *accel,
 			const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic);
-	quaternion<TYPE> get_9axis_quaternion(const sensor_data<TYPE> accel,
-			const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic);
+	quaternion<TYPE> get_9axis_quaternion(const sensor_data<TYPE> *accel,
+			const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic);
 	quaternion<TYPE> get_geomagnetic_quaternion(const sensor_data<TYPE> accel,
 			const sensor_data<TYPE> magnetic);
 	quaternion<TYPE> get_gaming_quaternion(const sensor_data<TYPE> accel,

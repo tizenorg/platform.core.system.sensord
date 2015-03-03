@@ -305,7 +305,7 @@ void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &
 		m_orientation_filter.m_azimuth_phase_compensation = m_azimuth_rotation_compensation;
 		m_orientation_filter.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
 
-		quaternion_orientation = m_orientation_filter.get_9axis_quaternion(m_accel, m_gyro, m_magnetic);
+		quaternion_orientation = m_orientation_filter.get_9axis_quaternion(&m_accel, &m_gyro, &m_magnetic);
 
 		m_time = get_timestamp();
 		rv_event.sensor_id = get_id();
@@ -355,7 +355,7 @@ int rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
 	m_orientation_filter_poll.m_azimuth_phase_compensation = m_azimuth_rotation_compensation;
 	m_orientation_filter_poll.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
 
-	quaternion_orientation = m_orientation_filter_poll.get_9axis_quaternion(m_accel, m_gyro, m_magnetic);
+	quaternion_orientation = m_orientation_filter_poll.get_9axis_quaternion(&m_accel, &m_gyro, &m_magnetic);
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();
