@@ -40,7 +40,7 @@ int main()
 	quaternion<float> orientation_9axis_quat;
 	quaternion<float> orientation_geomagnetic_quat;
 	quaternion<float> orientation_gaming_quat;
-	orientation_sensor orien_sensor1, orien_sensor2, orien_sensor3, orien_sensor4, orien_sensor5;
+	orientation_sensor orien_sensor;
 
 	accel_in.open(((string)ORIENTATION_DATA_PATH + (string)"accel.txt").c_str());
 	gyro_in.open(((string)ORIENTATION_DATA_PATH + (string)"gyro.txt").c_str());
@@ -79,27 +79,19 @@ int main()
 
 		cout << "Magnetic Data\t" << magnetic_data.m_data << "\t Time Stamp\t" << magnetic_data.m_time_stamp << "\n\n";
 
-		orientation = orien_sensor1.get_orientation(&accel_data, &gyro_data, &magnetic_data);
+		orien_sensor.get_device_orientation(&accel_data, &gyro_data, &magnetic_data);
 
-		orien_file << orientation.m_ang;
+		orien_file << orien_sensor.orien_filter.m_orientation.m_ang;
 
-		cout << "Orientation angles\t" << orientation.m_ang << "\n\n";
+		cout << "Orientation angles\t" << orien_sensor.orien_filter.m_orientation.m_ang << "\n\n";
 
-		orientation_mat = orien_sensor2.get_rotation_matrix(&accel_data, &gyro_data, &magnetic_data);
+		cout << "Orientation matrix\t" << orien_sensor.orien_filter.m_rot_matrix.m_rot_mat << "\n\n";
 
-		cout << "Orientation matrix\t" << orientation_mat.m_rot_mat << "\n\n";
+		cout << "Orientation 9-axis quaternion\t" << orien_sensor.orien_filter.m_quat_9axis.m_quat << "\n\n";
 
-		orientation_9axis_quat = orien_sensor3.get_9axis_quaternion(&accel_data, &gyro_data, &magnetic_data);
+		cout << "Orientation geomagnetic quaternion\t" << orien_sensor.orien_filter.m_quat_aid.m_quat << "\n\n";
 
-		cout << "Orientation 9-axis quaternion\t" << orientation_9axis_quat.m_quat << "\n\n";
-
-		orientation_geomagnetic_quat = orien_sensor4.get_geomagnetic_quaternion(&accel_data, &magnetic_data);
-
-		cout << "Orientation geomagnetic quaternion\t" << orientation_geomagnetic_quat.m_quat << "\n\n";
-
-		orientation_gaming_quat = orien_sensor5.get_gaming_quaternion(&accel_data, &gyro_data);
-
-		cout << "Orientation gaming quaternion\t" << orientation_gaming_quat.m_quat << "\n\n";
+		cout << "Orientation gaming quaternion\t" << orien_sensor.orien_filter.m_quat_gaming_rv.m_quat << "\n\n";
 	}
 
 	accel_in.close();
