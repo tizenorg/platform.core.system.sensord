@@ -107,27 +107,6 @@ inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<T
 }
 
 template <typename TYPE>
-inline void orientation_filter<TYPE>::init_accel_gyro_mag_data(const sensor_data<TYPE> accel,
-		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
-{
-	unsigned long long sample_interval_gyro = SAMPLE_INTV;
-
-	m_accel.m_data = accel.m_data;
-	m_magnetic.m_data = magnetic.m_data;
-
-	if (m_gyro.m_time_stamp != 0 && gyro.m_time_stamp != 0)
-		sample_interval_gyro = gyro.m_time_stamp - m_gyro.m_time_stamp;
-
-	m_gyro_dt = sample_interval_gyro * US2S;
-
-	m_accel.m_time_stamp = accel.m_time_stamp;
-	m_gyro.m_time_stamp = gyro.m_time_stamp;
-	m_magnetic.m_time_stamp = magnetic.m_time_stamp;
-
-	m_gyro.m_data = gyro.m_data - m_bias_correction;
-}
-
-template <typename TYPE>
 inline void orientation_filter<TYPE>::init_accel_mag_data(const sensor_data<TYPE> accel,
 		const sensor_data<TYPE> magnetic)
 {
@@ -441,24 +420,10 @@ euler_angles<TYPE> orientation_filter<TYPE>::get_device_rotation(const sensor_da
 }
 
 template <typename TYPE>
-euler_angles<TYPE> orientation_filter<TYPE>::get_orientation(const sensor_data<TYPE> accel,
-		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
+euler_angles<TYPE> orientation_filter<TYPE>::get_orientation(const sensor_data<TYPE> *accel,
+		const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic)
 {
-	euler_angles<TYPE> cor_euler_ang;
-
-	init_accel_gyro_mag_data(accel, gyro, magnetic);
-
-	normalize(m_accel);
-	m_gyro.m_data = m_gyro.m_data * (TYPE) PI;
-	normalize(m_magnetic);
-
-	orientation_triad_algorithm();
-
-	compute_covariance();
-
-	time_update();
-
-	measurement_update();
+	get_device_rotation(accel, gyro, magnetic);
 
 	return m_orientation;
 }
@@ -473,11 +438,11 @@ rotation_matrix<TYPE> orientation_filter<TYPE>::get_rotation_matrix(const sensor
 }
 
 template <typename TYPE>
-quaternion<TYPE> orientation_filter<TYPE>::get_9axis_quaternion(const sensor_data<TYPE> accel,
-		const sensor_data<TYPE> gyro, const sensor_data<TYPE> magnetic)
+quaternion<TYPE> orientation_filter<TYPE>::get_9axis_quaternion(const sensor_data<TYPE> *accel,
+		const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic)
 {
 
-	get_orientation(accel, gyro, magnetic);
+	get_device_rotation(accel, gyro, magnetic);
 
 	return m_quat_9axis;
 }

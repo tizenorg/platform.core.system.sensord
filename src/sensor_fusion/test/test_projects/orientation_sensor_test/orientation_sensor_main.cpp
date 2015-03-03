@@ -79,7 +79,7 @@ int main()
 
 		cout << "Magnetic Data\t" << magnetic_data.m_data << "\t Time Stamp\t" << magnetic_data.m_time_stamp << "\n\n";
 
-		orientation = orien_sensor1.get_orientation(accel_data, gyro_data, magnetic_data);
+		orientation = orien_sensor1.get_orientation(&accel_data, &gyro_data, &magnetic_data);
 
 		orien_file << orientation.m_ang;
 
@@ -89,7 +89,7 @@ int main()
 
 		cout << "Orientation matrix\t" << orientation_mat.m_rot_mat << "\n\n";
 
-		orientation_9axis_quat = orien_sensor3.get_9axis_quaternion(accel_data, gyro_data, magnetic_data);
+		orientation_9axis_quat = orien_sensor3.get_9axis_quaternion(&accel_data, &gyro_data, &magnetic_data);
 
 		cout << "Orientation 9-axis quaternion\t" << orientation_9axis_quat.m_quat << "\n\n";
 
