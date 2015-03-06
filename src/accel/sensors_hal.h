@@ -22,11 +22,6 @@
 
 #define API __attribute__((visibility("default")))
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #define SENSOR_DATA_VALUE_SIZE 16
 
 /**
@@ -53,6 +48,7 @@ typedef struct sensor_data_t {
 typedef struct sensor_info_t {
 	const char *name;
 	const char *vendor;
+	const char *string_type;
 	int handle;
 	int type;
 	float min_range;
@@ -64,32 +60,40 @@ typedef struct sensor_info_t {
 	void* reserved[8];
 } sensor_info_t;
 
-struct sensors_device_t {
-	int (*initialize)(struct sensors_device_t *dev);
+struct sensors_module_t {
+	int handle;
 
-	int (*get_sensor_infos)(struct sensors_device_t *dev, sensor_info_t **infos, int *count);
+	int (*initialize)(struct sensors_module_t *dev);
+
+	int (*get_sensor_infos)(struct sensors_module_t *dev, sensor_info_t **infos, int *count);
 
 	/* sensor must be given a handle(id)*/
-	int (*set_handle)(struct sensors_device_t *dev, sensor_info_t info, int handle);
+	int (*set_handle)(struct sensors_module_t *dev, sensor_info_t info, int handle);
 
-	int (*enable)(struct sensors_device_t *dev, int handle, int enabled);
+	int (*enable)(struct sensors_module_t *dev, int handle, int enabled);
 
-	int (*set_interval)(struct sensors_device_t *dev, int handle,
-			unsigned long long interval_ns);
+	int (*get_fd)(struct sensors_module_t *dev, int handle, int *fd);
 
-	int (*get_fd)(struct sensors_device_t *dev, int handle, int *fd);
-
-	int (*get_sensor_data)(struct sensors_device_t *dev,
+	int (*get_sensor_data)(struct sensors_module_t *dev,
 			int handle, sensor_data_t *data);
 
-	int (*batch)(struct sensors_device_t *dev, int handle, int flags,
+	int (*batch)(struct sensors_module_t *dev, int handle, int flags, 
 			unsigned long long interval_ns, unsigned long long max_report_latency_ns);
 
-	int (*flush)(struct sensors_device_t *dev, int handle);
+	int (*flush)(struct sensors_module_t *dev, int handle);
 
 	int (*reserved_fp[8])(void);
 };
 
-API int create(const struct sensors_device_t **dev, int *count);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-#endif /* _SENSORS_HAL_H_ */
+API int create(const struct sensors_module_t **dev, int *count);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _SENSORS_HAL_INTERFACE_H_ */

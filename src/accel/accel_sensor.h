@@ -25,18 +25,16 @@
 #include <physical_sensor.h>
 #include <sensor_hal.h>
 
-class accel_sensor : public physical_sensor {
+class accel_sensor {
 public:
 	accel_sensor();
 	virtual ~accel_sensor();
 
-	bool init();
-	virtual sensor_type_t get_type(void);
-
-	static bool working(void *inst);
+	virtual bool initialize();
 	virtual bool set_interval(unsigned long interval);
 	virtual bool get_properties(sensor_properties_s &properties);
 	virtual int get_sensor_data(unsigned int type, sensor_data_t &data);
+	virtual bool 
 private:
 	sensor_hal *m_sensor_hal;
 	cmutex m_value_mutex;
