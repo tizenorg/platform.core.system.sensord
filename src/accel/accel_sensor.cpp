@@ -16,161 +16,271 @@
  * limitations under the License.
  *
  */
-
-#include <common.h>
-#include <sf_common.h>
-
+#include <sensors_hal.h>
 #include <accel_sensor.h>
-#include <sensor_plugin_loader.h>
-#include <algorithm>
 
-using std::bind1st;
-using std::mem_fun;
+using std::string;
+using std::vector;
 
 #define GRAVITY 9.80665
 #define G_TO_MG 1000
-
 #define RAW_DATA_TO_G_UNIT(X) (((float)(X))/((float)G_TO_MG))
 #define RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(X) (GRAVITY * (RAW_DATA_TO_G_UNIT(X)))
 
-#define SENSOR_NAME "ACCELEROMETER_SENSOR"
+#define SENSOR_NAME                     "ACCELEROMETER_SENSOR"
+
+#define MIN_RANGE(RES)                  (-((1 << (RES))/2))
+#define MAX_RANGE(RES)                  (((1 << (RES))/2)-1)
+
+#define ELEMENT_NAME                    "NAME"
+#define ELEMENT_VENDOR                  "VENDOR"
+#define ELEMENT_RAW_DATA_UNIT           "RAW_DATA_UNIT"
+#define ELEMENT_RESOLUTION              "RESOLUTION"
+#define ATTR_VALUE                      "value"
+#define INPUT_NAME                      "accelerometer_sensor"
+#define ACCEL_SENSORHUB_POLL_NODE_NAME  "accel_poll_delay"
 
 accel_sensor::accel_sensor()
-: m_sensor_hal(NULL)
-, m_interval(POLL_1HZ_MS)
+: m_x(-1)
+, m_y(-1)
+, m_z(-1)
+, m_fired_time(0)
+, m_polling_interval(POLL_1HZ_MS)
+, m_handle(-1)
+, m_node_handle(-1)
 {
 	m_name = string(SENSOR_NAME);
 
-	vector<unsigned int> supported_events = {
-		ACCELEROMETER_RAW_DATA_EVENT,
-		ACCELEROMETER_UNPROCESSED_DATA_EVENT,
-	};
+	const string sensorhub_interval_node_name = "accel_poll_delay";
+	CConfig &config = CConfig::get_instance();
 
-	for_each(supported_events.begin(), supported_events.end(),
-		bind1st(mem_fun(&sensor_base::register_supported_event), this));
+	if (!find_model_id(SENSOR_TYPE_ACCEL, m_model_id)) {
+		ERR("Failed to find model id");
+		throw ENXIO;
+	}
 
-	physical_sensor::set_poller(accel_sensor::working, this);
+	node_info_query query;
+	node_info info;
+
+	m_sensorhub_controlled = is_sensorhub_controlled(sensorhub_interval_node_name);
+	query.sensorhub_controlled = m_sensorhub_controlled;
+	query.sensor_type = "ACCEL";
+	query.key = "accelerometer_sensor";
+	query.iio_enable_node_name = "accel_enable";
+	query.sensorhub_interval_node_name = sensorhub_interval_node_name;
+
+	if (!get_node_info(query, info)) {
+		ERR("Failed to get node info");
+		throw ENXIO;
+	}
+
+	show_node_info(info);
+
+	m_method = info.method;
+	m_data_node = info.data_node_path;
+	m_enable_node = info.enable_node_path;
+	m_interval_node = info.interval_node_path;
+
+	if (!config.get(SENSOR_TYPE_ACCEL, m_model_id, ELEMENT_VENDOR, m_vendor)) {
+		ERR("[VENDOR] is empty\n");
+		throw ENXIO;
+	}
+
+	if (!config.get(SENSOR_TYPE_ACCEL, m_model_id, ELEMENT_NAME, m_chip_name)) {
+		ERR("[NAME] is empty\n");
+		throw ENXIO;
+	}
+
+	long resolution;
+	if (!config.get(SENSOR_TYPE_ACCEL, m_model_id, ELEMENT_RESOLUTION, resolution)) {
+		ERR("[RESOLUTION] is empty\n");
+		throw ENXIO;
+	}
+	m_resolution = (int)resolution;
+
+	double raw_data_unit;
+	if (!config.get(SENSOR_TYPE_ACCEL, m_model_id, ELEMENT_RAW_DATA_UNIT, raw_data_unit)) {
+		ERR("[RAW_DATA_UNIT] is empty\n");
+		throw ENXIO;
+	}
+
+	m_raw_data_unit = (float)(raw_data_unit);
+
+	if ((m_node_handle = open(m_data_node.c_str(), O_RDWR)) < 0) {
+		ERR("accel handle open fail for accel processor, error:%s\n", strerror(errno));
+		throw ENXIO;
+	}
+
+	int clockId = CLOCK_MONOTONIC;
+	if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
+		ERR("Fail to set monotonic timestamp for %s", m_data_node.c_str());
+		throw ENXIO;
+	}
+
+	/*
+	register_supported_event(ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME);
+	register_supported_event(ACCELEROMETER_EVENT_UNPROCESSED_DATA_REPORT_ON_TIME);
+	*/
+	INFO("%s is created!", m_name);
 }
 
 accel_sensor::~accel_sensor()
 {
-	INFO("accel_sensor is destroyed!\n");
+	INFO("%s is destroyed!", m_name);
 }
 
-bool accel_sensor::init()
+bool accel_sensor::initialize(void)
 {
-	m_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(ACCELEROMETER_SENSOR);
+	close(m_node_handle);
+	m_node_handle = -1;
 
-	if (!m_sensor_hal) {
-		ERR("cannot load sensor_hal[%s]", sensor_base::get_name());
-		return false;
-	}
-
-	sensor_properties_s properties;
-
-	if (m_sensor_hal->get_properties(properties) == false) {
-		ERR("sensor->get_properties() is failed!\n");
-		return false;
-	}
-
-	m_raw_data_unit = properties.resolution / GRAVITY * G_TO_MG;
-
-	INFO("m_raw_data_unit accel : [%f]\n", m_raw_data_unit);
-
-	INFO("%s is created!\n", sensor_base::get_name());
+	INFO("%s is created!\n", m_name);
 	return true;
 }
 
-sensor_type_t accel_sensor::get_type(void)
+bool accel_sensor::enable(void)
 {
-	return ACCELEROMETER_SENSOR;
-}
-
-bool accel_sensor::working(void *inst)
-{
-	accel_sensor *sensor = (accel_sensor*)inst;
-	return sensor->process_event();
-}
-
-bool accel_sensor::process_event(void)
-{
-	sensor_event_t base_event;
-
-	if (!m_sensor_hal->is_data_ready(true))
-		return true;
-
-	m_sensor_hal->get_sensor_data(base_event.data);
-
 	AUTOLOCK(m_mutex);
-	AUTOLOCK(m_client_info_mutex);
 
-	if (get_client_cnt(ACCELEROMETER_UNPROCESSED_DATA_EVENT)) {
-		base_event.sensor_id = get_id();
-		base_event.event_type = ACCELEROMETER_UNPROCESSED_DATA_EVENT;
-		push(base_event);
+	set_enable_node(m_enable_node, m_sensorhub_controlled, true, SENSORHUB_ACCELEROMETER_ENABLE_BIT);
+	set_interval(m_polling_interval);
+
+	m_fired_time = 0;
+	INFO("Accel sensor real starting");
+	return true;
+}
+
+bool disable(void)
+{
+	AUTOLOCK(m_mutex);
+
+	set_enable_node(m_enable_node, m_sensorhub_controlled, false, SENSORHUB_ACCELEROMETER_ENABLE_BIT);
+
+	INFO("Accel sensor real stopping");
+	return true;
+}
+
+bool set_handle(int handle)
+{
+	m_handle = handle;
+}
+
+virtual bool get_fd(int &fd)
+{
+	return m_node_handle;
+}
+
+virtual bool get_info(sensor_info_t &info)
+{
+	info.name = m_chip_name;
+	info.vendor = m_vendor;
+	info.min_range = MIN_RANGE(m_resolution)* RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(m_raw_data_unit);
+	info.max_range = MAX_RANGE(m_resolution)* RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(m_raw_data_unit);
+	info.min_interval = 1;
+	info.resolution = m_raw_data_unit;
+	info.fifo_count = 0;
+	info.max_batch_count = 0;
+	return true;
+}
+
+virtual bool get_sensor_data(sensor_data_t &data)
+{
+	int accel_raw[3] = {0,};
+	unsigned long long fired_time = 0;
+	int read_input_cnt = 0;
+	const int INPUT_MAX_BEFORE_SYN = 10;
+	bool x, y, z;
+	bool syn = false;
+	x = y = z = false;
+
+	struct input_event data;
+	DBG("accel event detection!");
+
+	while ((syn == false) && (read_input_cnt < INPUT_MAX_BEFORE_SYN)) {
+		int len = read(m_node_handle, &data, sizeof(data));
+		if (len != sizeof(data)) {
+			ERR("accel_file read fail, read_len = %d\n",len);
+			return false;
+		}
+
+		++read_input_cnt;
+
+		if (data.type == EV_REL) {
+			switch (data.code) {
+				case REL_X:
+					accel_raw[0] = (int)data.value;
+					x = true;
+					break;
+				case REL_Y:
+					accel_raw[1] = (int)data.value;
+					y = true;
+					break;
+				case REL_Z:
+					accel_raw[2] = (int)data.value;
+					z = true;
+					break;
+				default:
+					ERR("data event[type = %d, code = %d] is unknown.", data.type, data.code);
+					return false;
+			}
+		} else if (data.type == EV_SYN) {
+			syn = true;
+			fired_time = sensor_hal::get_timestamp(&data.time);
+		} else {
+			ERR("data event[type = %d, code = %d] is unknown.", data.type, data.code);
+			return false;
+		}
 	}
 
-	if (get_client_cnt(ACCELEROMETER_RAW_DATA_EVENT)) {
-		base_event.sensor_id = get_id();
-		base_event.event_type = ACCELEROMETER_RAW_DATA_EVENT;
-		raw_to_base(base_event.data);
-		push(base_event);
+	if (syn == false) {
+		ERR("EV_SYN didn't come until %d inputs had come", read_input_cnt);
+		return false;
 	}
+
+	AUTOLOCK(m_value_mutex);
+
+	if (x)
+		m_x =  accel_raw[0];
+	if (y)
+		m_y =  accel_raw[1];
+	if (z)
+		m_z =  accel_raw[2];
+
+	m_fired_time = fired_time;
+
+	ERR("m_x = %d, m_y = %d, m_z = %d, time = %lluus", m_x, m_y, m_z, m_fired_time);
 
 	return true;
 }
 
-bool accel_sensor::on_start(void)
+virtual bool set_command(unsigned int cmd, long val)
 {
-	if (!m_sensor_hal->enable()) {
-		ERR("m_sensor_hal start fail\n");
-		return false;
-	}
-
-	return start_poll();
+	return false;
 }
 
-bool accel_sensor::on_stop(void)
+virtual bool batch(int flags,
+		unsigned long long interval_ms,
+		unsigned long long max_report_latency_ns)
 {
-	if (!m_sensor_hal->disable()) {
-		ERR("m_sensor_hal stop fail\n");
-		return false;
-	}
+	unsigned long long polling_interval_ns;
 
-	return stop_poll();
-}
-
-bool accel_sensor::get_properties(sensor_properties_s &properties)
-{
-	return m_sensor_hal->get_properties(properties);
-}
-
-int accel_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
-{
-	if (m_sensor_hal->get_sensor_data(data) < 0) {
-		ERR("Failed to get sensor data");
-		return -1;
-	}
-
-	if (type == ACCELEROMETER_RAW_DATA_EVENT) {
-		raw_to_base(data);
-	} else {
-		ERR("Does not support type: 0x%x", type);
-		return -1;
-	}
-
-	return 0;
-}
-
-bool accel_sensor::set_interval(unsigned long interval)
-{
 	AUTOLOCK(m_mutex);
 
-	m_interval = interval;
+	polling_interval_ns = ((unsigned long long)(interval_ms) * 1000llu * 1000llu);
 
-	INFO("Polling interval is set to %dms", interval);
+	if (!set_node_value(m_interval_node, polling_interval_ns)) {
+		ERR("Failed to set polling resource: %s\n", m_interval_node.c_str());
+		return false;
+	}
 
-	return m_sensor_hal->set_interval(interval);
+	INFO("Interval is changed from %dms to %dms]", m_polling_interval, val);
+	m_polling_interval = val;
+	return true;
+}
+
+virtual bool flush(void)
+{
+	return false;
 }
 
 void accel_sensor::raw_to_base(sensor_data_t &data)
@@ -179,22 +289,4 @@ void accel_sensor::raw_to_base(sensor_data_t &data)
 	data.values[0] = RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(data.values[0] * m_raw_data_unit);
 	data.values[1] = RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(data.values[1] * m_raw_data_unit);
 	data.values[2] = RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(data.values[2] * m_raw_data_unit);
-}
-
-extern "C" sensor_module* create(void)
-{
-	accel_sensor *sensor;
-
-	try {
-		sensor = new(std::nothrow) accel_sensor;
-	} catch (int err) {
-		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
-		return NULL;
-	}
-
-	sensor_module *module = new(std::nothrow) sensor_module;
-	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
-
-	module->sensors.push_back(sensor);
-	return module;
 }

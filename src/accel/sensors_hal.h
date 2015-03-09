@@ -77,7 +77,7 @@ struct sensors_module_t {
 	int (*get_sensor_data)(struct sensors_module_t *dev,
 			int handle, sensor_data_t *data);
 
-	int (*batch)(struct sensors_module_t *dev, int handle, int flags, 
+	int (*batch)(struct sensors_module_t *dev, int handle, int flags,
 			unsigned long long interval_ns, unsigned long long max_report_latency_ns);
 
 	int (*flush)(struct sensors_module_t *dev, int handle);

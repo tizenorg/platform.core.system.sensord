@@ -20,34 +20,53 @@
 #ifndef _ACCEL_SENSOR_H_
 #define _ACCEL_SENSOR_H_
 
-#include <sensor_common.h>
-
-#include <physical_sensor.h>
 #include <sensor_hal.h>
+#include <string>
 
-class accel_sensor {
+class cmutex;
+
+class accel_sensor : public sensor_hal
+{
 public:
 	accel_sensor();
 	virtual ~accel_sensor();
 
-	virtual bool initialize();
-	virtual bool set_interval(unsigned long interval);
-	virtual bool get_properties(sensor_properties_s &properties);
-	virtual int get_sensor_data(unsigned int type, sensor_data_t &data);
-	virtual bool 
+	virtual bool initialize(void);
+	virtual bool enable(void);
+	virtual bool disable(void);
+	virtual bool set_handle(int handle);
+	virtual bool get_fd(int &fd);
+	virtual bool get_info(sensor_info_t &info);
+	virtual bool get_sensor_data(sensor_data_t &data);
+	virtual bool set_command(unsigned int cmd, long val);
+	virtual bool batch(int flags,
+			unsigned long long interval_ms,
+			unsigned long long max_report_latency_ns);
+	virtual bool flush(void);
 private:
-	sensor_hal *m_sensor_hal;
+	cmutex m_mutex;
 	cmutex m_value_mutex;
+	float m_x;
+	float m_y;
+	float m_z;
+	unsigned long long m_fired_time;
+	unsigned long long m_polling_interval;
 
+	int m_resolution;
 	float m_raw_data_unit;
 
-	unsigned long m_interval;
+	int m_method;
+	int m_handle;
+	int m_node_handle;
 
-	virtual bool on_start(void);
-	virtual bool on_stop(void);
+	std::string m_name;
+	std::string m_model_id;
+	std::string m_vendor;
+	std::string m_chip_name;
 
-	void raw_to_base(sensor_data_t &data);
-	bool process_event(void);
+	std::string m_data_node;
+	std::string m_enable_node;
+	std::string m_interval_node;
 };
 
 #endif

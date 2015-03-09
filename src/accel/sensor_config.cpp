@@ -18,7 +18,7 @@
  */
 
 #include <cconfig.h>
-#include "common.h"
+#include <common.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <sstream>
@@ -210,7 +210,7 @@ bool CConfig::get(const string& sensor_type, const string& model_id, const strin
 
 	istringstream convert(str_value);
 
-	if ( !(convert >> value))
+	if (!(convert >> value))
 		value = 0;
 
 	return true;
@@ -225,7 +225,7 @@ bool CConfig::get(const string& sensor_type, const string& model_id, const strin
 
 	istringstream convert(str_value);
 
-	if ( !(convert >> value))
+	if (!(convert >> value))
 		value = 0;
 
 	return true;
