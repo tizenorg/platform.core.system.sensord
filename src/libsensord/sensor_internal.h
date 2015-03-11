@@ -54,6 +54,7 @@ extern "C"
 #include <sensor_geomagnetic_rv.h>
 #include <sensor_gaming_rv.h>
 #include <sensor_temperature.h>
+#include <sensor_fusion.h>
 
 
 typedef void (*sensor_cb_t)(sensor_t sensor, unsigned int event_type, sensor_data_t *data, void *user_data);
