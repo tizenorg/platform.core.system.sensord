@@ -61,9 +61,6 @@ orientation_filter<TYPE>::orientation_filter()
 	m_var_pitch = vec;
 	m_var_azimuth = vec;
 
-	m_pitch_phase_compensation = 1;
-	m_roll_phase_compensation = 1;
-	m_azimuth_phase_compensation = 1;
 	m_magnetic_alignment_factor = 1;
 
 	m_gyro.m_time_stamp = 0;
@@ -231,10 +228,6 @@ inline void orientation_filter<TYPE>::time_update()
 
 	orientation = quat2euler(quat_output);
 
-	m_orientation.m_ang.m_vec[0] = orientation.m_ang.m_vec[0] * m_pitch_phase_compensation;
-	m_orientation.m_ang.m_vec[1] = orientation.m_ang.m_vec[1] * m_roll_phase_compensation;
-	m_orientation.m_ang.m_vec[2] = orientation.m_ang.m_vec[2] * m_azimuth_phase_compensation;
-
 	m_rot_matrix = quat2rot_mat(m_quat_driv);
 
 	quat_error = m_quat_aid * m_quat_driv;
@@ -378,6 +371,15 @@ void orientation_filter<TYPE>::get_device_orientation(const sensor_data<TYPE> *a
 			time_update_gaming_rv();
 
 		measurement_update();
+
+		if (magnetic == NULL) {
+			m_quaternion = m_quat_gaming_rv;
+		} else {
+			m_quaternion = m_quat_9axis;
+		}
+
+	} else {
+		m_quaternion = m_quat_aid;
 	}
 }
 

@@ -64,11 +64,9 @@ public:
 	euler_angles<TYPE> m_orientation;
 	quaternion<TYPE> m_quat_9axis;
 	quaternion<TYPE> m_quat_gaming_rv;
+	quaternion<TYPE> m_quaternion;
 	TYPE m_gyro_dt;
 
-	int m_pitch_phase_compensation;
-	int m_roll_phase_compensation;
-	int m_azimuth_phase_compensation;
 	int m_magnetic_alignment_factor;
 
 	orientation_filter();
