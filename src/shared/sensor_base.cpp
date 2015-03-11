@@ -306,6 +306,11 @@ void sensor_base::register_supported_event(unsigned int event_type)
 	m_supported_event_info.push_back(event_type);
 }
 
+void sensor_base::unregister_supported_event(unsigned int event_type)
+{
+	m_supported_event_info.erase(std::remove(m_supported_event_info.begin(),
+			m_supported_event_info.end(), event_type), m_supported_event_info.end());
+}
 unsigned int sensor_base::get_client_cnt(unsigned int event_type)
 {
 	AUTOLOCK(m_client_info_mutex);

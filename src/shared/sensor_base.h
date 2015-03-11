@@ -85,6 +85,7 @@ public:
 	virtual int get_sensor_data(unsigned int type, sensor_data_t &data);
 
 	void register_supported_event(unsigned int event_type);
+	void unregister_supported_event(unsigned int event_type);
 protected:
 	typedef lock_guard<mutex> lock;
 	typedef lock_guard<recursive_mutex> rlock;
