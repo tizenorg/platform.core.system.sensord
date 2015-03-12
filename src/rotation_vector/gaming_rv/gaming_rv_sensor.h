@@ -38,11 +38,12 @@ public:
 	bool get_properties(sensor_properties_s &properties);
 	sensor_type_t get_type(void);
 
-	int get_sensor_data(const unsigned int data_id, sensor_data_t &data);
+	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
 
 private:
 	sensor_base *m_accel_sensor;
 	sensor_base *m_gyro_sensor;
+	sensor_base *m_fusion_sensor;
 
 	sensor_data<float> m_accel;
 	sensor_data<float> m_gyro;
@@ -54,19 +55,12 @@ private:
 
 	unsigned int m_enable_gaming_rv;
 
-	int m_accuracy;
 	unsigned long long m_time;
 	unsigned int m_interval;
 
 	string m_vendor;
 	string m_raw_data_unit;
 	int m_default_sampling_time;
-	float m_accel_static_bias[3];
-	float m_gyro_static_bias[3];
-	int m_accel_rotation_direction_compensation[3];
-	int m_gyro_rotation_direction_compensation[3];
-	float m_accel_scale;
-	float m_gyro_scale;
 
 	bool on_start(void);
 	bool on_stop(void);
