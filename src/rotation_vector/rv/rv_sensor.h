@@ -44,6 +44,7 @@ private:
 	sensor_base *m_accel_sensor;
 	sensor_base *m_gyro_sensor;
 	sensor_base *m_magnetic_sensor;
+	sensor_base *m_fusion_sensor;
 
 	sensor_data<float> m_accel;
 	sensor_data<float> m_gyro;
@@ -56,26 +57,12 @@ private:
 
 	unsigned int m_enable_orientation;
 
-	int m_accuracy;
 	unsigned long long m_time;
 	unsigned int m_interval;
 
 	string m_vendor;
 	string m_raw_data_unit;
 	int m_default_sampling_time;
-	float m_accel_static_bias[3];
-	float m_gyro_static_bias[3];
-	float m_geomagnetic_static_bias[3];
-	int m_accel_rotation_direction_compensation[3];
-	int m_gyro_rotation_direction_compensation[3];
-	int m_geomagnetic_rotation_direction_compensation[3];
-	float m_accel_scale;
-	float m_gyro_scale;
-	float m_geomagnetic_scale;
-	int m_magnetic_alignment_factor;
-	int m_azimuth_rotation_compensation;
-	int m_pitch_rotation_compensation;
-	int m_roll_rotation_compensation;
 
 	bool on_start(void);
 	bool on_stop(void);

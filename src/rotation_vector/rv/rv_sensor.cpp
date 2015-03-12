@@ -35,10 +35,7 @@
 #define SENSOR_NAME "RV_SENSOR"
 #define SENSOR_TYPE_RV		"ROTATION_VECTOR"
 
-#define ACCELEROMETER_ENABLED 0x01
-#define GYROSCOPE_ENABLED 0x02
-#define GEOMAGNETIC_ENABLED 0x04
-#define ORIENTATION_ENABLED 7
+#define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
 #define INITIAL_VALUE -1
 
@@ -48,16 +45,6 @@
 #define ELEMENT_VENDOR											"VENDOR"
 #define ELEMENT_RAW_DATA_UNIT									"RAW_DATA_UNIT"
 #define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
-#define ELEMENT_ACCEL_STATIC_BIAS								"ACCEL_STATIC_BIAS"
-#define ELEMENT_GYRO_STATIC_BIAS								"GYRO_STATIC_BIAS"
-#define ELEMENT_GEOMAGNETIC_STATIC_BIAS							"GEOMAGNETIC_STATIC_BIAS"
-#define ELEMENT_ACCEL_ROTATION_DIRECTION_COMPENSATION			"ACCEL_ROTATION_DIRECTION_COMPENSATION"
-#define ELEMENT_GYRO_ROTATION_DIRECTION_COMPENSATION			"GYRO_ROTATION_DIRECTION_COMPENSATION"
-#define ELEMENT_GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION		"GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION"
-#define ELEMENT_ACCEL_SCALE										"ACCEL_SCALE"
-#define ELEMENT_GYRO_SCALE										"GYRO_SCALE"
-#define ELEMENT_GEOMAGNETIC_SCALE								"GEOMAGNETIC_SCALE"
-#define ELEMENT_MAGNETIC_ALIGNMENT_FACTOR						"MAGNETIC_ALIGNMENT_FACTOR"
 
 void pre_process_data(sensor_data<float> &data_out, const float *data_in, float *bias, int *sign, float scale)
 {
@@ -70,7 +57,6 @@ rv_sensor::rv_sensor()
 : m_accel_sensor(NULL)
 , m_gyro_sensor(NULL)
 , m_magnetic_sensor(NULL)
-, m_accuracy(-1)
 , m_time(0)
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
@@ -93,78 +79,7 @@ rv_sensor::rv_sensor()
 
 	INFO("m_default_sampling_time = %d", m_default_sampling_time);
 
-	if (!config.get(SENSOR_TYPE_RV, ELEMENT_ACCEL_STATIC_BIAS, m_accel_static_bias, 3)) {
-		ERR("[ACCEL_STATIC_BIAS] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_accel_static_bias = (%f, %f, %f)", m_accel_static_bias[0], m_accel_static_bias[1], m_accel_static_bias[2]);
-
-	if (!config.get(SENSOR_TYPE_RV, ELEMENT_GYRO_STATIC_BIAS, m_gyro_static_bias,3)) {
-		ERR("[GYRO_STATIC_BIAS] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_gyro_static_bias = (%f, %f, %f)", m_gyro_static_bias[0], m_gyro_static_bias[1], m_gyro_static_bias[2]);
-
-	if (!config.get(SENSOR_TYPE_RV, ELEMENT_GEOMAGNETIC_STATIC_BIAS, m_geomagnetic_static_bias, 3)) {
-		ERR("[GEOMAGNETIC_STATIC_BIAS] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_geomagnetic_static_bias = (%f, %f, %f)", m_geomagnetic_static_bias[0], m_geomagnetic_static_bias[1], m_geomagnetic_static_bias[2]);
-
-	if (!config.get(SENSOR_TYPE_RV, ELEMENT_ACCEL_ROTATION_DIRECTION_COMPENSATION, m_accel_rotation_direction_compensation, 3)) {
-		ERR("[ACCEL_ROTATION_DIRECTION_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_accel_rotation_direction_compensation = (%d, %d, %d)", m_accel_rotation_direction_compensation[0], m_accel_rotation_direction_compensation[1], m_accel_rotation_direction_compensation[2]);
-
-	if (!config.get(SENSOR_TYPE_RV, ELEMENT_GYRO_ROTATION_DIRECTION_COMPENSATION, m_gyro_rotation_direction_compensation, 3)) {
-		ERR("[GYRO_ROTATION_DIRECTION_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_gyro_rotation_direction_compensation = (%d, %d, %d)", m_gyro_rotation_direction_compensation[0], m_gyro_rotation_direction_compensation[1], m_gyro_rotation_direction_compensation[2]);
-
-	if (!config.get(SENSOR_TYPE_RV, ELEMENT_GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION, m_geomagnetic_rotation_direction_compensation, 3)) {
-		ERR("[GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_geomagnetic_rotation_direction_compensation = (%d, %d, %d)", m_geomagnetic_rotation_direction_compensation[0], m_geomagnetic_rotation_direction_compensation[1], m_geomagnetic_rotation_direction_compensation[2]);
-
-	if (!config.get(SENSOR_TYPE_RV, ELEMENT_ACCEL_SCALE, &m_accel_scale)) {
-		ERR("[ACCEL_SCALE] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_accel_scale = %f", m_accel_scale);
-
-	if (!config.get(SENSOR_TYPE_RV, ELEMENT_GYRO_SCALE, &m_gyro_scale)) {
-		ERR("[GYRO_SCALE] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_gyro_scale = %f", m_gyro_scale);
-
-	if (!config.get(SENSOR_TYPE_RV, ELEMENT_GEOMAGNETIC_SCALE, &m_geomagnetic_scale)) {
-		ERR("[GEOMAGNETIC_SCALE] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_geomagnetic_scale = %f", m_geomagnetic_scale);
-
-	if (!config.get(SENSOR_TYPE_RV, ELEMENT_MAGNETIC_ALIGNMENT_FACTOR, &m_magnetic_alignment_factor)) {
-		ERR("[MAGNETIC_ALIGNMENT_FACTOR] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_magnetic_alignment_factor = %d", m_magnetic_alignment_factor);
-
 	m_interval = m_default_sampling_time * MS_TO_US;
-
 }
 
 rv_sensor::~rv_sensor()
@@ -178,9 +93,11 @@ bool rv_sensor::init()
 	m_gyro_sensor = sensor_plugin_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
 	m_magnetic_sensor = sensor_plugin_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
 
-	if (!m_accel_sensor || !m_gyro_sensor || !m_magnetic_sensor) {
-		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, mag: 0x%x",
-			m_accel_sensor, m_gyro_sensor, m_magnetic_sensor);
+	m_fusion_sensor = sensor_plugin_loader::get_instance().get_sensor(FUSION_SENSOR);
+
+	if (!m_accel_sensor || !m_gyro_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
+		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, mag: 0x%x, fusion: 0x%x",
+			m_accel_sensor, m_gyro_sensor, m_magnetic_sensor, m_fusion_sensor);
 		return false;
 	}
 
@@ -208,6 +125,12 @@ bool rv_sensor::on_start(void)
 	m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_magnetic_sensor->start();
 
+	m_fusion_sensor->register_supported_event(FUSION_EVENT);
+	m_fusion_sensor->register_supported_event(FUSION_ROTATION_VECTOR_ENABLED);
+	m_fusion_sensor->add_client(FUSION_EVENT);
+	m_fusion_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+	m_fusion_sensor->start();
+
 	activate();
 	return true;
 }
@@ -226,6 +149,12 @@ bool rv_sensor::on_stop(void)
 	m_magnetic_sensor->delete_interval((intptr_t)this, false);
 	m_magnetic_sensor->stop();
 
+	m_fusion_sensor->delete_client(FUSION_EVENT);
+	m_fusion_sensor->delete_interval((intptr_t)this, false);
+	m_fusion_sensor->unregister_supported_event(FUSION_EVENT);
+	m_fusion_sensor->unregister_supported_event(FUSION_ROTATION_VECTOR_ENABLED);
+	m_fusion_sensor->stop();
+
 	deactivate();
 	return true;
 }
@@ -238,6 +167,8 @@ bool rv_sensor::add_interval(int client_id, unsigned int interval)
 	m_gyro_sensor->add_interval(client_id, interval, false);
 	m_magnetic_sensor->add_interval(client_id, interval, false);
 
+	m_fusion_sensor->add_interval(client_id, interval, false);
+
 	return sensor_base::add_interval(client_id, interval, false);
 }
 
@@ -249,65 +180,22 @@ bool rv_sensor::delete_interval(int client_id)
 	m_gyro_sensor->delete_interval(client_id, false);
 	m_magnetic_sensor->delete_interval(client_id, false);
 
+	m_fusion_sensor->delete_interval(client_id, false);
+
 	return sensor_base::delete_interval(client_id, false);
 }
 
-void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &outs)
+void rv_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
 {
-	const float MIN_DELIVERY_DIFF_FACTOR = 0.75f;
 	unsigned long long diff_time;
 
 	sensor_event_t rv_event;
-	quaternion<float> quaternion_orientation;
 
-	if (event.event_type == ACCELEROMETER_RAW_DATA_EVENT) {
+	if (event.event_type == FUSION_EVENT) {
 		diff_time = event.data.timestamp - m_time;
 
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
-
-		pre_process_data(m_accel, event.data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);
-
-		m_accel.m_time_stamp = event.data.timestamp;
-
-		m_enable_orientation |= ACCELEROMETER_ENABLED;
-	}
-	else if (event.event_type == GYROSCOPE_RAW_DATA_EVENT) {
-		diff_time = event.data.timestamp - m_time;
-
-		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
-			return;
-
-		pre_process_data(m_gyro, event.data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, m_gyro_scale);
-
-		m_gyro.m_time_stamp = event.data.timestamp;
-
-		m_enable_orientation |= GYROSCOPE_ENABLED;
-	}
-	else if (event.event_type == GEOMAGNETIC_RAW_DATA_EVENT) {
-		diff_time = event.data.timestamp - m_time;
-
-		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
-			return;
-
-		pre_process_data(m_magnetic, event.data.values, m_geomagnetic_static_bias, m_geomagnetic_rotation_direction_compensation, m_geomagnetic_scale);
-
-		m_magnetic.m_time_stamp = event.data.timestamp;
-
-		m_enable_orientation |= GEOMAGNETIC_ENABLED;
-	}
-
-	if (m_enable_orientation == ORIENTATION_ENABLED) {
-		m_enable_orientation = 0;
-
-		m_orientation_filter.m_pitch_phase_compensation = m_pitch_rotation_compensation;
-		m_orientation_filter.m_roll_phase_compensation = m_roll_rotation_compensation;
-		m_orientation_filter.m_azimuth_phase_compensation = m_azimuth_rotation_compensation;
-		m_orientation_filter.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
-
-		m_orientation_filter.get_device_orientation(&m_accel, &m_gyro, &m_magnetic);
-
-		quaternion_orientation = m_orientation_filter.m_quat_9axis;
 
 		m_time = get_timestamp();
 		rv_event.sensor_id = get_id();
@@ -315,10 +203,10 @@ void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &
 		rv_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 		rv_event.data.timestamp = m_time;
 		rv_event.data.value_count = 4;
-		rv_event.data.values[0] = quaternion_orientation.m_quat.m_vec[1];
-		rv_event.data.values[1] = quaternion_orientation.m_quat.m_vec[2];
-		rv_event.data.values[2] = quaternion_orientation.m_quat.m_vec[3];
-		rv_event.data.values[3] = quaternion_orientation.m_quat.m_vec[0];
+		rv_event.data.values[0] = event.data.values[1];
+		rv_event.data.values[1] = event.data.values[2];
+		rv_event.data.values[2] = event.data.values[3];
+		rv_event.data.values[3] = event.data.values[0];
 
 		push(rv_event);
 	}
@@ -328,46 +216,20 @@ void rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &
 
 int rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
 {
-	sensor_data<float> accel;
-	sensor_data<float> gyro;
-	sensor_data<float> magnetic;
-
-	sensor_data_t accel_data;
-	sensor_data_t gyro_data;
-	sensor_data_t magnetic_data;
-
-	quaternion<float> quaternion_orientation;
+	sensor_data_t fusion_data;
 
 	if (event_type != ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME)
 		return -1;
 
-	m_accel_sensor->get_sensor_data(ACCELEROMETER_RAW_DATA_EVENT, accel_data);
-	m_gyro_sensor->get_sensor_data(GYROSCOPE_RAW_DATA_EVENT, gyro_data);
-	m_magnetic_sensor->get_sensor_data(GEOMAGNETIC_RAW_DATA_EVENT, magnetic_data);
-
-	pre_process_data(accel, accel_data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);
-	pre_process_data(gyro, gyro_data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, m_gyro_scale);
-	pre_process_data(magnetic, magnetic_data.values, m_geomagnetic_static_bias, m_geomagnetic_rotation_direction_compensation, m_geomagnetic_scale);
-	accel.m_time_stamp = accel_data.timestamp;
-	gyro.m_time_stamp = gyro_data.timestamp;
-	magnetic.m_time_stamp = magnetic_data.timestamp;
-
-	m_orientation_filter_poll.m_pitch_phase_compensation = m_pitch_rotation_compensation;
-	m_orientation_filter_poll.m_roll_phase_compensation = m_roll_rotation_compensation;
-	m_orientation_filter_poll.m_azimuth_phase_compensation = m_azimuth_rotation_compensation;
-	m_orientation_filter_poll.m_magnetic_alignment_factor = m_magnetic_alignment_factor;
-
-	m_orientation_filter_poll.get_device_orientation(&m_accel, &m_gyro, &m_magnetic);
-
-	quaternion_orientation = m_orientation_filter_poll.m_quat_9axis;
+	m_fusion_sensor->get_sensor_data(FUSION_ORIENTATION_ENABLED, fusion_data);
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();
 	data.value_count = 4;
-	data.values[0] = quaternion_orientation.m_quat.m_vec[1];
-	data.values[1] = quaternion_orientation.m_quat.m_vec[2];
-	data.values[2] = quaternion_orientation.m_quat.m_vec[3];
-	data.values[3] = quaternion_orientation.m_quat.m_vec[0];
+	data.values[0] = data.values[1];
+	data.values[1] = data.values[2];
+	data.values[2] = data.values[3];
+	data.values[3] = data.values[0];
 
 	return 0;
 }
