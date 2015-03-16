@@ -76,9 +76,6 @@ private:
 	float m_gyro_scale;
 	float m_geomagnetic_scale;
 	int m_magnetic_alignment_factor;
-	int m_azimuth_rotation_compensation;
-	int m_pitch_rotation_compensation;
-	int m_roll_rotation_compensation;
 
 	bool on_start(void);
 	bool on_stop(void);
