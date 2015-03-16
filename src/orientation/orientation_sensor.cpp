@@ -63,6 +63,7 @@ orientation_sensor::orientation_sensor()
 : m_accel_sensor(NULL)
 , m_gyro_sensor(NULL)
 , m_magnetic_sensor(NULL)
+, m_fusion_sensor(NULL)
 , m_time(0)
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
@@ -244,6 +245,10 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 			azimuth_offset = AZIMUTH_OFFSET_RADIANS;
 		}
 
+		euler.m_ang.m_vec[0] *= m_pitch_rotation_compensation;
+		euler.m_ang.m_vec[1] *= m_roll_rotation_compensation;
+		euler.m_ang.m_vec[2] *= m_azimuth_rotation_compensation;
+
 		m_time = get_timestamp();
 		orientation_event.sensor_id = get_id();
 		orientation_event.event_type = ORIENTATION_RAW_DATA_EVENT;
@@ -256,10 +261,6 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 			orientation_event.data.values[0] = euler.m_ang.m_vec[2];
 		else
 			orientation_event.data.values[0] = euler.m_ang.m_vec[2] + azimuth_offset;
-
-		orientation_event.data.values[1] *= m_pitch_rotation_compensation;
-		orientation_event.data.values[2] *= m_roll_rotation_compensation;
-		orientation_event.data.values[0] *= m_azimuth_rotation_compensation;
 
 		push(orientation_event);
 	}
