@@ -88,9 +88,9 @@ inline void orientation_filter<TYPE>::initialize_sensor_data(const sensor_data<T
 		m_gyro_dt = sample_interval_gyro * US2S;
 		m_gyro.m_time_stamp = gyro->m_time_stamp;
 
-		m_gyro.m_data = m_gyro.m_data * (TYPE) PI;
+		m_gyro.m_data = gyro->m_data * (TYPE) PI;
 
-		m_gyro.m_data = gyro->m_data - m_bias_correction;
+		m_gyro.m_data = m_gyro.m_data - m_bias_correction;
 	}
 
 	if (magnetic != NULL) {
@@ -226,7 +226,7 @@ inline void orientation_filter<TYPE>::time_update()
 	m_quat_9axis = quat_output;
 	m_quat_gaming_rv = m_quat_9axis;
 
-	orientation = quat2euler(quat_output);
+	m_orientation = quat2euler(quat_output);
 
 	m_rot_matrix = quat2rot_mat(m_quat_driv);
 
@@ -291,6 +291,8 @@ inline void orientation_filter<TYPE>::time_update_gaming_rv()
 	m_quat_driv.quat_normalize();
 
 	quat_output = phase_correction(m_quat_driv, m_quat_aid);
+
+	m_orientation = quat2euler(quat_output);
 
 	quat_error = m_quat_aid * m_quat_driv;
 
