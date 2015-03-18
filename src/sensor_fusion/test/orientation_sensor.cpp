@@ -28,10 +28,6 @@ int sign_magnetic[] = {+1, +1, +1};
 float scale_accel = 1;
 float scale_gyro = 1150;
 float scale_magnetic = 1;
-
-int pitch_phase_compensation = -1;
-int roll_phase_compensation = -1;
-int azimuth_phase_compensation = -1;
 int magnetic_alignment_factor = -1;
 
 void pre_process_data(sensor_data<float> *data_out, sensor_data<float> *data_in, float *bias, int *sign, float scale)
@@ -53,9 +49,6 @@ void orientation_sensor::get_device_orientation(sensor_data<float> *accel_data,
 	pre_process_data(magnetic_data, magnetic_data, bias_magnetic, sign_magnetic, scale_magnetic);
 	normalize(*magnetic_data);
 
-	orien_filter.m_pitch_phase_compensation = pitch_phase_compensation;
-	orien_filter.m_roll_phase_compensation = roll_phase_compensation;
-	orien_filter.m_azimuth_phase_compensation = azimuth_phase_compensation;
 	orien_filter.m_magnetic_alignment_factor = magnetic_alignment_factor;
 
 	orien_filter.get_device_orientation(accel_data, gyro_data, magnetic_data);

@@ -26,6 +26,9 @@ using namespace std;
 
 #define ORIENTATION_DATA_PATH "../../../design/data/100ms/orientation/roll_pitch_yaw/"
 #define ORIENTATION_DATA_SIZE 1095
+int pitch_phase_compensation = -1;
+int roll_phase_compensation = -1;
+int azimuth_phase_compensation = -1;
 
 int main()
 {
@@ -81,9 +84,20 @@ int main()
 
 		orien_sensor.get_device_orientation(&accel_data, &gyro_data, &magnetic_data);
 
-		orien_file << orien_sensor.orien_filter.m_orientation.m_ang;
+		orientation = orien_sensor.orien_filter.m_orientation;
 
-		cout << "Orientation angles\t" << orien_sensor.orien_filter.m_orientation.m_ang << "\n\n";
+		orientation = rad2deg(orientation);
+
+		orientation.m_ang.m_vec[0] *= pitch_phase_compensation;
+		orientation.m_ang.m_vec[1] *= roll_phase_compensation;
+		orientation.m_ang.m_vec[2] *= azimuth_phase_compensation; 
+
+		if (orientation.m_ang.m_vec[2] < 0)
+			orientation.m_ang.m_vec[2] += 360;
+
+		orien_file << orientation.m_ang;
+
+		cout << "Orientation angles\t" << orientation.m_ang << "\n\n";
 
 		cout << "Orientation matrix\t" << orien_sensor.orien_filter.m_rot_matrix.m_rot_mat << "\n\n";
 
