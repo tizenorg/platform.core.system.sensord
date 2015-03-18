@@ -24,8 +24,8 @@
 % - Estimation and correction of orientation errors and bias errors for gyroscope using Kalman filter
 
 function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, Gyro_data, Mag_data)
-	PLOT_SCALED_SENSOR_COMPARISON_DATA = 0;
-	PLOT_INDIVIDUAL_SENSOR_INPUT_DATA = 0;
+	PLOT_SCALED_SENSOR_COMPARISON_DATA = 1;
+	PLOT_INDIVIDUAL_SENSOR_INPUT_DATA = 1;
 
 	MAGNETIC_ALIGNMENT_FACTOR = -1;
 	GYRO_DATA_DISABLED = 0;

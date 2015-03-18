@@ -48,6 +48,14 @@ Bias_Mx = 0;
 Bias_My = 0;
 Bias_Mz = 0;
 
+Sign_Ax = 1;
+Sign_Ay = 1;
+Sign_Az = 1;
+
+Sign_Gx = 1;
+Sign_Gy = 1;
+Sign_Gz = 1;
+
 Sign_Mx = 1;
 Sign_My = 1;
 Sign_Mz = 1;
@@ -80,15 +88,15 @@ Gyro_data(2,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/gyro.txt")(:,
 Gyro_data(3,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/gyro.txt")(:,3))') - Bias_Gz)(1:BUFFER_SIZE);
 Gyro_data(4,:) = ((dlmread("data/100ms/orientation/roll_pitch_yaw/gyro.txt")(:,4))')(1:BUFFER_SIZE);
 
-scale_Gyro = 575;
+scale_Gyro = 1150;
 Gyro_data(1,:) = Gyro_data(1,:)/scale_Gyro;
 Gyro_data(2,:) = Gyro_data(2,:)/scale_Gyro;
 Gyro_data(3,:) = Gyro_data(3,:)/scale_Gyro;
 
 % get magnetometer x,y,z axis data from stored file
-Mag_data(1,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,1))') + Bias_Mx)(1:BUFFER_SIZE) * Sign_Mx;
-Mag_data(2,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,2))') + Bias_My)(1:BUFFER_SIZE) * Sign_My;
-Mag_data(3,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,3))') + Bias_Mz)(1:BUFFER_SIZE) * Sign_Mz;
+Mag_data(1,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,1))') - Bias_Mx)(1:BUFFER_SIZE) * Sign_Mx;
+Mag_data(2,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,2))') - Bias_My)(1:BUFFER_SIZE) * Sign_My;
+Mag_data(3,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,3))') - Bias_Mz)(1:BUFFER_SIZE) * Sign_Mz;
 Mag_data(4,:) = ((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,4))')(1:BUFFER_SIZE);
 
 % estimate orientation
@@ -104,6 +112,14 @@ for i = 1:BUFFER_SIZE
 	OR_driv(1,i) = ROLL_PHASE_CORRECTION * euler_driv(i,2)' * RAD2DEG;
 	OR_driv(2,i) = PITCH_PHASE_CORRECTION * euler_driv(i,1)' * RAD2DEG;
 	OR_driv(3,i) = YAW_PHASE_CORRECTION * euler_driv(i,3)' * RAD2DEG;
+	
+	if (OR_driv(3,i) < 0)
+		OR_driv(3,i) = OR_driv(3,i) + 360;
+	end
+
+	if (OR_aid(3,i) < 0)
+		OR_aid(3,i) = OR_aid(3,i) + 360;
+	end
 
 	euler_err(i,:) = quat2euler(Quat_err(i,:));
 	OR_err(1,i) = euler_err(i,2)' * RAD2DEG;
