@@ -104,7 +104,7 @@ int get_event_driven(sensor_type_t sensor_type, char str[])
 		break;
 	case ROTATION_VECTOR_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
-			return ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME;
+			return ROTATION_VECTOR_RAW_DATA_EVENT;
 		break;
 	case GEOMAGNETIC_RV_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
@@ -217,7 +217,7 @@ int main(int argc, char **argv)
 	}
 	else if (strcmp(argv[1], "rotation_vector") == 0) {
 		 sensor_type = ROTATION_VECTOR_SENSOR;
-		 event = ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME;
+		 event = ROTATION_VECTOR_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "geomagnetic_rv") == 0) {
 		 sensor_type = GEOMAGNETIC_RV_SENSOR;

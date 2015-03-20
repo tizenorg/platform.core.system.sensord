@@ -62,7 +62,7 @@ rv_sensor::rv_sensor()
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
 	m_name = string(SENSOR_NAME);
-	register_supported_event(ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME);
+	register_supported_event(ROTATION_VECTOR_RAW_DATA_EVENT);
 	m_enable_orientation = 0;
 
 	if (!config.get(SENSOR_TYPE_RV, ELEMENT_VENDOR, m_vendor)) {
@@ -199,7 +199,7 @@ void rv_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &
 
 		m_time = get_timestamp();
 		rv_event.sensor_id = get_id();
-		rv_event.event_type = ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME;
+		rv_event.event_type = ROTATION_VECTOR_RAW_DATA_EVENT;
 		rv_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 		rv_event.data.timestamp = m_time;
 		rv_event.data.value_count = 4;
@@ -218,7 +218,7 @@ int rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
 {
 	sensor_data_t fusion_data;
 
-	if (event_type != ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME)
+	if (event_type != ROTATION_VECTOR_RAW_DATA_EVENT)
 		return -1;
 
 	m_fusion_sensor->get_sensor_data(FUSION_ORIENTATION_ENABLED, fusion_data);
