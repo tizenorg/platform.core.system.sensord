@@ -25,14 +25,14 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 
 link_directories(../src/libsensord/)
 
-add_executable(auto_test src/auto_test.c)
-add_executable(tc-common src/tc-common.c)
+add_executable(api-test src/api-test.c)
+add_executable(sensor-test src/sensor-test.c src/check-sensor.c)
 
-SET_TARGET_PROPERTIES(auto_test PROPERTIES LINKER_LANGUAGE C)
-SET_TARGET_PROPERTIES(tc-common PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(api-test PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(sensor-test PROPERTIES LINKER_LANGUAGE C)
 
-target_link_libraries(auto_test glib-2.0 dlog sensor)
-target_link_libraries(tc-common glib-2.0 dlog sensor)
+target_link_libraries(api-test glib-2.0 dlog sensor)
+target_link_libraries(sensor-test glib-2.0 dlog sensor)
 
-INSTALL(TARGETS auto_test DESTINATION /usr/bin/)
-INSTALL(TARGETS tc-common DESTINATION /usr/bin/)
+INSTALL(TARGETS api-test DESTINATION /usr/bin/)
+INSTALL(TARGETS sensor-test DESTINATION /usr/bin/)
