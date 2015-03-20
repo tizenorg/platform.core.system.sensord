@@ -138,7 +138,7 @@ systemctl daemon-reload
 %if %{build_test_suite} == "ON"
 %files -n sensor-test
 %defattr(-,root,root,-)
-%{_bindir}/auto_test
-%{_bindir}/tc-common
+%{_bindir}/api-test
+%{_bindir}/sensor-test
 %license LICENSE.APLv2
 %endif

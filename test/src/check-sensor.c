@@ -26,38 +26,9 @@
 #include <unistd.h>
 #include <string.h>
 
-#define DEFAULT_EVENT_INTERVAL 100
+#include "check-sensor.h"
 
 static GMainLoop *mainloop;
-
-void usage()
-{
-	printf("Usage : ./tc-common <Sensor_type> <event>(optional) <interval>(optional)\n\n");
-
-	printf("Sensor_type: ");
-	printf("[accelerometer] ");
-	printf("[gyroscope] ");
-	printf("[pressure] ");
-	printf("[temperature] ");
-	printf("[geomagnetic] ");
-	printf("[orientation] ");
-	printf("[gravity] ");
-	printf("[linear_accel] ");
-	printf("[rotation_vector] ");
-	printf("[geomagnetic_rv] ");
-	printf("[gaming_rv] ");
-	printf("[light]\n");
-	printf("event:");
-	printf("[RAW_DATA_REPORT_ON_TIME]\n");
-
-	printf("Sensor_type: ");
-	printf("[proximity]\n");
-	printf("event:");
-	printf("[EVENT_CHANGE_STATE]\n");
-
-	printf("interval:\n");
-	printf("The time interval should be entered based on the sampling frequency supported by accelerometer driver on the device in ms.If no value for sensor is entered default value by the driver will be used.\n");
-}
 
 int get_event_driven(sensor_type_t sensor_type, char str[])
 {
@@ -104,7 +75,7 @@ int get_event_driven(sensor_type_t sensor_type, char str[])
 		break;
 	case ROTATION_VECTOR_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
-			return ROTATION_VECTOR_RAW_DATA_EVENT;
+			return ROTATION_VECTOR_EVENT_RAW_DATA_REPORT_ON_TIME;
 		break;
 	case GEOMAGNETIC_RV_SENSOR:
 		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
@@ -168,107 +139,11 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 	}
 }
 
-int main(int argc, char **argv)
+int check_sensor(sensor_type_t sensor_type, unsigned int event, int interval)
 {
-	int result, handle, start_handle, stop_handle, interval;
-	char *end1, *end2;
-	int event;
-	bool EVENT_NOT_ENTERED = TRUE;
-	sensor_type_t sensor_type;
+	int handle, result, start_handle, stop_handle;
+
 	mainloop = g_main_loop_new(NULL, FALSE);
-
-	if (argc < 2 || argc > 4) {
-		printf("Wrong number of arguments\n");
-		usage();
-		return 0;
-	}
-
-	if (strcmp(argv[1], "accelerometer") == 0) {
-		 sensor_type = ACCELEROMETER_SENSOR;
-		 event = ACCELEROMETER_RAW_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "gyroscope") == 0) {
-		 sensor_type = GYROSCOPE_SENSOR;
-		 event = GYROSCOPE_RAW_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "pressure") == 0) {
-		 sensor_type = PRESSURE_SENSOR;
-		 event = PRESSURE_RAW_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "temperature") == 0) {
-		 sensor_type = TEMPERATURE_SENSOR;
-		 event = TEMPERATURE_RAW_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "geomagnetic") == 0) {
-		 sensor_type = GEOMAGNETIC_SENSOR;
-		 event = GEOMAGNETIC_RAW_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "orientation") == 0) {
-		 sensor_type = ORIENTATION_SENSOR;
-		 event = ORIENTATION_RAW_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "gravity") == 0) {
-		 sensor_type = GRAVITY_SENSOR;
-		 event = GRAVITY_RAW_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "linear_accel") == 0) {
-		 sensor_type = LINEAR_ACCEL_SENSOR;
-		 event = LINEAR_ACCEL_RAW_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "rotation_vector") == 0) {
-		 sensor_type = ROTATION_VECTOR_SENSOR;
-		 event = ROTATION_VECTOR_RAW_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "geomagnetic_rv") == 0) {
-		 sensor_type = GEOMAGNETIC_RV_SENSOR;
-		 event = GEOMAGNETIC_RV_RAW_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "gaming_rv") == 0) {
-		 sensor_type = GAMING_RV_SENSOR;
-		 event = GAMING_RV_RAW_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "light") == 0) {
-		 sensor_type = LIGHT_SENSOR;
-		 event = LIGHT_LUX_DATA_EVENT;
-	}
-	else if (strcmp(argv[1], "proximity") == 0) {
-		 sensor_type = PROXIMITY_SENSOR;
-		 event = PROXIMITY_CHANGE_STATE_EVENT;
-	}
-	else {
-		 usage();
-	}
-
-	interval = DEFAULT_EVENT_INTERVAL;
-
-	if (argc > 2) {
-		event = get_event_driven(sensor_type, argv[2]);
-
-		if (event == -1) {
-			usage();
-			return -1;
-		}
-
-		EVENT_NOT_ENTERED = FALSE;
-	}
-
-	if (argc == 4) {
-		interval = strtol(argv[3], &end1, 10);
-
-		if (*end1) {
-			printf("Conversion error, non-convertible part: %s\n", end1);
-			return -1;
-		}
-	}
-
-	if (argc == 3 && EVENT_NOT_ENTERED) {
-		interval = strtol(argv[2], &end2, 10);
-
-		if (*end2) {
-			printf("Conversion error, non-convertible part: %s\n", end2);
-			return -1;
-		}
-	}
 
 	sensor_t sensor = sensord_get_sensor(sensor_type);
 	handle = sensord_connect(sensor);
@@ -276,7 +151,7 @@ int main(int argc, char **argv)
 	result = sensord_register_event(handle, event, interval, 0, callback, NULL);
 
 	if (result < 0) {
-		printf("Can't register %s\n", argv[1]);
+		printf("Can't register sensor\n");
 		return -1;
 	}
 
