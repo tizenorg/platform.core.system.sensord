@@ -140,5 +140,6 @@ systemctl daemon-reload
 %defattr(-,root,root,-)
 %{_bindir}/api-test
 %{_bindir}/sensor-test
+%{_bindir}/performance-test
 %license LICENSE.APLv2
 %endif
