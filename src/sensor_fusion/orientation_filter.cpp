@@ -359,29 +359,35 @@ void orientation_filter<TYPE>::get_device_orientation(const sensor_data<TYPE> *a
 {
 	initialize_sensor_data(accel, gyro, magnetic);
 
-	if (magnetic != NULL)
-		orientation_triad_algorithm();
-	else if (gyro != NULL)
-		compute_accel_orientation();
+	if (gyro != NULL && magnetic != NULL) {
 
-	if (gyro != NULL) {
+		orientation_triad_algorithm();
+
 		compute_covariance();
 
-		if (magnetic != NULL)
-			time_update();
-		else
-			time_update_gaming_rv();
+		time_update();
 
 		measurement_update();
 
-		if (magnetic == NULL) {
-			m_quaternion = m_quat_gaming_rv;
-		} else {
-			m_quaternion = m_quat_9axis;
-		}
+		m_quaternion = m_quat_9axis;
 
-	} else {
+	} else if (gyro == NULL) {
+
+		orientation_triad_algorithm();
+
 		m_quaternion = m_quat_aid;
+
+	} else if (magnetic == NULL) {
+
+		compute_accel_orientation();
+
+		compute_covariance();
+
+		time_update_gaming_rv();
+
+		measurement_update();
+
+		m_quaternion = m_quat_gaming_rv;
 	}
 }
 
