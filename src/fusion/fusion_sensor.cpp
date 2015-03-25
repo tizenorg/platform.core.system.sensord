@@ -195,10 +195,17 @@ bool fusion_sensor::init(void)
 	m_gyro_sensor = sensor_plugin_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
 	m_magnetic_sensor = sensor_plugin_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
 
-	if (!m_accel_sensor || !m_gyro_sensor || !m_magnetic_sensor) {
-		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, mag: 0x%x",
-			m_accel_sensor, m_gyro_sensor, m_magnetic_sensor);
+	if (!m_accel_sensor) {
+		ERR("Failed to load accel sensor: 0x%x", m_accel_sensor);
 		return false;
+	}
+
+	if (!m_gyro_sensor) {
+		INFO("Failed to load gyro sensor: 0x%x", m_gyro_sensor);
+	}
+
+	if (!m_magnetic_sensor) {
+		INFO("Failed to load geomagnetic sensor: 0x%x", m_magnetic_sensor);	
 	}
 
 	INFO("%s is created!", sensor_base::get_name());
