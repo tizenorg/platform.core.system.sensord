@@ -21,8 +21,10 @@
 
 #define DEFAULT_EVENT_INTERVAL 100
 
-int get_event_driven(sensor_type_t sensor_type, char str[]);
+int get_event(sensor_type_t sensor_type, char str[]);
 void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, void *user_data);
 int check_sensor(sensor_type_t sensor_type, unsigned int event, int interval);
+void printpollinglogs(sensor_type_t type, sensor_data_t data);
+int polling_sensor(sensor_type_t sensor_type, unsigned int event);
 
 #endif
