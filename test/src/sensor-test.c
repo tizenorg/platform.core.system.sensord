@@ -29,8 +29,8 @@
 
 void usage()
 {
-	printf("Usage : ./sensor-test <Sensor_type> <event>(optional) <interval>(optional)\n\n");
-
+	printf("Usage : ./sensor-test <Sensor_type> -p(optional) <event>(optional) <interval>(optional)\n\n");
+                
 	printf("Sensor_type: ");
 	printf("[accelerometer] ");
 	printf("[gyroscope] ");
@@ -45,12 +45,12 @@ void usage()
 	printf("[gaming_rv] ");
 	printf("[light]\n");
 	printf("event:");
-	printf("[RAW_DATA_REPORT_ON_TIME]\n");
+	printf("[RAW_DATA_EVENT]\n");
 
 	printf("Sensor_type: ");
 	printf("[proximity]\n");
 	printf("event:");
-	printf("[EVENT_CHANGE_STATE]\n");
+	printf("[CHANGE_STATE_EVENT]\n");
 
 	printf("interval:\n");
 	printf("The time interval should be entered based on the sampling frequency supported by accelerometer driver on the device in ms.If no value for sensor is entered default value by the driver will be used.\n");
@@ -61,15 +61,16 @@ int main(int argc, char **argv)
 	int interval;
 	unsigned int event;
 	sensor_type_t sensor_type;
+	bool is_polling;
 
 	char *end1;
 
-	if (argc < 2 || argc > 4) {
+	if (argc < 2 || argc > 5) {
 		printf("Wrong number of arguments\n");
 		usage();
 		return 0;
 	}
-
+	
 	if (strcmp(argv[1], "accelerometer") == 0) {
 		 sensor_type = ACCELEROMETER_SENSOR;
 		 event = ACCELEROMETER_RAW_DATA_EVENT;
@@ -128,8 +129,43 @@ int main(int argc, char **argv)
 
 	interval = DEFAULT_EVENT_INTERVAL;
 
+	is_polling = FALSE;
+
+	if(argc >= 3 && strcmp(argv[2], "-p") == 0) {
+		is_polling = TRUE;	
+
+	}	
+	
+	if (is_polling) {
+		if (argc == 4) {
+		int temp_event = get_event(sensor_type, argv[3]);
+
+		if (temp_event == -1) {
+			interval = atoi(argv[3]);
+			if (interval == 0){
+				usage();
+				return -1;
+			}
+		}
+		else {
+			event = temp_event;
+		}
+	}
+	else if (argc == 5) {
+		event = get_event(sensor_type, argv[3]);
+		interval = strtol(argv[4], &end1, 10);
+
+		if (*end1) {
+			printf("Conversion error, non-convertible part: %s\n", end1);
+			return -1;
+		}
+
+	}
+return polling_sensor(sensor_type, event);
+}
+	else {
 	if (argc == 3) {
-		int temp_event = get_event_driven(sensor_type, argv[2]);
+		int temp_event = get_event(sensor_type, argv[2]);
 
 		if (temp_event == -1) {
 			interval = atoi(argv[2]);
@@ -143,7 +179,7 @@ int main(int argc, char **argv)
 		}
 	}
 	else if (argc == 4) {
-		event = get_event_driven(sensor_type, argv[2]);
+		event = get_event(sensor_type, argv[2]);
 		interval = strtol(argv[3], &end1, 10);
 
 		if (*end1) {
@@ -153,4 +189,5 @@ int main(int argc, char **argv)
 	}
 
 	return check_sensor(sensor_type, event, interval);
+  }
 }
