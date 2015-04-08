@@ -30,59 +30,105 @@
 
 static GMainLoop *mainloop;
 
-int get_event_driven(sensor_type_t sensor_type, char str[])
+void printpollinglogs(sensor_type_t type,sensor_data_t data)
+{
+switch(type) {
+	case(ACCELEROMETER_SENSOR):
+		printf("Accelerometer [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
+		break;
+	case(GYROSCOPE_SENSOR):
+		printf("Gyroscope [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
+		break;
+	case(PRESSURE_SENSOR):
+		printf("Pressure [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
+	break;
+	case(GEOMAGNETIC_SENSOR):
+		printf("Geomagnetic [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
+		break;
+	case(LIGHT_SENSOR):
+		printf("Light [%lld] [%6.6f]\n\n", data.timestamp, data.values[0]);
+		break;
+	case(TEMPERATURE_SENSOR):
+		printf("Temperature [%lld] [%6.6f]\n\n", data.timestamp, data.values[0]);
+		break;
+	case(PROXIMITY_SENSOR):
+		printf("Proximity [%lld] [%6.6f]\n\n", data.timestamp, data.values[0]);
+	break;
+	case(ORIENTATION_SENSOR):
+		printf("Orientation [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
+		break;
+	case(GRAVITY_SENSOR):
+		printf("Gravity [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
+		break;
+	case(LINEAR_ACCEL_SENSOR):
+		printf("Linear Acceleration [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
+		break;
+	case(ROTATION_VECTOR_SENSOR):
+		printf("Rotation Vector [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2], data.values[3]);
+		break;
+	case(GEOMAGNETIC_RV_SENSOR):
+		printf("Geomagnetic Rv [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2], data.values[3]);
+		break;
+	case(GAMING_RV_SENSOR):
+		printf("Gaming Rv [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2], data.values[3]);
+		break;
+	}
+return;
+}
+
+int get_event(sensor_type_t sensor_type, char str[])
 {
 	switch (sensor_type) {
 	case ACCELEROMETER_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return ACCELEROMETER_RAW_DATA_EVENT;
 		break;
 	case GYROSCOPE_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return GYROSCOPE_RAW_DATA_EVENT;
 		break;
 	case PRESSURE_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return PRESSURE_RAW_DATA_EVENT;
 		break;
 	case GEOMAGNETIC_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return GEOMAGNETIC_RAW_DATA_EVENT;
 		break;
 	case LIGHT_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return LIGHT_LUX_DATA_EVENT;
 		break;
 	case TEMPERATURE_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return TEMPERATURE_RAW_DATA_EVENT;
 		break;
 	case PROXIMITY_SENSOR:
-		if (strcmp(str, "EVENT_CHANGE_STATE") == 0)
+		if (strcmp(str, "CHANGE_STATE_EVENT") == 0)
 			return PROXIMITY_CHANGE_STATE_EVENT;
 		break;
 	case ORIENTATION_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return ORIENTATION_RAW_DATA_EVENT;
 		break;
 	case GRAVITY_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return GRAVITY_RAW_DATA_EVENT;
 		break;
 	case LINEAR_ACCEL_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return LINEAR_ACCEL_RAW_DATA_EVENT;
 		break;
 	case ROTATION_VECTOR_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return ROTATION_VECTOR_RAW_DATA_EVENT;
 		break;
 	case GEOMAGNETIC_RV_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return GEOMAGNETIC_RV_RAW_DATA_EVENT;
 		break;
 	case GAMING_RV_SENSOR:
-		if (strcmp(str, "RAW_DATA_REPORT_ON_TIME") == 0)
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return GAMING_RV_RAW_DATA_EVENT;
 		break;
 	}
@@ -183,5 +229,37 @@ int check_sensor(sensor_type_t sensor_type, unsigned int event, int interval)
 
 	sensord_disconnect(handle);
 
+	return 0;
+}
+
+int polling_sensor(sensor_type_t sensor_type, unsigned int event)
+{
+		int result, handle;
+		printf("Polling based\n");
+
+		handle = sf_connect(sensor_type);
+		result = sf_start(handle, 1);		
+
+		if (result < 0) {
+			printf("Can't start the sensor\n");
+			printf("Error\n\n\n\n");
+			return -1;
+		}
+
+		sensor_data_t data;
+
+		while(1) {
+			result = sf_get_data(handle, event , &data);			
+			printpollinglogs(sensor_type, data);
+			usleep(100000);
+		}
+
+		result = sf_disconnect(handle);
+
+		if (result < 0) {
+			printf("Can't disconnect sensor\n");
+			printf("Error\n\n\n\n");
+			return -1;
+		}
 	return 0;
 }
