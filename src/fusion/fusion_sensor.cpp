@@ -353,7 +353,6 @@ int fusion_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t 
 	sensor_data_t magnetic_data;
 
 	euler_angles<float> euler_orientation;
-	float azimuth_offset;
 
 	if (event_type != FUSION_ORIENTATION_ENABLED ||
 			event_type != FUSION_ROTATION_VECTOR_ENABLED ||
