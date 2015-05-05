@@ -31,7 +31,7 @@
 static GMainLoop *mainloop;
 FILE *fp;
 
-void callback(unsigned int event_type, sensor_event_data_t *event, void *user_data)
+void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, void *user_data)
 {
 	g_main_loop_quit(mainloop);
 }
