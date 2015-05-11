@@ -131,7 +131,7 @@
 			<DEFAULT_SAMPLING_TIME value="100" />
 		</GAMING_ROTATION_VECTOR>
 	</DEVICE>
-	
+
 	<DEVICE type="Mobile-RD-PQ_V2">
 		<FUSION>
 			<NAME value="FUSION_SENSOR" />

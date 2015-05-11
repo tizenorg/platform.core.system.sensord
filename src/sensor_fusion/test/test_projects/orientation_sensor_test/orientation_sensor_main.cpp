@@ -90,7 +90,7 @@ int main()
 
 		orientation.m_ang.m_vec[0] *= pitch_phase_compensation;
 		orientation.m_ang.m_vec[1] *= roll_phase_compensation;
-		orientation.m_ang.m_vec[2] *= azimuth_phase_compensation; 
+		orientation.m_ang.m_vec[2] *= azimuth_phase_compensation;
 
 		if (orientation.m_ang.m_vec[2] < 0)
 			orientation.m_ang.m_vec[2] += 360;
