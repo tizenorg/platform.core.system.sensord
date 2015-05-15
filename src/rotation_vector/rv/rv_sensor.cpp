@@ -57,6 +57,8 @@ rv_sensor::rv_sensor()
 : m_accel_sensor(NULL)
 , m_gyro_sensor(NULL)
 , m_magnetic_sensor(NULL)
+, m_rv_raw_sensor(NULL)
+, m_fusion_sensor(NULL)
 , m_time(0)
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
@@ -92,12 +94,13 @@ bool rv_sensor::init()
 	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
 	m_gyro_sensor = sensor_plugin_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
 	m_magnetic_sensor = sensor_plugin_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
+	m_rv_raw_sensor = sensor_plugin_loader::get_instance().get_sensor(RV_RAW_SENSOR);
 
 	m_fusion_sensor = sensor_plugin_loader::get_instance().get_sensor(FUSION_SENSOR);
 
-	if (!m_accel_sensor || !m_gyro_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
-		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, mag: 0x%x, fusion: 0x%x",
-			m_accel_sensor, m_gyro_sensor, m_magnetic_sensor, m_fusion_sensor);
+	if (!m_accel_sensor || !m_gyro_sensor || !m_magnetic_sensor || !m_rv_raw_sensor || !m_fusion_sensor) {
+		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, mag: 0x%x, rv_raw: 0x%x, fusion: 0x%x",
+			m_accel_sensor, m_gyro_sensor, m_magnetic_sensor, m_rv_raw_sensor, m_fusion_sensor);
 		return false;
 	}
 
@@ -125,6 +128,10 @@ bool rv_sensor::on_start(void)
 	m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_magnetic_sensor->start();
 
+	m_rv_raw_sensor->add_client(RV_RAW_RAW_DATA_EVENT);
+	m_rv_raw_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+	m_rv_raw_sensor->start();
+
 	m_fusion_sensor->register_supported_event(FUSION_EVENT);
 	m_fusion_sensor->register_supported_event(FUSION_ROTATION_VECTOR_ENABLED);
 	m_fusion_sensor->add_client(FUSION_EVENT);
@@ -149,6 +156,10 @@ bool rv_sensor::on_stop(void)
 	m_magnetic_sensor->delete_interval((intptr_t)this, false);
 	m_magnetic_sensor->stop();
 
+	m_rv_raw_sensor->delete_client(RV_RAW_RAW_DATA_EVENT);
+	m_rv_raw_sensor->delete_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+	m_rv_raw_sensor->stop();
+
 	m_fusion_sensor->delete_client(FUSION_EVENT);
 	m_fusion_sensor->delete_interval((intptr_t)this, false);
 	m_fusion_sensor->unregister_supported_event(FUSION_EVENT);
@@ -166,6 +177,7 @@ bool rv_sensor::add_interval(int client_id, unsigned int interval)
 	m_accel_sensor->add_interval(client_id, interval, false);
 	m_gyro_sensor->add_interval(client_id, interval, false);
 	m_magnetic_sensor->add_interval(client_id, interval, false);
+	m_rv_raw_sensor->add_interval(client_id, interval, false);
 
 	m_fusion_sensor->add_interval(client_id, interval, false);
 
@@ -179,6 +191,7 @@ bool rv_sensor::delete_interval(int client_id)
 	m_accel_sensor->delete_interval(client_id, false);
 	m_gyro_sensor->delete_interval(client_id, false);
 	m_magnetic_sensor->delete_interval(client_id, false);
+	m_rv_raw_sensor->delete_interval(client_id, false);
 
 	m_fusion_sensor->delete_interval(client_id, false);
 
@@ -221,7 +234,7 @@ int rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
 	if (event_type != ROTATION_VECTOR_RAW_DATA_EVENT)
 		return -1;
 
-	m_fusion_sensor->get_sensor_data(FUSION_ORIENTATION_ENABLED, fusion_data);
+	m_fusion_sensor->get_sensor_data(FUSION_ROTATION_VECTOR_ENABLED, fusion_data);
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();

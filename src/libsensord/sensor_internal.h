@@ -51,6 +51,7 @@ extern "C"
 #include <sensor_linear_accel.h>
 #include <sensor_orientation.h>
 #include <sensor_rv.h>
+#include <sensor_rv_raw.h>
 #include <sensor_geomagnetic_rv.h>
 #include <sensor_gaming_rv.h>
 #include <sensor_temperature.h>

@@ -30,8 +30,8 @@ rv_raw_sensor::rv_raw_sensor()
 {
 	m_name = string(SENSOR_NAME);
 
-	register_supported_event(RV_RAW_EVENT_RAW_DATA_REPORT_ON_TIME);
-	register_supported_event(RV_RAW_EVENT_CALIBRATION_NEEDED);
+	register_supported_event(RV_RAW_RAW_DATA_EVENT);
+	register_supported_event(RV_RAW_CALIBRATION_NEEDED_EVENT);
 
 	physical_sensor::set_poller(rv_raw_sensor::working, this);
 }
@@ -87,9 +87,9 @@ bool rv_raw_sensor::process_event(void)
 	AUTOLOCK(m_client_info_mutex);
 	AUTOLOCK(m_mutex);
 
-	if (get_client_cnt(RV_RAW_EVENT_RAW_DATA_REPORT_ON_TIME)) {
+	if (get_client_cnt(RV_RAW_RAW_DATA_EVENT)) {
 		event.sensor_id = get_id();
-		event.event_type = RV_RAW_EVENT_RAW_DATA_REPORT_ON_TIME;
+		event.event_type = RV_RAW_RAW_DATA_EVENT;
 		push(event);
 	}
 
@@ -125,7 +125,7 @@ int rv_raw_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 {
 	int state;
 
-	if (type != RV_RAW_BASE_DATA_SET)
+	if (type != RV_RAW_RAW_DATA_EVENT)
 		return -1;
 
 	state = m_sensor_hal->get_sensor_data(data);

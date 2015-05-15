@@ -44,6 +44,7 @@ private:
 	sensor_base *m_accel_sensor;
 	sensor_base *m_gyro_sensor;
 	sensor_base *m_magnetic_sensor;
+	sensor_base *m_rv_raw_sensor;
 	sensor_base *m_fusion_sensor;
 
 	sensor_data<float> m_accel;
