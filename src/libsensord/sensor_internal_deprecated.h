@@ -54,6 +54,7 @@ extern "C"
 #include <sensor_motion.h>
 #include <sensor_deprecated.h>
 #include <sensor_fusion.h>
+#include <sensor_tilt.h>
 
 #define MAX_KEY_LEN 30
 

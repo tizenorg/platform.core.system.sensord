@@ -30,7 +30,7 @@ BuildRequires:  pkgconfig(capi-system-info)
 %define rv_state ON
 %define geomagnetic_rv_state ON
 %define gaming_rv_state ON
-%define fusion_state ON
+%define tilt_state ON
 %define build_test_suite OFF
 
 %description
@@ -82,7 +82,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
-	-DFUSION=%{fusion_state} -DTEST_SUITE=%{build_test_suite} \
+	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite} \
 	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
 
 %build
@@ -134,6 +134,7 @@ systemctl daemon-reload
 %{_libdir}/pkgconfig/sensor.pc
 %{_libdir}/pkgconfig/sf_common.pc
 %{_libdir}/pkgconfig/sensord-server.pc
+%license LICENSE.APLv2
 
 %if %{build_test_suite} == "ON"
 %files -n sensor-test

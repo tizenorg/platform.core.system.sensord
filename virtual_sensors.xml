@@ -64,6 +64,15 @@
 			<VENDOR value="SAMSUNG" />
 			<DEFAULT_SAMPLING_TIME value="100" />
 		</GAMING_ROTATION_VECTOR>
+
+		<TILT>
+			<NAME value="TILT_SENSOR" />
+			<VENDOR value="SAMSUNG" />
+			<RAW_DATA_UNIT value="DEGREES" />
+			<DEFAULT_SAMPLING_TIME value="100" />
+			<PITCH_ROTATION_COMPENSATION value="-1" />
+			<ROLL_ROTATION_COMPENSATION value="-1" />
+		</TILT>
 	</DEVICE>
 
 	<DEVICE type="Mobile-RD-PQ">
@@ -130,6 +139,15 @@
 			<VENDOR value="SAMSUNG" />
 			<DEFAULT_SAMPLING_TIME value="100" />
 		</GAMING_ROTATION_VECTOR>
+
+		<TILT>
+			<NAME value="TILT_SENSOR" />
+			<VENDOR value="SAMSUNG" />
+			<RAW_DATA_UNIT value="DEGREES" />
+			<DEFAULT_SAMPLING_TIME value="100" />
+			<PITCH_ROTATION_COMPENSATION value="-1" />
+			<ROLL_ROTATION_COMPENSATION value="-1" />
+		</TILT>
 	</DEVICE>
 
 	<DEVICE type="Mobile-RD-PQ_V2">
@@ -196,5 +214,14 @@
 			<VENDOR value="SAMSUNG" />
 			<DEFAULT_SAMPLING_TIME value="100" />
 		</GAMING_ROTATION_VECTOR>
+
+		<TILT>
+			<NAME value="TILT_SENSOR" />
+			<VENDOR value="SAMSUNG" />
+			<RAW_DATA_UNIT value="DEGREES" />
+			<DEFAULT_SAMPLING_TIME value="100" />
+			<PITCH_ROTATION_COMPENSATION value="1" />
+			<ROLL_ROTATION_COMPENSATION value="-1" />
+		</TILT>
 	</DEVICE>
 </VIRTUAL_SENSOR>

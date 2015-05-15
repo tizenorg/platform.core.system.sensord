@@ -54,6 +54,7 @@ install(FILES sensor_auto_rotation.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sen
 install(FILES sensor_gravity.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_linear_accel.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_orientation.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
+install(FILES sensor_tilt.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_rv.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_geomagnetic_rv.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_gaming_rv.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)

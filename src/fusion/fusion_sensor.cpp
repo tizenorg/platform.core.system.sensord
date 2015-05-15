@@ -39,6 +39,7 @@
 #define ACCELEROMETER_ENABLED 0x01
 #define GYROSCOPE_ENABLED 0x02
 #define GEOMAGNETIC_ENABLED 0x04
+#define TILT_ENABLED 1
 #define GAMING_RV_ENABLED 3
 #define GEOMAGNETIC_RV_ENABLED 5
 #define ORIENTATION_ENABLED 7
@@ -317,7 +318,8 @@ void fusion_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_
 		}
 	}
 
-	if ((m_enable_fusion == ORIENTATION_ENABLED && sensor_base::is_supported(FUSION_ORIENTATION_ENABLED)) ||
+	if ((m_enable_fusion == TILT_ENABLED && sensor_base::is_supported(FUSION_TILT_ENABLED)) ||
+			(m_enable_fusion == ORIENTATION_ENABLED && sensor_base::is_supported(FUSION_ORIENTATION_ENABLED)) ||
 			(m_enable_fusion == ROTATION_VECTOR_ENABLED && sensor_base::is_supported(FUSION_ROTATION_VECTOR_ENABLED)) ||
 			(m_enable_fusion == GAMING_RV_ENABLED && sensor_base::is_supported(FUSION_GAMING_ROTATION_VECTOR_ENABLED)) ||
 			(m_enable_fusion == GEOMAGNETIC_RV_ENABLED && sensor_base::is_supported(FUSION_GEOMAGNETIC_ROTATION_VECTOR_ENABLED))) {
