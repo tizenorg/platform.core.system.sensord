@@ -64,6 +64,8 @@ private:
 	string m_raw_data_unit;
 	int m_default_sampling_time;
 
+	bool m_is_hardware;
+
 	bool on_start(void);
 	bool on_stop(void);
 };
