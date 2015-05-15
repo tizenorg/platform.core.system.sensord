@@ -371,6 +371,12 @@ void orientation_filter<TYPE>::get_device_orientation(const sensor_data<TYPE> *a
 
 		m_quaternion = m_quat_9axis;
 
+	} else if (!gyro && !magnetic) {
+
+		compute_accel_orientation();
+
+		m_quaternion = m_quat_aid;
+
 	} else if (!gyro) {
 
 		orientation_triad_algorithm();
