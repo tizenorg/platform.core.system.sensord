@@ -38,6 +38,7 @@ void usage()
 	printf("[temperature] ");
 	printf("[geomagnetic] ");
 	printf("[orientation] ");
+	printf("[tilt] ");
 	printf("[gravity] ");
 	printf("[linear_accel] ");
 	printf("[rotation_vector] ");
@@ -94,6 +95,10 @@ int main(int argc, char **argv)
 	else if (strcmp(argv[1], "orientation") == 0) {
 		 sensor_type = ORIENTATION_SENSOR;
 		 event = ORIENTATION_RAW_DATA_EVENT;
+	}
+	else if (strcmp(argv[1], "tilt") == 0) {
+		 sensor_type = TILT_SENSOR;
+		 event = TILT_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "gravity") == 0) {
 		 sensor_type = GRAVITY_SENSOR;

@@ -220,6 +220,9 @@ int main(int argc, char **argv)
 	result = check_sensor_api(ORIENTATION_RAW_DATA_EVENT, interval);
 	fprintf(fp, "Orientation - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
+	result = check_sensor_api(TILT_RAW_DATA_EVENT, interval);
+	fprintf(fp, "Tilt - RAW_DATA_REPORT_ON_TIME - %d\n", result);
+
 	result = check_sensor_api(PRESSURE_RAW_DATA_EVENT, interval);
 	fprintf(fp, "Pressure - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 

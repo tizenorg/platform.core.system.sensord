@@ -57,6 +57,9 @@ void printpollinglogs(sensor_type_t type,sensor_data_t data)
 	case(ORIENTATION_SENSOR):
 		printf("Orientation [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
 		break;
+	case(TILT_SENSOR):
+		printf("Tilt [%lld] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1]);
+		break;
 	case(GRAVITY_SENSOR):
 		printf("Gravity [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
 		break;
@@ -112,6 +115,10 @@ int get_event(sensor_type_t sensor_type, char str[])
 		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return ORIENTATION_RAW_DATA_EVENT;
 		break;
+	case TILT_SENSOR:
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
+			return TILT_RAW_DATA_EVENT;
+		break;
 	case GRAVITY_SENSOR:
 		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return GRAVITY_RAW_DATA_EVENT;
@@ -164,6 +171,9 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 		break;
 	case ORIENTATION_SENSOR :
 		printf("Orientation [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+		break;
+	case TILT_SENSOR :
+		printf("Tilt [%lld] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1]);
 		break;
 	case GRAVITY_SENSOR:
 		printf("Gravity [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
