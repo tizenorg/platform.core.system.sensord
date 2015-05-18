@@ -66,6 +66,12 @@ gravity_sensor::gravity_sensor()
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
+	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR);
+	if (!fusion_sensor_hal)
+		m_hardware_fusion = false;
+	else
+		m_hardware_fusion = true;
+
 	m_name = std::string(SENSOR_NAME);
 	register_supported_event(GRAVITY_RAW_DATA_EVENT);
 
@@ -160,15 +166,17 @@ bool gravity_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
-	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-	m_accel_sensor->start();
-	m_gyro_sensor->add_client(GYROSCOPE_RAW_DATA_EVENT);
-	m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-	m_gyro_sensor->start();
-	m_magnetic_sensor->add_client(GEOMAGNETIC_RAW_DATA_EVENT);
-	m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-	m_magnetic_sensor->start();
+	if (!m_hardware_fusion) {
+		m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
+		m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+		m_accel_sensor->start();
+		m_gyro_sensor->add_client(GYROSCOPE_RAW_DATA_EVENT);
+		m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+		m_gyro_sensor->start();
+		m_magnetic_sensor->add_client(GEOMAGNETIC_RAW_DATA_EVENT);
+		m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+		m_magnetic_sensor->start();
+	}
 
 	m_fusion_sensor->register_supported_event(FUSION_EVENT);
 	m_fusion_sensor->register_supported_event(FUSION_ORIENTATION_ENABLED);
@@ -184,15 +192,17 @@ bool gravity_sensor::on_stop(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
-	m_accel_sensor->delete_interval((intptr_t)this, false);
-	m_accel_sensor->stop();
-	m_gyro_sensor->delete_client(GYROSCOPE_RAW_DATA_EVENT);
-	m_gyro_sensor->delete_interval((intptr_t)this, false);
-	m_gyro_sensor->stop();
-	m_magnetic_sensor->delete_client(GEOMAGNETIC_RAW_DATA_EVENT);
-	m_magnetic_sensor->delete_interval((intptr_t)this, false);
-	m_magnetic_sensor->stop();
+	if (!m_hardware_fusion) {
+		m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
+		m_accel_sensor->delete_interval((intptr_t)this, false);
+		m_accel_sensor->stop();
+		m_gyro_sensor->delete_client(GYROSCOPE_RAW_DATA_EVENT);
+		m_gyro_sensor->delete_interval((intptr_t)this, false);
+		m_gyro_sensor->stop();
+		m_magnetic_sensor->delete_client(GEOMAGNETIC_RAW_DATA_EVENT);
+		m_magnetic_sensor->delete_interval((intptr_t)this, false);
+		m_magnetic_sensor->stop();
+	}
 
 	m_fusion_sensor->delete_client(FUSION_EVENT);
 	m_fusion_sensor->delete_interval((intptr_t)this, false);
@@ -207,9 +217,11 @@ bool gravity_sensor::on_stop(void)
 bool gravity_sensor::add_interval(int client_id, unsigned int interval)
 {
 	AUTOLOCK(m_mutex);
-	m_accel_sensor->add_interval(client_id, interval, false);
-	m_gyro_sensor->add_interval(client_id, interval, false);
-	m_magnetic_sensor->add_interval(client_id, interval, false);
+	if (!m_hardware_fusion) {
+		m_accel_sensor->add_interval(client_id, interval, false);
+		m_gyro_sensor->add_interval(client_id, interval, false);
+		m_magnetic_sensor->add_interval(client_id, interval, false);
+	}
 
 	m_fusion_sensor->add_interval(client_id, interval, false);
 
@@ -219,9 +231,11 @@ bool gravity_sensor::add_interval(int client_id, unsigned int interval)
 bool gravity_sensor::delete_interval(int client_id)
 {
 	AUTOLOCK(m_mutex);
-	m_accel_sensor->delete_interval(client_id, false);
-	m_gyro_sensor->delete_interval(client_id, false);
-	m_magnetic_sensor->delete_interval(client_id, false);
+	if (!m_hardware_fusion) {
+		m_accel_sensor->delete_interval(client_id, false);
+		m_gyro_sensor->delete_interval(client_id, false);
+		m_magnetic_sensor->delete_interval(client_id, false);
+	}
 
 	m_fusion_sensor->delete_interval(client_id, false);
 
