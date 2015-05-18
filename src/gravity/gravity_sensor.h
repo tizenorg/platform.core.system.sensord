@@ -22,6 +22,7 @@
 
 #include <sensor_internal.h>
 #include <virtual_sensor.h>
+#include <orientation_filter.h>
 
 class gravity_sensor : public virtual_sensor {
 public:
@@ -39,7 +40,16 @@ public:
 	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
 	bool get_properties(sensor_properties_s &properties);
 private:
-	sensor_base *m_orientation_sensor;
+	sensor_base *m_accel_sensor;
+	sensor_base *m_gyro_sensor;
+	sensor_base *m_magnetic_sensor;
+	sensor_base *m_fusion_sensor;
+
+	sensor_data<float> m_accel;
+	sensor_data<float> m_gyro;
+	sensor_data<float> m_magnetic;
+
+
 	cmutex m_value_mutex;
 
 	int m_accuracy;
@@ -51,6 +61,9 @@ private:
 	string m_orientation_data_unit;
 	int m_default_sampling_time;
 	int m_gravity_sign_compensation[3];
+	int m_azimuth_rotation_compensation;
+	int m_pitch_rotation_compensation;
+	int m_roll_rotation_compensation;
 
 	bool on_start(void);
 	bool on_stop(void);
