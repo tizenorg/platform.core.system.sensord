@@ -78,6 +78,12 @@ linear_accel_sensor::linear_accel_sensor()
 	m_enable_linear_accel = 0;
 	register_supported_event(LINEAR_ACCEL_RAW_DATA_EVENT);
 
+	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR);
+	if (!fusion_sensor_hal)
+		m_hardware_fusion = false;
+	else
+		m_hardware_fusion = true;
+
 
 	if (!config.get(SENSOR_TYPE_LINEAR_ACCEL, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
@@ -197,15 +203,19 @@ sensor_type_t linear_accel_sensor::get_type(void)
 bool linear_accel_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
+
 	m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_accel_sensor->start();
-	m_gyro_sensor->add_client(GYROSCOPE_RAW_DATA_EVENT);
-	m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-	m_gyro_sensor->start();
-	m_magnetic_sensor->add_client(GEOMAGNETIC_RAW_DATA_EVENT);
-	m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-	m_magnetic_sensor->start();
+
+	if (!m_hardware_fusion) {
+		m_gyro_sensor->add_client(GYROSCOPE_RAW_DATA_EVENT);
+		m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+		m_gyro_sensor->start();
+		m_magnetic_sensor->add_client(GEOMAGNETIC_RAW_DATA_EVENT);
+		m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+		m_magnetic_sensor->start();
+	}
 
 	m_fusion_sensor->register_supported_event(FUSION_EVENT);
 	m_fusion_sensor->register_supported_event(FUSION_ORIENTATION_ENABLED);
@@ -223,12 +233,15 @@ bool linear_accel_sensor::on_stop(void)
 	m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->delete_interval((intptr_t)this, false);
 	m_accel_sensor->stop();
-	m_gyro_sensor->delete_client(GYROSCOPE_RAW_DATA_EVENT);
-	m_gyro_sensor->delete_interval((intptr_t)this, false);
-	m_gyro_sensor->stop();
-	m_magnetic_sensor->delete_client(GEOMAGNETIC_RAW_DATA_EVENT);
-	m_magnetic_sensor->delete_interval((intptr_t)this, false);
-	m_magnetic_sensor->stop();
+
+	if (!m_hardware_fusion) {
+		m_gyro_sensor->delete_client(GYROSCOPE_RAW_DATA_EVENT);
+		m_gyro_sensor->delete_interval((intptr_t)this, false);
+		m_gyro_sensor->stop();
+		m_magnetic_sensor->delete_client(GEOMAGNETIC_RAW_DATA_EVENT);
+		m_magnetic_sensor->delete_interval((intptr_t)this, false);
+		m_magnetic_sensor->stop();
+	}
 
 	m_fusion_sensor->delete_client(FUSION_EVENT);
 	m_fusion_sensor->delete_interval((intptr_t)this, false);
@@ -244,8 +257,11 @@ bool linear_accel_sensor::add_interval(int client_id, unsigned int interval)
 {
 	AUTOLOCK(m_mutex);
 	m_accel_sensor->add_interval(client_id, interval, false);
-	m_gyro_sensor->add_interval(client_id, interval, false);
-	m_magnetic_sensor->add_interval(client_id, interval, false);
+
+	if (!m_hardware_fusion) {
+		m_gyro_sensor->add_interval(client_id, interval, false);
+		m_magnetic_sensor->add_interval(client_id, interval, false);
+	}
 
 	m_fusion_sensor->add_interval(client_id, interval, false);
 
@@ -256,8 +272,11 @@ bool linear_accel_sensor::delete_interval(int client_id)
 {
 	AUTOLOCK(m_mutex);
 	m_accel_sensor->delete_interval(client_id, false);
-	m_gyro_sensor->delete_interval(client_id, false);
-	m_magnetic_sensor->delete_interval(client_id, false);
+
+	if (!m_hardware_fusion) {
+		m_gyro_sensor->delete_interval(client_id, false);
+		m_magnetic_sensor->delete_interval(client_id, false);
+	}
 
 	m_fusion_sensor->delete_interval(client_id, false);
 
