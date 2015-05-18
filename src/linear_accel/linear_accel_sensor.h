@@ -41,11 +41,15 @@ public:
 	bool get_properties(sensor_properties_s &properties);
 private:
 	sensor_base *m_accel_sensor;
-	sensor_base *m_gravity_sensor;
-	cmutex m_value_mutex;
+	sensor_base *m_gyro_sensor;
+	sensor_base *m_magnetic_sensor;
+	sensor_base *m_fusion_sensor;
 
 	sensor_data<float> m_accel;
-	sensor_data<float> m_gravity;
+	sensor_data<float> m_gyro;
+	sensor_data<float> m_magnetic;
+
+	cmutex m_value_mutex;
 
 	unsigned long long m_time;
 	unsigned int m_interval;
@@ -54,14 +58,20 @@ private:
 
 	string m_vendor;
 	string m_raw_data_unit;
+	string m_orientation_data_unit;
 	int m_default_sampling_time;
 	float m_accel_static_bias[3];
 	int m_accel_rotation_direction_compensation[3];
 	float m_accel_scale;
 	int m_linear_accel_sign_compensation[3];
+	int m_gravity_sign_compensation[3];
+	int m_azimuth_rotation_compensation;
+	int m_pitch_rotation_compensation;
+	int m_roll_rotation_compensation;
 
 	bool on_start(void);
 	bool on_stop(void);
+	sensor_data_t calculate_gravity(sensor_data_t data);
 };
 
 #endif
