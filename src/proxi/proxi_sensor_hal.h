@@ -28,11 +28,18 @@ using std::string;
 class proxi_sensor_hal : public sensor_hal
 {
 public:
-	enum proxi_node_state_event_t {	//changed as per IIO definitions
-		PROXIMITY_NODE_STATE_NEAR = 1,
-		PROXIMITY_NODE_STATE_FAR = 2,
-		PROXIMITY_NODE_STATE_UNKNOWN = 0,
+	enum proxi_node_state_event_t {	//changed as per Input Event Method definitions
+		PROXIMITY_NODE_STATE_NEAR = 0,
+		PROXIMITY_NODE_STATE_FAR = 1,
+		PROXIMITY_NODE_STATE_UNKNOWN = -1,
 	};
+
+// In case of IIO input method, use the following definitions as the values returned by sensor are different.
+//	enum proxi_node_state_event_t {	//changed as per IIO Method definitions
+//		PROXIMITY_NODE_STATE_NEAR = 1,
+//		PROXIMITY_NODE_STATE_FAR = 2,
+//		PROXIMITY_NODE_STATE_UNKNOWN = 0,
+//	};
 
 	proxi_sensor_hal();
 	virtual ~proxi_sensor_hal();
