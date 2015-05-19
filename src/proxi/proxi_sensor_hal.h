@@ -29,9 +29,9 @@ class proxi_sensor_hal : public sensor_hal
 {
 public:
 	enum proxi_node_state_event_t {	//changed as per IIO definitions
-		PROXIMITY_NODE_STATE_NEAR = 1,
-		PROXIMITY_NODE_STATE_FAR = 2,
-		PROXIMITY_NODE_STATE_UNKNOWN = 0,
+		PROXIMITY_NODE_STATE_NEAR = 0,
+		PROXIMITY_NODE_STATE_FAR = 1,
+		PROXIMITY_NODE_STATE_UNKNOWN = -1,
 	};
 
 	proxi_sensor_hal();
