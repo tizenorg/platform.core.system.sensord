@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="LibreOffice 3.5  (Linux)">
+	<META NAME="AUTHOR" CONTENT="Ankur Garg">
+	<META NAME="CREATED" CONTENT="20150520;15471000">
+	<META NAME="CHANGEDBY" CONTENT="Ankur Garg">
+	<META NAME="CHANGED" CONTENT="20150520;17001600">
+	<STYLE TYPE="text/css">
+	<!--
+		@page { margin: 2cm }
+		P { margin-bottom: 0.21cm }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-IN" DIR="LTR">
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm">Adding Hardware Fusion
+sensor to Virtual Sensors</P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Software Fusion Sensor:</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">The fusion sensor registers for
+accelerometer, gyroscope and geomagnetic sensors. Uses the data from
+these three sensors to fusion_event, which is used by various sensors
+to generate their sepcific sensor events.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">-&gt;The virtual sensor registers and
+starts the hardware sensors requried along with the fusion sensor.</P>
+<P STYLE="margin-bottom: 0cm">-&gt;Fusion sensor registers for
+hardware sensors. It received accelerometer, gyroscope and/or
+geomagnetic sensor events. 
+</P>
+<P STYLE="margin-bottom: 0cm">-&gt;Based on what all events are
+received, fusion sensor generates a fusion sensor event. 
+</P>
+<P STYLE="margin-bottom: 0cm">-&gt;The FUSION_EVENT is sent to all
+virtual sensors which have registered for fusion sensor.</P>
+<P STYLE="margin-bottom: 0cm">-&gt;The virtual sensors then use the
+data from FUSION_EVENT to create their specific virtual sensor
+events.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">Hardware Fusion Sensor:</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">In case hardware based fusion sensor is
+present, individual sensors won't be required by fusion sensor to
+generate FUSION_EVENT.</P>
+<P STYLE="margin-bottom: 0cm">So, virtual sensors won't have to
+register and start the individual hardware sensors (accel, gyro or
+geomagnetic) for receiving FUSION_EVENT. They will just have to
+register for FUSION_EVENT and they will receive the hardware sensor
+event.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm; text-decoration: none">Adding hardware
+fusion sensor in virtual sensors:</P>
+<P STYLE="margin-bottom: 0cm; text-decoration: none">In case hardware
+fusion sensor is present, instead of registering of individual
+hardware sensors and fusion sensor, virtual sensor will register for
+just sensor hal fusion sensor. 
+</P>
+<P STYLE="margin-bottom: 0cm; text-decoration: none"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm; text-decoration: none">Also, fusion
+sensor will register for just fusion_sensor_hal and send the events
+to all virtual sensor registered for fusion sensor events.</P>
+<P STYLE="margin-bottom: 0cm; text-decoration: none"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm; text-decoration: none">For this, the
+virtual sensor must register/start specific sensors in case hardware
+fusion sensor is present or not.</P>
+<P STYLE="margin-bottom: 0cm; text-decoration: none"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">In any virtual sensor class, to add
+support for both hardware and software sensor fusion, 
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">-&gt;In the constructor use
+sensor_plugin_loader to check if the hal sensor fusion is present or
+not:</P>
+<P STYLE="margin-bottom: 0cm">sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR)</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">-&gt;If it returns NULL, in that case,
+hardware fusion sensor is not present, else the hardware fusion is
+present.</P>
+<P STYLE="margin-bottom: 0cm">-&gt;Store this result in
+virtual_sensor::m_hardware_fusion</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm">-&gt;Bases on this, in on_start,
+on_stop, add_interval, delete_interval etc functions, the physical
+sensors will be started in case hardware fusion sensor is not present
+and only fusion sensor will be started in case hardware fusion sensor
+is present.</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+</BODY>
+</HTML>
