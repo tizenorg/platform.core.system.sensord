@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="LibreOffice 3.5  (Linux)">
+	<META NAME="AUTHOR" CONTENT="Ankur Garg">
+	<META NAME="CREATED" CONTENT="20150520;15471000">
+	<META NAME="CHANGEDBY" CONTENT="Ankur Garg">
+	<META NAME="CHANGED" CONTENT="20150522;13492000">
+	<META NAME="CHANGEDBY" CONTENT="Ankur Garg">
+	<META NAME="CHANGEDBY" CONTENT="Ankur Garg">
+	<STYLE TYPE="text/css">
+	<!--
+		@page { margin: 2cm }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-IN" DIR="LTR">
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">Supporting
+Virtual Sensors based on On-Chip(Hardware Based) Sensor Fusion
+Solution</FONT></P>
+<P ALIGN=CENTER STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">Software
+Fusion Sensor:</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">The
+fusion sensor registers for accelerometer, gyroscope and geomagnetic
+sensors. Uses the data from these three sensors to fusion_event,
+which is used by various sensors to generate their specific sensor
+events.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">-&gt;The
+virtual sensor starts the hardware and fusion sensor.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">-&gt;Fusion
+sensor registers for hardware sensors. It received accelerometer,
+gyroscope and/or geomagnetic sensor events.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">-&gt;Based
+on what all events are received, fusion sensor generates a fusion
+sensor event.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">-&gt;The
+FUSION_EVENT is sent to all virtual sensors which have registered for
+fusion sensor.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">-&gt;The
+virtual sensors then use the data from FUSION_EVENT to create their
+specific virtual sensor events.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">Hardware
+Fusion Sensor:</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">In
+case hardware based fusion sensor is present, individual sensors
+won't be required by fusion sensor to generate FUSION_EVENT.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">So,
+virtual sensors won't have to register and start the individual
+hardware sensors (accel, gyro or geomagnetic) for receiving
+FUSION_EVENT. They will just have to register for hardware fusion
+sensor event and they will receive the hardware sensor event.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm; text-decoration: none"><FONT FACE="Liberation Serif, serif">Adding
+hardware fusion sensor in virtual sensors:</FONT></P>
+<P STYLE="margin-bottom: 0cm; text-decoration: none"><FONT FACE="Liberation Serif, serif">In
+case hardware fusion sensor is present, instead of registering of
+individual hardware sensors and fusion sensor, virtual sensor will
+register for just sensor hal fusion sensor. </FONT>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm; text-decoration: none"><FONT FACE="Liberation Serif, serif">Also,
+fusion sensor will register for just fusion_sensor_hal and send the
+events to all virtual sensor registered for fusion sensor events.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm; text-decoration: none"><FONT FACE="Liberation Serif, serif">For
+this, the virtual sensor must register/start specific sensors in case
+hardware fusion sensor is present or not.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">In
+any virtual sensor class, to add support for both hardware and
+software sensor fusion, </FONT>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">-&gt;In
+the constructor use sensor_plugin_loader to check if the hal sensor
+fusion is present or not:</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR)</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">-&gt;If
+it returns NULL, in that case, hardware fusion sensor is not present,
+else the hardware fusion is present.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">-&gt;Store
+this result in virtual_sensor::m_hardware_fusion</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">sensor_hal
+*fusion_sensor_hal =
+sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">if
+(!fusion_sensor_hal)</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;m_hardware_fusion
+= false;</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">else</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;m_hardware_fusion
+= true;</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">-&gt;Bases
+on this, in on_start, on_stop, add_interval, delete_interval etc
+functions, the physical sensors will be started in case hardware
+fusion sensor is not present and only fusion sensor will be started
+in case hardware fusion sensor is present.</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">bool
+orientation_sensor::on_start(void)</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">{</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;AUTOLOCK(m_mutex);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;if
+(!m_hardware_fusion) {</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;&emsp;&emsp;m_accel_sensor-&gt;add_client(ACCELEROMETER_RAW_DATA_EVENT);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;&emsp;&emsp;m_accel_sensor-&gt;add_interval((intptr_t)this,
+(m_interval/MS_TO_US), false);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;&emsp;&emsp;m_accel_sensor-&gt;start();</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;&emsp;&emsp;m_gyro_sensor-&gt;add_client(GYROSCOPE_RAW_DATA_EVENT);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;&emsp;&emsp;m_gyro_sensor-&gt;add_interval((intptr_t)this,
+(m_interval/MS_TO_US), false);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;&emsp;&emsp;m_gyro_sensor-&gt;start();</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;&emsp;&emsp;m_magnetic_sensor-&gt;add_client(GEOMAGNETIC_RAW_DATA_EVENT);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;&emsp;&emsp;m_magnetic_sensor-&gt;add_interval((intptr_t)this,
+(m_interval/MS_TO_US), false);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;&emsp;&emsp;m_magnetic_sensor-&gt;start();</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;}</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;m_fusion_sensor-&gt;register_supported_event(FUSION_EVENT);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;m_fusion_sensor-&gt;register_supported_event(FUSION_ORIENTATION_ENABLED);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;m_fusion_sensor-&gt;add_client(FUSION_EVENT);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;m_fusion_sensor-&gt;add_interval((intptr_t)this,
+(m_interval/MS_TO_US), false);</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;m_fusion_sensor-&gt;start();</FONT></P>
+<P STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;activate();</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;return
+true;</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">}</FONT></P>
+</BODY>
+</HTML>
