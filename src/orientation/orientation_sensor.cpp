@@ -52,13 +52,6 @@
 #define ELEMENT_ROLL_ROTATION_COMPENSATION						"ROLL_ROTATION_COMPENSATION"
 #define ELEMENT_AZIMUTH_ROTATION_COMPENSATION					"AZIMUTH_ROTATION_COMPENSATION"
 
-void pre_process_data(sensor_data<float> &data_out, const float *data_in, float *bias, int *sign, float scale)
-{
-	data_out.m_data.m_vec[0] = sign[0] * (data_in[0] - bias[0]) / scale;
-	data_out.m_data.m_vec[1] = sign[1] * (data_in[1] - bias[1]) / scale;
-	data_out.m_data.m_vec[2] = sign[2] * (data_in[2] - bias[2]) / scale;
-}
-
 orientation_sensor::orientation_sensor()
 : m_accel_sensor(NULL)
 , m_gyro_sensor(NULL)
@@ -70,7 +63,6 @@ orientation_sensor::orientation_sensor()
 
 	m_name = string(SENSOR_NAME);
 	register_supported_event(ORIENTATION_RAW_DATA_EVENT);
-	m_enable_orientation = 0;
 
 	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
