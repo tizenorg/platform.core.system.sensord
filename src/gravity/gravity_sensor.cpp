@@ -34,8 +34,11 @@
 #define INITIAL_VALUE -1
 #define GRAVITY 9.80665
 
-#define DEG2RAD (M_PI/180)
 #define DEVIATION 0.1
+
+#define PI 3.141593
+#define AZIMUTH_OFFSET_DEGREES 360
+#define AZIMUTH_OFFSET_RADIANS (2 * PI)
 
 #define SENSOR_NAME "GRAVITY_SENSOR"
 #define SENSOR_TYPE_GRAVITY		"GRAVITY"
@@ -50,9 +53,15 @@
 #define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
 #define ELEMENT_GRAVITY_SIGN_COMPENSATION						"GRAVITY_SIGN_COMPENSATION"
 #define ELEMENT_ORIENTATION_DATA_UNIT							"RAW_DATA_UNIT"
+#define ELEMENT_PITCH_ROTATION_COMPENSATION						"PITCH_ROTATION_COMPENSATION"
+#define ELEMENT_ROLL_ROTATION_COMPENSATION						"ROLL_ROTATION_COMPENSATION"
+#define ELEMENT_AZIMUTH_ROTATION_COMPENSATION					"AZIMUTH_ROTATION_COMPENSATION"
 
 gravity_sensor::gravity_sensor()
-: m_orientation_sensor(NULL)
+: m_accel_sensor(NULL)
+, m_gyro_sensor(NULL)
+, m_magnetic_sensor(NULL)
+, m_fusion_sensor(NULL)
 , m_time(0)
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
@@ -95,6 +104,27 @@ gravity_sensor::gravity_sensor()
 
 	INFO("m_gravity_sign_compensation = (%d, %d, %d)", m_gravity_sign_compensation[0], m_gravity_sign_compensation[1], m_gravity_sign_compensation[2]);
 
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_AZIMUTH_ROTATION_COMPENSATION, &m_azimuth_rotation_compensation)) {
+		ERR("[AZIMUTH_ROTATION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_azimuth_rotation_compensation = %d", m_azimuth_rotation_compensation);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_PITCH_ROTATION_COMPENSATION, &m_pitch_rotation_compensation)) {
+		ERR("[PITCH_ROTATION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_pitch_rotation_compensation = %d", m_pitch_rotation_compensation);
+
+	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_ROLL_ROTATION_COMPENSATION, &m_roll_rotation_compensation)) {
+		ERR("[ROLL_ROTATION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_roll_rotation_compensation = %d", m_roll_rotation_compensation);
+
 	m_interval = m_default_sampling_time * MS_TO_US;
 }
 
@@ -105,10 +135,15 @@ gravity_sensor::~gravity_sensor()
 
 bool gravity_sensor::init()
 {
-	m_orientation_sensor = sensor_plugin_loader::get_instance().get_sensor(ORIENTATION_SENSOR);
+	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
+	m_gyro_sensor = sensor_plugin_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
+	m_magnetic_sensor = sensor_plugin_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
 
-	if (!m_orientation_sensor) {
-		ERR("Failed to load orientation sensor: 0x%x", m_orientation_sensor);
+	m_fusion_sensor = sensor_plugin_loader::get_instance().get_sensor(FUSION_SENSOR);
+
+	if (!m_accel_sensor || !m_gyro_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
+		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, mag: 0x%x, fusion: 0x%x",
+			m_accel_sensor, m_gyro_sensor, m_magnetic_sensor, m_fusion_sensor);
 		return false;
 	}
 
@@ -125,9 +160,21 @@ bool gravity_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_orientation_sensor->add_client(ORIENTATION_RAW_DATA_EVENT);
-	m_orientation_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-	m_orientation_sensor->start();
+	m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
+	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+	m_accel_sensor->start();
+	m_gyro_sensor->add_client(GYROSCOPE_RAW_DATA_EVENT);
+	m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+	m_gyro_sensor->start();
+	m_magnetic_sensor->add_client(GEOMAGNETIC_RAW_DATA_EVENT);
+	m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+	m_magnetic_sensor->start();
+
+	m_fusion_sensor->register_supported_event(FUSION_EVENT);
+	m_fusion_sensor->register_supported_event(FUSION_ORIENTATION_ENABLED);
+	m_fusion_sensor->add_client(FUSION_EVENT);
+	m_fusion_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+	m_fusion_sensor->start();
 
 	activate();
 	return true;
@@ -137,9 +184,21 @@ bool gravity_sensor::on_stop(void)
 {
 	AUTOLOCK(m_mutex);
 
-	m_orientation_sensor->delete_client(ORIENTATION_RAW_DATA_EVENT);
-	m_orientation_sensor->delete_interval((intptr_t)this, false);
-	m_orientation_sensor->stop();
+	m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
+	m_accel_sensor->delete_interval((intptr_t)this, false);
+	m_accel_sensor->stop();
+	m_gyro_sensor->delete_client(GYROSCOPE_RAW_DATA_EVENT);
+	m_gyro_sensor->delete_interval((intptr_t)this, false);
+	m_gyro_sensor->stop();
+	m_magnetic_sensor->delete_client(GEOMAGNETIC_RAW_DATA_EVENT);
+	m_magnetic_sensor->delete_interval((intptr_t)this, false);
+	m_magnetic_sensor->stop();
+
+	m_fusion_sensor->delete_client(FUSION_EVENT);
+	m_fusion_sensor->delete_interval((intptr_t)this, false);
+	m_fusion_sensor->unregister_supported_event(FUSION_EVENT);
+	m_fusion_sensor->unregister_supported_event(FUSION_ORIENTATION_ENABLED);
+	m_fusion_sensor->stop();
 
 	deactivate();
 	return true;
@@ -148,7 +207,11 @@ bool gravity_sensor::on_stop(void)
 bool gravity_sensor::add_interval(int client_id, unsigned int interval)
 {
 	AUTOLOCK(m_mutex);
-	m_orientation_sensor->add_interval(client_id , interval, false);
+	m_accel_sensor->add_interval(client_id, interval, false);
+	m_gyro_sensor->add_interval(client_id, interval, false);
+	m_magnetic_sensor->add_interval(client_id, interval, false);
+
+	m_fusion_sensor->add_interval(client_id, interval, false);
 
 	return sensor_base::add_interval(client_id, interval, false);
 }
@@ -156,7 +219,11 @@ bool gravity_sensor::add_interval(int client_id, unsigned int interval)
 bool gravity_sensor::delete_interval(int client_id)
 {
 	AUTOLOCK(m_mutex);
-	m_orientation_sensor->delete_interval(client_id , false);
+	m_accel_sensor->delete_interval(client_id, false);
+	m_gyro_sensor->delete_interval(client_id, false);
+	m_magnetic_sensor->delete_interval(client_id, false);
+
+	m_fusion_sensor->delete_interval(client_id, false);
 
 	return sensor_base::delete_interval(client_id, false);
 }
@@ -165,28 +232,49 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 {
 	sensor_event_t gravity_event;
 	float pitch, roll, azimuth;
-
-	azimuth = event.data.values[0];
-	pitch = event.data.values[1];
-	roll = event.data.values[2];
-
 	unsigned long long diff_time;
+	float azimuth_offset;
 
-	if(m_orientation_data_unit == "DEGREES") {
-		azimuth *= DEG2RAD;
-		pitch *= DEG2RAD;
-		roll *= DEG2RAD;
-	}
-
-	if (event.event_type == ORIENTATION_RAW_DATA_EVENT) {
+	if (event.event_type == FUSION_EVENT) {
 		diff_time = event.data.timestamp - m_time;
 
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
+		quaternion<float> quat(event.data.values[0], event.data.values[1],
+				event.data.values[2], event.data.values[3]);
+
+		euler_angles<float> euler = quat2euler(quat);
+
+		if(m_orientation_data_unit == "DEGREES") {
+			euler = rad2deg(euler);
+			azimuth_offset = AZIMUTH_OFFSET_DEGREES;
+		}
+		else {
+			azimuth_offset = AZIMUTH_OFFSET_RADIANS;
+		}
+
+		euler.m_ang.m_vec[0] *= m_pitch_rotation_compensation;
+		euler.m_ang.m_vec[1] *= m_roll_rotation_compensation;
+		euler.m_ang.m_vec[2] *= m_azimuth_rotation_compensation;
+
+		pitch = euler.m_ang.m_vec[0];
+		roll = euler.m_ang.m_vec[1];
+		if (euler.m_ang.m_vec[2] >= 0)
+			azimuth = euler.m_ang.m_vec[2];
+		else
+			azimuth = euler.m_ang.m_vec[2] + azimuth_offset;
+
+		if(m_orientation_data_unit == "DEGREES") {
+			azimuth *= DEG2RAD;
+			pitch *= DEG2RAD;
+			roll *= DEG2RAD;
+		}
+
 		m_time = get_timestamp();
 		gravity_event.sensor_id = get_id();
 		gravity_event.event_type = GRAVITY_RAW_DATA_EVENT;
+
 		if ((roll >= (M_PI/2)-DEVIATION && roll <= (M_PI/2)+DEVIATION) ||
 				(roll >= -(M_PI/2)-DEVIATION && roll <= -(M_PI/2)+DEVIATION)) {
 			gravity_event.data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(roll) * cos(azimuth);
@@ -208,27 +296,47 @@ void gravity_sensor::synthesize(const sensor_event_t &event, vector<sensor_event
 
 		push(gravity_event);
 	}
+
+	return;
 }
 
 int gravity_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &data)
 {
-	sensor_data_t orientation_data;
+	sensor_data_t fusion_data;
+	float azimuth_offset;
 	float pitch, roll, azimuth;
 
-	m_orientation_sensor->get_sensor_data(ORIENTATION_RAW_DATA_EVENT, orientation_data);
+	if (event_type != GRAVITY_RAW_DATA_EVENT)
+		return -1;
 
-	azimuth = orientation_data.values[0];
-	pitch = orientation_data.values[1];
-	roll = orientation_data.values[2];
+	m_fusion_sensor->get_sensor_data(FUSION_ORIENTATION_ENABLED, fusion_data);
+
+	quaternion<float> quat(fusion_data.values[0], fusion_data.values[1],
+			fusion_data.values[2], fusion_data.values[3]);
+
+	euler_angles<float> euler = quat2euler(quat);
+
+	if(m_orientation_data_unit == "DEGREES") {
+		euler = rad2deg(euler);
+		azimuth_offset = AZIMUTH_OFFSET_DEGREES;
+	}
+	else {
+		azimuth_offset = AZIMUTH_OFFSET_RADIANS;
+	}
+
+	pitch = euler.m_ang.m_vec[0];
+	roll = euler.m_ang.m_vec[1];
+
+	if (euler.m_ang.m_vec[2] >= 0)
+		azimuth = euler.m_ang.m_vec[2];
+	else
+		azimuth = euler.m_ang.m_vec[2] + azimuth_offset;
 
 	if(m_orientation_data_unit == "DEGREES") {
 		azimuth *= DEG2RAD;
 		pitch *= DEG2RAD;
 		roll *= DEG2RAD;
 	}
-
-	if (event_type != GRAVITY_RAW_DATA_EVENT)
-		return -1;
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();
