@@ -58,6 +58,7 @@ public:
 	vect<TYPE, V1x6S> m_state_old;
 	vect<TYPE, V1x6S> m_state_error;
 	vect<TYPE, V1x3S> m_bias_correction;
+	vect<TYPE, V1x3S> m_gyro_bias;
 	quaternion<TYPE> m_quat_aid;
 	quaternion<TYPE> m_quat_driv;
 	rotation_matrix<TYPE> m_rot_matrix;
