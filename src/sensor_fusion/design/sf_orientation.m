@@ -100,7 +100,11 @@ Mag_data(3,:) = (((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")
 Mag_data(4,:) = ((dlmread("data/100ms/orientation/roll_pitch_yaw/magnetic.txt")(:,4))')(1:BUFFER_SIZE);
 
 % estimate orientation
-[Quat_driv, Quat_aid, Quat_err]  = estimate_orientation(Accel_data, Gyro_data, Mag_data);
+[Quat_driv, Quat_aid, Quat_err, Gyro_bias]  = estimate_orientation(Accel_data, Gyro_data, Mag_data);
+
+Gyro_bias(1,:) = Gyro_bias(1,:) + Bias_Gx;
+Gyro_bias(2,:) = Gyro_bias(2,:) + Bias_Gy;
+Gyro_bias(3,:) = Gyro_bias(3,:) + Bias_Gz;
 
 for i = 1:BUFFER_SIZE
 	euler_aid(i,:) = quat2euler(Quat_aid(i,:));
@@ -120,11 +124,6 @@ for i = 1:BUFFER_SIZE
 	if (OR_aid(3,i) < 0)
 		OR_aid(3,i) = OR_aid(3,i) + 360;
 	end
-
-	euler_err(i,:) = quat2euler(Quat_err(i,:));
-	OR_err(1,i) = euler_err(i,2)' * RAD2DEG;
-	OR_err(2,i) = euler_err(i,1)' * RAD2DEG;
-	OR_err(3,i) = euler_err(i,3)' * RAD2DEG;
 end
 
 % Rotation Plot Results
@@ -140,10 +139,10 @@ UA = OR_driv(2,:);
 p2 = plot(1:length(UA),UA(1,1:length(UA)),'b');
 hold on;
 grid on;
-UA = OR_err(2,:);
+UA = Gyro_bias(1,:);
 p3 = plot(1:length(UA),UA(1,1:length(UA)),'g');
 title(['Pitch']);
-legend([p1 p2 p3],'Aiding System', 'Driving System', 'Quaternion based error');
+legend([p1 p2 p3],'Aiding System', 'Driving System', 'Gyroscope Bias error');
 subplot(3,1,2)
 UA = OR_aid(1,:);
 p1 = plot(1:length(UA),UA(1,1:length(UA)),'r');
@@ -153,10 +152,10 @@ UA = OR_driv(1,:);
 p2 = plot(1:length(UA),UA(1,1:length(UA)),'b');
 hold on;
 grid on;
-UA = OR_err(1,:);
+UA = Gyro_bias(2,:);
 p3 = plot(1:length(UA),UA(1,1:length(UA)),'g');
 title(['Roll']);
-legend([p1 p2 p3],'Aiding System', 'Driving System', 'Quaternion based error');
+legend([p1 p2 p3],'Aiding System', 'Driving System', 'Gyroscope Bias error');
 subplot(3,1,3)
 UA = OR_aid(3,:);
 p1 = plot(1:length(UA),UA(1,1:length(UA)),'r');
@@ -166,7 +165,7 @@ UA = OR_driv(3,:);
 p2 = plot(1:length(UA),UA(1,1:length(UA)),'b');
 hold on;
 grid on;
-UA = OR_err(3,:);
+UA = Gyro_bias(3,:);
 p3 = plot(1:length(UA),UA(1,1:length(UA)),'g');
 title(['Yaw']);
-legend([p1 p2 p3],'Aiding System', 'Driving System', 'Quaternion based error');
+legend([p1 p2 p3],'Aiding System', 'Driving System', 'Gyroscope Bias error');
