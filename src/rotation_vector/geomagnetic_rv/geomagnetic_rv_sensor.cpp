@@ -37,21 +37,11 @@
 
 #define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
-#define INITIAL_VALUE -1
-
 #define MS_TO_US 1000
 
-#define ELEMENT_NAME											"NAME"
 #define ELEMENT_VENDOR											"VENDOR"
-#define ELEMENT_RAW_DATA_UNIT									"RAW_DATA_UNIT"
-#define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
 
-void pre_process_data(sensor_data<float> &data_out, const float *data_in, float *bias, int *sign, float scale)
-{
-	data_out.m_data.m_vec[0] = sign[0] * (data_in[0] - bias[0]) / scale;
-	data_out.m_data.m_vec[1] = sign[1] * (data_in[1] - bias[1]) / scale;
-	data_out.m_data.m_vec[2] = sign[2] * (data_in[2] - bias[2]) / scale;
-}
+#define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
 
 geomagnetic_rv_sensor::geomagnetic_rv_sensor()
 : m_accel_sensor(NULL)
@@ -69,7 +59,6 @@ geomagnetic_rv_sensor::geomagnetic_rv_sensor()
 
 	m_name = string(SENSOR_NAME);
 	register_supported_event(GEOMAGNETIC_RV_RAW_DATA_EVENT);
-	m_enable_geomagnetic_rv = 0;
 
 	if (!config.get(SENSOR_TYPE_GEOMAGNETIC_RV, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
