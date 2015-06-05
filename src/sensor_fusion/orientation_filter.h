@@ -66,6 +66,8 @@ public:
 	quaternion<TYPE> m_quat_9axis;
 	quaternion<TYPE> m_quat_gaming_rv;
 	quaternion<TYPE> m_quaternion;
+	quaternion<TYPE>  m_quat_output;
+	euler_angles<TYPE> m_euler_error;
 	TYPE m_gyro_dt;
 
 	int m_magnetic_alignment_factor;
