@@ -148,6 +148,32 @@ inline void orientation_filter<TYPE>::compute_covariance()
 {
 	TYPE var_gyr_x, var_gyr_y, var_gyr_z;
 	TYPE var_roll, var_pitch, var_azimuth;
+	quaternion<TYPE> quat_diff, quat_error;
+
+	if(!is_initialized(m_quat_driv.m_quat))
+		m_quat_driv = m_quat_aid;
+
+	quaternion<TYPE> quat_rot_inc(0, m_gyro.m_data.m_vec[0], m_gyro.m_data.m_vec[1],
+			m_gyro.m_data.m_vec[2]);
+
+	quat_diff = (m_quat_driv * quat_rot_inc) * (TYPE) 0.5;
+
+	m_quat_driv = m_quat_driv + (quat_diff * (TYPE) m_gyro_dt * (TYPE) PI);
+	m_quat_driv.quat_normalize();
+
+	m_quat_output = phase_correction(m_quat_driv, m_quat_aid);
+
+	m_orientation = quat2euler(m_quat_output);
+
+	quat_error = m_quat_aid * m_quat_driv;
+
+	m_euler_error = (quat2euler(quat_error)).m_ang;
+
+	m_gyro.m_data = m_gyro.m_data - m_euler_error.m_ang;
+
+	m_euler_error.m_ang = m_euler_error.m_ang / (TYPE) PI;
+
+	m_gyro_bias = m_euler_error.m_ang * (TYPE) PI;
 
 	insert_end(m_var_gyr_x, m_gyro.m_data.m_vec[0]);
 	insert_end(m_var_gyr_y, m_gyro.m_data.m_vec[1]);
@@ -178,8 +204,6 @@ inline void orientation_filter<TYPE>::compute_covariance()
 template <typename TYPE>
 inline void orientation_filter<TYPE>::time_update()
 {
-	quaternion<TYPE> quat_diff, quat_error, quat_output;
-	euler_angles<TYPE> euler_error;
 	euler_angles<TYPE> orientation;
 
 	m_tran_mat.m_mat[0][1] = m_gyro.m_data.m_vec[2];
@@ -210,43 +234,22 @@ inline void orientation_filter<TYPE>::time_update()
 			m_state_new.m_vec[j] = NEGLIGIBLE_VAL;
 	}
 
-	if(!is_initialized(m_quat_driv.m_quat))
-		m_quat_driv = m_quat_aid;
-
-	quaternion<TYPE> quat_rot_inc(0, m_gyro.m_data.m_vec[0], m_gyro.m_data.m_vec[1],
-			m_gyro.m_data.m_vec[2]);
-
-	quat_diff = (m_quat_driv * quat_rot_inc) * (TYPE) 0.5;
-
-	m_quat_driv = m_quat_driv + (quat_diff * (TYPE) m_gyro_dt * (TYPE) PI);
-	m_quat_driv.quat_normalize();
-
-	quat_output = phase_correction(m_quat_driv, m_quat_aid);
-
-	m_quat_9axis = quat_output;
+	m_quat_9axis = m_quat_output;
 	m_quat_gaming_rv = m_quat_9axis;
-
-	m_orientation = quat2euler(quat_output);
 
 	m_rot_matrix = quat2rot_mat(m_quat_driv);
 
-	quat_error = m_quat_aid * m_quat_driv;
-
-	euler_error = (quat2euler(quat_error)).m_ang / (TYPE) PI;
-
-	m_gyro_bias = euler_error.m_ang * (TYPE) PI;
-
-	quaternion<TYPE> quat_eu_er(1, euler_error.m_ang.m_vec[0], euler_error.m_ang.m_vec[1],
-			euler_error.m_ang.m_vec[2]);
+	quaternion<TYPE> quat_eu_er(1, m_euler_error.m_ang.m_vec[0], m_euler_error.m_ang.m_vec[1],
+			m_euler_error.m_ang.m_vec[2]);
 
 	m_quat_driv = (m_quat_driv * quat_eu_er) * (TYPE) PI;
 	m_quat_driv.quat_normalize();
 
 	if (is_initialized(m_state_new))
 	{
-		m_state_error.m_vec[0] = euler_error.m_ang.m_vec[0];
-		m_state_error.m_vec[1] = euler_error.m_ang.m_vec[1];
-		m_state_error.m_vec[2] = euler_error.m_ang.m_vec[2];
+		m_state_error.m_vec[0] = m_euler_error.m_ang.m_vec[0];
+		m_state_error.m_vec[1] = m_euler_error.m_ang.m_vec[1];
+		m_state_error.m_vec[2] = m_euler_error.m_ang.m_vec[2];
 		m_state_error.m_vec[3] = m_state_new.m_vec[3];
 		m_state_error.m_vec[4] = m_state_new.m_vec[4];
 		m_state_error.m_vec[5] = m_state_new.m_vec[5];
@@ -256,8 +259,6 @@ inline void orientation_filter<TYPE>::time_update()
 template <typename TYPE>
 inline void orientation_filter<TYPE>::time_update_gaming_rv()
 {
-	quaternion<TYPE> quat_diff, quat_error, quat_output;
-	euler_angles<TYPE> euler_error;
 	euler_angles<TYPE> orientation;
 	euler_angles<TYPE> euler_aid;
 	euler_angles<TYPE> euler_driv;
@@ -281,29 +282,8 @@ inline void orientation_filter<TYPE>::time_update_gaming_rv()
 
 	m_pred_cov = (m_tran_mat * m_pred_cov * tran(m_tran_mat)) + m_driv_cov;
 
-	if(!is_initialized(m_quat_driv.m_quat))
-		m_quat_driv = m_quat_aid;
-
-	quaternion<TYPE> quat_rot_inc(0, m_gyro.m_data.m_vec[0], m_gyro.m_data.m_vec[1],
-			m_gyro.m_data.m_vec[2]);
-
-	quat_diff = (m_quat_driv * quat_rot_inc) * (TYPE) 0.5;
-
-	m_quat_driv = m_quat_driv + (quat_diff * (TYPE) m_gyro_dt * (TYPE) PI);
-	m_quat_driv.quat_normalize();
-
-	quat_output = phase_correction(m_quat_driv, m_quat_aid);
-
-	m_orientation = quat2euler(quat_output);
-
-	quat_error = m_quat_aid * m_quat_driv;
-
-	euler_error = (quat2euler(quat_error)).m_ang / (TYPE) PI;
-
-	m_gyro_bias = euler_error.m_ang * (TYPE) PI;
-
 	euler_aid = quat2euler(m_quat_aid);
-	euler_driv = quat2euler(quat_output);
+	euler_driv = quat2euler(m_quat_output);
 
 	euler_angles<TYPE> euler_gaming_rv(euler_aid.m_ang.m_vec[0], euler_aid.m_ang.m_vec[1],
 			euler_driv.m_ang.m_vec[2]);
@@ -311,9 +291,9 @@ inline void orientation_filter<TYPE>::time_update_gaming_rv()
 	m_quat_gaming_rv = euler2quat(euler_gaming_rv);
 
 	if (is_initialized(m_state_new)) {
-		m_state_error.m_vec[0] = euler_error.m_ang.m_vec[0];
-		m_state_error.m_vec[1] = euler_error.m_ang.m_vec[1];
-		m_state_error.m_vec[2] = euler_error.m_ang.m_vec[2];
+		m_state_error.m_vec[0] = m_euler_error.m_ang.m_vec[0];
+		m_state_error.m_vec[1] = m_euler_error.m_ang.m_vec[1];
+		m_state_error.m_vec[2] = m_euler_error.m_ang.m_vec[2];
 		m_state_error.m_vec[3] = m_state_new.m_vec[3];
 		m_state_error.m_vec[4] = m_state_new.m_vec[4];
 		m_state_error.m_vec[5] = m_state_new.m_vec[5];
