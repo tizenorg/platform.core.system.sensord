@@ -23,7 +23,7 @@
 % - Quaternion based approach
 % - Estimation and correction of orientation errors and bias errors for gyroscope using Kalman filter
 
-function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, Gyro_data, Mag_data)
+function [quat_driv, quat_aid, quat_error, gyro_bias]  = estimate_orientation(Accel_data, Gyro_data, Mag_data)
 	PLOT_SCALED_SENSOR_COMPARISON_DATA = 1;
 	PLOT_INDIVIDUAL_SENSOR_INPUT_DATA = 1;
 
@@ -42,6 +42,7 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 	GRAVITY = 9.80665;
 	PI = 3.141593;
 	NON_ZERO_VAL = 0.1;
+	PI_DEG = 180;
 
 	MOVING_AVERAGE_WINDOW_LENGTH = 20;
 	RAD2DEG = 57.2957795;
@@ -61,6 +62,8 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 	mag_y = zeros(1,BUFFER_SIZE);
 	mag_z = zeros(1,BUFFER_SIZE);
 	MTime = zeros(1,BUFFER_SIZE);
+
+	gyro_bias = zeros(3,BUFFER_SIZE);
 
 	if MAG_DATA_DISABLED != 1
 		Mx = Mag_data(1,:);
@@ -121,7 +124,7 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 
 		H = [eye(3) zeros(3,3); zeros(3,6)];
 		x = zeros(6,BUFFER_SIZE);
-		e = zeros(1,6);
+		e = zeros(1,6);PI
 		P = 1 * eye(6);% state covariance matrix
 
 		quat_driv(1,:) = [1 0 0 0];
@@ -270,6 +273,7 @@ function [quat_driv, quat_aid, quat_error]  = estimate_orientation(Accel_data, G
 			Bx = x(4,i);
 			By = x(5,i);
 			Bz = x(6,i);
+			gyro_bias(:,i) = [x1; x2; x3] * PI_DEG + [Bx; By; Bz];
 		end
 	end
 
