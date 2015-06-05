@@ -86,6 +86,8 @@ int main()
 
 		orientation = orien_sensor.orien_filter.m_orientation;
 
+		cout << "Gyro Bias in radians\t" << orien_sensor.orien_filter.m_gyro_bias;
+
 		orientation = rad2deg(orientation);
 
 		orientation.m_ang.m_vec[0] *= pitch_phase_compensation;
@@ -96,6 +98,8 @@ int main()
 			orientation.m_ang.m_vec[2] += 360;
 
 		orien_file << orientation.m_ang;
+
+		orientation = orien_sensor.orien_filter.m_orientation;
 
 		cout << "Orientation angles\t" << orientation.m_ang << "\n\n";
 

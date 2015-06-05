@@ -42,6 +42,7 @@ void pre_process_data(sensor_data<float> *data_out, sensor_data<float> *data_in,
 void orientation_sensor::get_device_orientation(sensor_data<float> *accel_data,
 		sensor_data<float> *gyro_data, sensor_data<float> *magnetic_data)
 {
+	vect<float, 3> vec_bias_gyro(bias_gyro);
 
 	pre_process_data(accel_data, accel_data, bias_accel, sign_accel, scale_accel);
 	normalize(*accel_data);
@@ -52,6 +53,8 @@ void orientation_sensor::get_device_orientation(sensor_data<float> *accel_data,
 	orien_filter.m_magnetic_alignment_factor = magnetic_alignment_factor;
 
 	orien_filter.get_device_orientation(accel_data, gyro_data, magnetic_data);
+
+	orien_filter.m_gyro_bias = orien_filter.m_gyro_bias + vec_bias_gyro;
 }
 
 #endif
