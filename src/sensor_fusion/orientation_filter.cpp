@@ -234,6 +234,8 @@ inline void orientation_filter<TYPE>::time_update()
 
 	euler_error = (quat2euler(quat_error)).m_ang / (TYPE) PI;
 
+	m_gyro_bias = euler_error.m_ang * (TYPE) PI;
+
 	quaternion<TYPE> quat_eu_er(1, euler_error.m_ang.m_vec[0], euler_error.m_ang.m_vec[1],
 			euler_error.m_ang.m_vec[2]);
 
@@ -298,6 +300,8 @@ inline void orientation_filter<TYPE>::time_update_gaming_rv()
 
 	euler_error = (quat2euler(quat_error)).m_ang / (TYPE) PI;
 
+	m_gyro_bias = euler_error.m_ang * (TYPE) PI;
+
 	euler_aid = quat2euler(m_quat_aid);
 	euler_driv = quat2euler(quat_output);
 
@@ -351,6 +355,8 @@ inline void orientation_filter<TYPE>::measurement_update()
 	vect<TYPE, V1x3S> vec(arr_bias);
 
 	m_bias_correction = vec;
+
+	m_gyro_bias = m_gyro_bias + vec;
 }
 
 template <typename TYPE>
