@@ -21,4 +21,4 @@ add_library(${SENSOR_NAME} SHARED
 
 target_link_libraries(${SENSOR_NAME} ${orientation_pkgs_LDFLAGS} "-lm")
 
-install(TARGETS ${SENSOR_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/sensord)
+install(TARGETS ${SENSOR_NAME} DESTINATION ${PLUGINDIR})

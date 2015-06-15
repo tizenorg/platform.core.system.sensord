@@ -26,5 +26,5 @@ add_library(${SENSOR_HAL_NAME} SHARED
 target_link_libraries(${SENSOR_NAME} ${uv_pkgs_LDFLAGS} "-lm")
 target_link_libraries(${SENSOR_HAL_NAME} ${uv_pkgs_LDFLAGS})
 
-install(TARGETS ${SENSOR_NAME} DESTINATION lib/sensord)
-install(TARGETS ${SENSOR_HAL_NAME} DESTINATION lib/sensord)
+install(TARGETS ${SENSOR_NAME} DESTINATION ${PLUGINDIR})
+install(TARGETS ${SENSOR_HAL_NAME} DESTINATION ${PLUGINDIR})

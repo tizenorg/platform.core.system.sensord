@@ -5,8 +5,9 @@ include(GNUInstallDirs)
 # Setup For pkgconfig File
 SET(PREFIX ${CMAKE_INSTALL_PREFIX})
 SET(EXEC_PREFIX "${PREFIX}/bin")
-SET(LIBDIR "${PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-SET(INCLUDEDIR "${PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
+SET(LIBDIR "${LIBDIR}")
+SET(INCLUDEDIR "${INCLUDEDIR}")
+SET(PLUGINDIR "${LIBDIR}/sensord")
 SET(VERSION 1.0)
 
 # Common Options
@@ -17,7 +18,8 @@ MESSAGE("FLAGS: ${CMAKE_CXX_FLAGS}")
 MESSAGE("FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
 
 add_definitions(-DUSE_DLOG_LOG)
-add_definitions(-DLIBDIR="${CMAKE_INSTALL_LIBDIR}")
+add_definitions(-DLIBDIR="${LIBDIR}")
+add_definitions(-DPLUGINDIR="${PLUGINDIR}")
 
 # Internal Debugging Options
 #add_definitions(-Wall -g -D_DEBUG)
