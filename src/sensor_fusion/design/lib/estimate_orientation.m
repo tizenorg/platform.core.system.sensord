@@ -172,14 +172,37 @@ function [quat_driv, quat_aid, quat_error, gyro_bias]  = estimate_orientation(Ac
 			gyr_y(i) = Gy(i) * PI;
 			gyr_z(i) = Gz(i) * PI;
 
-			gyr_x(i) = gyr_x(i) - Bx;
-			gyr_y(i) = gyr_y(i) - By;
-			gyr_z(i) = gyr_z(i) - Bz;
-
 			euler = quat2euler(quat_aid(i,:));
 			roll(i) = euler(2);
 			pitch(i) = euler(1);
 			yaw(i) = euler(3);
+
+			if i > 1
+				A_T(i) = ATime(i) - ATime(i-1);
+				G_T(i) = GTime(i) - GTime(i-1);
+				M_T(i) = MTime(i) - MTime(i-1);
+			end
+
+			dt = G_T(i) * US2S;
+
+			% Driving System (Gyroscope) quaternion generation
+			% convert scaled gyro data to rad/s
+			qDot = 0.5 * quat_prod(q, [0 gyr_x(i) gyr_y(i) gyr_z(i)]);
+
+			% Integrate to yield quaternion
+			q = q + qDot * dt * PI;
+
+			% normalise quaternion
+			quat_driv(i,:) = q / norm(q);
+
+			% Kalman Filtering
+			quat_error(i,:) = quat_prod(quat_aid(i,:), quat_driv(i,:));
+
+			euler_e = quat2euler(quat_error(i,:));
+
+			gyr_x(i) = gyr_x(i) - (Bx + euler_e(1));
+			gyr_y(i) = gyr_y(i) - (By + euler_e(2));
+			gyr_z(i) = gyr_z(i) - (Bz + euler_e(3));
 
 			if i <= MOVING_AVERAGE_WINDOW_LENGTH
 				var_Gx(i) = NON_ZERO_VAL;
@@ -196,13 +219,7 @@ function [quat_driv, quat_aid, quat_error, gyro_bias]  = estimate_orientation(Ac
 				var_pitch(i) = var(pitch((i-MOVING_AVERAGE_WINDOW_LENGTH):i));
 				var_yaw(i) = var(yaw((i-MOVING_AVERAGE_WINDOW_LENGTH):i));
 			end
-			if i > 1
-				A_T(i) = ATime(i) - ATime(i-1);
-				G_T(i) = GTime(i) - GTime(i-1);
-				M_T(i) = MTime(i) - MTime(i-1);
-			end
 
-			dt = G_T(i) * US2S;
 
 			Qwn = [var_Gx(i) 0 0;0 var_Gy(i) 0;0 0 var_Gz(i);];
 			Qwb = (2 * (ZigmaW^2) / TauW) * eye(3);
@@ -228,20 +245,6 @@ function [quat_driv, quat_aid, quat_error, gyro_bias]  = estimate_orientation(Ac
 			% compute covariance of prediction
 			P = (F * P * F') + Q;
 
-			% Driving System (Gyroscope) quaternion generation
-			% convert scaled gyro data to rad/s
-			qDot = 0.5 * quat_prod(q, [0 gyr_x(i) gyr_y(i) gyr_z(i)]);
-
-			% Integrate to yield quaternion
-			q = q + qDot * dt * PI;
-
-			% normalise quaternion
-			quat_driv(i,:) = q / norm(q);
-
-			% Kalman Filtering
-			quat_error(i,:) = quat_prod(quat_aid(i,:), quat_driv(i,:));
-
-			euler_e = quat2euler(quat_error(i,:));
 			x1 = euler_e(1)'/PI;
 			x2 = euler_e(2)'/PI;
 			x3 = euler_e(3)'/PI;
