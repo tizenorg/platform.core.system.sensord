@@ -16,6 +16,7 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(vconf)
 BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(capi-system-info)
+Requires(post): systemd
 
 %define accel_state ON
 %define gyro_state ON

@@ -26,5 +26,5 @@ add_library(${SENSOR_HAL_NAME} SHARED
 target_link_libraries(${SENSOR_NAME} ${light_pkgs_LDFLAGS} "-lm")
 target_link_libraries(${SENSOR_HAL_NAME} ${light_pkgs_LDFLAGS})
 
-install(TARGETS ${SENSOR_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/sensord)
-install(TARGETS ${SENSOR_HAL_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/sensord)
+install(TARGETS ${SENSOR_NAME} DESTINATION ${PLUGINDIR})
+install(TARGETS ${SENSOR_HAL_NAME} DESTINATION ${PLUGINDIR})

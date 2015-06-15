@@ -1,29 +1,29 @@
 <PLUGIN>
 	<HAL>
-		<MODULE path = "/usr/lib/sensord/libaccel_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libgyro_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libgeo_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libproxi_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/liblight_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libpressure_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libtemperature_sensor_hal.so"/>
+		<MODULE path = "@PLUGINDIR@/libaccel_sensor_hal.so"/>
+		<MODULE path = "@PLUGINDIR@/libgyro_sensor_hal.so"/>
+		<MODULE path = "@PLUGINDIR@/libgeo_sensor_hal.so"/>
+		<MODULE path = "@PLUGINDIR@/libproxi_sensor_hal.so"/>
+		<MODULE path = "@PLUGINDIR@/liblight_sensor_hal.so"/>
+		<MODULE path = "@PLUGINDIR@/libpressure_sensor_hal.so"/>
+		<MODULE path = "@PLUGINDIR@/libtemperature_sensor_hal.so"/>
 	</HAL>
 
 	<SENSOR>
-		<MODULE path = "/usr/lib/sensord/libaccel_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/libgyro_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/libgeo_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/libproxi_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/liblight_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/libpressure_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/libfusion_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/liborientation_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/libgravity_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/liblinear_accel_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/libtemperature_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/librv_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/libgeomagnetic_rv_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/libgaming_rv_sensor.so"/>
-		<MODULE path = "/usr/lib/sensord/libtilt_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/libaccel_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/libgyro_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/libgeo_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/libproxi_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/liblight_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/libpressure_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/libfusion_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/liborientation_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/libgravity_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/liblinear_accel_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/libtemperature_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/librv_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/libgeomagnetic_rv_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/libgaming_rv_sensor.so"/>
+		<MODULE path = "@PLUGINDIR@/libtilt_sensor.so"/>
 	</SENSOR>
 </PLUGIN>

@@ -51,10 +51,10 @@ target_link_libraries(sensord-share ${shared_pkgs_LDFLAGS} "-lrt -ldl -pthread")
 configure_file(sensord-server.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/sensord-server.pc @ONLY)
 configure_file(${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc @ONLY)
 
-install(TARGETS sensord-server DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(TARGETS sensord-share DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(FILES sensord-server.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-install(FILES ${PROJECT_NAME}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(TARGETS sensord-server DESTINATION ${LIBDIR})
+install(TARGETS sensord-share DESTINATION ${LIBDIR})
+install(FILES sensord-server.pc DESTINATION ${LIBDIR}/pkgconfig)
+install(FILES ${PROJECT_NAME}.pc DESTINATION ${LIBDIR}/pkgconfig)
 install(FILES
 	crw_lock.h
 	worker_thread.h
@@ -76,11 +76,11 @@ install(FILES
 	common.h
 	sensor_info.h
 	iio_common.h
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+	DESTINATION ${INCLUDEDIR}/${PROJECT_NAME}
 )
 
 install(FILES
 	sensor_common.h
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor
+	DESTINATION ${INCLUDEDIR}/sensor
 )
 
