@@ -31,6 +31,7 @@ BuildRequires:  pkgconfig(capi-system-info)
 %define geomagnetic_rv_state ON
 %define gaming_rv_state ON
 %define tilt_state ON
+%define uncal_gyro_state ON
 %define build_test_suite OFF
 
 %description
@@ -82,6 +83,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
+	-DUNCAL_GYRO=%{uncal_gyro_state} \
 	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite} \
 	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
 
