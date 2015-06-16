@@ -55,6 +55,7 @@ extern "C"
 #include <sensor_deprecated.h>
 #include <sensor_fusion.h>
 #include <sensor_tilt.h>
+#include <sensor_uncal_gyro.h>
 
 #define MAX_KEY_LEN 30
 

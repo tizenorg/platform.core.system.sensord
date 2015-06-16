@@ -56,6 +56,7 @@ extern "C"
 #include <sensor_temperature.h>
 #include <sensor_fusion.h>
 #include <sensor_tilt.h>
+#include <sensor_uncal_gyro.h>
 
 
 typedef void (*sensor_cb_t)(sensor_t sensor, unsigned int event_type, sensor_data_t *data, void *user_data);

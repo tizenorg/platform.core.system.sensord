@@ -25,5 +25,6 @@
 		<MODULE path = "/usr/lib/sensord/libgeomagnetic_rv_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libgaming_rv_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libtilt_sensor.so"/>
+		<MODULE path = "/usr/lib/sensord/libuncal_gyro_sensor.so"/>
 	</SENSOR>
 </PLUGIN>
