@@ -38,15 +38,19 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 	switch (sensor_type) {
 	case ACCELEROMETER_SENSOR:
 		fprintf(file_output[0], "%6.6f %6.6f %6.6f %lld\n", data->values[0], data->values[1], data->values[2], data->timestamp);
+		fflush(file_output[0]);
 		break;
 	case GEOMAGNETIC_SENSOR:
 		fprintf(file_output[1], "%6.6f %6.6f %6.6f %lld\n", data->values[0], data->values[1], data->values[2], data->timestamp);
+		fflush(file_output[1]);
 		break;
 	case GYROSCOPE_SENSOR:
 		fprintf(file_output[2], "%6.6f %6.6f %6.6f %lld\n", data->values[0], data->values[1], data->values[2], data->timestamp);
+		fflush(file_output[2]);
 		break;
 	case PROXIMITY_SENSOR:
 		fprintf(file_output[MAXSIZE-1], "%6.6f %lld\n", data->values[0], data->timestamp);
+		fflush(file_output[MAXSIZE-1]);
 		break;
 	default:
 		return;
@@ -55,7 +59,7 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 
 void usage()
 {
-	printf("Usage : ./one-client-multiple-sensors <interval>\n\n");
+	printf("Usage : ./fusion-data-collection <interval>\n\n");
 
 	printf("interval:\n");
 	printf("The sampling interval in ms.\n");
