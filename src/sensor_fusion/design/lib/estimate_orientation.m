@@ -42,6 +42,7 @@ function [quat_driv, quat_aid, quat_error, gyro_bias]  = estimate_orientation(Ac
 	GRAVITY = 9.80665;
 	PI = 3.141593;
 	NON_ZERO_VAL = 0.1;
+	ROUNDOFF_VAL = 0.0025;
 	PI_DEG = 180;
 
 	MOVING_AVERAGE_WINDOW_LENGTH = 20;
@@ -220,7 +221,6 @@ function [quat_driv, quat_aid, quat_error, gyro_bias]  = estimate_orientation(Ac
 				var_yaw(i) = var(yaw((i-MOVING_AVERAGE_WINDOW_LENGTH):i));
 			end
 
-
 			Qwn = [var_Gx(i) 0 0;0 var_Gy(i) 0;0 0 var_Gz(i);];
 			Qwb = (2 * (ZigmaW^2) / TauW) * eye(3);
 
@@ -254,10 +254,13 @@ function [quat_driv, quat_aid, quat_error, gyro_bias]  = estimate_orientation(Ac
 				q = q / norm(q);
 			else
 				euler_aid = quat2euler(quat_aid(i,:));
-				euler_driv = quat2euler(quat_driv(i,:));
-
-				euler_gaming_rv = [euler_aid(2) euler_aid(1) euler_driv(3)];
-				quat_gaming_rv(i,:) = euler2quat(euler_gaming_rv);
+				if (euler_aid(1)^2 < (ROUNDOFF_VAL * PI))
+					if (euler_aid(2)^2 < (ROUNDOFF_VAL * PI))
+						if (gyr_z(i)^2 < (NON_ZERO_VAL))
+							q = quat_aid(i,:);
+						end
+					end
+				end
 			end
 
 			if i > 1
@@ -280,8 +283,8 @@ function [quat_driv, quat_aid, quat_error, gyro_bias]  = estimate_orientation(Ac
 		end
 	end
 
-	if MAG_DATA_DISABLED == 1
-		quat_driv = quat_gaming_rv;
+	if GYRO_DATA_DISABLED == 1
+		quat_driv = quat_aid;
 	end
 
 	if PLOT_SCALED_SENSOR_COMPARISON_DATA == 1

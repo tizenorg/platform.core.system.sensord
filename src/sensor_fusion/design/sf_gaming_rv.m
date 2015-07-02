@@ -26,9 +26,14 @@ close all
 clc
 
 GRAVITY = 9.80665;
+RAD2DEG = 57.2957795;
 
 Max_Range_Accel = 39.203407; Min_Range_Accel = -39.204006; Res_Accel = 0.000598;
 Max_Range_Gyro = 1146.862549; Min_Range_Gyro = -1146.880005; Res_Gyro = 0.017500;
+
+PITCH_PHASE_CORRECTION = -1;
+ROLL_PHASE_CORRECTION = -1;
+YAW_PHASE_CORRECTION = -1;
 
 Bias_Ax = 0.098586;
 Bias_Ay = 0.18385;
@@ -70,6 +75,9 @@ Game_RV = estimate_gaming_rv(Accel_data, Gyro_data);
 
 for i = 1:BUFFER_SIZE
 	Orientation_RV(:,i) = quat2euler(Game_RV(i,:));
+	Orientation_RV(1,i) = ROLL_PHASE_CORRECTION * Orientation_RV(1,i) * RAD2DEG;
+	Orientation_RV(2,i) = PITCH_PHASE_CORRECTION * Orientation_RV(2,i) * RAD2DEG;
+	Orientation_RV(3,i) = YAW_PHASE_CORRECTION * Orientation_RV(3,i) * RAD2DEG;
 end
 
 hfig=(figure);
