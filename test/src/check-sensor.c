@@ -32,6 +32,7 @@ static GMainLoop *mainloop;
 
 void printpollinglogs(sensor_type_t type,sensor_data_t data)
 {
+	/*Adding some dummy changes */
 	switch(type) {
 	case(ACCELEROMETER_SENSOR):
 		printf("Accelerometer [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
@@ -82,6 +83,7 @@ void printpollinglogs(sensor_type_t type,sensor_data_t data)
 
 int get_event(sensor_type_t sensor_type, char str[])
 {
+	/*Adding some dummy changes */
 	switch (sensor_type) {
 	case ACCELEROMETER_SENSOR:
 		if (strcmp(str, "RAW_DATA_EVENT") == 0)
@@ -147,6 +149,7 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 {
 	sensor_type_t sensor_type = event_type >> 16;
 
+	/*Adding some dummy changes */
 	switch (sensor_type) {
 	case ACCELEROMETER_SENSOR:
 		printf("Accelerometer [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);

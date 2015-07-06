@@ -41,6 +41,8 @@ accel_sensor::accel_sensor()
 {
 	m_name = string(SENSOR_NAME);
 
+	/*Adding some dummy changes */
+
 	vector<unsigned int> supported_events = {
 		ACCELEROMETER_RAW_DATA_EVENT,
 		ACCELEROMETER_UNPROCESSED_DATA_EVENT,
