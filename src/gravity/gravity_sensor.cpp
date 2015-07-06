@@ -72,6 +72,8 @@ gravity_sensor::gravity_sensor()
 	else
 		m_hardware_fusion = true;
 
+	/*Making some dummy changes */
+
 	m_name = std::string(SENSOR_NAME);
 	register_supported_event(GRAVITY_RAW_DATA_EVENT);
 
