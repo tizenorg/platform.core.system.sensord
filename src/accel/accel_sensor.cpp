@@ -40,7 +40,7 @@ accel_sensor::accel_sensor()
 , m_interval(POLL_1HZ_MS)
 {
 	m_name = string(SENSOR_NAME);
-
+	/*Making some dummy changes */
 	vector<unsigned int> supported_events = {
 		ACCELEROMETER_RAW_DATA_EVENT,
 		ACCELEROMETER_UNPROCESSED_DATA_EVENT,
