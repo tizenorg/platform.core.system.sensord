@@ -1,7 +1,7 @@
 /*
  * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,9 @@
 #define _AUTO_ROTATION_SENSOR_H_
 
 #include <sensor_internal.h>
-#include <vconf.h>
-#include <string>
+#include <virtual_sensor.h>
+#include <orientation_filter.h>
 #include <auto_rotation_alg.h>
-
-using std::string;
 
 class auto_rotation_sensor : public virtual_sensor {
 public:
@@ -35,24 +33,46 @@ public:
 	bool init();
 	sensor_type_t get_type(void);
 
-	static bool working(void *inst);
+	void synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs);
 
-	void synthesize(const sensor_event_t& event, vector<sensor_event_t> &outs);
+	bool add_interval(int client_id, unsigned int interval);
+	bool delete_interval(int client_id);
 
-	int get_sensor_data(unsigned int data_id, sensor_data_t &data);
-	virtual bool get_properties(sensor_properties_t &properties);
+	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
+	bool get_properties(sensor_properties_s &properties);
 private:
 	sensor_base *m_accel_sensor;
+	sensor_base *m_gyro_sensor;
+	sensor_base *m_magnetic_sensor;
+	sensor_base *m_fusion_sensor;
+
+	sensor_data<float> m_accel;
+	sensor_data<float> m_gyro;
+	sensor_data<float> m_magnetic;
+
 	cmutex m_value_mutex;
 
+	int m_accuracy;
 	int m_rotation;
-	unsigned long long m_rotation_time;
+	unsigned long long m_time;
+	unsigned int m_interval;
+	int m_prev_rotation_x;
+	int m_prev_rotation_y;
+	int m_prev_rotation_z;
+
+
 	auto_rotation_alg *m_alg;
 
+	string m_vendor;
+	string m_raw_data_unit;
+	int m_default_sampling_time;
+	int m_azimuth_rotation_compensation;
+	int m_pitch_rotation_compensation;
+	int m_roll_rotation_compensation;
+
 	auto_rotation_alg *get_alg();
-	virtual bool on_start(void);
-	virtual bool on_stop(void);
-	bool check_lib(void);
+	bool on_start(void);
+	bool on_stop(void);
 };
 
-#endif
+#endif /* _AUTO_ROTATION_SENSOR_H_ */

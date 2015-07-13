@@ -1,7 +1,7 @@
 /*
  * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,31 +25,105 @@
 #include <time.h>
 #include <sys/types.h>
 #include <dlfcn.h>
-
 #include <common.h>
 #include <sf_common.h>
-
-#include <virtual_sensor.h>
 #include <auto_rotation_sensor.h>
 #include <sensor_plugin_loader.h>
-#include <auto_rotation_alg.h>
+#include <cvirtual_sensor_config.h>
+
 #include <auto_rotation_alg_emul.h>
 
-using std::bind1st;
-using std::mem_fun;
+#define INITIAL_VALUE -1
+#define GRAVITY 9.80665
+
+#define DEVIATION 0.1
+
+#define PI 3.141593
+#define AZIMUTH_OFFSET_DEGREES 360
+#define AZIMUTH_OFFSET_RADIANS (2 * PI)
 
 #define SENSOR_NAME "AUTO_ROTATION_SENSOR"
-#define AUTO_ROTATION_LIB "/usr/lib/sensord/libauto-rotation.so"
+#define SENSOR_TYPE_AUTO_ROTATION		"AUTO_ROTATION"
+#define SENSOR_TYPE_ORIENTATION		"ORIENTATION"
+
+#define MS_TO_US 1000
+#define MIN_DELIVERY_DIFF_FACTOR 0.75f
+
+#define ELEMENT_NAME											"NAME"
+#define ELEMENT_VENDOR											"VENDOR"
+#define ELEMENT_RAW_DATA_UNIT									"RAW_DATA_UNIT"
+#define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
+#define ELEMENT_PITCH_ROTATION_COMPENSATION						"PITCH_ROTATION_COMPENSATION"
+#define ELEMENT_ROLL_ROTATION_COMPENSATION						"ROLL_ROTATION_COMPENSATION"
+#define ELEMENT_AZIMUTH_ROTATION_COMPENSATION					"AZIMUTH_ROTATION_COMPENSATION"
 
 auto_rotation_sensor::auto_rotation_sensor()
 : m_accel_sensor(NULL)
-, m_rotation(0)
-, m_rotation_time(1) // rotation state is valid from initial state, so set rotation time to non-zero value
+, m_gyro_sensor(NULL)
+, m_magnetic_sensor(NULL)
+, m_fusion_sensor(NULL)
+, m_time(0)
 , m_alg(NULL)
 {
-	m_name = string(SENSOR_NAME);
+	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
+	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR);
+	if (!fusion_sensor_hal)
+		m_hardware_fusion = false;
+	else
+		m_hardware_fusion = true;
+
+	m_name = std::string(SENSOR_NAME);
 	register_supported_event(AUTO_ROTATION_CHANGE_STATE_EVENT);
+
+	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_VENDOR, m_vendor)) {
+		ERR("[VENDOR] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_vendor = %s", m_vendor.c_str());
+
+	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
+		ERR("[RAW_DATA_UNIT] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_raw_data_unit = %s", m_raw_data_unit.c_str());
+
+	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
+		ERR("[DEFAULT_SAMPLING_TIME] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_default_sampling_time = %d", m_default_sampling_time);
+
+	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_AZIMUTH_ROTATION_COMPENSATION, &m_azimuth_rotation_compensation)) {
+		ERR("[AZIMUTH_ROTATION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_azimuth_rotation_compensation = %d", m_azimuth_rotation_compensation);
+
+	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_PITCH_ROTATION_COMPENSATION, &m_pitch_rotation_compensation)) {
+		ERR("[PITCH_ROTATION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_pitch_rotation_compensation = %d", m_pitch_rotation_compensation);
+
+	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_ROLL_ROTATION_COMPENSATION, &m_roll_rotation_compensation)) {
+		ERR("[ROLL_ROTATION_COMPENSATION] is empty\n");
+		throw ENXIO;
+	}
+
+	INFO("m_roll_rotation_compensation = %d", m_roll_rotation_compensation);
+
+	m_interval = m_default_sampling_time * MS_TO_US;
+
+	m_prev_rotation_x = AUTO_ROTATION_DEGREE_UNKNOWN;
+	m_prev_rotation_y = AUTO_ROTATION_DEGREE_UNKNOWN;
+	m_prev_rotation_z = AUTO_ROTATION_DEGREE_UNKNOWN;
+
 }
 
 auto_rotation_sensor::~auto_rotation_sensor()
@@ -57,14 +131,6 @@ auto_rotation_sensor::~auto_rotation_sensor()
 	delete m_alg;
 
 	INFO("auto_rotation_sensor is destroyed!\n");
-}
-
-bool auto_rotation_sensor::check_lib(void)
-{
-	if (access(AUTO_ROTATION_LIB, F_OK) < 0)
-		return false;
-
-	return true;
 }
 
 auto_rotation_alg *auto_rotation_sensor::get_alg()
@@ -75,9 +141,14 @@ auto_rotation_alg *auto_rotation_sensor::get_alg()
 bool auto_rotation_sensor::init()
 {
 	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
+	m_gyro_sensor = sensor_plugin_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
+	m_magnetic_sensor = sensor_plugin_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
 
-	if (!m_accel_sensor) {
-		ERR("cannot load accel sensor_hal[%s]", sensor_base::get_name());
+	m_fusion_sensor = sensor_plugin_loader::get_instance().get_sensor(FUSION_SENSOR);
+
+	if (!m_accel_sensor || !m_gyro_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
+		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, mag: 0x%x, fusion: 0x%x",
+			m_accel_sensor, m_gyro_sensor, m_magnetic_sensor, m_fusion_sensor);
 		return false;
 	}
 
@@ -91,10 +162,7 @@ bool auto_rotation_sensor::init()
 	if (!m_alg->open())
 		return false;
 
-	set_privilege(SENSOR_PRIVILEGE_INTERNAL);
-
-	INFO("%s is created!\n", sensor_base::get_name());
-
+	INFO("%s is created!", sensor_base::get_name());
 	return true;
 }
 
@@ -105,85 +173,235 @@ sensor_type_t auto_rotation_sensor::get_type(void)
 
 bool auto_rotation_sensor::on_start(void)
 {
-	const int SAMPLING_TIME = 60;
-	m_rotation = AUTO_ROTATION_DEGREE_UNKNOWN;
+	AUTOLOCK(m_mutex);
+
+	if (!m_hardware_fusion) {
+		m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
+		m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+		m_accel_sensor->start();
+		m_gyro_sensor->add_client(GYROSCOPE_RAW_DATA_EVENT);
+		m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+		m_gyro_sensor->start();
+		m_magnetic_sensor->add_client(GEOMAGNETIC_RAW_DATA_EVENT);
+		m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+		m_magnetic_sensor->start();
+	}
+
+	m_fusion_sensor->register_supported_event(FUSION_EVENT);
+	m_fusion_sensor->register_supported_event(FUSION_ORIENTATION_ENABLED);
+	m_fusion_sensor->add_client(FUSION_EVENT);
+	m_fusion_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+	m_fusion_sensor->start();
 
 	m_alg->start();
 
-	m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
-	m_accel_sensor->add_interval((int)this , SAMPLING_TIME, true);
-	m_accel_sensor->start();
-
-	return activate();
+	activate();
+	return true;
 }
 
 bool auto_rotation_sensor::on_stop(void)
 {
-	m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
-	m_accel_sensor->delete_interval((int)this , true);
-	m_accel_sensor->stop();
-
-	return deactivate();
-}
-
-void auto_rotation_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &outs)
-{
 	AUTOLOCK(m_mutex);
 
-	if (event.event_type == ACCELEROMETER_RAW_DATA_EVENT) {
-		int rotation;
-		float acc[3];
-		acc[0] = event.data.values[0];
-		acc[1] = event.data.values[1];
-		acc[2] = event.data.values[2];
+	if (!m_hardware_fusion) {
+		m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
+		m_accel_sensor->delete_interval((intptr_t)this, false);
+		m_accel_sensor->stop();
+		m_gyro_sensor->delete_client(GYROSCOPE_RAW_DATA_EVENT);
+		m_gyro_sensor->delete_interval((intptr_t)this, false);
+		m_gyro_sensor->stop();
+		m_magnetic_sensor->delete_client(GEOMAGNETIC_RAW_DATA_EVENT);
+		m_magnetic_sensor->delete_interval((intptr_t)this, false);
+		m_magnetic_sensor->stop();
+	}
 
-		if (!m_alg->get_rotation(acc, event.data.timestamp, m_rotation, rotation))
+	m_fusion_sensor->delete_client(FUSION_EVENT);
+	m_fusion_sensor->delete_interval((intptr_t)this, false);
+	m_fusion_sensor->unregister_supported_event(FUSION_EVENT);
+	m_fusion_sensor->unregister_supported_event(FUSION_ORIENTATION_ENABLED);
+	m_fusion_sensor->stop();
+
+	deactivate();
+	return true;
+}
+
+bool auto_rotation_sensor::add_interval(int client_id, unsigned int interval)
+{
+	AUTOLOCK(m_mutex);
+	if (!m_hardware_fusion) {
+		m_accel_sensor->add_interval(client_id, interval, false);
+		m_gyro_sensor->add_interval(client_id, interval, false);
+		m_magnetic_sensor->add_interval(client_id, interval, false);
+	}
+
+	m_fusion_sensor->add_interval(client_id, interval, false);
+
+	return sensor_base::add_interval(client_id, interval, false);
+}
+
+bool auto_rotation_sensor::delete_interval(int client_id)
+{
+	AUTOLOCK(m_mutex);
+	if (!m_hardware_fusion) {
+		m_accel_sensor->delete_interval(client_id, false);
+		m_gyro_sensor->delete_interval(client_id, false);
+		m_magnetic_sensor->delete_interval(client_id, false);
+	}
+
+	m_fusion_sensor->delete_interval(client_id, false);
+
+	return sensor_base::delete_interval(client_id, false);
+}
+
+void auto_rotation_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
+{
+	sensor_event_t auto_rotation_event;
+	float pitch, roll, azimuth;
+	unsigned long long diff_time;
+	float azimuth_offset;
+
+	if (event.event_type == FUSION_EVENT) {
+		diff_time = event.data.timestamp - m_time;
+
+		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
-		AUTOLOCK(m_value_mutex);
-		sensor_event_t rotation_event;
+		quaternion<float> quat(event.data.values[0], event.data.values[1],
+				event.data.values[2], event.data.values[3]);
 
-		INFO("Rotation: %d, ACC[0]: %f, ACC[1]: %f, ACC[2]: %f", rotation, event.data.values[0], event.data.values[1], event.data.values[2]);
-		rotation_event.sensor_id = get_id();
-		rotation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
-		rotation_event.event_type = AUTO_ROTATION_CHANGE_STATE_EVENT;
-		rotation_event.data.timestamp = event.data.timestamp;
-		rotation_event.data.values[0] = rotation;
-		rotation_event.data.value_count = 1;
-		outs.push_back(rotation_event);
-		m_rotation = rotation;
-		m_rotation_time = event.data.timestamp;
+		euler_angles<float> euler = quat2euler(quat);
 
-		return;
+		euler = rad2deg(euler);
+		azimuth_offset = AZIMUTH_OFFSET_DEGREES;
+
+		euler.m_ang.m_vec[0] *= m_pitch_rotation_compensation;
+		euler.m_ang.m_vec[1] *= m_roll_rotation_compensation;
+		euler.m_ang.m_vec[2] *= m_azimuth_rotation_compensation;
+
+
+		int rotation_x, rotation_y, rotation_z;
+		bool changed1, changed2, changed3;
+		float acc[3];
+		acc[1] = euler.m_ang.m_vec[0];
+		acc[2] = euler.m_ang.m_vec[1];
+
+		if (euler.m_ang.m_vec[2] >= 0)
+			acc[0] = euler.m_ang.m_vec[2];
+		else
+			acc[0] = euler.m_ang.m_vec[2] + azimuth_offset;
+
+		changed1 = m_alg->get_rotation(acc[0], m_prev_rotation_x, rotation_x);
+		changed2 = m_alg->get_rotation(acc[1]+180, m_prev_rotation_y, rotation_y);
+		changed3 = m_alg->get_rotation(acc[2]+90, m_prev_rotation_z, rotation_z);
+		m_prev_rotation_x = rotation_x;
+		m_prev_rotation_y = rotation_y;
+		m_prev_rotation_z = rotation_z;
+
+		m_alg->correct_rotation(rotation_x, rotation_y, rotation_z);
+
+		m_time = get_timestamp();
+		auto_rotation_event.sensor_id = get_id();
+		auto_rotation_event.event_type = AUTO_ROTATION_CHANGE_STATE_EVENT;
+
+		auto_rotation_event.data.value_count = 1;
+		auto_rotation_event.data.values[0] = m_rotation;
+		auto_rotation_event.data.timestamp = m_time;
+		auto_rotation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
+
+		if (changed1) {
+			m_rotation = rotation_x;
+			push(auto_rotation_event);
+		}
+		if (changed2) {
+			m_rotation = rotation_y;
+			push(auto_rotation_event);
+		}
+		if (changed3) {
+			m_rotation = rotation_z;
+			push(auto_rotation_event);
+		}
 	}
+
 	return;
 }
 
-int auto_rotation_sensor::get_sensor_data(unsigned int data_id, sensor_data_t &data)
+int auto_rotation_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &data)
 {
-	if (data_id != AUTO_ROTATION_CHANGE_STATE_EVENT)
+	sensor_data_t fusion_data;
+	float azimuth_offset;
+	float pitch, roll, azimuth;
+
+	if (event_type != AUTO_ROTATION_CHANGE_STATE_EVENT)
 		return -1;
 
-	AUTOLOCK(m_value_mutex);
+	m_fusion_sensor->get_sensor_data(FUSION_ORIENTATION_ENABLED, fusion_data);
 
-	data.accuracy = SENSOR_ACCURACY_GOOD;
-	data.timestamp = m_rotation_time;
-	data.values[0] = m_rotation;
-	data.value_count = 1;
+	quaternion<float> quat(fusion_data.values[0], fusion_data.values[1],
+			fusion_data.values[2], fusion_data.values[3]);
+
+	euler_angles<float> euler = quat2euler(quat);
+
+	euler = rad2deg(euler);
+	azimuth_offset = AZIMUTH_OFFSET_DEGREES;
+
+	euler.m_ang.m_vec[0] *= m_pitch_rotation_compensation;
+	euler.m_ang.m_vec[1] *= m_roll_rotation_compensation;
+	euler.m_ang.m_vec[2] *= m_azimuth_rotation_compensation;
+
+	int rotation_x, rotation_y, rotation_z;
+	bool changed1, changed2, changed3;
+	float acc[3];
+	acc[1] = euler.m_ang.m_vec[0];
+	acc[2] = euler.m_ang.m_vec[1];
+
+	if (euler.m_ang.m_vec[2] >= 0)
+		acc[0] = euler.m_ang.m_vec[2];
+	else
+		acc[0] = euler.m_ang.m_vec[2] + azimuth_offset;
+
+	changed1 = m_alg->get_rotation(acc[0], m_prev_rotation_x, rotation_x);
+	changed2 = m_alg->get_rotation(acc[1]+180, m_prev_rotation_y, rotation_y);
+	changed3 = m_alg->get_rotation(acc[2]+90, m_prev_rotation_z, rotation_z);
+	m_prev_rotation_x = rotation_x;
+	m_prev_rotation_y = rotation_y;
+	m_prev_rotation_z = rotation_z;
+
+	m_alg->correct_rotation(rotation_x, rotation_y, rotation_z);
+
+	if (changed1) {
+		m_rotation = rotation_x;
+		data.accuracy = SENSOR_ACCURACY_GOOD;
+		data.timestamp = get_timestamp();
+		data.values[0] = m_rotation;
+		data.value_count = 1;
+	}
+	if (changed2) {
+		m_rotation = rotation_y;
+		data.accuracy = SENSOR_ACCURACY_GOOD;
+		data.timestamp = get_timestamp();
+		data.values[0] = m_rotation;
+		data.value_count = 1;
+	}
+	if (changed3) {
+		m_rotation = rotation_z;
+		data.accuracy = SENSOR_ACCURACY_GOOD;
+		data.timestamp = get_timestamp();
+		data.values[0] = m_rotation;
+		data.value_count = 1;
+	}
 
 	return 0;
 }
 
-bool auto_rotation_sensor::get_properties(sensor_properties_t &properties)
+bool auto_rotation_sensor::get_properties(sensor_properties_s &properties)
 {
-	properties.name = "Auto Rotation Sensor";
-	properties.vendor = "Samsung Electronics";
 	properties.min_range = AUTO_ROTATION_DEGREE_UNKNOWN;
 	properties.max_range = AUTO_ROTATION_DEGREE_270;
-	properties.min_interval = 1;
-	properties.resolution = 1;
+	properties.vendor = m_vendor;
+	properties.name = m_name;
 	properties.fifo_count = 0;
 	properties.max_batch_count = 0;
+	properties.min_interval = 1;
 
 	return true;
 }

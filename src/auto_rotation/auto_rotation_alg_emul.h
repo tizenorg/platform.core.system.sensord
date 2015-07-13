@@ -28,9 +28,11 @@ public:
 	auto_rotation_alg_emul();
 	virtual ~auto_rotation_alg_emul();
 
-	virtual bool get_rotation(float acc[3], unsigned long long timestamp, int prev_rotation, int &cur_rotation);
+	virtual bool get_rotation(float acc, int prev_rotation, int &cur_rotation);
+	virtual void correct_rotation(int &rot_x, int &rot_y, int &rot_z);
 
 private:
-	int convert_rotation(int prev_rotation, float acc_pitch, float acc_theta);
+	int convert_rotation(int prev_rotation, float acc_theta);
+
 };
 #endif /* _AUTO_ROTATION_ALG_EMUL_H_ */
