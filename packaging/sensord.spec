@@ -18,6 +18,7 @@ BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(capi-system-info)
 
 %define accel_state ON
+%define auto_rotation_state ON
 %define gyro_state ON
 %define proxi_state ON
 %define light_state ON
@@ -83,7 +84,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
-	-DUNCAL_GYRO=%{uncal_gyro_state} \
+	-DUNCAL_GYRO=%{uncal_gyro_state} -DAUTO_ROTATION=%{auto_rotation_state} \
 	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite} \
 	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
 

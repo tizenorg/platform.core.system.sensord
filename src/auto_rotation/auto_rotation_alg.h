@@ -30,6 +30,7 @@ public:
 	virtual bool close(void);
 	virtual bool start(void);
 	virtual bool stop(void);
-	virtual bool get_rotation(float acc[3], unsigned long long timestamp, int prev_rotation, int &rotation) = 0;
+	virtual bool get_rotation(float acc, int prev_rotation, int &rotation) = 0;
+	virtual void correct_rotation(int &rot_x, int &rot_y, int &rot_z) = 0;
 };
 #endif /* _AUTO_ROTATION_ALG_H_ */
