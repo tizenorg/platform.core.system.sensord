@@ -47,8 +47,7 @@ auto_rotation_alg_emul::~auto_rotation_alg_emul()
 	close();
 }
 
-int auto_rotation_alg_emul::convert_rotation(int prev_rotation,
-		float acc_pitch, float acc_theta)
+int auto_rotation_alg_emul::convert_rotation(int prev_rotation, float acc_theta)
 {
 	const int ROTATION_0 = 0;
 	const int ROTATION_90 = 90;
@@ -62,9 +61,6 @@ int auto_rotation_alg_emul::convert_rotation(int prev_rotation,
 
 	for (int i = 0; i < ROTATION_RULE_CNT; ++i) {
 		tilt = rot_rule[i].tilt;
-
-		if ((acc_pitch < TILT_MIN) || (acc_pitch > tilt))
-			continue;
 
 		if ((prev_rotation == AUTO_ROTATION_DEGREE_0) || (prev_rotation == AUTO_ROTATION_DEGREE_180))
 			angle = rot_rule[i].angle;
@@ -87,28 +83,78 @@ int auto_rotation_alg_emul::convert_rotation(int prev_rotation,
 	return new_rotation;
 }
 
-bool auto_rotation_alg_emul::get_rotation(float acc[3],
-		unsigned long long timestamp, int prev_rotation, int &cur_rotation)
+void auto_rotation_alg_emul::correct_rotation(int &rotation_x, int &rotation_y, int &rotation_z)
 {
-	const int ROTATION_90 = 90;
-	const int RADIAN = 57.29747;
+	int rot_x, rot_y, rot_z;
 
-	double atan_value;
-	int acc_theta;
-	int acc_pitch;
-	double realg;
-	float x, y, z;
+	switch(rotation_x) {
+	case AUTO_ROTATION_DEGREE_0:
+		rot_x = AUTO_ROTATION_YAW_DEGREE_0;
+		break;
+	case AUTO_ROTATION_DEGREE_90:
+		rot_x = AUTO_ROTATION_YAW_DEGREE_90;
+		break;
+	case AUTO_ROTATION_DEGREE_180:
+		rot_x = AUTO_ROTATION_YAW_DEGREE_180;
+		break;
+	case AUTO_ROTATION_DEGREE_270:
+		rot_x = AUTO_ROTATION_YAW_DEGREE_270;
+		break;
+	default:
+		rot_x = AUTO_ROTATION_DEGREE_UNKNOWN;
+	}
 
-	x = acc[0];
-	y = acc[1];
-	z = acc[2];
+	switch(rotation_y) {
+	case AUTO_ROTATION_DEGREE_0:
+		rot_y = AUTO_ROTATION_PITCH_DEGREE_0;
+		break;
+	case AUTO_ROTATION_DEGREE_90:
+		rot_y = AUTO_ROTATION_PITCH_DEGREE_90;
+		break;
+	case AUTO_ROTATION_DEGREE_180:
+		rot_y = AUTO_ROTATION_PITCH_DEGREE_180;
+		break;
+	case AUTO_ROTATION_DEGREE_270:
+		rot_y = AUTO_ROTATION_PITCH_DEGREE_270;
+		break;
+	default:
+		rot_y = AUTO_ROTATION_DEGREE_UNKNOWN;
+	}
 
-	atan_value = atan2(x, y);
-	acc_theta = (int)(atan_value * (RADIAN) + 360) % 360;
-	realg = (double)sqrt((x * x) + (y * y) + (z * z));
-	acc_pitch = ROTATION_90 - abs((int) (asin(z / realg) * RADIAN));
+	if (rotation_x == AUTO_ROTATION_DEGREE_180 && rotation_y == AUTO_ROTATION_DEGREE_0
+			&& rotation_z == AUTO_ROTATION_DEGREE_90)
+		rotation_z = AUTO_ROTATION_DEGREE_270;
 
-	cur_rotation = convert_rotation(prev_rotation, acc_pitch, acc_theta);
+	switch(rotation_z) {
+	case AUTO_ROTATION_DEGREE_0:
+		rot_z = AUTO_ROTATION_ROLL_DEGREE_0;
+		break;
+	case AUTO_ROTATION_DEGREE_90:
+		rot_z = AUTO_ROTATION_ROLL_DEGREE_90;
+		break;
+	case AUTO_ROTATION_DEGREE_180:
+		rot_z = AUTO_ROTATION_ROLL_DEGREE_180;
+		break;
+	case AUTO_ROTATION_DEGREE_270:
+		rot_z = AUTO_ROTATION_ROLL_DEGREE_270;
+		break;
+	default:
+		rot_z = AUTO_ROTATION_DEGREE_UNKNOWN;
+	}
+
+	rotation_x = rot_x;
+	rotation_y = rot_y;
+	rotation_z = rot_z;
+}
+
+
+bool auto_rotation_alg_emul::get_rotation(float acc, int prev_rotation, int &cur_rotation)
+{
+	int rot1;
+
+	rot1 = convert_rotation(prev_rotation, (int)acc);
+
+	cur_rotation = rot1;
 
 	if (cur_rotation == AUTO_ROTATION_DEGREE_UNKNOWN)
 		return false;
