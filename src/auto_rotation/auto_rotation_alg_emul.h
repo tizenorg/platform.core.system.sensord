@@ -31,6 +31,10 @@ public:
 	virtual bool get_rotation(float acc[3], unsigned long long timestamp, int prev_rotation, int &cur_rotation);
 
 private:
-	int convert_rotation(int prev_rotation, float acc_pitch, float acc_theta);
+	int prev_rotation_x;
+	int prev_rotation_y;
+	int prev_rotation_z;
+	int convert_rotation(int prev_rotation, float acc_theta);
+	int overall_rotation(int rot_x, int rot_y, int rot_z);
 };
 #endif /* _AUTO_ROTATION_ALG_EMUL_H_ */
