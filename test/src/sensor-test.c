@@ -46,6 +46,7 @@ void usage()
 	printf("[gaming_rv] ");
 	printf("[light]\n");
 	printf("[uncal_gyro]");
+	printf("[auto_rotation]\n");
 	printf("event:");
 	printf("[RAW_DATA_EVENT]\n");
 	printf("-p: [polling]\n");
@@ -80,6 +81,10 @@ int main(int argc, char **argv)
 	else if (strcmp(argv[1], "gyroscope") == 0) {
 		 sensor_type = GYROSCOPE_SENSOR;
 		 event = GYROSCOPE_RAW_DATA_EVENT;
+	}
+	else if (strcmp(argv[1], "auto_rotation") == 0) {
+		 sensor_type = AUTO_ROTATION_SENSOR;
+		 event = AUTO_ROTATION_CHANGE_STATE_EVENT;
 	}
 	else if (strcmp(argv[1], "pressure") == 0) {
 		 sensor_type = PRESSURE_SENSOR;
