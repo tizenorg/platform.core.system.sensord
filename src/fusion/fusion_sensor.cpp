@@ -388,10 +388,11 @@ int fusion_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t 
 
 	euler_angles<float> euler_orientation;
 
-	if (event_type != FUSION_ORIENTATION_ENABLED ||
-			event_type != FUSION_ROTATION_VECTOR_ENABLED ||
-			event_type != FUSION_GAMING_ROTATION_VECTOR_ENABLED ||
-			event_type != FUSION_GEOMAGNETIC_ROTATION_VECTOR_ENABLED ||
+	if (event_type != FUSION_ORIENTATION_ENABLED &&
+			event_type != FUSION_ROTATION_VECTOR_ENABLED &&
+			event_type != FUSION_GAMING_ROTATION_VECTOR_ENABLED &&
+			event_type != FUSION_TILT_ENABLED &&
+			event_type != FUSION_GEOMAGNETIC_ROTATION_VECTOR_ENABLED &&
 			event_type != FUSION_UNCAL_GYRO_ENABLED)
 		return -1;
 
@@ -429,6 +430,8 @@ int fusion_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t 
 		m_orientation_filter_poll.get_device_orientation(&accel, &gyro, NULL);
 	else if (event_type == FUSION_GEOMAGNETIC_ROTATION_VECTOR_ENABLED)
 		m_orientation_filter_poll.get_device_orientation(&accel, NULL, &magnetic);
+	else if (event_type == FUSION_TILT_ENABLED)
+			m_orientation_filter_poll.get_device_orientation(&accel, NULL, NULL);
 
 	if (event_type == FUSION_UNCAL_GYRO_ENABLED) {
 		data.accuracy = SENSOR_ACCURACY_GOOD;
@@ -438,10 +441,11 @@ int fusion_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t 
 		data.values[1] = m_orientation_filter_poll.m_gyro_bias.m_vec[1];
 		data.values[2] = m_orientation_filter_poll.m_gyro_bias.m_vec[2];
 	}
-	else if (event_type != FUSION_ORIENTATION_ENABLED ||
-			event_type != FUSION_ROTATION_VECTOR_ENABLED ||
-			event_type != FUSION_GAMING_ROTATION_VECTOR_ENABLED ||
-			event_type != FUSION_GEOMAGNETIC_ROTATION_VECTOR_ENABLED) {
+	else if (event_type == FUSION_ORIENTATION_ENABLED ||
+			event_type == FUSION_ROTATION_VECTOR_ENABLED ||
+			event_type == FUSION_GAMING_ROTATION_VECTOR_ENABLED ||
+			event_type == FUSION_TILT_ENABLED ||
+			event_type == FUSION_GEOMAGNETIC_ROTATION_VECTOR_ENABLED) {
 		data.accuracy = SENSOR_ACCURACY_GOOD;
 		data.timestamp = get_timestamp();
 		data.value_count = 4;
