@@ -366,5 +366,12 @@
 			<MIN_RANGE value="0"/>
 			<MAX_RANGE value="15"/>
 		</MODEL>
+		<MODEL id="MAX86902_UV">
+			<NAME value="MAX86902_UV" />
+			<VENDOR value="MAXIM"/>
+			<RAW_DATA_UNIT value="0.1"/>
+			<MIN_RANGE value="0"/>
+			<MAX_RANGE value="15"/>
+		</MODEL>
 	</ULTRAVIOLET>
 </SENSOR>
