@@ -57,6 +57,9 @@ void printpollinglogs(sensor_type_t type,sensor_data_t data)
 	case(PROXIMITY_SENSOR):
 		printf("Proximity [%lld] [%6.6f]\n", data.timestamp, data.values[0]);
 		break;
+	case(ULTRAVIOLET_SENSOR):
+		printf("Ultraviolet [%lld] [%6.6f]\n", data.timestamp, data.values[0]);
+		break;
 	case(ORIENTATION_SENSOR):
 		printf("Orientation [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
 		break;
@@ -120,6 +123,10 @@ int get_event(sensor_type_t sensor_type, char str[])
 	case PROXIMITY_SENSOR:
 		if (strcmp(str, "CHANGE_STATE_EVENT") == 0)
 			return PROXIMITY_CHANGE_STATE_EVENT;
+		break;
+	case ULTRAVIOLET_SENSOR:
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
+			return ULTRAVIOLET_RAW_DATA_EVENT;
 		break;
 	case ORIENTATION_SENSOR:
 		if (strcmp(str, "RAW_DATA_EVENT") == 0)
@@ -186,6 +193,9 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 		break;
 	case PROXIMITY_SENSOR:
 		printf("Proximity [%lld] [%6.6f]\n", data->timestamp, data->values[0]);
+		break;
+	case ULTRAVIOLET_SENSOR:
+		printf("Ultraviolet [%lld] [%6.6f]\n", data->timestamp, data->values[0]);
 		break;
 	case ORIENTATION_SENSOR :
 		printf("Orientation [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
