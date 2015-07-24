@@ -31,14 +31,12 @@ public:
 	virtual ~ultraviolet_sensor();
 
 	bool init();
-	sensor_type_t get_type(void);
+	virtual sensor_type_t get_type(void);
 
 	static bool working(void *inst);
-
-	bool set_interval(unsigned long interval);
-	virtual bool get_properties(sensor_properties_t &properties);
-	int get_sensor_data(unsigned int type, sensor_data_t &data);
-
+	virtual bool set_interval(unsigned long interval);
+	virtual bool get_properties(sensor_properties_s &properties);
+	virtual int get_sensor_data(unsigned int type, sensor_data_t &data);
 private:
 	sensor_hal *m_sensor_hal;
 	float m_resolution;
