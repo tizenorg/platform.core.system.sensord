@@ -35,7 +35,7 @@ ultraviolet_sensor::ultraviolet_sensor()
 {
 	m_name = string(SENSOR_NAME);
 
-	register_supported_event(ULTRAVIOLET_EVENT_RAW_DATA_REPORT_ON_TIME);
+	register_supported_event(ULTRAVIOLET_RAW_DATA_EVENT);
 
 	physical_sensor::set_poller(ultraviolet_sensor::working, this);
 }
@@ -54,9 +54,9 @@ bool ultraviolet_sensor::init()
 		return false;
 	}
 
-	sensor_properties_t properties;
+	sensor_properties_s properties;
 
-	if (!m_sensor_hal->get_properties(properties)) {
+	if (m_sensor_hal->get_properties(properties) == false) {
 		ERR("sensor->get_properties() is failed!\n");
 		return false;
 	}
@@ -88,11 +88,12 @@ bool ultraviolet_sensor::process_event(void)
 
 	m_sensor_hal->get_sensor_data(event.data);
 
+
 	AUTOLOCK(m_client_info_mutex);
 
-	if (get_client_cnt(ULTRAVIOLET_EVENT_RAW_DATA_REPORT_ON_TIME)) {
+	if (get_client_cnt(ULTRAVIOLET_RAW_DATA_EVENT)) {
 		event.sensor_id = get_id();
-		event.event_type = ULTRAVIOLET_EVENT_RAW_DATA_REPORT_ON_TIME;
+		event.event_type = ULTRAVIOLET_RAW_DATA_EVENT;
 		raw_to_base(event.data);
 		push(event);
 	}
@@ -120,7 +121,7 @@ bool ultraviolet_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool ultraviolet_sensor::get_properties(sensor_properties_t &properties)
+bool ultraviolet_sensor::get_properties(sensor_properties_s &properties)
 {
 	return m_sensor_hal->get_properties(properties);
 }
@@ -134,7 +135,7 @@ int ultraviolet_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 	if (ret < 0)
 		return -1;
 
-	if (type == ULTRAVIOLET_BASE_DATA_SET) {
+	if (type == ULTRAVIOLET_RAW_DATA_EVENT) {
 		raw_to_base(data);
 		return 0;
 	}
@@ -153,21 +154,6 @@ bool ultraviolet_sensor::set_interval(unsigned long interval)
 
 void ultraviolet_sensor::raw_to_base(sensor_data_t &data)
 {
-	/*
-	double lsb = data.values[0];
-	double comp_lsb;
-
-	const double c = 0.89;
-	const double e = 2.12;
-	const double f = -132.8;
-
-	if (lsb > 108.8f)
-		comp_lsb = e * lsb + f;
-	else
-		comp_lsb = c * lsb;
-
-	data.values[0] = comp_lsb * m_resolution;
-	*/
 	data.values[0] = data.values[0] * m_resolution;
 	data.value_count = 1;
 }
