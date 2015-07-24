@@ -24,6 +24,7 @@ BuildRequires:  pkgconfig(capi-system-info)
 %define geo_state ON
 %define pressure_state ON
 %define temperature_state ON
+%define ultraviolet_state ON
 %define orientation_state ON
 %define gravity_state ON
 %define linear_accel_state ON
@@ -82,7 +83,8 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
-	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite} \
+	-DTILT=%{tilt_state} -DULTRAVIOLET=%{ultraviolet_state} \
+	-DTEST_SUITE=%{build_test_suite} \
 	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
 
 %build
