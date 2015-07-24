@@ -27,7 +27,7 @@
 
 using std::ifstream;
 
-#define SENSOR_TYPE_ULTRAVIOLET		"ULTRAVIOLET"
+#define SENSOR_TYPE_ULTRAVIOLET	"ULTRAVIOLET"
 #define ELEMENT_NAME			"NAME"
 #define ELEMENT_VENDOR			"VENDOR"
 #define ELEMENT_RAW_DATA_UNIT	"RAW_DATA_UNIT"
@@ -211,7 +211,7 @@ bool ultraviolet_sensor_hal::update_value(bool wait)
 
 		++read_input_cnt;
 
-		if (ultraviolet_event.type == EV_REL && ultraviolet_event.code == REL_MISC) {
+		if (ultraviolet_event.type == EV_REL && ultraviolet_event.code == REL_X) {
 			ultraviolet_raw = (int)ultraviolet_event.value - BIAS;
 			ultraviolet = true;
 		} else if (ultraviolet_event.type == EV_SYN) {
@@ -246,15 +246,14 @@ int ultraviolet_sensor_hal::get_sensor_data(sensor_data_t &data)
 {
 	AUTOLOCK(m_value_mutex);
 	data.accuracy = SENSOR_ACCURACY_GOOD;
-	data.timestamp = m_fired_time ;
+	data.timestamp = m_fired_time;
 	data.value_count = 1;
 	data.values[0] = (float) m_ultraviolet;
 
 	return 0;
 }
 
-
-bool ultraviolet_sensor_hal::get_properties(sensor_properties_t &properties)
+bool ultraviolet_sensor_hal::get_properties(sensor_properties_s &properties)
 {
 	properties.name = m_chip_name;
 	properties.vendor = m_vendor;
