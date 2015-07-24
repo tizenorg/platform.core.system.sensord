@@ -45,6 +45,7 @@ void usage()
 	printf("[rotation_vector] ");
 	printf("[geomagnetic_rv] ");
 	printf("[gaming_rv] ");
+	printf("[ultraviolet] ");
 	printf("[light]\n");
 	printf("[uncal_gyro]");
 	printf("event:");
@@ -133,6 +134,10 @@ int main(int argc, char **argv)
 	else if (strcmp(argv[1], "proximity") == 0) {
 		 sensor_type = PROXIMITY_SENSOR;
 		 event = PROXIMITY_CHANGE_STATE_EVENT;
+	}
+	else if (strcmp(argv[1], "ultraviolet") == 0) {
+		 sensor_type = ULTRAVIOLET_SENSOR;
+		 event = ULTRAVIOLET_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "uncal_gyro") == 0) {
 		 sensor_type = UNCAL_GYROSCOPE_SENSOR;
