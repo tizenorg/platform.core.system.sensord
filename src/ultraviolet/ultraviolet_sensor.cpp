@@ -31,7 +31,6 @@ using std::mem_fun;
 
 ultraviolet_sensor::ultraviolet_sensor()
 : m_sensor_hal(NULL)
-, m_resolution(0.0f)
 {
 	m_name = string(SENSOR_NAME);
 
@@ -60,8 +59,6 @@ bool ultraviolet_sensor::init()
 		ERR("sensor->get_properties() is failed!\n");
 		return false;
 	}
-
-	m_resolution = properties.resolution;
 
 	INFO("%s is created!", sensor_base::get_name());
 
@@ -154,8 +151,7 @@ bool ultraviolet_sensor::set_interval(unsigned long interval)
 
 void ultraviolet_sensor::raw_to_base(sensor_data_t &data)
 {
-	data.values[0] = data.values[0] * m_resolution;
-	data.value_count = 1;
+
 }
 
 extern "C" sensor_module* create(void)
