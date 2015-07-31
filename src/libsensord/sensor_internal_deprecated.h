@@ -58,6 +58,7 @@ extern "C"
 #include <sensor_tilt.h>
 #include <sensor_ultraviolet.h>
 #include <sensor_uncal_gyro.h>
+#include <sensor_bio_led_red.h>
 
 #define MAX_KEY_LEN 30
 
