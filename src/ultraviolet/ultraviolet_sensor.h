@@ -39,7 +39,6 @@ public:
 	virtual int get_sensor_data(unsigned int type, sensor_data_t &data);
 private:
 	sensor_hal *m_sensor_hal;
-	float m_resolution;
 
 	virtual bool on_start(void);
 	virtual bool on_stop(void);
