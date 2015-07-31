@@ -193,6 +193,7 @@ bool ultraviolet_sensor_hal::set_interval(unsigned long val)
 bool ultraviolet_sensor_hal::update_value(bool wait)
 {
 	int ultraviolet_raw = -1;
+	bool ultraviolet_sign = false;
 	bool ultraviolet = false;
 	int read_input_cnt = 0;
 	const int INPUT_MAX_BEFORE_SYN = 10;
@@ -212,8 +213,10 @@ bool ultraviolet_sensor_hal::update_value(bool wait)
 		++read_input_cnt;
 
 		if (ultraviolet_event.type == EV_REL && ultraviolet_event.code == REL_X) {
-			ultraviolet_raw = (int)ultraviolet_event.value - BIAS;
+			ultraviolet_raw = (int)ultraviolet_event.value;
 			ultraviolet = true;
+		} else if (ultraviolet_event.type == EV_REL && ultraviolet_event.code == REL_Y) {
+			ultraviolet_sign = ((int)ultraviolet_event.value < 0) ? false : true;
 		} else if (ultraviolet_event.type == EV_SYN) {
 			syn = true;
 			fired_time = sensor_hal::get_timestamp(&ultraviolet_event.time);
@@ -225,8 +228,10 @@ bool ultraviolet_sensor_hal::update_value(bool wait)
 
 	AUTOLOCK(m_value_mutex);
 
-	if (ultraviolet)
-		m_ultraviolet = ultraviolet_raw;
+	if (ultraviolet && ultraviolet_sign)
+		m_ultraviolet = ultraviolet_raw - BIAS;
+	else
+		return false;
 
 	m_fired_time = fired_time;
 
