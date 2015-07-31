@@ -374,4 +374,11 @@
 			<MAX_RANGE value="15"/>
 		</MODEL>
 	</ULTRAVIOLET>
+
+	<BIO_LED_RED>
+		<MODEL id="MAX86902">
+			<NAME value="MAX86902" />
+			<VENDOR value="MAXIM"/>
+		</MODEL>
+	</BIO_LED_RED>
 </SENSOR>
