@@ -34,6 +34,7 @@ BuildRequires:  pkgconfig(capi-system-info)
 %define gaming_rv_state ON
 %define tilt_state ON
 %define uncal_gyro_state ON
+%define bio_led_red_state ON
 %define build_test_suite OFF
 
 %description
@@ -87,7 +88,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
 	-DUNCAL_GYRO=%{uncal_gyro_state} -DAUTO_ROTATION=%{auto_rotation_state} \
 	-DTILT=%{tilt_state} -DULTRAVIOLET=%{ultraviolet_state} \
-	-DTEST_SUITE=%{build_test_suite} \
+	-DBIO_LED_RED=%{bio_led_red_state} -DTEST_SUITE=%{build_test_suite} \
 	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
 
 %build
