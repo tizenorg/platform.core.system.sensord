@@ -8,6 +8,7 @@
 		<MODULE path = "/usr/lib/sensord/libpressure_sensor_hal.so"/>
 		<MODULE path = "/usr/lib/sensord/libtemperature_sensor_hal.so"/>
 		<MODULE path = "/usr/lib/sensord/libultraviolet_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensord/libbio_led_red_sensor_hal.so"/>
 	</HAL>
 
 	<SENSOR>
@@ -29,5 +30,6 @@
 		<MODULE path = "/usr/lib/sensord/libtilt_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libuncal_gyro_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libultraviolet_sensor.so"/>
+		<MODULE path = "/usr/lib/sensord/libbio_led_red_sensor.so"/>
 	</SENSOR>
 </PLUGIN>

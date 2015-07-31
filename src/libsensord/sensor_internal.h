@@ -58,6 +58,7 @@ extern "C"
 #include <sensor_tilt.h>
 #include <sensor_uncal_gyro.h>
 #include <sensor_ultraviolet.h>
+#include <sensor_bio_led_red.h>
 
 typedef void (*sensor_cb_t)(sensor_t sensor, unsigned int event_type, sensor_data_t *data, void *user_data);
 typedef void (*sensorhub_cb_t)(sensor_t sensor, unsigned int event_type, sensorhub_data_t *data, void *user_data);
