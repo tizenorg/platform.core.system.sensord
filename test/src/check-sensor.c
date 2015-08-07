@@ -199,7 +199,7 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 		printf("Gaming RV [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3]);
 		break;
 	case UNCAL_GYROSCOPE_SENSOR:
-		printf("Uncal gyro [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2], data.values[3], data.values[4], data.values[5]);
+		printf("Uncal gyro [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3], data->values[4], data->values[5]);
 		break;
 
 	default:
