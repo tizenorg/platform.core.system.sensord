@@ -33,12 +33,15 @@
 #define US2S	(1.0 / 1000000.0)
 //Initialize sampling interval to 100000microseconds
 #define SAMPLE_INTV		100000
+#define ACCEL_THRESHOLD 0.2
+#define GYRO_THRESHOLD (0.01 * PI)
 
 // constants for computation of covariance and transition matrices
 #define ZIGMA_W		(0.05 * DEG2RAD)
 #define TAU_W		1000
 #define QWB_CONST	((2 * (ZIGMA_W * ZIGMA_W)) / TAU_W)
 #define F_CONST		(-1 / TAU_W)
+#define SQUARE(T)	(T * T)
 
 #define NEGLIGIBLE_VAL 0.0000001
 
@@ -285,10 +288,18 @@ inline void orientation_filter<TYPE>::time_update_gaming_rv()
 	euler_aid = quat2euler(m_quat_aid);
 	euler_driv = quat2euler(m_quat_output);
 
-	euler_angles<TYPE> euler_gaming_rv(euler_aid.m_ang.m_vec[0], euler_aid.m_ang.m_vec[1],
-			euler_driv.m_ang.m_vec[2]);
-
-	m_quat_gaming_rv = euler2quat(euler_gaming_rv);
+	if ((SQUARE(m_accel.m_data.m_vec[1]) < ACCEL_THRESHOLD) && (SQUARE(m_gyro.m_data.m_vec[0]) < GYRO_THRESHOLD))
+	{
+		if ((SQUARE(m_accel.m_data.m_vec[0]) < ACCEL_THRESHOLD) && (SQUARE(m_gyro.m_data.m_vec[1]) < GYRO_THRESHOLD))
+		{
+			if (SQUARE(m_gyro.m_data.m_vec[2]) < GYRO_THRESHOLD)
+			{
+				euler_angles<TYPE> euler_gaming_rv(euler_aid.m_ang.m_vec[0], euler_aid.m_ang.m_vec[1],
+						euler_driv.m_ang.m_vec[2]);
+				m_quat_gaming_rv = euler2quat(euler_gaming_rv);
+			}
+		}
+	}
 
 	if (is_initialized(m_state_new)) {
 		m_state_error.m_vec[0] = m_euler_error.m_ang.m_vec[0];
