@@ -38,6 +38,7 @@ extern "C"
 
 /*header for each sensor type*/
 #include <sensor_accel.h>
+#include <sensor_auto_rotation.h>
 #include <sensor_geomag.h>
 #include <sensor_light.h>
 #include <sensor_proxi.h>

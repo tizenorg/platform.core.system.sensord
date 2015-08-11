@@ -11,6 +11,7 @@
 
 	<SENSOR>
 		<MODULE path = "/usr/lib/sensord/libaccel_sensor.so"/>
+		<MODULE path = "/usr/lib/sensord/libauto_rotation_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libgyro_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libgeo_sensor.so"/>
 		<MODULE path = "/usr/lib/sensord/libproxi_sensor.so"/>
