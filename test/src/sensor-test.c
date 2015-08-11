@@ -33,6 +33,7 @@ void usage()
 
 	printf("Sensor_type: ");
 	printf("[accelerometer] ");
+	printf("[auto_rotation]\n");
 	printf("[gyroscope] ");
 	printf("[pressure] ");
 	printf("[temperature] ");
@@ -76,6 +77,10 @@ int main(int argc, char **argv)
 	if (strcmp(argv[1], "accelerometer") == 0) {
 		 sensor_type = ACCELEROMETER_SENSOR;
 		 event = ACCELEROMETER_RAW_DATA_EVENT;
+	}
+	else if (strcmp(argv[1], "auto_rotation") == 0) {
+		 sensor_type = AUTO_ROTATION_SENSOR;
+		 event = AUTO_ROTATION_CHANGE_STATE_EVENT;
 	}
 	else if (strcmp(argv[1], "gyroscope") == 0) {
 		 sensor_type = GYROSCOPE_SENSOR;
