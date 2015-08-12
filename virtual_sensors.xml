@@ -63,6 +63,12 @@
 			<NAME value="GAMING_RV_SENSOR" />
 			<VENDOR value="SAMSUNG" />
 			<DEFAULT_SAMPLING_TIME value="100" />
+			<ACCEL_STATIC_BIAS value1="0" value2="0" value3="0" />
+			<GYRO_STATIC_BIAS value1="0" value2="0" value3="0" />
+			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="-1" value3="-1" />
+			<GYRO_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
+			<ACCEL_SCALE value="1" />
+			<GYRO_SCALE value="1146" />
 		</GAMING_ROTATION_VECTOR>
 
 		<TILT>
@@ -152,6 +158,12 @@
 			<NAME value="GAMING_RV_SENSOR" />
 			<VENDOR value="SAMSUNG" />
 			<DEFAULT_SAMPLING_TIME value="100" />
+			<ACCEL_STATIC_BIAS value1="0.064444" value2="0.15789" value3="-0.36865" />
+			<GYRO_STATIC_BIAS value1="3.5638" value2="-5.8288" value3="-0.79750" />
+			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
+			<GYRO_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
+			<ACCEL_SCALE value="1" />
+			<GYRO_SCALE value="1150" />
 		</GAMING_ROTATION_VECTOR>
 
 		<TILT>
@@ -241,6 +253,12 @@
 			<NAME value="GAMING_RV_SENSOR" />
 			<VENDOR value="SAMSUNG" />
 			<DEFAULT_SAMPLING_TIME value="100" />
+			<ACCEL_STATIC_BIAS value1="0.046091" value2="0.127486" value3="0.10787" />
+			<GYRO_STATIC_BIAS value1="-0.54385" value2="0.24325" value3="0.87875" />
+			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="1" value2="-1" value3="1" />
+			<GYRO_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="1" value3="-1" />
+			<ACCEL_SCALE value="1" />
+			<GYRO_SCALE value="1150" />
 		</GAMING_ROTATION_VECTOR>
 
 		<TILT>
