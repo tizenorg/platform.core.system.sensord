@@ -48,12 +48,7 @@
 #define ELEMENT_PITCH_ROTATION_COMPENSATION						"PITCH_ROTATION_COMPENSATION"
 #define ELEMENT_ROLL_ROTATION_COMPENSATION						"ROLL_ROTATION_COMPENSATION"
 
-void pre_process_data(sensor_data<float> &data_out, const float *data_in, float *bias, int *sign, float scale)
-{
-	data_out.m_data.m_vec[0] = sign[0] * (data_in[0] - bias[0]) / scale;
-	data_out.m_data.m_vec[1] = sign[1] * (data_in[1] - bias[1]) / scale;
-	data_out.m_data.m_vec[2] = sign[2] * (data_in[2] - bias[2]) / scale;
-}
+
 
 tilt_sensor::tilt_sensor()
 : m_accel_sensor(NULL)
@@ -64,7 +59,6 @@ tilt_sensor::tilt_sensor()
 
 	m_name = string(SENSOR_NAME);
 	register_supported_event(TILT_RAW_DATA_EVENT);
-	m_enable_tilt = 0;
 
 	if (!config.get(SENSOR_TYPE_TILT, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
@@ -103,7 +97,6 @@ tilt_sensor::tilt_sensor()
 
 	m_interval = m_default_sampling_time * MS_TO_US;
 
-	INFO("ramasamy 1: Constructor completed");
 }
 
 tilt_sensor::~tilt_sensor()
@@ -123,8 +116,6 @@ bool tilt_sensor::init(void)
 	}
 
 	INFO("%s is created!\n", sensor_base::get_name());
-
-	INFO("ramasamy 2: Init completed");
 
 	return true;
 }
@@ -148,8 +139,6 @@ bool tilt_sensor::on_start(void)
 	m_fusion_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_fusion_sensor->start();
 
-	INFO("ramasamy 3: ON_START completed");
-
 	activate();
 	return true;
 }
@@ -168,8 +157,6 @@ bool tilt_sensor::on_stop(void)
 	m_fusion_sensor->unregister_supported_event(FUSION_TILT_ENABLED);
 	m_fusion_sensor->stop();
 
-	INFO("ramasamy 4: ON_STOP completed");
-
 	deactivate();
 	return true;
 }
@@ -181,8 +168,6 @@ bool tilt_sensor::add_interval(int client_id, unsigned int interval)
 	m_accel_sensor->add_interval(client_id, interval, false);
 	m_fusion_sensor->add_interval(client_id, interval, false);
 
-	INFO("ramasamy 5: ADD_INTERVAL completed");
-
 	return sensor_base::add_interval(client_id, interval, false);
 }
 
@@ -193,8 +178,6 @@ bool tilt_sensor::delete_interval(int client_id)
 	m_accel_sensor->delete_interval(client_id, false);
 	m_fusion_sensor->delete_interval(client_id, false);
 
-	INFO("ramasamy 6: DELETE_INTERVAL completed");
-
 	return sensor_base::delete_interval(client_id, false);
 }
 
@@ -203,11 +186,8 @@ void tilt_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t>
 	sensor_event_t tilt_event;
 	unsigned long long diff_time;
 
-	INFO("ramasamy 7: SYNTHESIZE STARTED");
-
 	if (event.event_type == FUSION_EVENT) {
 
-		INFO("ramasamy 8: SYNTHESIZE FUSION EVENT RECEIVED");
 		diff_time = event.data.timestamp - m_time;
 
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
@@ -233,8 +213,6 @@ void tilt_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t>
 		tilt_event.data.value_count = 2;
 		tilt_event.data.values[0] = euler.m_ang.m_vec[0];
 		tilt_event.data.values[1] = euler.m_ang.m_vec[1];
-
-		INFO("ramasamy 8: SYNTHESIZE FUSION EVENT SENT");
 
 		push(tilt_event);
 	}
