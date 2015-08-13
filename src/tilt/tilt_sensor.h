@@ -48,11 +48,6 @@ private:
 
 	cmutex m_value_mutex;
 
-	orientation_filter<float> m_orientation_filter;
-	orientation_filter<float> m_orientation_filter_poll;
-
-	unsigned int m_enable_tilt;
-
 	unsigned long long m_time;
 	unsigned int m_interval;
 
