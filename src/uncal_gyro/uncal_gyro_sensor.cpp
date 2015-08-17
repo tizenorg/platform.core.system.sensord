@@ -210,7 +210,6 @@ void uncal_gyro_sensor::synthesize(const sensor_event_t &event, vector<sensor_ev
 {
 	sensor_event_t uncal_gyro_event;
 	unsigned long long diff_time;
-	float azimuth_offset;
 
 	if (event.event_type == GYROSCOPE_RAW_DATA_EVENT) {
 		diff_time = event.data.timestamp - m_time;
