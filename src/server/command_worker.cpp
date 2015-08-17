@@ -716,7 +716,7 @@ out:
 
 bool command_worker::cmd_get_data(void *payload)
 {
-	const int GET_DATA_MIN_INTERVAL = 10;
+	const unsigned int GET_DATA_MIN_INTERVAL = 10;
 	cmd_get_data_t *cmd;
 	int state = OP_ERROR;
 	bool adjusted = false;
