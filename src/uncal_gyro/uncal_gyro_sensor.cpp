@@ -55,8 +55,8 @@
 
 uncal_gyro_sensor::uncal_gyro_sensor()
 : m_accel_sensor(NULL)
-, m_gyro_sensor(NULL)
 , m_magnetic_sensor(NULL)
+, m_gyro_sensor(NULL)
 , m_fusion_sensor(NULL)
 , m_time(0)
 {
