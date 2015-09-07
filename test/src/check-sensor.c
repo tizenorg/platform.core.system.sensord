@@ -28,7 +28,7 @@
 
 #include "check-sensor.h"
 
-static GMainLoop *mainloop;
+//static GMainLoop *mainloop;
 
 void printpollinglogs(sensor_type_t type,sensor_data_t data)
 {
@@ -59,9 +59,6 @@ void printpollinglogs(sensor_type_t type,sensor_data_t data)
 		break;
 	case(ULTRAVIOLET_SENSOR):
 		printf("Ultraviolet [%lld] [%6.6f]\n", data.timestamp, data.values[0]);
-		break;
-	case(BIO_LED_RED_SENSOR):
-		printf("Bio_LED_Red [%lld] [%6.6f]\n", data.timestamp, data.values[0]);
 		break;
 	case(ORIENTATION_SENSOR):
 		printf("Orientation [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
@@ -130,10 +127,6 @@ int get_event(sensor_type_t sensor_type, char str[])
 	case ULTRAVIOLET_SENSOR:
 		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return ULTRAVIOLET_RAW_DATA_EVENT;
-		break;
-	case BIO_LED_RED_SENSOR:
-		if (strcmp(str, "RAW_DATA_EVENT") == 0)
-			return BIO_LED_RED_RAW_DATA_EVENT;
 		break;
 	case ORIENTATION_SENSOR:
 		if (strcmp(str, "RAW_DATA_EVENT") == 0)
@@ -204,9 +197,6 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 	case ULTRAVIOLET_SENSOR:
 		printf("Ultraviolet [%lld] [%6.6f]\n", data->timestamp, data->values[0]);
 		break;
-	case BIO_LED_RED_SENSOR:
-		printf("Bio_LED_Red [%lld] [%6.6f]\n", data->timestamp, data->values[0]);
-		break;
 	case ORIENTATION_SENSOR :
 		printf("Orientation [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 		break;
@@ -237,8 +227,59 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 	}
 }
 
-int check_sensor(sensor_type_t sensor_type, unsigned int event, int interval)
+void *check_sensor(void *arg)
 {
+struct arguments * argu = (struct arguments *) arg;
+
+GMainLoop *mainloop;
+	int handle, result, start_handle, stop_handle;
+
+	mainloop = g_main_loop_new(NULL, FALSE);
+
+	sensor_t sensor = sensord_get_sensor(argu -> sensor_type);
+	handle = sensord_connect(sensor);
+
+	result = sensord_register_event(handle, argu->event, argu->interval, 0, callback, NULL);
+
+	if (result < 0) {
+		printf("Can't register sensor\n");
+		return NULL;
+	}
+
+	start_handle = sensord_start(handle, 0);
+
+	if (start_handle < 0) {
+		printf("Error\n\n\n\n");
+		sensord_unregister_event(handle, argu->event);
+		sensord_disconnect(handle);
+		return NULL;
+	}
+
+	g_main_loop_run(mainloop);
+	g_main_loop_unref(mainloop);
+
+	result = sensord_unregister_event(handle, argu->event);
+
+	if (result < 0) {
+		printf("Error\n\n");
+		return NULL;
+	}
+
+	stop_handle = sensord_stop(handle);
+
+	if (stop_handle < 0) {
+		printf("Error\n\n");
+		return NULL;
+	}
+
+	sensord_disconnect(handle);
+return NULL;
+}
+
+
+/*int check_sensor(sensor_type_t sensor_type, unsigned int event, int interval)
+{
+	GMainLoop *mainloop;
 	int handle, result, start_handle, stop_handle;
 
 	mainloop = g_main_loop_new(NULL, FALSE);
@@ -282,7 +323,7 @@ int check_sensor(sensor_type_t sensor_type, unsigned int event, int interval)
 	sensord_disconnect(handle);
 
 	return 0;
-}
+}*/
 
 int polling_sensor(sensor_type_t sensor_type, unsigned int event)
 {

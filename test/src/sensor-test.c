@@ -46,7 +46,6 @@ void usage()
 	printf("[geomagnetic_rv] ");
 	printf("[gaming_rv] ");
 	printf("[ultraviolet] ");
-	printf("[bio_led_red] ");
 	printf("[light]\n");
 	printf("[uncal_gyro]");
 	printf("event:");
@@ -144,10 +143,6 @@ int main(int argc, char **argv)
 		 sensor_type = UNCAL_GYROSCOPE_SENSOR;
 		 event = UNCAL_GYRO_RAW_DATA_EVENT;
 	}
-	else if (strcmp(argv[1], "bio_led_red") == 0) {
-		 sensor_type = BIO_LED_RED_SENSOR;
-		 event = BIO_LED_RED_RAW_DATA_EVENT;
-	}
 	else {
 		 usage();
 	}
@@ -209,6 +204,12 @@ int main(int argc, char **argv)
 				return -1;
 			}
 		}
-		return check_sensor(sensor_type, event, interval);
+		struct arguments arg;
+		arg.sensor_type = sensor_type;
+		arg.event = event;
+		arg.interval = interval;
+
+		return check_sensor((void*)&arg);
+
 	}
 }

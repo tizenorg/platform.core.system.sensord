@@ -147,6 +147,7 @@ systemctl daemon-reload
 %defattr(-,root,root,-)
 %{_bindir}/api-test
 %{_bindir}/sensor-test
+%{_bindir}/multi-sensor
 %{_bindir}/performance-test
 %{_bindir}/fusion-data-collection
 %license LICENSE.APLv2
