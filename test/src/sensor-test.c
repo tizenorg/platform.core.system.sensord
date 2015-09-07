@@ -209,6 +209,12 @@ int main(int argc, char **argv)
 				return -1;
 			}
 		}
-		return check_sensor(sensor_type, event, interval);
+		struct arguments arg;
+		arg.sensor_type = sensor_type;
+		arg.event = event;
+		arg.interval = interval;
+
+		return check_sensor((void*)&arg);
+
 	}
 }
