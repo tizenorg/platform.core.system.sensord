@@ -28,7 +28,7 @@
 
 #include "check-sensor.h"
 
-static GMainLoop *mainloop;
+
 
 void printpollinglogs(sensor_type_t type,sensor_data_t data)
 {
@@ -237,51 +237,53 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 	}
 }
 
-int check_sensor(sensor_type_t sensor_type, unsigned int event, int interval)
+void *check_sensor(void *arg)
 {
+struct arguments * argu = (struct arguments *) arg;
+
+GMainLoop *mainloop;
 	int handle, result, start_handle, stop_handle;
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 
-	sensor_t sensor = sensord_get_sensor(sensor_type);
+	sensor_t sensor = sensord_get_sensor(argu -> sensor_type);
 	handle = sensord_connect(sensor);
 
-	result = sensord_register_event(handle, event, interval, 0, callback, NULL);
+	result = sensord_register_event(handle, argu->event, argu->interval, 0, callback, NULL);
 
 	if (result < 0) {
 		printf("Can't register sensor\n");
-		return -1;
+		return NULL;
 	}
 
 	start_handle = sensord_start(handle, 0);
 
 	if (start_handle < 0) {
 		printf("Error\n\n\n\n");
-		sensord_unregister_event(handle, event);
+		sensord_unregister_event(handle, argu->event);
 		sensord_disconnect(handle);
-		return -1;
+		return NULL;
 	}
 
 	g_main_loop_run(mainloop);
 	g_main_loop_unref(mainloop);
 
-	result = sensord_unregister_event(handle, event);
+	result = sensord_unregister_event(handle, argu->event);
 
 	if (result < 0) {
 		printf("Error\n\n");
-		return -1;
+		return NULL;
 	}
 
 	stop_handle = sensord_stop(handle);
 
 	if (stop_handle < 0) {
 		printf("Error\n\n");
-		return -1;
+		return NULL;
 	}
 
 	sensord_disconnect(handle);
-
-	return 0;
+return NULL;
 }
 
 int polling_sensor(sensor_type_t sensor_type, unsigned int event)
