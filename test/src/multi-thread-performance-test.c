@@ -16,29 +16,49 @@
  * limitations under the License.
  *
  */
-#include <stdio.h>
+#include <glib.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <sensor_internal.h>
+#include <stdbool.h>
+#include <sensor_common.h>
 #include <unistd.h>
 #include <string.h>
-#include <sensor_common.h>
-
+#include <pthread.h>
 #include "check-sensor.h"
+
 
 void usage()
 {
-	printf("Usage : ./performance-test <TIMEOUT> <interval>(optional)\n\n");
-
+	printf("Usage : ./multi-sensor <TIMEOUT> <interval>(optional)\n\n");
 	printf("TIMEOUT:\n");
 	printf("time for which the parallel sensor test cases should run\n");
 
 	printf("interval:\n");
 	printf("The time interval should be entered based on the sampling frequency supported by accelerometer driver on the device in ms.\n");
 	printf("If no value for sensor is entered default value by the driver will be used.\n");
+	printf("arg[i].sensor_type: ");
+	printf("[accelerometer] ");
+	printf("[auto_rotation]\n");
+	printf("[gyroscope] ");
+	printf("[pressure] ");
+	printf("[temperature] ");
+	printf("[geomagnetic] ");
+	printf("[orientation] ");
+	printf("[tilt] ");
+	printf("[gravity] ");
+	printf("[linear_accel] ");
+	printf("[rotation_vector] ");
+	printf("[geomagnetic_rv] ");
+	printf("[gaming_rv] ");
+	printf("[ultraviolet] ");
+	printf("[light]\n");
+	printf("[uncal_gyro]");
+
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-	pid_t b = 1;
 
 	int i = 0;
 	int interval = DEFAULT_EVENT_INTERVAL;
@@ -64,47 +84,36 @@ int main(int argc, char** argv)
 		}
 	}
 
-	//make an array of size MAX and fill it with all the sensors needed to run
-	int MAX = 6;
-	pid_t pids[MAX];
-	sensor_type_t sensor[MAX];
 
-	//Update the value of MAX and add more sensors here to test more sensors in parallel
-	sensor[0] = ACCELEROMETER_SENSOR;
-	sensor[1] = GYROSCOPE_SENSOR;
-	sensor[2] = GEOMAGNETIC_SENSOR;
-	sensor[3] = PRESSURE_SENSOR;
-	sensor[4] = PROXIMITY_SENSOR;
-	sensor[MAX-1] = LIGHT_SENSOR;
+	int MAX = 6, j = 0, k = 0;
+	struct pthread_arguments arg[MAX];
+	int t = 0;
 
-	while (i < MAX) {
-		if (b > 0) {
-			b = fork();
-			if (b == -1) perror("Fork failed\n");
-			else if (b == 0) {
-				break;
-			}
-			pids[i] = b;
-			i++;
-		}
+	arg[0].sensor_type = ACCELEROMETER_SENSOR;
+	arg[0].event = ACCELEROMETER_RAW_DATA_EVENT;
+	arg[1].sensor_type = GYROSCOPE_SENSOR;
+	arg[1].event = GYROSCOPE_RAW_DATA_EVENT;
+	arg[2].sensor_type = GEOMAGNETIC_RV_SENSOR;
+	arg[2].event = GEOMAGNETIC_RV_RAW_DATA_EVENT;
+	arg[3].sensor_type = PRESSURE_SENSOR;
+	arg[3].event = PRESSURE_RAW_DATA_EVENT;
+	arg[4].sensor_type = PROXIMITY_SENSOR;
+	arg[4].event = PROXIMITY_CHANGE_STATE_EVENT;
+	arg[5].sensor_type = LIGHT_SENSOR;
+    arg[5].event = LIGHT_LUX_DATA_EVENT;
+
+    for(t = 0; t < MAX; t++)
+	{
+		arg[t].interval = interval;
 	}
 
-	if (i < MAX) {
-		// call the sensord test tc-common for a sensor.
-		int event = (sensor[i] << 16) | 0x0001;
-		check_sensor(sensor[i], event, interval);
-	}
-	else {
-		// Main Parent Child. Waits for TIMEOUT and then kills all child processes.
-		sleep (TIMEOUT);
-		int j = 0;
+	pthread_t thread_id[MAX];
 
-		for (j = 0; j < MAX; j++) {
-			char command[100];
-			sprintf(command, "kill %d", pids[j]);
-			system(command);
-		}
+	for(j = 0; j < MAX; j++)
+	{
+		pthread_create(&thread_id[j], NULL, check_sensor, (void*)&arg[j]);
 	}
 
+	sleep(TIMEOUT);
 	return 0;
 }
