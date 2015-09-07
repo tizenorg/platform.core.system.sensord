@@ -92,7 +92,12 @@ int main(int argc, char** argv)
 	if (i < MAX) {
 		// call the sensord test tc-common for a sensor.
 		int event = (sensor[i] << 16) | 0x0001;
-		check_sensor(sensor[i], event, interval);
+		struct arguments arg;
+				arg.sensor_type = sensor[i];
+				arg.event = event;
+				arg.interval = interval;
+
+		check_sensor((void*)&arg);
 	}
 	else {
 		// Main Parent Child. Waits for TIMEOUT and then kills all child processes.
