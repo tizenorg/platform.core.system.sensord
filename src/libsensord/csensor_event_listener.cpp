@@ -32,11 +32,11 @@ using std::thread;
 using std::pair;
 
 csensor_event_listener::csensor_event_listener()
-: m_client_id(CLIENT_ID_INVALID)
-, m_poller(NULL)
+: m_poller(NULL)
 , m_thread_state(THREAD_STATE_TERMINATE)
 , m_hup_observer(NULL)
 {
+	m_client_info = csensor_client_info::get_instance();
 }
 
 csensor_event_listener::~csensor_event_listener()
@@ -54,53 +54,18 @@ csensor_event_listener& csensor_event_listener::get_instance(void)
 
 int csensor_event_listener::create_handle(sensor_id_t sensor)
 {
-	csensor_handle_info handle_info;
-	int handle = 0;
-
-	AUTOLOCK(m_handle_info_lock);
-
-	while (m_sensor_handle_infos.count(handle) > 0)
-		handle++;
-
-	if (handle == MAX_HANDLE) {
-		ERR("Handles of client %s are full", get_client_name());
-		return MAX_HANDLE_REACHED;
-	}
-
-	handle_info.m_sensor_id = sensor;
-	handle_info.m_sensor_state = SENSOR_STATE_STOPPED;
-	handle_info.m_sensor_option = SENSOR_OPTION_DEFAULT;
-	handle_info.m_handle = handle;
-	handle_info.m_accuracy = -1;
-	handle_info.m_accuracy_cb = NULL;
-	handle_info.m_accuracy_user_data = NULL;
-
-	m_sensor_handle_infos.insert(pair<int,csensor_handle_info> (handle, handle_info));
-
-	return handle;
+	return m_client_info.create_handle(sensor);
 }
 
 bool csensor_event_listener::delete_handle(int handle)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	m_sensor_handle_infos.erase(it_handle);
-	return true;
+	return m_client_info.delete_handle(handle);
 }
 
 
 bool csensor_event_listener::is_active()
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	return !m_sensor_handle_infos.empty();
+	return m_client_info.is_active();
 }
 
 bool csensor_event_listener::start_handle(int handle)
@@ -116,224 +81,70 @@ bool csensor_event_listener::stop_handle(int handle)
 bool csensor_event_listener::register_event(int handle, unsigned int event_type,
 		unsigned int interval, int cb_type, void *cb, void* user_data)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	if (!it_handle->second.add_reg_event_info(event_type, interval, cb_type, cb, user_data))
-		return false;
-
-	return true;
+	return m_client_info.add_register_event_info(handle, event_type, interval, cb_type, cb, user_data);
 }
 
 bool csensor_event_listener::unregister_event(int handle, unsigned int event_type)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	if (!it_handle->second.delete_reg_event_info(event_type))
-		return false;
-
-	return true;
+	return m_client_info.delete_register_event_info(handle, event_type);
 }
 
 bool csensor_event_listener::change_event_interval(int handle, unsigned int event_type,
 		unsigned int interval)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	if (!it_handle->second.change_reg_event_interval(event_type, interval))
-		return false;
-
-	return true;
+	return m_client_info.change_event_interval_info(handle, event_type, interval);
 }
 
 bool csensor_event_listener::register_accuracy_cb(int handle, sensor_accuracy_changed_cb_t cb, void* user_data)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	it_handle->second.m_accuracy = -1;
-	it_handle->second.m_accuracy_cb = cb;
-	it_handle->second.m_accuracy_user_data = user_data;
-
-	return true;
+	return m_client_info.add_accuracy_cb_info(handle, cb, user_data);
 }
 
 bool csensor_event_listener::unregister_accuracy_cb(int handle)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	it_handle->second.m_accuracy = -1;
-	it_handle->second.m_accuracy_cb = NULL;
-	it_handle->second.m_accuracy_user_data = NULL;
-
-	return true;
+	return m_client_info.delete_accuracy_cb_info(handle);
 }
 
 bool csensor_event_listener::set_sensor_params(int handle, int sensor_state, int sensor_option)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	it_handle->second.m_sensor_state = sensor_state;
-	it_handle->second.m_sensor_option = sensor_option;
-
-	return true;
+	return m_client_info.set_sensor_params_info(handle, sensor_state, sensor_option);
 }
 
 bool csensor_event_listener::get_sensor_params(int handle, int &sensor_state, int &sensor_option)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	sensor_state = it_handle->second.m_sensor_state;
-	sensor_option = it_handle->second.m_sensor_option;
-
-	return true;
+	return m_client_info.get_sensor_params_info(handle, sensor_state, sensor_option);
 }
 
 bool csensor_event_listener::set_sensor_state(int handle, int sensor_state)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	it_handle->second.m_sensor_state = sensor_state;
-
-	return true;
+	return m_client_info.set_sensor_state_info(handle, sensor_state);
 }
 
 bool csensor_event_listener::set_sensor_option(int handle, int sensor_option)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	it_handle->second.m_sensor_option = sensor_option;
-
-	return true;
+	return m_client_info.set_sensor_option_info(handle, sensor_option);
 }
 
 bool csensor_event_listener::set_event_interval(int handle, unsigned int event_type, unsigned int interval)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	if (!it_handle->second.change_reg_event_interval(event_type, interval))
-		return false;
-
-	return true;
+	return m_client_info.set_event_interval_info(handle, event_type, interval);
 }
 
 
 bool csensor_event_listener::get_event_info(int handle, unsigned int event_type, unsigned int &interval, int &cb_type, void* &cb, void* &user_data)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	const creg_event_info *event_info;
-
-	event_info = it_handle->second.get_reg_event_info(event_type);
-
-	if (!event_info)
-		return NULL;
-
-
-	interval = event_info->m_interval;
-	cb_type = event_info->m_cb_type;
-	cb = event_info->m_cb;
-	user_data = event_info->m_user_data;
-
-	return true;
+	return m_client_info.get_event_info(handle, event_type, interval, cb_type, cb, user_data);
 }
 
 
 void csensor_event_listener::get_listening_sensors(sensor_id_vector &sensors)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.begin();
-
-	while (it_handle != m_sensor_handle_infos.end()) {
-		sensors.push_back(it_handle->second.m_sensor_id);
-		++it_handle;
-	}
-
-	sort(sensors.begin(), sensors.end());
-	unique(sensors.begin(),sensors.end());
+	m_client_info.get_listening_sensors(sensors);
 }
 
 
 void csensor_event_listener::get_sensor_rep(sensor_id_t sensor, sensor_rep& rep)
 {
-	AUTOLOCK(m_handle_info_lock);
-
 	rep.active = is_sensor_active(sensor);
 	rep.option = get_active_option(sensor);
 	rep.interval = get_active_min_interval(sensor);
@@ -343,23 +154,25 @@ void csensor_event_listener::get_sensor_rep(sensor_id_t sensor, sensor_rep& rep)
 
 void csensor_event_listener::operate_sensor(sensor_id_t sensor, int power_save_state)
 {
-	AUTOLOCK(m_handle_info_lock);
+	sensor_handle_info_map handles_info;
 
-	auto it_handle = m_sensor_handle_infos.begin();
+	m_client_info.get_sensor_handle_info(sensor, handles_info);
 
-	while (it_handle != m_sensor_handle_infos.end()) {
+	auto it_handle = handles_info.begin();
+
+	while (it_handle != handles_info.end()) {
 		if (it_handle->second.m_sensor_id == sensor) {
 			if ((it_handle->second.m_sensor_state == SENSOR_STATE_STARTED) &&
 				power_save_state &&
 				!(it_handle->second.m_sensor_option & power_save_state)) {
 
-				it_handle->second.m_sensor_state = SENSOR_STATE_PAUSED;
+				m_client_info.set_sensor_state_info(it_handle->first, SENSOR_STATE_PAUSED);
 				INFO("%s's %s[%d] is paused", get_client_name(), get_sensor_name(sensor), it_handle->first);
 
 			} else if ((it_handle->second.m_sensor_state == SENSOR_STATE_PAUSED) &&
 				(!power_save_state || (it_handle->second.m_sensor_option & power_save_state))) {
 
-				it_handle->second.m_sensor_state = SENSOR_STATE_STARTED;
+				m_client_info.set_sensor_state_info(it_handle->first, SENSOR_STATE_STARTED);
 				INFO("%s's %s[%d] is resumed", get_client_name(), get_sensor_name(sensor), it_handle->first);
 			}
 		}
@@ -370,236 +183,79 @@ void csensor_event_listener::operate_sensor(sensor_id_t sensor, int power_save_s
 
 bool csensor_event_listener::add_command_channel(sensor_id_t sensor, command_channel *cmd_channel)
 {
-	auto it_channel = m_command_channels.find(sensor);
-
-	if (it_channel != m_command_channels.end()) {
-		ERR("%s alreay has command_channel for %s", get_client_name(), get_sensor_name(sensor));
-		return false;
-	}
-
-	m_command_channels.insert(pair<sensor_id_t, command_channel *> (sensor, cmd_channel));
-
-	return true;
-
+	return m_client_info.add_command_channel(sensor, cmd_channel);
 }
+
 bool csensor_event_listener::get_command_channel(sensor_id_t sensor, command_channel **cmd_channel)
 {
-	auto it_channel = m_command_channels.find(sensor);
-
-	if (it_channel == m_command_channels.end()) {
-		ERR("%s doesn't have command_channel for %s", get_client_name(), get_sensor_name(sensor));
-		return false;
-	}
-
-	*cmd_channel = it_channel->second;
-
-	return true;
+	return m_client_info.get_command_channel(sensor, cmd_channel);
 }
-
 
 bool csensor_event_listener::close_command_channel(void)
 {
-	auto it_channel = m_command_channels.begin();
-
-	if (it_channel != m_command_channels.end()) {
-		delete it_channel->second;
-		++it_channel;
-	}
-
-	m_command_channels.clear();
-
-	return true;
+	return m_client_info.close_command_channel();
 }
 
 bool csensor_event_listener::close_command_channel(sensor_id_t sensor_id)
 {
-	auto it_channel = m_command_channels.find(sensor_id);
-
-	if (it_channel == m_command_channels.end()) {
-		ERR("%s doesn't have command_channel for %s", get_client_name(), get_sensor_name(sensor_id));
-		return false;
-	}
-
-	delete it_channel->second;
-
-	m_command_channels.erase(it_channel);
-
-	return true;
+	return m_client_info.close_command_channel(sensor_id);
 }
-
 
 bool csensor_event_listener::has_client_id(void)
 {
-	return (m_client_id != CLIENT_ID_INVALID);
+	return m_client_info.has_client_id();
 }
 
 int csensor_event_listener::get_client_id(void)
 {
-	return m_client_id;
+	return m_client_info.get_client_id();
 }
 
 void csensor_event_listener::set_client_id(int client_id)
 {
-	m_client_id = client_id;
+	m_client_info.set_client_id(client_id);
 }
 
 unsigned int csensor_event_listener::get_active_min_interval(sensor_id_t sensor)
 {
-	unsigned int min_interval = POLL_MAX_HZ_MS;
-	bool active_sensor_found = false;
-	unsigned int interval;
-
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.begin();
-
-	while (it_handle != m_sensor_handle_infos.end()) {
-		if ((it_handle->second.m_sensor_id == sensor) &&
-			(it_handle->second.m_sensor_state == SENSOR_STATE_STARTED)) {
-				active_sensor_found = true;
-				interval = it_handle->second.get_min_interval();
-				min_interval = (interval < min_interval) ? interval : min_interval;
-		}
-
-		++it_handle;
-	}
-
-	if (!active_sensor_found)
-		DBG("Active sensor[0x%x] is not found for client %s", sensor, get_client_name());
-
-	return (active_sensor_found) ? min_interval : 0;
-
+	return m_client_info.get_active_min_interval(sensor);
 }
 
 unsigned int csensor_event_listener::get_active_option(sensor_id_t sensor)
 {
-	int active_option = SENSOR_OPTION_DEFAULT;
-	bool active_sensor_found = false;
-	int option;
-
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.begin();
-
-	while (it_handle != m_sensor_handle_infos.end()) {
-		if ((it_handle->second.m_sensor_id == sensor) &&
-			(it_handle->second.m_sensor_state == SENSOR_STATE_STARTED)) {
-				active_sensor_found = true;
-				option = it_handle->second.m_sensor_option;
-				active_option = (option > active_option) ? option : active_option;
-		}
-
-		++it_handle;
-	}
-
-	if (!active_sensor_found)
-		DBG("Active sensor[0x%x] is not found for client %s", sensor, get_client_name());
-
-	return active_option;
+	return m_client_info.get_active_option(sensor);
 }
 
 bool csensor_event_listener::get_sensor_id(int handle, sensor_id_t &sensor)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	sensor = it_handle->second.m_sensor_id;
-
-	return true;
+	return m_client_info.get_sensor_id(handle, sensor);
 }
 
 bool csensor_event_listener::get_sensor_state(int handle, int &sensor_state)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	sensor_state = it_handle->second.m_sensor_state;
-
-	return true;
+	return m_client_info.get_sensor_state(handle, sensor_state);
 }
 
 void csensor_event_listener::get_active_event_types(sensor_id_t sensor, event_type_vector &active_event_types)
 {
-	event_type_vector event_types;
-
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.begin();
-
-	while (it_handle != m_sensor_handle_infos.end()) {
-		if ((it_handle->second.m_sensor_id == sensor) &&
-			(it_handle->second.m_sensor_state == SENSOR_STATE_STARTED))
-				it_handle->second.get_reg_event_types(event_types);
-
-		++it_handle;
-	}
-
-	if (event_types.empty())
-		return;
-
-	sort(event_types.begin(), event_types.end());
-
-	unique_copy(event_types.begin(), event_types.end(), back_inserter(active_event_types));
-
+	return m_client_info.get_active_event_types(sensor, active_event_types);
 }
 
 
 void csensor_event_listener::get_all_handles(handle_vector &handles)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.begin();
-
-	while (it_handle != m_sensor_handle_infos.end()) {
-		handles.push_back(it_handle->first);
-		++it_handle;
-	}
+	m_client_info.get_all_handles(handles);
 }
 
 bool csensor_event_listener::is_sensor_registered(sensor_id_t sensor)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.begin();
-
-	while (it_handle != m_sensor_handle_infos.end()) {
-		if (it_handle->second.m_sensor_id == sensor)
-			return true;
-
-		++it_handle;
-	}
-
-	return false;
+	return m_client_info.is_sensor_registered(sensor);
 }
 
 
 bool csensor_event_listener::is_sensor_active(sensor_id_t sensor)
 {
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.begin();
-
-	while (it_handle != m_sensor_handle_infos.end()) {
-		if ((it_handle->second.m_sensor_id == sensor) &&
-			(it_handle->second.m_sensor_state == SENSOR_STATE_STARTED))
-			return true;
-
-		++it_handle;
-	}
-
-	return false;
+	return m_client_info.is_sensor_active(sensor);
 }
 
 client_callback_info* csensor_event_listener::handle_calibration_cb(csensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy)
@@ -638,13 +294,13 @@ client_callback_info* csensor_event_listener::handle_calibration_cb(csensor_hand
 
 		cal_callback_info = get_callback_info(handle_info.m_sensor_id, cal_event_info, cal_sensor_data);
 
-		handle_info.m_bad_accuracy = true;
+		m_client_info.set_bad_accuracy_info(handle_info.m_handle, true);
 
 		print_event_occurrence_log(handle_info, cal_event_info);
 	}
 
 	if ((accuracy != SENSOR_ACCURACY_BAD) && handle_info.m_bad_accuracy)
-		handle_info.m_bad_accuracy = false;
+		m_client_info.set_bad_accuracy_info(handle_info.m_handle, false);
 
 	return cal_callback_info;
 }
@@ -656,6 +312,7 @@ void csensor_event_listener::handle_events(void* event)
 	creg_event_info *event_info = NULL;
 	sensor_event_data_t event_data;
 	sensor_id_t sensor_id;
+	sensor_handle_info_map handles_info;
 	void *sensor_data;
 
 	sensor_panning_data_t panning_data;
@@ -700,9 +357,9 @@ void csensor_event_listener::handle_events(void* event)
 	}
 
 	{	/* scope for the lock */
-		AUTOLOCK(m_handle_info_lock);
+		m_client_info.get_all_handle_info(handles_info);
 
-		for (auto it_handle = m_sensor_handle_infos.begin(); it_handle != m_sensor_handle_infos.end(); ++it_handle) {
+		for (auto it_handle = handles_info.begin(); it_handle != handles_info.end(); ++it_handle) {
 
 			csensor_handle_info &sensor_handle_info = it_handle->second;
 
@@ -733,7 +390,7 @@ void csensor_event_listener::handle_events(void* event)
 			}
 
 			if (sensor_handle_info.m_accuracy != accuracy) {
-				sensor_handle_info.m_accuracy = accuracy;
+				m_client_info.set_accuracy_info(sensor_handle_info.m_handle, accuracy);
 
 				callback_info->accuracy_cb = sensor_handle_info.m_accuracy_cb;
 				callback_info->timestamp = cur_time;
@@ -835,32 +492,9 @@ void csensor_event_listener::post_callback_to_main_loop(client_callback_info* cb
 	g_idle_add_full(G_PRIORITY_DEFAULT, callback_dispatcher, cb_info, NULL);
 }
 
-
-bool csensor_event_listener::is_event_active(int handle, unsigned int event_type, unsigned long long event_id)
-{
-	creg_event_info *event_info;
-
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end())
-		return false;
-
-	event_info = it_handle->second.get_reg_event_info(event_type);
-	if (!event_info)
-		return false;
-
-	if (event_info->m_id != event_id)
-		return false;
-
-	return true;
-}
-
-
 bool csensor_event_listener::is_valid_callback(client_callback_info *cb_info)
 {
-	return is_event_active(cb_info->handle, cb_info->event_type, cb_info->event_id);
+	return m_client_info.is_event_active(cb_info->handle, cb_info->event_type, cb_info->event_id);
 }
 
 gboolean csensor_event_listener::callback_dispatcher(gpointer data)
@@ -1043,7 +677,7 @@ void csensor_event_listener::clear(void)
 	close_event_channel();
 	stop_event_listener();
 	close_command_channel();
-	m_sensor_handle_infos.clear();
+	m_client_info.clear();
 	set_client_id(CLIENT_ID_INVALID);
 }
 
