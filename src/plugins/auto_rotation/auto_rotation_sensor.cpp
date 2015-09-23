@@ -145,7 +145,7 @@ bool auto_rotation_sensor::on_start(void)
 	m_alg->start();
 
 	m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
-	m_accel_sensor->add_interval((intptr_t)this , (m_interval/MS_TO_US), true);
+	m_accel_sensor->add_interval((int)this , (m_interval/MS_TO_US), true);
 	m_accel_sensor->start();
 
 	return activate();
@@ -154,7 +154,7 @@ bool auto_rotation_sensor::on_start(void)
 bool auto_rotation_sensor::on_stop(void)
 {
 	m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
-	m_accel_sensor->delete_interval((intptr_t)this , true);
+	m_accel_sensor->delete_interval((int)this , true);
 	m_accel_sensor->stop();
 
 	return deactivate();
