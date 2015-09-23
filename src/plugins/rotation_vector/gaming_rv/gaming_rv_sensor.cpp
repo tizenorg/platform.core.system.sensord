@@ -27,13 +27,13 @@
 #include <dlfcn.h>
 #include <common.h>
 #include <sf_common.h>
-#include <geomagnetic_rv_sensor.h>
+#include <gaming_rv_sensor.h>
 #include <sensor_plugin_loader.h>
 #include <orientation_filter.h>
 #include <cvirtual_sensor_config.h>
 
-#define SENSOR_NAME "GEOMAGNETIC_RV_SENSOR"
-#define SENSOR_TYPE_GEOMAGNETIC_RV		"GEOMAGNETIC_ROTATION_VECTOR"
+#define SENSOR_NAME "GAMING_RV_SENSOR"
+#define SENSOR_TYPE_GAMING_RV "GAMING_ROTATION_VECTOR"
 
 #define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
@@ -42,9 +42,9 @@
 #define ELEMENT_VENDOR											"VENDOR"
 #define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
 
-geomagnetic_rv_sensor::geomagnetic_rv_sensor()
+gaming_rv_sensor::gaming_rv_sensor()
 : m_accel_sensor(NULL)
-, m_magnetic_sensor(NULL)
+, m_gyro_sensor(NULL)
 , m_fusion_sensor(NULL)
 , m_time(0)
 {
@@ -57,16 +57,16 @@ geomagnetic_rv_sensor::geomagnetic_rv_sensor()
 		m_hardware_fusion = true;
 
 	m_name = string(SENSOR_NAME);
-	register_supported_event(GEOMAGNETIC_RV_RAW_DATA_EVENT);
+	register_supported_event(GAMING_RV_RAW_DATA_EVENT);
 
-	if (!config.get(SENSOR_TYPE_GEOMAGNETIC_RV, ELEMENT_VENDOR, m_vendor)) {
+	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
 		throw ENXIO;
 	}
 
 	INFO("m_vendor = %s", m_vendor.c_str());
 
-	if (!config.get(SENSOR_TYPE_GEOMAGNETIC_RV, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
+	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
 		ERR("[DEFAULT_SAMPLING_TIME] is empty\n");
 		throw ENXIO;
 	}
@@ -76,21 +76,21 @@ geomagnetic_rv_sensor::geomagnetic_rv_sensor()
 	m_interval = m_default_sampling_time * MS_TO_US;
 }
 
-geomagnetic_rv_sensor::~geomagnetic_rv_sensor()
+gaming_rv_sensor::~gaming_rv_sensor()
 {
-	INFO("geomagnetic_rv_sensor is destroyed!\n");
+	INFO("gaming_rv_sensor is destroyed!\n");
 }
 
-bool geomagnetic_rv_sensor::init()
+bool gaming_rv_sensor::init()
 {
 	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
-	m_magnetic_sensor = sensor_plugin_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
+	m_gyro_sensor = sensor_plugin_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
 
 	m_fusion_sensor = sensor_plugin_loader::get_instance().get_sensor(FUSION_SENSOR);
 
-	if (!m_accel_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
-		ERR("Failed to load sensors,  accel: 0x%x, mag: 0x%x, fusion: 0x%x",
-			m_accel_sensor, m_magnetic_sensor, m_fusion_sensor);
+	if (!m_accel_sensor || !m_gyro_sensor || !m_fusion_sensor) {
+		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, fusion: 0x%x",
+			m_accel_sensor, m_gyro_sensor, m_fusion_sensor);
 		return false;
 	}
 
@@ -99,12 +99,12 @@ bool geomagnetic_rv_sensor::init()
 	return true;
 }
 
-sensor_type_t geomagnetic_rv_sensor::get_type(void)
+sensor_type_t gaming_rv_sensor::get_type(void)
 {
-	return GEOMAGNETIC_RV_SENSOR;
+	return GAMING_RV_SENSOR;
 }
 
-bool geomagnetic_rv_sensor::on_start(void)
+bool gaming_rv_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
 
@@ -112,13 +112,13 @@ bool geomagnetic_rv_sensor::on_start(void)
 		m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
 		m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 		m_accel_sensor->start();
-		m_magnetic_sensor->add_client(GEOMAGNETIC_RAW_DATA_EVENT);
-		m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-		m_magnetic_sensor->start();
+		m_gyro_sensor->add_client(GYROSCOPE_RAW_DATA_EVENT);
+		m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
+		m_gyro_sensor->start();
 	}
 
 	m_fusion_sensor->register_supported_event(FUSION_EVENT);
-	m_fusion_sensor->register_supported_event(FUSION_GEOMAGNETIC_ROTATION_VECTOR_ENABLED);
+	m_fusion_sensor->register_supported_event(FUSION_GAMING_ROTATION_VECTOR_ENABLED);
 	m_fusion_sensor->add_client(FUSION_EVENT);
 	m_fusion_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_fusion_sensor->start();
@@ -127,7 +127,7 @@ bool geomagnetic_rv_sensor::on_start(void)
 	return true;
 }
 
-bool geomagnetic_rv_sensor::on_stop(void)
+bool gaming_rv_sensor::on_stop(void)
 {
 	AUTOLOCK(m_mutex);
 
@@ -135,28 +135,28 @@ bool geomagnetic_rv_sensor::on_stop(void)
 		m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
 		m_accel_sensor->delete_interval((intptr_t)this, false);
 		m_accel_sensor->stop();
-		m_magnetic_sensor->delete_client(GEOMAGNETIC_RAW_DATA_EVENT);
-		m_magnetic_sensor->delete_interval((intptr_t)this, false);
-		m_magnetic_sensor->stop();
+		m_gyro_sensor->delete_client(GYROSCOPE_RAW_DATA_EVENT);
+		m_gyro_sensor->delete_interval((intptr_t)this, false);
+		m_gyro_sensor->stop();
 	}
 
 	m_fusion_sensor->delete_client(FUSION_EVENT);
 	m_fusion_sensor->delete_interval((intptr_t)this, false);
 	m_fusion_sensor->unregister_supported_event(FUSION_EVENT);
-	m_fusion_sensor->unregister_supported_event(FUSION_GEOMAGNETIC_ROTATION_VECTOR_ENABLED);
+	m_fusion_sensor->unregister_supported_event(FUSION_GAMING_ROTATION_VECTOR_ENABLED);
 	m_fusion_sensor->stop();
 
 	deactivate();
 	return true;
 }
 
-bool geomagnetic_rv_sensor::add_interval(int client_id, unsigned int interval)
+bool gaming_rv_sensor::add_interval(int client_id, unsigned int interval)
 {
 	AUTOLOCK(m_mutex);
 
 	if (!m_hardware_fusion) {
 		m_accel_sensor->add_interval(client_id, interval, false);
-		m_magnetic_sensor->add_interval(client_id, interval, false);
+		m_gyro_sensor->add_interval(client_id, interval, false);
 	}
 
 	m_fusion_sensor->add_interval(client_id, interval, false);
@@ -164,13 +164,13 @@ bool geomagnetic_rv_sensor::add_interval(int client_id, unsigned int interval)
 	return sensor_base::add_interval(client_id, interval, false);
 }
 
-bool geomagnetic_rv_sensor::delete_interval(int client_id)
+bool gaming_rv_sensor::delete_interval(int client_id)
 {
 	AUTOLOCK(m_mutex);
 
 	if (!m_hardware_fusion) {
 		m_accel_sensor->delete_interval(client_id, false);
-		m_magnetic_sensor->delete_interval(client_id, false);
+		m_gyro_sensor->delete_interval(client_id, false);
 	}
 
 	m_fusion_sensor->delete_interval(client_id, false);
@@ -178,7 +178,7 @@ bool geomagnetic_rv_sensor::delete_interval(int client_id)
 	return sensor_base::delete_interval(client_id, false);
 }
 
-void geomagnetic_rv_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
+void gaming_rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &outs)
 {
 	unsigned long long diff_time;
 
@@ -192,7 +192,7 @@ void geomagnetic_rv_sensor::synthesize(const sensor_event_t &event, vector<senso
 
 		m_time = get_timestamp();
 		rv_event.sensor_id = get_id();
-		rv_event.event_type = GEOMAGNETIC_RV_RAW_DATA_EVENT;
+		rv_event.event_type = GAMING_RV_RAW_DATA_EVENT;
 		rv_event.data.accuracy = SENSOR_ACCURACY_GOOD;
 		rv_event.data.timestamp = m_time;
 		rv_event.data.value_count = 4;
@@ -207,14 +207,14 @@ void geomagnetic_rv_sensor::synthesize(const sensor_event_t &event, vector<senso
 	return;
 }
 
-int geomagnetic_rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
+int gaming_rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
 {
 	sensor_data_t fusion_data;
 
-	if (event_type != GEOMAGNETIC_RV_RAW_DATA_EVENT)
+	if (event_type != GAMING_RV_RAW_DATA_EVENT)
 		return -1;
 
-	m_fusion_sensor->get_sensor_data(FUSION_GEOMAGNETIC_ROTATION_VECTOR_ENABLED, fusion_data);
+	m_fusion_sensor->get_sensor_data(FUSION_GAMING_ROTATION_VECTOR_ENABLED, fusion_data);
 
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();
@@ -227,7 +227,7 @@ int geomagnetic_rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_
 	return 0;
 }
 
-bool geomagnetic_rv_sensor::get_properties(sensor_properties_s &properties)
+bool gaming_rv_sensor::get_properties(sensor_properties_s &properties)
 {
 	properties.vendor = m_vendor;
 	properties.name = SENSOR_NAME;
@@ -243,10 +243,10 @@ bool geomagnetic_rv_sensor::get_properties(sensor_properties_s &properties)
 
 extern "C" sensor_module* create(void)
 {
-	geomagnetic_rv_sensor *sensor;
+	gaming_rv_sensor *sensor;
 
 	try {
-		sensor = new(std::nothrow) geomagnetic_rv_sensor;
+		sensor = new(std::nothrow) gaming_rv_sensor;
 	} catch (int err) {
 		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
 		return NULL;

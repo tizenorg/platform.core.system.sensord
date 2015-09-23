@@ -241,10 +241,10 @@ int rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = get_timestamp();
 	data.value_count = 4;
-	data.values[0] = fusion_data.values[1];
-	data.values[1] = fusion_data.values[2];
-	data.values[2] = fusion_data.values[3];
-	data.values[3] = fusion_data.values[0];
+	data.values[0] = data.values[1];
+	data.values[1] = data.values[2];
+	data.values[2] = data.values[3];
+	data.values[3] = data.values[0];
 
 	return 0;
 }
