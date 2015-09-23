@@ -24,6 +24,7 @@ add_library(${PROJECT_NAME} SHARED
 	csensor_event_listener.cpp
 	sensor_info_manager.cpp
 	csensor_handle_info.cpp
+	csensor_client_info.cpp
 	client_common.cpp
 	command_channel.cpp
 	poller.cpp
@@ -40,6 +41,7 @@ install(FILES sensor_internal.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES poller.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES creg_event_info.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES csensor_event_listener.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
+install(FILES csensor_client_info.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_info_manager.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES csensor_handle_info.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES client_common.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)

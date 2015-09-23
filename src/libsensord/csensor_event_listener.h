@@ -23,6 +23,7 @@
 #include <glib.h>
 #include <sys/types.h>
 #include <csensor_handle_info.h>
+#include <csensor_client_info.h>
 #include <unistd.h>
 #include <csocket.h>
 #include <string.h>
@@ -138,15 +139,10 @@ private:
 	typedef lock_guard<mutex> lock;
 	typedef unique_lock<mutex> ulock;
 
-	sensor_handle_info_map m_sensor_handle_infos;
-	sensor_command_channel_map m_command_channels;
-
-	int m_client_id;
+	csensor_client_info m_client_info;
 
 	csocket m_event_socket;
 	poller *m_poller;
-
-	cmutex m_handle_info_lock;
 
 	thread_state m_thread_state;
 	mutex m_thread_mutex;
@@ -175,7 +171,6 @@ private:
 
 	void post_callback_to_main_loop(client_callback_info *cb_info);
 
-	bool is_event_active(int handle, unsigned int event_type, unsigned long long event_id);
 	bool is_valid_callback(client_callback_info *cb_info);
 	static gboolean callback_dispatcher(gpointer data);
 
