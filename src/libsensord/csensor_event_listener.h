@@ -23,6 +23,7 @@
 #include <glib.h>
 #include <sys/types.h>
 #include <csensor_handle_info.h>
+#include <csensor_client_info.h>
 #include <unistd.h>
 #include <csocket.h>
 #include <string.h>
@@ -38,7 +39,6 @@
 #include <cmutex.h>
 #include <poller.h>
 
-using std::unordered_map;
 using std::vector;
 using std::string;
 using std::queue;
@@ -46,11 +46,6 @@ using std::mutex;
 using std::lock_guard;
 using std::unique_lock;
 using std::condition_variable;
-
-typedef vector<unsigned int> handle_vector;
-typedef vector<sensor_id_t> sensor_id_vector;
-typedef unordered_map<int,csensor_handle_info> sensor_handle_info_map;
-typedef unordered_map<sensor_id_t, command_channel*> sensor_command_channel_map;
 
 typedef struct {
 	unsigned long long event_id;
@@ -138,15 +133,10 @@ private:
 	typedef lock_guard<mutex> lock;
 	typedef unique_lock<mutex> ulock;
 
-	sensor_handle_info_map m_sensor_handle_infos;
-	sensor_command_channel_map m_command_channels;
-
-	int m_client_id;
+	csensor_client_info m_client_info;
 
 	csocket m_event_socket;
 	poller *m_poller;
-
-	cmutex m_handle_info_lock;
 
 	thread_state m_thread_state;
 	mutex m_thread_mutex;
@@ -175,7 +165,6 @@ private:
 
 	void post_callback_to_main_loop(client_callback_info *cb_info);
 
-	bool is_event_active(int handle, unsigned int event_type, unsigned long long event_id);
 	bool is_valid_callback(client_callback_info *cb_info);
 	static gboolean callback_dispatcher(gpointer data);
 
