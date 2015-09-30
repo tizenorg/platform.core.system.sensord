@@ -105,5 +105,4 @@ install(FILES sensor_ultraviolet.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/senso
 install(FILES sensor_bio_led_red.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_deprecated.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_uncal_gyro.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
-install(FILES sensor_internal_deprecated.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
-install(FILES sensor_internal.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
+
