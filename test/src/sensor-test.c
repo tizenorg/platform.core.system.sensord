@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 	if (argc < 2 || argc > 5) {
 		printf("Wrong number of arguments\n");
 		usage();
-		return 0;
+		return -1;
 	}
 
 	if (strcmp(argv[1], "accelerometer") == 0) {
@@ -209,6 +209,12 @@ int main(int argc, char **argv)
 				return -1;
 			}
 		}
-		return check_sensor(sensor_type, event, interval);
+		struct pthread_arguments arg;
+		arg.sensor_type = sensor_type;
+		arg.event = event;
+		arg.interval = interval;
+
+		return check_sensor((void*)&arg);
+
 	}
 }
