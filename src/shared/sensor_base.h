@@ -27,6 +27,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <string>
+#include <sensor_internal.h>
 
 #include <cplugin_info_list.h>
 #include <cmutex.h>

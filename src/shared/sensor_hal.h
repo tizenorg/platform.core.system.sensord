@@ -23,7 +23,6 @@
 #include <sf_common.h>
 #include <cmutex.h>
 #include <common.h>
-#include <sensor_internal.h>
 #include <string>
 
 /*
