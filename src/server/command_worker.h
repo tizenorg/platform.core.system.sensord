@@ -25,6 +25,7 @@
 #include <csensor_event_dispatcher.h>
 #include <sensor_base.h>
 #include <map>
+#include <cpacket.h>
 
 using std::multimap;
 

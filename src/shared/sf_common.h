@@ -20,8 +20,6 @@
 #if !defined(_SF_COMMON_H_)
 #define _SF_COMMON_H_
 #include <unistd.h>
-#include <cpacket.h>
-#include <vector>
 #include <sensor_common.h>
 #include <string>
 #include <vector>
