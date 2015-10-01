@@ -35,7 +35,7 @@ using std::ifstream;
 #define PROXI_CODE	0x0019
 
 proxi_sensor_hal::proxi_sensor_hal()
-: m_state(PROXIMITY_STATE_FAR)
+: m_state(-1)
 , m_fired_time(0)
 , m_node_handle(-1)
 {
@@ -148,16 +148,7 @@ bool proxi_sensor_hal::update_value(bool wait)
 	DBG("read event,  len : %d , type : %x , code : %x , value : %x", len, proxi_event.type, proxi_event.code, proxi_event.value);
 	if ((proxi_event.type == EV_ABS) && (proxi_event.code == PROXI_CODE)) {
 		AUTOLOCK(m_value_mutex);
-		if (proxi_event.value == PROXIMITY_NODE_STATE_FAR) {
-			INFO("PROXIMITY_STATE_FAR state occured\n");
-			m_state = PROXIMITY_STATE_FAR;
-		} else if (proxi_event.value == PROXIMITY_NODE_STATE_NEAR) {
-			INFO("PROXIMITY_STATE_NEAR state occured\n");
-			m_state = PROXIMITY_STATE_NEAR;
-		} else {
-			ERR("PROXIMITY_STATE Unknown: %d\n",proxi_event.value);
-			return false;
-		}
+		m_state = proxi_event.value;
 		m_fired_time = sensor_hal::get_timestamp(&proxi_event.time);
 	} else {
 		return false;
