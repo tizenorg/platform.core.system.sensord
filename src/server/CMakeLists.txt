@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(sensord CXX)
 
 INCLUDE(FindPkgConfig)
-PKG_CHECK_MODULES(server_pkgs REQUIRED glib-2.0 gio-2.0 dlog libsystemd-daemon)
+PKG_CHECK_MODULES(server_pkgs REQUIRED glib-2.0 gio-2.0 dlog libsystemd-daemon cynara-client cynara-creds-socket)
 
 FOREACH(flag ${server_pkgs_LDFLAGS})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")

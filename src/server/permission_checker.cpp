@@ -17,27 +17,48 @@
  *
  */
 
+#include <cynara-client.h>
+#include <cynara-creds-socket.h>
 #include <permission_checker.h>
 #include <sf_common.h>
 #include <common.h>
 #include <sensor_plugin_loader.h>
 #include <sensor_base.h>
-#include <dlfcn.h>
 
-#define SECURITY_LIB "/usr/lib/libsecurity-server-client.so.1"
+static cynara *cynara_env = NULL;
+
+static bool check_privilege_by_sockfd(int sock_fd, const char *priv)
+{
+	retvm_if(cynara_env == NULL, false, "Cynara not initialized");
+
+	char *client_smack = NULL;
+	char *uid = NULL;
+	int ret = CYNARA_API_ACCESS_DENIED;
+
+	cynara_creds_socket_get_client(sock_fd, CLIENT_METHOD_SMACK, &client_smack);
+	cynara_creds_socket_get_user(sock_fd, USER_METHOD_UID, &uid);
+
+	warn_if(client_smack == NULL, "cynara_creds_socket_get_client() failed");
+	warn_if(uid== NULL, "cynara_creds_socket_get_user() failed");
+
+	if (client_smack && uid)
+		ret = cynara_check(cynara_env, client_smack, "", uid, priv);
+
+	free(client_smack);
+	free(uid);
+
+	return (ret == CYNARA_API_ACCESS_ALLOWED);
+}
 
 permission_checker::permission_checker()
-: m_security_server_check_privilege_by_sockfd(NULL)
-, m_security_handle(NULL)
-, m_permission_set(0)
+: m_permission_set(0)
 {
 	init();
 }
 
 permission_checker::~permission_checker()
 {
-	if (m_security_handle)
-		dlclose(m_security_handle);
+	deinit();
 }
 
 permission_checker& permission_checker::get_instance()
@@ -46,33 +67,10 @@ permission_checker& permission_checker::get_instance()
 	return inst;
 }
 
-bool permission_checker::init_security_lib(void)
-{
-	m_security_handle = dlopen(SECURITY_LIB, RTLD_LAZY);
-
-	if (!m_security_handle) {
-		ERR("dlopen(%s) error, cause: %s", SECURITY_LIB, dlerror());
-		return false;
-	}
-
-	m_security_server_check_privilege_by_sockfd =
-		(security_server_check_privilege_by_sockfd_t) dlsym(m_security_handle, "security_server_check_privilege_by_sockfd");
-
-	if (!m_security_server_check_privilege_by_sockfd) {
-		ERR("Failed to load symbol");
-		dlclose(m_security_handle);
-		m_security_handle = NULL;
-		return false;
-	}
-
-	return true;
-
-}
-
 void permission_checker::init()
 {
-	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_STANDARD, false, "", ""));
-	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_BIO, true, "sensord::bio", "rw"));
+	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_STANDARD, false, ""));
+	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_BIO, true, "http://tizen.org/privilege/healthinfo"));
 
 	vector<sensor_base *> sensors;
 	sensors = sensor_plugin_loader::get_instance().get_sensors(ALL_SENSOR);
@@ -82,8 +80,18 @@ void permission_checker::init()
 
 	INFO("Permission Set = %d", m_permission_set);
 
-	if (!init_security_lib())
-		ERR("Failed to init security lib: %s", SECURITY_LIB);
+	if (cynara_initialize(&cynara_env, NULL) != CYNARA_API_SUCCESS) {
+		cynara_env = NULL;
+		ERR("Cynara initialization failed");
+	}
+}
+
+void permission_checker::deinit()
+{
+	if (cynara_env)
+		cynara_finish(cynara_env);
+
+	cynara_env = NULL;
 }
 
 int permission_checker::get_permission(int sock_fd)
@@ -93,8 +101,8 @@ int permission_checker::get_permission(int sock_fd)
 	for (unsigned int i = 0; i < m_permission_infos.size(); ++i) {
 		if (!m_permission_infos[i]->need_to_check) {
 			permission |= m_permission_infos[i]->permission;
-		} else if ((m_permission_set & m_permission_infos[i]->permission) && m_security_server_check_privilege_by_sockfd) {
-			if (m_security_server_check_privilege_by_sockfd(sock_fd, m_permission_infos[i]->name.c_str(), m_permission_infos[i]->access_right.c_str()) == 1) {
+		} else if (m_permission_set & m_permission_infos[i]->permission) {
+			if (check_privilege_by_sockfd(sock_fd, m_permission_infos[i]->privilege.c_str())) {
 				permission |= m_permission_infos[i]->permission;
 			}
 		}
