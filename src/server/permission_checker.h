@@ -28,38 +28,30 @@ class permission_checker {
 private:
 	class permission_info {
 		public:
-		permission_info(int _permission, bool _need_to_check, std::string _name, std::string _access_right)
+		permission_info(int _permission, bool _need_to_check, std::string _priv)
 		: permission(_permission)
 		, need_to_check(_need_to_check)
-		, name(_name)
-		, access_right(_access_right)
+		, privilege(_priv)
 		{
 		}
 		int permission;
 		bool need_to_check;
-		std::string name;
-		std::string access_right;
+		std::string privilege;
 	};
 
 	typedef std::vector<std::shared_ptr<permission_info>> permission_info_vector;
-
-	typedef int (*security_server_check_privilege_by_sockfd_t)(int sockfd,
-			  const char *object,
-			  const char *access_rights);
 
 	permission_checker();
 	~permission_checker();
 	permission_checker(permission_checker const&) {};
 	permission_checker& operator=(permission_checker const&);
 
-	bool init_security_lib(void);
 	void init();
-
-	security_server_check_privilege_by_sockfd_t m_security_server_check_privilege_by_sockfd;
-	void *m_security_handle;
+	void deinit();
 
 	permission_info_vector m_permission_infos;
 	int m_permission_set;
+
 public:
 	static permission_checker& get_instance();
 
