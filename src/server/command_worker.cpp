@@ -28,11 +28,13 @@
 #include <sensor_gravity.h>
 #include <thread>
 #include <string>
+#include <vector>
 #include <utility>
 #include <permission_checker.h>
 #include <set>
 
 using std::string;
+using std::vector;
 using std::make_pair;
 using std::set;
 
@@ -47,6 +49,7 @@ command_worker::command_worker(const csocket& socket)
 , m_permission(SENSOR_PERMISSION_NONE)
 , m_socket(socket)
 , m_module(NULL)
+, m_sensor_id(UNKNOWN_SENSOR)
 {
 	static bool init = false;
 
@@ -147,17 +150,26 @@ void command_worker::make_sensor_raw_data_map(void)
 
 	sensors = sensor_plugin_loader::get_instance().get_sensors(ALL_SENSOR);
 
+    std::sort(sensors.begin(), sensors.end());
+    auto last = std::unique(sensors.begin(), sensors.end());
+
 	auto it_sensor = sensors.begin();
 
-	while (it_sensor != sensors.end()) {
-		(*it_sensor)->get_sensor_info(info);
-		permission = (*it_sensor)->get_permission();
+	while (it_sensor != last) {
 
-		sensor_raw_data_map::iterator it_sensor_raw_data;
-		it_sensor_raw_data = m_sensor_raw_data_map.insert(std::make_pair(permission, raw_data_t()));
+		vector<sensor_type_t> types;
+		(*it_sensor)->get_types(types);
 
-		info.get_raw_data(it_sensor_raw_data->second);
-		info.clear();
+		for (unsigned int i = 0; i < types.size(); ++i) {
+			(*it_sensor)->get_sensor_info(types[i], info);
+			permission = (*it_sensor)->get_permission();
+
+			sensor_raw_data_map::iterator it_sensor_raw_data;
+			it_sensor_raw_data = m_sensor_raw_data_map.insert(std::make_pair(permission, raw_data_t()));
+
+			info.get_raw_data(it_sensor_raw_data->second);
+			info.clear();
+		}
 		++it_sensor;
 	}
 }
@@ -213,7 +225,7 @@ bool command_worker::stopped(void *ctx)
 
 	if ((inst->m_module) && (inst->m_client_id != CLIENT_ID_INVALID)) {
 
-		get_client_info_manager().get_registered_events(inst->m_client_id, inst->m_module->get_id(), event_vec);
+		get_client_info_manager().get_registered_events(inst->m_client_id, inst->m_sensor_id, event_vec);
 
 		auto it_event = event_vec.begin();
 
@@ -225,16 +237,16 @@ bool command_worker::stopped(void *ctx)
 			++it_event;
 		}
 
-		if (get_client_info_manager().is_started(inst->m_client_id, inst->m_module->get_id())) {
+		if (get_client_info_manager().is_started(inst->m_client_id, inst->m_sensor_id)) {
 			WARN("Does not receive cmd_stop before connection broken for [%s]!!", inst->m_module->get_name());
 			inst->m_module->delete_interval(inst->m_client_id, false);
 			inst->m_module->stop();
 		}
 
-		if (inst->m_module->get_id()) {
-			if (get_client_info_manager().has_sensor_record(inst->m_client_id, inst->m_module->get_id())) {
-				INFO("Removing sensor[0x%x] record for client_id[%d]", inst->m_module->get_id(), inst->m_client_id);
-				get_client_info_manager().remove_sensor_record(inst->m_client_id, inst->m_module->get_id());
+		if (inst->m_sensor_id) {
+			if (get_client_info_manager().has_sensor_record(inst->m_client_id, inst->m_sensor_id)) {
+				INFO("Removing sensor[0x%x] record for client_id[%d]", inst->m_sensor_id, inst->m_client_id);
+				get_client_info_manager().remove_sensor_record(inst->m_client_id, inst->m_sensor_id);
 			}
 		}
 	}
@@ -356,12 +368,20 @@ bool command_worker::cmd_get_id(void *payload)
 {
 	cmd_get_id_t *cmd;
 	int client_id;
+	struct ucred cr;
+	socklen_t opt_len = sizeof(cr);
 
 	DBG("CMD_GET_ID Handler invoked\n");
 	cmd = (cmd_get_id_t*)payload;
 
+	if (getsockopt(m_socket.get_socket_fd(), SOL_SOCKET, SO_PEERCRED, &cr, &opt_len)) {
+		ERR("Failed to get socket option with SO_PEERCRED");
+		return false;
+	}
+
 	client_id = get_client_info_manager().create_client_record();
-	get_client_info_manager().set_client_info(client_id, cmd->pid);
+
+	get_client_info_manager().set_client_info(client_id, cr.pid, cmd->name);
 
 	m_permission = get_permission();
 	get_client_info_manager().set_permission(client_id, m_permission);
@@ -393,6 +413,7 @@ bool command_worker::cmd_hello(void *payload)
 	DBG("CMD_HELLO Handler invoked\n");
 	cmd = (cmd_hello_t*)payload;
 
+	m_sensor_id = cmd->sensor;
 	m_client_id = cmd->client_id;
 
 	if (m_permission == SENSOR_PERMISSION_NONE)
@@ -410,14 +431,14 @@ bool command_worker::cmd_hello(void *payload)
 	}
 
 	if (!is_permission_allowed()) {
-		ERR("Permission denied to connect sensor[0x%x] for client [%d]", m_module->get_id(), m_client_id);
+		ERR("Permission denied to connect sensor[0x%x] for client [%d]", m_sensor_id, m_client_id);
 		ret_value = OP_ERROR;
 		goto out;
 	}
 
-	DBG("Hello sensor [0x%x], client id [%d]", m_module->get_id(), m_client_id);
-	get_client_info_manager().create_sensor_record(m_client_id, m_module->get_id());
-	INFO("New sensor record created for sensor [0x%x], sensor name [%s] on client id [%d]\n", m_module->get_id(), m_module->get_name(), m_client_id);
+	DBG("Hello sensor [0x%x], client id [%d]", m_sensor_id, m_client_id);
+	get_client_info_manager().create_sensor_record(m_client_id, m_sensor_id);
+	INFO("New sensor record created for sensor [0x%x], sensor name [%s] on client id [%d]\n", m_sensor_id, m_module->get_name(), m_client_id);
 	ret_value = OP_SUCCESS;
 out:
 	if (!send_cmd_done(ret_value))
@@ -431,14 +452,14 @@ bool command_worker::cmd_byebye(void *payload)
 	long ret_value = OP_ERROR;
 
 	if (!is_permission_allowed()) {
-		ERR("Permission denied to stop sensor[0x%x] for client [%d]", m_module? m_module->get_id() : -1, m_client_id);
+		ERR("Permission denied to stop sensor[0x%x] for client [%d]", m_sensor_id, m_client_id);
 		ret_value = OP_ERROR;
 		goto out;
 	}
 
-	DBG("CMD_BYEBYE for client [%d], sensor [0x%x]", m_client_id, m_module->get_id());
+	DBG("CMD_BYEBYE for client [%d], sensor [0x%x]", m_client_id, m_sensor_id);
 
-	if (!get_client_info_manager().remove_sensor_record(m_client_id, m_module->get_id())) {
+	if (!get_client_info_manager().remove_sensor_record(m_client_id, m_sensor_id)) {
 		ERR("Error removing sensor_record for client [%d]", m_client_id);
 		ret_value = OP_ERROR;
 		goto out;
@@ -462,24 +483,24 @@ bool command_worker::cmd_start(void *payload)
 	long ret_value = OP_ERROR;
 
 	if (!is_permission_allowed()) {
-		ERR("Permission denied to start sensor[0x%x] for client [%d]", m_module? m_module->get_id() : -1, m_client_id);
+		ERR("Permission denied to start sensor[0x%x] for client [%d]", m_sensor_id, m_client_id);
 		ret_value = OP_ERROR;
 		goto out;
 	}
 
-	DBG("START Sensor [0x%x], called from client [%d]", m_module->get_id(), m_client_id);
+	DBG("START Sensor [0x%x], called from client [%d]", m_sensor_id, m_client_id);
 
 	if (m_module->start()) {
-		get_client_info_manager().set_start(m_client_id, m_module->get_id(), true);
+		get_client_info_manager().set_start(m_client_id, m_sensor_id, true);
 /*
  *	Rotation could be changed even LCD is off by pop sync rotation
  *	and a client listening rotation event with always-on option.
  *	To reflect the last rotation state, request it to event dispatcher.
  */
-		get_event_dispathcher().request_last_event(m_client_id, m_module->get_id());
+		get_event_dispathcher().request_last_event(m_client_id, m_sensor_id);
 		ret_value = OP_SUCCESS;
 	} else {
-		ERR("Failed to start sensor [0x%x] for client [%d]", m_module->get_id(), m_client_id);
+		ERR("Failed to start sensor [0x%x] for client [%d]", m_sensor_id, m_client_id);
 		ret_value = OP_ERROR;
 	}
 
@@ -495,18 +516,18 @@ bool command_worker::cmd_stop(void *payload)
 	long ret_value = OP_ERROR;
 
 	if (!is_permission_allowed()) {
-		ERR("Permission denied to stop sensor[0x%x] for client [%d]", m_module? m_module->get_id() : -1, m_client_id);
+		ERR("Permission denied to stop sensor[0x%x] for client [%d]", m_sensor_id, m_client_id);
 		ret_value = OP_ERROR;
 		goto out;
 	}
 
-	DBG("STOP Sensor [0x%x], called from client [%d]", m_module->get_id(), m_client_id);
+	DBG("STOP Sensor [0x%x], called from client [%d]", m_sensor_id, m_client_id);
 
 	if (m_module->stop()) {
-		get_client_info_manager().set_start(m_client_id, m_module->get_id(), false);
+		get_client_info_manager().set_start(m_client_id, m_sensor_id, false);
 		ret_value = OP_SUCCESS;
 	} else {
-		ERR("Failed to stop sensor [0x%x] for client [%d]", m_module->get_id(), m_client_id);
+		ERR("Failed to stop sensor [0x%x] for client [%d]", m_sensor_id, m_client_id);
 		ret_value = OP_ERROR;
 	}
 
@@ -531,7 +552,7 @@ bool command_worker::cmd_register_event(void *payload)
 		goto out;
 	}
 
-	if (!get_client_info_manager().register_event(m_client_id, m_module? m_module->get_id() : -1, cmd->event_type)) {
+	if (!get_client_info_manager().register_event(m_client_id, m_sensor_id, cmd->event_type)) {
 		INFO("Failed to register event [0x%x] for client [%d] to client info manager",
 			cmd->event_type, m_client_id);
 		ret_value = OP_ERROR;
@@ -565,7 +586,7 @@ bool command_worker::cmd_unregister_event(void *payload)
 		goto out;
 	}
 
-	if (!get_client_info_manager().unregister_event(m_client_id, m_module->get_id(), cmd->event_type)) {
+	if (!get_client_info_manager().unregister_event(m_client_id, m_sensor_id, cmd->event_type)) {
 		ERR("Failed to unregister event [0x%x] for client [%d] from client info manager",
 			cmd->event_type, m_client_id);
 		ret_value = OP_ERROR;
@@ -599,21 +620,21 @@ bool command_worker::cmd_set_interval(void *payload)
 
 	if (!is_permission_allowed()) {
 		ERR("Permission denied to register interval for client [%d], for sensor [0x%x] with interval [%d] to client info manager",
-			m_client_id, m_module? m_module->get_id() : -1, cmd->interval);
+			m_client_id, m_sensor_id, cmd->interval);
 		ret_value = OP_ERROR;
 		goto out;
 	}
 
-	if (!get_client_info_manager().set_interval(m_client_id, m_module->get_id(), cmd->interval)) {
+	if (!get_client_info_manager().set_interval(m_client_id, m_sensor_id, cmd->interval)) {
 		ERR("Failed to register interval for client [%d], for sensor [0x%x] with interval [%d] to client info manager",
-			m_client_id, m_module->get_id(), cmd->interval);
+			m_client_id, m_sensor_id, cmd->interval);
 		ret_value = OP_ERROR;
 		goto out;
 	}
 
 	if (!m_module->add_interval(m_client_id, cmd->interval, false)) {
 		ERR("Failed to set interval for client [%d], for sensor [0x%x] with interval [%d]",
-			m_client_id, m_module->get_id(), cmd->interval);
+			m_client_id, m_sensor_id, cmd->interval);
 		ret_value = OP_ERROR;
 		goto out;
 	}
@@ -633,14 +654,14 @@ bool command_worker::cmd_unset_interval(void *payload)
 
 	if (!is_permission_allowed()) {
 		ERR("Permission denied to unregister interval for client [%d], for sensor [0x%x] to client info manager",
-			m_client_id, m_module? m_module->get_id() : -1);
+			m_client_id, m_sensor_id);
 		ret_value = OP_ERROR;
 		goto out;
 	}
 
-	if (!get_client_info_manager().set_interval(m_client_id, m_module->get_id(), 0)) {
+	if (!get_client_info_manager().set_interval(m_client_id, m_sensor_id, 0)) {
 		ERR("Failed to unregister interval for client [%d], for sensor [0x%x] to client info manager",
-			m_client_id, m_module->get_id());
+			m_client_id, m_sensor_id);
 		ret_value = OP_ERROR;
 		goto out;
 	}
@@ -669,14 +690,14 @@ bool command_worker::cmd_set_option(void *payload)
 
 	if (!is_permission_allowed()) {
 		ERR("Permission denied to set interval for client [%d], for sensor [0x%x] with option [%d] to client info manager",
-			m_client_id, m_module? m_module->get_id() : -1, cmd->option);
+			m_client_id, m_sensor_id, cmd->option);
 		ret_value = OP_ERROR;
 		goto out;
 	}
 
-	if (!get_client_info_manager().set_option(m_client_id, m_module->get_id(), cmd->option)) {
+	if (!get_client_info_manager().set_option(m_client_id, m_sensor_id, cmd->option)) {
 		ERR("Failed to set option for client [%d], for sensor [0x%x] with option [%d] to client info manager",
-			m_client_id, m_module->get_id(), cmd->option);
+			m_client_id, m_sensor_id, cmd->option);
 		ret_value = OP_ERROR;
 		goto out;
 	}
@@ -700,7 +721,7 @@ bool command_worker::cmd_set_command(void *payload)
 
 	if (!is_permission_allowed()) {
 		ERR("Permission denied to set command for client [%d], for sensor [0x%x] with cmd [%d]",
-			m_client_id, m_module? m_module->get_id() : -1, cmd->cmd);
+			m_client_id, m_sensor_id, cmd->cmd);
 		ret_value = OP_ERROR;
 		goto out;
 	}
@@ -729,7 +750,7 @@ bool command_worker::cmd_get_data(void *payload)
 
 	if (!is_permission_allowed()) {
 		ERR("Permission denied to get data for client [%d], for sensor [0x%x]",
-			m_client_id, m_module? m_module->get_id() : -1);
+			m_client_id, m_sensor_id);
 		state = OP_ERROR;
 		goto out;
 	}
@@ -757,7 +778,7 @@ bool command_worker::cmd_get_data(void *payload)
 		}
 
 		while (!state && !data.timestamp && (retry++ < RETRY_CNT)) {
-			INFO("Wait sensor[0x%x] data updated for client [%d] #%d", m_module->get_id(), m_client_id, retry);
+			INFO("Wait sensor[0x%x] data updated for client [%d] #%d", m_sensor_id, m_client_id, retry);
 			usleep((retry == 1) ? INIT_WAIT_TIME : WAIT_TIME);
 			state = m_module->get_sensor_data(cmd->type, data);
 		}
@@ -771,7 +792,7 @@ bool command_worker::cmd_get_data(void *payload)
 
 	if (state) {
 		ERR("Failed to get data for client [%d], for sensor [0x%x]",
-			m_client_id, m_module->get_id());
+			m_client_id, m_sensor_id);
 	}
 
 out:
@@ -791,7 +812,7 @@ bool command_worker::cmd_send_sensorhub_data(void *payload)
 
 	if (!is_permission_allowed()) {
 		ERR("Permission denied to send sensorhub_data for client [%d], for sensor [0x%x]",
-			m_client_id, m_module? m_module->get_id() : -1);
+			m_client_id, m_sensor_id);
 		ret_value = OP_ERROR;
 		goto out;
 	}

@@ -131,6 +131,7 @@ bool get_proc_name(pid_t pid, char *process_name)
 	}
 
 	strncpy(process_name, buf, NAME_MAX-1);
+	process_name[NAME_MAX-1] = '\0';
 	fclose(fp);
 
 	return true;

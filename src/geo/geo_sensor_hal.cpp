@@ -26,6 +26,7 @@
 #include <fstream>
 
 using std::ifstream;
+using std::string;
 
 #define SENSOR_TYPE_MAGNETIC	"MAGNETIC"
 #define ELEMENT_NAME				"NAME"
@@ -147,9 +148,9 @@ string geo_sensor_hal::get_model_id(void)
 	return m_model_id;
 }
 
-sensor_type_t geo_sensor_hal::get_type(void)
+sensor_hal_type_t geo_sensor_hal::get_type(void)
 {
-	return GEOMAGNETIC_SENSOR;
+	return SENSOR_HAL_TYPE_GEOMAGNETIC;
 }
 
 bool geo_sensor_hal::enable(void)
@@ -190,7 +191,6 @@ bool geo_sensor_hal::set_interval(unsigned long val)
 	INFO("Interval is changed from %dms to %dms]", m_polling_interval, val);
 	m_polling_interval = val;
 	return true;
-
 }
 
 bool geo_sensor_hal::update_value(bool wait)

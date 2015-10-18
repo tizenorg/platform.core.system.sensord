@@ -32,6 +32,9 @@
 #include <orientation_filter.h>
 #include <cvirtual_sensor_config.h>
 
+using std::string;
+using std::vector;
+
 #define SENSOR_NAME "ORIENTATION_SENSOR"
 #define SENSOR_TYPE_ORIENTATION		"ORIENTATION"
 
@@ -61,7 +64,7 @@ orientation_sensor::orientation_sensor()
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
-	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR);
+	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
 	if (!fusion_sensor_hal)
 		m_hardware_fusion = false;
 	else
@@ -139,9 +142,9 @@ bool orientation_sensor::init(void)
 	return true;
 }
 
-sensor_type_t orientation_sensor::get_type(void)
+void orientation_sensor::get_types(vector<sensor_type_t> &types)
 {
-	return ORIENTATION_SENSOR;
+	types.push_back(ORIENTATION_SENSOR);
 }
 
 bool orientation_sensor::on_start(void)
@@ -314,7 +317,7 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 	return 0;
 }
 
-bool orientation_sensor::get_properties(sensor_properties_s &properties)
+bool orientation_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
 {
 	if(m_raw_data_unit == "DEGREES") {
 		properties.min_range = -180;

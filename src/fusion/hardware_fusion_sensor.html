@@ -91,7 +91,7 @@ software sensor fusion, </FONT>
 <P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">-&gt;In
 the constructor use sensor_plugin_loader to check if the hal sensor
 fusion is present or not:</FONT></P>
-<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR)</FONT></P>
+<P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION)</FONT></P>
 <P STYLE="margin-bottom: 0cm"><BR>
 </P>
 <P STYLE="margin-bottom: 0cm"><FONT FACE="Liberation Serif, serif">-&gt;If
@@ -103,7 +103,7 @@ this result in virtual_sensor::m_hardware_fusion</FONT></P>
 </P>
 <P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">sensor_hal
 *fusion_sensor_hal =
-sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR);</FONT></P>
+sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);</FONT></P>
 <P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">if
 (!fusion_sensor_hal)</FONT></P>
 <P STYLE="margin-bottom: 0cm"><FONT FACE="Courier 10 Pitch">&emsp;&emsp;m_hardware_fusion

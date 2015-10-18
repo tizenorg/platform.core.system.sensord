@@ -20,7 +20,7 @@
 #include <csocket.h>
 #include <attr/xattr.h>
 #include <sys/stat.h>
-
+#include <stdint.h>
 
 csocket::csocket()
 : m_sock_fd(-1)

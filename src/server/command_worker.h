@@ -26,9 +26,7 @@
 #include <sensor_base.h>
 #include <map>
 
-using std::multimap;
-
-typedef multimap<int, raw_data_t> sensor_raw_data_map;
+typedef std::multimap<int, raw_data_t> sensor_raw_data_map;
 void insert_priority_list(unsigned int);
 
 class command_worker {
@@ -43,6 +41,7 @@ private:
 	csocket m_socket;
 	worker_thread m_worker;
 	sensor_base *m_module;
+	sensor_id_t m_sensor_id;
 	static cmd_handler_t m_cmd_handlers[CMD_CNT];
 	static cpacket m_sensor_list;
 	static sensor_raw_data_map m_sensor_raw_data_map;
@@ -77,7 +76,7 @@ private:
 	bool cmd_get_data(void *payload);
 	bool cmd_send_sensorhub_data(void *payload);
 
-	void get_info(string &info);
+	void get_info(std::string &info);
 
 	int get_permission(void);
 	bool is_permission_allowed(void);

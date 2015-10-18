@@ -22,6 +22,7 @@
 #include <csocket.h>
 
 using std::pair;
+using std::string;
 
 cclient_info_manager::cclient_info_manager()
 {
@@ -224,7 +225,7 @@ bool cclient_info_manager::has_client_record(int client_id)
 }
 
 
-void cclient_info_manager::set_client_info(int client_id, pid_t pid)
+void cclient_info_manager::set_client_info(int client_id, pid_t pid, const string &name)
 {
 	AUTOLOCK(m_mutex);
 
@@ -235,7 +236,7 @@ void cclient_info_manager::set_client_info(int client_id, pid_t pid)
 		return;
 	}
 
-	it_record->second.set_client_info(pid);
+	it_record->second.set_client_info(pid, name);
 
 	return;
 }

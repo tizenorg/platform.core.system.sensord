@@ -23,6 +23,9 @@
 #include <sensor_plugin_loader.h>
 #include <sensor_base.h>
 #include <dlfcn.h>
+#include <vector>
+
+using std::vector;
 
 #define SECURITY_LIB "/usr/lib/libsecurity-server-client.so.1"
 

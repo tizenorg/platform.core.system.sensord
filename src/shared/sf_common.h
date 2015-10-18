@@ -17,6 +17,8 @@
  *
  */
 
+#include <common.h>
+
 #if !defined(_SF_COMMON_H_)
 #define _SF_COMMON_H_
 #include <unistd.h>
@@ -26,13 +28,15 @@
 #include <string>
 #include <vector>
 
-#define COMMAND_CHANNEL_PATH			"/tmp/sf_command_socket"
-#define EVENT_CHANNEL_PATH				"/tmp/sf_event_socket"
+#define COMMAND_CHANNEL_PATH			"/tmp/sensord_command_socket"
+#define EVENT_CHANNEL_PATH				"/tmp/sensord_event_socket"
 
 #define MAX_HANDLE			64
 #define MAX_HANDLE_REACHED	-2
 
 #define CLIENT_ID_INVALID   -1
+
+#define SENSOR_TYPE_MASK  0xFFFF
 
 enum packet_type_t {
 	CMD_NONE = 0,
@@ -73,7 +77,7 @@ enum poll_interval_t {
 };
 
 typedef struct {
-	pid_t pid;
+	char name[NAME_MAX];
 } cmd_get_id_t;
 
 typedef struct {

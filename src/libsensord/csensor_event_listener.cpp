@@ -24,12 +24,14 @@
 
 #include <thread>
 #include <chrono>
+#include <vector>
 
 #define MS_TO_US 1000
 #define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
 using std::thread;
 using std::pair;
+using std::vector;
 
 csensor_event_listener::csensor_event_listener()
 : m_client_id(CLIENT_ID_INVALID)

@@ -24,10 +24,10 @@
 #include <unordered_map>
 #include <common.h>
 #include <cmutex.h>
-using std::unordered_map;
+#include <vector>
 
-typedef unordered_map<int,cclient_sensor_record> client_id_sensor_record_map;
-typedef vector<int> client_id_vec;
+typedef std::unordered_map<int,cclient_sensor_record> client_id_sensor_record_map;
+typedef std::vector<int> client_id_vec;
 
 
 class cclient_info_manager {
@@ -37,7 +37,7 @@ public:
 	bool remove_client_record(int client_id);
 	bool has_client_record(int client_id);
 
-	void set_client_info(int client_id, pid_t pid);
+	void set_client_info(int client_id, pid_t pid, const std::string &name);
 	const char* get_client_info(int client_id);
 
 	bool set_permission(int client_id, int permission);
