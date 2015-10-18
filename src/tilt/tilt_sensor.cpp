@@ -32,6 +32,9 @@
 #include <orientation_filter.h>
 #include <cvirtual_sensor_config.h>
 
+using std::string;
+using std::vector;
+
 #define SENSOR_NAME			"TILT_SENSOR"
 #define SENSOR_TYPE_TILT	"TILT"
 
@@ -120,9 +123,9 @@ bool tilt_sensor::init(void)
 	return true;
 }
 
-sensor_type_t tilt_sensor::get_type(void)
+void tilt_sensor::get_types(vector<sensor_type_t> &types)
 {
-	return TILT_SENSOR;
+	types.push_back(TILT_SENSOR);
 }
 
 bool tilt_sensor::on_start(void)
@@ -250,7 +253,7 @@ int tilt_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &d
 	return 0;
 }
 
-bool tilt_sensor::get_properties(sensor_properties_s &properties)
+bool tilt_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
 {
 	if(m_raw_data_unit == "DEGREES") {
 		properties.min_range = -180;

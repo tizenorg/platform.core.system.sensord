@@ -26,6 +26,8 @@
 
 using std::bind1st;
 using std::mem_fun;
+using std::string;
+using std::vector;
 
 #define SENSOR_NAME "ULTRAVIOLET_SENSOR"
 
@@ -46,7 +48,7 @@ ultraviolet_sensor::~ultraviolet_sensor()
 
 bool ultraviolet_sensor::init()
 {
-	m_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(ULTRAVIOLET_SENSOR);
+	m_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_ULTRAVIOLET);
 
 	if (!m_sensor_hal) {
 		ERR("cannot load sensor_hal[%s]", sensor_base::get_name());
@@ -65,9 +67,9 @@ bool ultraviolet_sensor::init()
 	return true;
 }
 
-sensor_type_t ultraviolet_sensor::get_type(void)
+void ultraviolet_sensor::get_types(vector<sensor_type_t> &types)
 {
-	return ULTRAVIOLET_SENSOR;
+	types.push_back(ULTRAVIOLET_SENSOR);
 }
 
 bool ultraviolet_sensor::working(void *inst)
@@ -118,7 +120,7 @@ bool ultraviolet_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool ultraviolet_sensor::get_properties(sensor_properties_s &properties)
+bool ultraviolet_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
 {
 	return m_sensor_hal->get_properties(properties);
 }

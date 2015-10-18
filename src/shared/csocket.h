@@ -27,8 +27,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include "common.h"
-#include <string>
-using std::string;
 
 class csocket {
 public:

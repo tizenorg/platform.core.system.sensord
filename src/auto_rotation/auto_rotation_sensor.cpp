@@ -38,6 +38,8 @@
 
 using std::bind1st;
 using std::mem_fun;
+using std::string;
+using std::vector;
 
 #define SENSOR_NAME						"AUTO_ROTATION_SENSOR"
 #define SENSOR_TYPE_AUTO_ROTATION		"AUTO_ROTATION"
@@ -133,9 +135,9 @@ bool auto_rotation_sensor::init()
 	return true;
 }
 
-sensor_type_t auto_rotation_sensor::get_type(void)
+void auto_rotation_sensor::get_types(vector<sensor_type_t> &types)
 {
-	return AUTO_ROTATION_SENSOR;
+	types.push_back(AUTO_ROTATION_SENSOR);
 }
 
 bool auto_rotation_sensor::on_start(void)
@@ -208,7 +210,7 @@ int auto_rotation_sensor::get_sensor_data(const unsigned int event_type, sensor_
 	return 0;
 }
 
-bool auto_rotation_sensor::get_properties(sensor_properties_s &properties)
+bool auto_rotation_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
 {
 	properties.name = "Auto Rotation Sensor";
 	properties.vendor = "Samsung Electronics";

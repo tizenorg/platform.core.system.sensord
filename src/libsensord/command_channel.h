@@ -23,9 +23,6 @@
 #include <sensor_internal.h>
 #include <cpacket.h>
 #include <csocket.h>
-#include <vector>
-
-using std::vector;
 
 class command_channel
 {

@@ -26,6 +26,7 @@
 #include <fstream>
 
 using std::ifstream;
+using std::string;
 
 #define SENSOR_TYPE_BIO_LED_RED	"BIO_LED_RED"
 #define ELEMENT_NAME			"NAME"
@@ -112,9 +113,9 @@ string bio_led_red_sensor_hal::get_model_id(void)
 }
 
 
-sensor_type_t bio_led_red_sensor_hal::get_type(void)
+sensor_hal_type_t bio_led_red_sensor_hal::get_type(void)
 {
-	return BIO_LED_RED_SENSOR;
+	return SENSOR_HAL_TYPE_BIO_LED_RED;
 }
 
 bool bio_led_red_sensor_hal::enable(void)

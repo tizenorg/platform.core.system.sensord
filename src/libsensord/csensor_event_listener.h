@@ -38,19 +38,10 @@
 #include <cmutex.h>
 #include <poller.h>
 
-using std::unordered_map;
-using std::vector;
-using std::string;
-using std::queue;
-using std::mutex;
-using std::lock_guard;
-using std::unique_lock;
-using std::condition_variable;
-
-typedef vector<unsigned int> handle_vector;
-typedef vector<sensor_id_t> sensor_id_vector;
-typedef unordered_map<int,csensor_handle_info> sensor_handle_info_map;
-typedef unordered_map<sensor_id_t, command_channel*> sensor_command_channel_map;
+typedef std::vector<unsigned int> handle_vector;
+typedef std::vector<sensor_id_t> sensor_id_vector;
+typedef std::unordered_map<int,csensor_handle_info> sensor_handle_info_map;
+typedef std::unordered_map<sensor_id_t, command_channel*> sensor_command_channel_map;
 
 typedef struct {
 	unsigned long long event_id;
@@ -135,8 +126,8 @@ private:
 		THREAD_STATE_STOP,
 		THREAD_STATE_TERMINATE,
 	};
-	typedef lock_guard<mutex> lock;
-	typedef unique_lock<mutex> ulock;
+	typedef std::lock_guard<std::mutex> lock;
+	typedef std::unique_lock<std::mutex> ulock;
 
 	sensor_handle_info_map m_sensor_handle_infos;
 	sensor_command_channel_map m_command_channels;
@@ -149,8 +140,8 @@ private:
 	cmutex m_handle_info_lock;
 
 	thread_state m_thread_state;
-	mutex m_thread_mutex;
-	condition_variable m_thread_cond;
+	std::mutex m_thread_mutex;
+	std::condition_variable m_thread_cond;
 
 	hup_observer_t m_hup_observer;
 

@@ -25,11 +25,8 @@
 #include <common.h>
 #include <string.h>
 #include <unordered_map>
-#include <vector>
-using std::unordered_map;
-using std::vector;
 
-typedef unordered_map<unsigned int,creg_event_info> event_info_map;
+typedef std::unordered_map<unsigned int,creg_event_info> event_info_map;
 
 class csensor_handle_info {
 public:

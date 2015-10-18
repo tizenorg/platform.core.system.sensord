@@ -123,8 +123,6 @@ const char* get_log_element_name(log_id id, unsigned int type)
 
 const char* get_sensor_name(sensor_id_t sensor_id)
 {
-	const int SENSOR_TYPE_MASK = 0x0000FFFF;
-
 	sensor_type_t sensor_type = (sensor_type_t) (sensor_id & SENSOR_TYPE_MASK);
 
 	return get_log_element_name(LOG_ID_SENSOR_TYPE, sensor_type);

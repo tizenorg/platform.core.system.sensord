@@ -108,7 +108,8 @@ bool command_channel::cmd_get_id(int &client_id)
 	packet->set_cmd(CMD_GET_ID);
 
 	cmd_get_id = (cmd_get_id_t *)packet->data();
-	cmd_get_id->pid = getpid();
+
+	get_proc_name(getpid(), cmd_get_id->name);
 
 	INFO("%s send cmd_get_id()", get_client_name());
 

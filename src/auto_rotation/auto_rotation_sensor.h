@@ -21,7 +21,6 @@
 #define _AUTO_ROTATION_SENSOR_H_
 
 #include <sensor_internal.h>
-#include <string>
 #include <auto_rotation_alg.h>
 
 class auto_rotation_sensor : public virtual_sensor {
@@ -30,14 +29,14 @@ public:
 	virtual ~auto_rotation_sensor();
 
 	bool init();
-	sensor_type_t get_type(void);
+	virtual void get_types(std::vector<sensor_type_t> &types);
 
 	static bool working(void *inst);
 
-	void synthesize(const sensor_event_t& event, vector<sensor_event_t> &outs);
+	void synthesize(const sensor_event_t& event, std::vector<sensor_event_t> &outs);
 
 	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
-	virtual bool get_properties(sensor_properties_s &properties);
+	virtual bool get_properties(sensor_type_t sensor_type, sensor_properties_s &properties);
 private:
 	sensor_base *m_accel_sensor;
 	cmutex m_value_mutex;
@@ -47,8 +46,8 @@ private:
 	unsigned long long m_rotation_time;
 	auto_rotation_alg *m_alg;
 
-	string m_vendor;
-	string m_raw_data_unit;
+	std::string m_vendor;
+	std::string m_raw_data_unit;
 	int m_default_sampling_time;
 
 	auto_rotation_alg *get_alg();

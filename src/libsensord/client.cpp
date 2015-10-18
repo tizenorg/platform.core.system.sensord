@@ -27,10 +27,16 @@
 #include <common.h>
 #include <sensor_info.h>
 #include <sensor_info_manager.h>
+#include <vector>
+#include <algorithm>
+
+using std::vector;
 
 #ifndef API
 #define API __attribute__((visibility("default")))
 #endif
+
+#define MIN_INTERVAL 10
 
 static const int OP_SUCCESS = 0;
 static const int OP_ERROR =  -1;
@@ -623,7 +629,7 @@ API int sensord_connect(sensor_t sensor)
 	sensor_registered = event_listener.is_sensor_registered(sensor_id);
 
 	handle = event_listener.create_handle(sensor_id);
-	if (handle == MAX_HANDLE) {
+	if (handle == MAX_HANDLE_REACHED) {
 		ERR("Maximum number of handles reached, sensor: %s in client %s", get_sensor_name(sensor_id), get_client_name());
 		return OP_ERROR;
 	}
@@ -758,8 +764,8 @@ static bool register_event(int handle, unsigned int event_type, unsigned int int
 		return false;
 	}
 
-	if (interval == 0)
-		interval = 1;
+	if (interval < MIN_INTERVAL)
+		interval = MIN_INTERVAL;
 
 	INFO("%s registers event %s[0x%x] for sensor %s[%d] with interval: %d, cb: 0x%x, user_data: 0x%x", get_client_name(), get_event_name(event_type),
 			event_type, get_sensor_name(sensor_id), handle, interval, cb, user_data);
@@ -968,6 +974,9 @@ API bool sensord_change_event_interval(int handle, unsigned int event_type, unsi
 	event_listener.get_sensor_rep(sensor_id, prev_rep);
 
 	event_listener.get_event_info(handle, event_type, prev_interval, prev_cb_type, prev_cb, prev_user_data);
+
+	if (interval < MIN_INTERVAL)
+		interval = MIN_INTERVAL;
 
 	if (!event_listener.set_event_interval(handle, event_type, interval))
 		return false;
