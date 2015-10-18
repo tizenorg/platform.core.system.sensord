@@ -150,6 +150,7 @@ int main(int argc, char **argv)
 	}
 	else {
 		 usage();
+		 return -1;
 	}
 
 	interval = DEFAULT_EVENT_INTERVAL;

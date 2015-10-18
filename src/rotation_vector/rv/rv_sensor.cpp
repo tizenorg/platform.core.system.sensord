@@ -32,6 +32,9 @@
 #include <orientation_filter.h>
 #include <cvirtual_sensor_config.h>
 
+using std::string;
+using std::vector;
+
 #define SENSOR_NAME "RV_SENSOR"
 #define SENSOR_TYPE_RV		"ROTATION_VECTOR"
 
@@ -63,7 +66,7 @@ rv_sensor::rv_sensor()
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
 	// Will check if fusion_sensor is in the list of hal sensors.
-	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR);
+	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
 	if (!fusion_sensor_hal)
 		m_hardware_fusion = false;
 	else
@@ -114,9 +117,9 @@ bool rv_sensor::init()
 	return true;
 }
 
-sensor_type_t rv_sensor::get_type(void)
+void rv_sensor::get_types(vector<sensor_type_t> &types)
 {
-	return ROTATION_VECTOR_SENSOR;
+	types.push_back(ROTATION_VECTOR_SENSOR);
 }
 
 bool rv_sensor::on_start(void)
@@ -249,7 +252,7 @@ int rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &data)
 	return 0;
 }
 
-bool rv_sensor::get_properties(sensor_properties_s &properties)
+bool rv_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
 {
 	properties.vendor = m_vendor;
 	properties.name = SENSOR_NAME;

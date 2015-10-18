@@ -25,15 +25,7 @@
 #include <condition_variable>
 #include <set>
 
-using namespace std;
-using std::queue;
-using std::mutex;
-using std::lock_guard;
-using std::unique_lock;
-using std::condition_variable;
-using std::set;
-
-extern set<unsigned int> priority_list;
+extern std::set<unsigned int> priority_list;
 
 class csensor_event_queue
 {
@@ -51,8 +43,8 @@ private:
 			if (priority_list.empty())
 				return (e2->data.timestamp < e1->data.timestamp);
 
-			set<unsigned int>::iterator iter_e1 = priority_list.find(e1->event_type);
-			set<unsigned int>::iterator iter_e2 = priority_list.find(e2->event_type);
+			std::set<unsigned int>::iterator iter_e1 = priority_list.find(e1->event_type);
+			std::set<unsigned int>::iterator iter_e2 = priority_list.find(e2->event_type);
 
 			if (iter_e1 == priority_list.end())
 				prioritize_e1 = false;
@@ -82,21 +74,24 @@ private:
 
 	std::priority_queue<void*, std::vector<void*>, compare> m_queue;
 
-	mutex m_mutex;
-	condition_variable m_cond_var;
+	std::mutex m_mutex;
+	std::condition_variable m_cond_var;
 
-	typedef lock_guard<mutex> lock;
-	typedef unique_lock<mutex> ulock;
+	typedef std::lock_guard<std::mutex> lock;
+	typedef std::unique_lock<std::mutex> ulock;
 
-	csensor_event_queue();
-	csensor_event_queue(csensor_event_queue const&) {};
-	csensor_event_queue& operator=(csensor_event_queue const&);
+	csensor_event_queue() {};
+	~csensor_event_queue() {};
+	csensor_event_queue(const csensor_event_queue &) {};
+	csensor_event_queue& operator=(const csensor_event_queue &);
 	void push_internal(void *event);
-
 public:
 	static csensor_event_queue& get_instance();
-	void push(sensor_event_t const &event);
-	void push(sensorhub_event_t const &event);
+	void push(const sensor_event_t &event);
+	void push(sensor_event_t *event);
+	void push(const sensorhub_event_t &event);
+	void push(sensorhub_event_t *event);
+
 	void* pop(void);
 };
 

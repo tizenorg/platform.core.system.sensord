@@ -1,7 +1,7 @@
 /*
  * libsensord-share
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,29 @@
  *
  */
 
-#ifndef _CCONFIG_H_
-#define _CCONFIG_H_
+#ifndef _BATCH_INFO_LIST_CLASS_H_
+#define _BATCH_INFO_LIST_CLASS_H_
 
-#include <string>
 #include <unordered_map>
-#include <common.h>
+#include <memory>
 
-class cconfig
+class batch_info
 {
-protected:
-	virtual bool load_config(const std::string& config_path) = 0;
-
-	std::string m_device_id;
 public:
-	cconfig();
-	virtual ~cconfig();
-
-	bool get_device_id(void);
-
+	batch_info(unsigned int interval, unsigned int latency);
+	unsigned int interval;
+	unsigned int latency;
 };
 
-#endif /* _CCONFIG_H_ */
+class batch_info_list
+{
+private:
+	std::unordered_map<int, std::shared_ptr<batch_info>> m_batch_infos;
+
+public:
+	bool add_batch(int id, unsigned int interval, unsigned int latency);
+	bool delete_batch(int id);
+	bool get_batch(int id, unsigned int &interval, unsigned int &latency);
+	bool get_best_batch(unsigned int &interval, unsigned int &latency);
+};
+#endif

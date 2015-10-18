@@ -32,6 +32,9 @@
 #include <orientation_filter.h>
 #include <cvirtual_sensor_config.h>
 
+using std::vector;
+using std::string;
+
 #define SENSOR_NAME "UNCAL_GYROSCOPE_SENSOR"
 #define SENSOR_TYPE_UNCAL_GYRO		"UNCAL_GYROSCOPE"
 
@@ -62,7 +65,7 @@ uncal_gyro_sensor::uncal_gyro_sensor()
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
-	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR);
+	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
 	if (!fusion_sensor_hal)
 		m_hardware_fusion = false;
 	else
@@ -119,9 +122,9 @@ bool uncal_gyro_sensor::init(void)
 	return true;
 }
 
-sensor_type_t uncal_gyro_sensor::get_type(void)
+void uncal_gyro_sensor::get_types(vector<sensor_type_t> &types)
 {
-	return UNCAL_GYROSCOPE_SENSOR;
+	types.push_back(UNCAL_GYROSCOPE_SENSOR);
 }
 
 bool uncal_gyro_sensor::on_start(void)
@@ -287,7 +290,7 @@ int uncal_gyro_sensor::get_sensor_data(const unsigned int event_type, sensor_dat
 	return 0;
 }
 
-bool uncal_gyro_sensor::get_properties(sensor_properties_s &properties)
+bool uncal_gyro_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
 {
 	properties.resolution = 0.000001;
 	properties.vendor = m_vendor;

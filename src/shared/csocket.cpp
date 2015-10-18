@@ -20,7 +20,7 @@
 #include <csocket.h>
 #include <attr/xattr.h>
 #include <sys/stat.h>
-
+#include <stdint.h>
 
 csocket::csocket()
 : m_sock_fd(-1)
@@ -160,7 +160,7 @@ bool csocket::accept(csocket& client_socket) const
 	return true;
 }
 
-ssize_t csocket::send_for_seqpacket(void const* buffer, size_t size) const
+ssize_t csocket::send_for_seqpacket(const void *buffer, size_t size) const
 {
 	ssize_t err, len;
 
@@ -210,14 +210,14 @@ ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
 }
 
 
-ssize_t csocket::send_for_stream(void const* buffer, size_t size) const
+ssize_t csocket::send_for_stream(const void *buffer, size_t size) const
 {
 	ssize_t len;
 	ssize_t err = 0;
 	size_t total_sent_size = 0;
 
 	do {
-		len = ::send(m_sock_fd, (void const*)((uint8_t *)buffer + total_sent_size), size - total_sent_size, m_send_flags);
+		len = ::send(m_sock_fd, (const void *)((uint8_t *)buffer + total_sent_size), size - total_sent_size, m_send_flags);
 
 		if (len >= 0) {
 			total_sent_size += len;
@@ -269,7 +269,7 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 }
 
 
-ssize_t csocket::send(void const* buffer, size_t size) const
+ssize_t csocket::send(const void *buffer, size_t size) const
 {
 	if (m_sock_type == SOCK_STREAM)
 		return send_for_stream(buffer, size);

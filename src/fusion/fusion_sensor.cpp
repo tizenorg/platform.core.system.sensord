@@ -33,6 +33,9 @@
 #include <cvirtual_sensor_config.h>
 #include <algorithm>
 
+using std::string;
+using std::vector;
+
 #define SENSOR_NAME "FUSION_SENSOR"
 #define SENSOR_TYPE_FUSION		"FUSION"
 
@@ -212,9 +215,9 @@ bool fusion_sensor::init(void)
 	return true;
 }
 
-sensor_type_t fusion_sensor::get_type(void)
+void fusion_sensor::get_types(vector<sensor_type_t> &types)
 {
-	return FUSION_SENSOR;
+	types.push_back(FUSION_SENSOR);
 }
 
 bool fusion_sensor::on_start(void)
@@ -458,7 +461,7 @@ int fusion_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t 
 	return 0;
 }
 
-bool fusion_sensor::get_properties(sensor_properties_s &properties)
+bool fusion_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
 {
 	properties.min_range = 0;
 	properties.max_range = 0;
