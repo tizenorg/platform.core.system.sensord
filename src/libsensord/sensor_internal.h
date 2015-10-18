@@ -24,6 +24,10 @@
 #define DEPRECATED __attribute__((deprecated))
 #endif
 
+#ifndef API
+#define API __attribute__((visibility("default")))
+#endif
+
 #include "stdbool.h"
 
 #ifdef __cplusplus
@@ -298,10 +302,11 @@ bool sensord_change_event_interval(int handle, unsigned int event_type, unsigned
  * @brief Change the max batch latency of a specifed event type in a connected sensor.
  *
  * @param[in] handle a handle represensting a connected sensor.
+ * @param[in] event_type an event type to change max batch latency
  * @param[in] max_batch_latency an event in the batch can be delayed by at most max_batch_latency microseconds. If this is set to zero, batch mode is disabled.
  * @return true on success, otherwise false.
  */
-bool sensord_change_event_max_batch_latency(int handle, unsigned int max_batch_latency);
+bool sensord_change_event_max_batch_latency(int handle, unsigned int event_type, unsigned int max_batch_latency);
 
 /**
  * @brief Change the option of a connected sensor.

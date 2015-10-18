@@ -25,10 +25,6 @@
 #include <string>
 #include <common.h>
 
-using std::string;
-using std::ifstream;
-
-
 #define NO_OF_ULL_BYTES		8
 #define NO_OF_SHORT_VAL		4
 #define CH0_INDEX			0
@@ -85,9 +81,9 @@ int update_sysfs_string(const char *filepath, const char *val);
 int convert_bytes_to_int(int input, struct channel_parameters *info);
 
 template <typename value_t>
-bool read_node_value(string node_path, value_t &value)
+bool read_node_value(std::string node_path, value_t &value)
 {
-	ifstream handle;
+	std::ifstream handle;
 	handle.open(node_path.c_str());
 	if (!handle)
 	{

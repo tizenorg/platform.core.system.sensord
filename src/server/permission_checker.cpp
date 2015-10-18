@@ -81,7 +81,7 @@ void permission_checker::init()
 	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_STANDARD, false, ""));
 	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_BIO, true, "http://tizen.org/privilege/healthinfo"));
 
-	vector<sensor_base *> sensors;
+	std::vector<sensor_base *> sensors;
 	sensors = sensor_plugin_loader::get_instance().get_sensors(ALL_SENSOR);
 
 	for (unsigned int i = 0; i < sensors.size(); ++i)

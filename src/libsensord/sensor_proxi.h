@@ -40,8 +40,8 @@ enum proxi_event_type {
 };
 
 enum proxi_change_state {
-	PROXIMITY_STATE_FAR		= 0,
-	PROXIMITY_STATE_NEAR	= 1,
+	PROXIMITY_STATE_NEAR	= 0,
+	PROXIMITY_STATE_FAR	= 1,
 };
 
 enum proxi_property_id {

@@ -32,6 +32,9 @@
 #include <orientation_filter.h>
 #include <cvirtual_sensor_config.h>
 
+using std::string;
+using std::vector;
+
 #define SENSOR_NAME "GAMING_RV_SENSOR"
 #define SENSOR_TYPE_GAMING_RV "GAMING_ROTATION_VECTOR"
 
@@ -69,7 +72,7 @@ gaming_rv_sensor::gaming_rv_sensor()
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
 
-	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(FUSION_SENSOR);
+	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
 	if (!fusion_sensor_hal)
 		m_hardware_fusion = false;
 	else
@@ -161,9 +164,9 @@ bool gaming_rv_sensor::init()
 	return true;
 }
 
-sensor_type_t gaming_rv_sensor::get_type(void)
+void gaming_rv_sensor::get_types(vector<sensor_type_t> &types)
 {
-	return GAMING_RV_SENSOR;
+	types.push_back(GAMING_RV_SENSOR);
 }
 
 bool gaming_rv_sensor::on_start(void)
@@ -316,7 +319,7 @@ int gaming_rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &da
 	return 0;
 }
 
-bool gaming_rv_sensor::get_properties(sensor_properties_s &properties)
+bool gaming_rv_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
 {
 	properties.vendor = m_vendor;
 	properties.name = SENSOR_NAME;

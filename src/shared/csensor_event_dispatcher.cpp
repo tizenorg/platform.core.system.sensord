@@ -22,7 +22,10 @@
 #include <common.h>
 #include <sf_common.h>
 #include <thread>
+#include <vector>
+
 using std::thread;
+using std::vector;
 
 #define MAX_PENDING_CONNECTION 32
 

@@ -121,6 +121,7 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 	sensor_t *output_list;
 	result_boolean = sensord_get_sensor_list(sensor_type, &output_list, &output);
 	if (!result_boolean) {
+		free(output2);
 		fprintf(fp, "Sensor - %d, event - %d, failed at sensord_get_sensor_list\n", sensor_type, event_type);
 		return false;
 	}
@@ -128,6 +129,8 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 	result = sensord_register_event(handle, event_type, cond_value, 0, callback, NULL);
 
 	if (result < 0) {
+		free(output2);
+		free(output_list);
 		fprintf(fp, "Sensor - %d, event - %d, failed at sensord_register_event\n", sensor_type, event_type);
 		return false;
 	}
@@ -137,6 +140,8 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 	if (!result_boolean) {
 		sensord_unregister_event(handle, event_type);
 		sensord_disconnect(handle);
+		free(output2);
+		free(output_list);
 		fprintf(fp, "Sensor - %d, event - %d, failed at sensord_start\n", sensor_type, event_type);
 		return false;
 	}
@@ -146,6 +151,8 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 	if (!result_boolean) {
 		sensord_unregister_event(handle, event_type);
 		sensord_disconnect(handle);
+		free(output2);
+		free(output_list);
 		fprintf(fp, "Sensor - %d, event - %d, failed at sensord_get_data\n", sensor_type, event_type);
 		return false;
 	}
@@ -155,12 +162,16 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 
 	result_boolean = sensord_change_event_interval(handle, event_type, 101);
 	if (!result_boolean) {
+		free(output2);
+		free(output_list);
 		fprintf(fp, "Sensor - %d, event - %d, failed at sensord_change_event_interval\n", sensor_type, event_type);
 		return false;
 	}
 
 	result_boolean = sensord_set_option(handle, SENSOR_OPTION_ON_IN_SCREEN_OFF);
 	if (!result_boolean){
+		free(output2);
+		free(output_list);
 		fprintf(fp, "Sensor - %d, event - %d, failed at sensord_change_sensor_option\n", sensor_type, event_type);
 		return false;
 	}
@@ -168,6 +179,8 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 	result_boolean = sensord_unregister_event(handle, event_type);
 
 	if (!result_boolean) {
+		free(output2);
+		free(output_list);
 		fprintf(fp, "Sensor - %d, event - %d, failed at sensord_unregister_event\n", sensor_type, event_type);
 		return false;
 	}
@@ -175,6 +188,8 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 	result_boolean = sensord_stop(handle);
 
 	if (!result_boolean) {
+		free(output2);
+		free(output_list);
 		fprintf(fp, "Sensor - %d, event - %d, failed at sensord_stop\n", sensor_type, event_type);
 		return false;
 	}
@@ -182,9 +197,14 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 	result_boolean = sensord_disconnect(handle);
 
 	if (!result_boolean) {
+		free(output2);
+		free(output_list);
 		fprintf(fp, "Sensor - %d, event - %d, failed at sensord_disconnect\n", sensor_type, event_type);
 		return false;
 	}
+
+	free(output2);
+	free(output_list);
 
 	return true;
 }

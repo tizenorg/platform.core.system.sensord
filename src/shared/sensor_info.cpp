@@ -20,6 +20,11 @@
 #include <sensor_info.h>
 #include <common.h>
 #include <algorithm>
+#include <vector>
+#include <string>
+
+using std::vector;
+using std::string;
 
 sensor_type_t sensor_info::get_type(void)
 {

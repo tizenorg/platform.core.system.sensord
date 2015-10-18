@@ -107,7 +107,8 @@ int main(int argc, char** argv)
 		for (j = 0; j < MAX; j++) {
 			char command[100];
 			sprintf(command, "kill %d", pids[j]);
-			system(command);
+			if (system(command) == -1)
+				return -1;
 		}
 	}
 

@@ -26,6 +26,8 @@
 
 using std::bind1st;
 using std::mem_fun;
+using std::string;
+using std::vector;
 
 #define GRAVITY 9.80665
 #define G_TO_MG 1000
@@ -59,7 +61,7 @@ accel_sensor::~accel_sensor()
 
 bool accel_sensor::init()
 {
-	m_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(ACCELEROMETER_SENSOR);
+	m_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_ACCELEROMETER);
 
 	if (!m_sensor_hal) {
 		ERR("cannot load sensor_hal[%s]", sensor_base::get_name());
@@ -81,9 +83,9 @@ bool accel_sensor::init()
 	return true;
 }
 
-sensor_type_t accel_sensor::get_type(void)
+void accel_sensor::get_types(vector<sensor_type_t> &types)
 {
-	return ACCELEROMETER_SENSOR;
+	types.push_back(ACCELEROMETER_SENSOR);
 }
 
 bool accel_sensor::working(void *inst)
@@ -140,7 +142,7 @@ bool accel_sensor::on_stop(void)
 	return stop_poll();
 }
 
-bool accel_sensor::get_properties(sensor_properties_s &properties)
+bool accel_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
 {
 	return m_sensor_hal->get_properties(properties);
 }

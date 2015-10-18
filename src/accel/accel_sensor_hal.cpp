@@ -24,6 +24,7 @@
 #include <sys/poll.h>
 
 using std::ifstream;
+using std::string;
 
 #define GRAVITY 9.80665
 #define G_TO_MG 1000
@@ -157,9 +158,9 @@ string accel_sensor_hal::get_model_id(void)
 	return m_model_id;
 }
 
-sensor_type_t accel_sensor_hal::get_type(void)
+sensor_hal_type_t accel_sensor_hal::get_type(void)
 {
-	return ACCELEROMETER_SENSOR;
+	return SENSOR_HAL_TYPE_ACCELEROMETER;
 }
 
 bool accel_sensor_hal::enable(void)

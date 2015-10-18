@@ -168,6 +168,8 @@ int get_event(sensor_type_t sensor_type, char str[])
 			return UNCAL_GYRO_RAW_DATA_EVENT;
 		break;
 
+	default:
+		return -1;
 	}
 	return -1;
 }

@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 	int i;
 
 	int handle[MAXSIZE];
-	int result[MAXSIZE], start_handle[MAXSIZE], stop_handle[MAXSIZE];
+	int result[MAXSIZE], start_handle[MAXSIZE];
 	unsigned int event[MAXSIZE];
 	int sensors[MAXSIZE];
 

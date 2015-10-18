@@ -24,7 +24,9 @@
 #include <csensor_config.h>
 
 using std::ifstream;
+using std::ofstream;
 using std::fstream;
+using std::string;
 
 cmutex sensor_hal::m_shared_mutex;
 
@@ -200,7 +202,7 @@ bool sensor_hal::get_sensorhub_input_event_node_info(const string &interval_node
 
 bool sensor_hal::set_node_value(const string &node_path, int value)
 {
-	fstream node(node_path, fstream::out);
+	ofstream node(node_path, ofstream::binary);
 
 	if (!node)
 		return false;
@@ -212,7 +214,7 @@ bool sensor_hal::set_node_value(const string &node_path, int value)
 
 bool sensor_hal::set_node_value(const string &node_path, unsigned long long value)
 {
-	fstream node(node_path, fstream::out);
+	ofstream node(node_path, ofstream::binary);
 
 	if (!node)
 		return false;
@@ -225,7 +227,7 @@ bool sensor_hal::set_node_value(const string &node_path, unsigned long long valu
 
 bool sensor_hal::get_node_value(const string &node_path, int &value)
 {
-	fstream node(node_path, fstream::in);
+	ifstream node(node_path, ifstream::binary);
 
 	if (!node)
 		return false;

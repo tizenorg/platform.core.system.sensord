@@ -31,12 +31,12 @@ public:
 
 	bool init(void);
 
-	void synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs);
+	void synthesize(const sensor_event_t &event, std::vector<sensor_event_t> &outs);
 
 	bool add_interval(int client_id, unsigned int interval);
 	bool delete_interval(int client_id);
-	bool get_properties(sensor_properties_s &properties);
-	sensor_type_t get_type(void);
+	virtual bool get_properties(sensor_type_t sensor_type, sensor_properties_s &properties);
+	virtual void get_types(std::vector<sensor_type_t> &types);
 
 	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
 
@@ -53,8 +53,8 @@ private:
 	unsigned long long m_time;
 	unsigned int m_interval;
 
-	string m_vendor;
-	string m_raw_data_unit;
+	std::string m_vendor;
+	std::string m_raw_data_unit;
 	int m_default_sampling_time;
 
 	bool on_start(void);

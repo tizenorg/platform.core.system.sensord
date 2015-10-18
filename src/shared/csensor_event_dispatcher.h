@@ -25,9 +25,11 @@
 #include <cclient_info_manager.h>
 #include <csocket.h>
 #include <virtual_sensor.h>
+#include <unordered_map>
+#include <list>
 
-typedef unordered_map<unsigned int, sensor_event_t> event_type_last_event_map;
-typedef list<virtual_sensor *> virtual_sensors;
+typedef std::unordered_map<unsigned int, sensor_event_t> event_type_last_event_map;
+typedef std::list<virtual_sensor *> virtual_sensors;
 
 class csensor_event_dispatcher
 {

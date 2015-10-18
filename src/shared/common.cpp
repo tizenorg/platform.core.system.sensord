@@ -113,6 +113,7 @@ EXTAPI void sf_log(int type , int priority , const char *tag , const char *fmt ,
 	va_end(ap);
 }
 
+#if defined(_DEBUG)
 bool get_proc_name(pid_t pid, char *process_name)
 {
 	FILE *fp;
@@ -131,10 +132,26 @@ bool get_proc_name(pid_t pid, char *process_name)
 	}
 
 	strncpy(process_name, buf, NAME_MAX-1);
+	process_name[NAME_MAX-1] = '\0';
 	fclose(fp);
 
 	return true;
 }
+#else
+bool get_proc_name(pid_t pid, char *process_name)
+{
+	char buf[NAME_MAX];
+
+	if (sprintf(buf, "%d process", pid) < 1) {
+		return false;
+	}
+
+	strncpy(process_name, buf, NAME_MAX-1);
+	process_name[NAME_MAX-1] = '\0';
+
+	return true;
+}
+#endif
 
 const char* get_client_name(void)
 {
