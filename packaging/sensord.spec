@@ -28,7 +28,7 @@ BuildRequires:  pkgconfig(cynara-session)
 %define geo_state ON
 %define pressure_state ON
 %define temperature_state ON
-%define ultraviolet_state ON
+%define ultraviolet_state OFF
 %define orientation_state ON
 %define gravity_state ON
 %define linear_accel_state ON
@@ -37,7 +37,7 @@ BuildRequires:  pkgconfig(cynara-session)
 %define gaming_rv_state ON
 %define tilt_state ON
 %define uncal_gyro_state ON
-%define bio_led_red_state ON
+%define bio_led_red_state OFF
 %define build_test_suite OFF
 
 %description
