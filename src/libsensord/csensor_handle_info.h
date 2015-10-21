@@ -34,6 +34,7 @@ public:
 	sensor_id_t m_sensor_id;
 	int m_sensor_state;
 	int m_sensor_option;
+	int m_sensor_wakeup;
 	int m_bad_accuracy;
 	int m_accuracy;
 	sensor_accuracy_changed_cb_t m_accuracy_cb;

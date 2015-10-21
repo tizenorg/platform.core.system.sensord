@@ -135,6 +135,22 @@ bool cclient_info_manager::set_option(int client_id, sensor_id_t sensor_id, int 
 	return true;
 }
 
+bool cclient_info_manager::set_wakeup(int client_id, sensor_id_t sensor_id, int wakeup)
+{
+	AUTOLOCK(m_mutex);
+
+	auto it_record = m_clients.find(client_id);
+
+	if (it_record == m_clients.end()) {
+		ERR("Client[%d] is not found", client_id);
+		return false;
+	}
+
+	if(!it_record->second.set_wakeup(sensor_id, wakeup))
+		return false;
+
+	return true;
+}
 
 bool cclient_info_manager::set_start(int client_id, sensor_id_t sensor_id, bool start)
 {

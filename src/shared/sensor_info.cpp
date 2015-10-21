@@ -96,6 +96,11 @@ bool sensor_info::is_supported_event(unsigned int event)
 	return true;
 }
 
+bool sensor_info::is_wakeup_supported(void)
+{
+	return m_wakeup_supported;
+}
+
 void sensor_info::set_type(sensor_type_t type)
 {
 	m_type = type;
@@ -161,6 +166,11 @@ void sensor_info::set_supported_events(vector<unsigned int> &events)
 	copy(events.begin(), events.end(), back_inserter(m_supported_events));
 }
 
+void sensor_info::set_wakeup_supported(bool supported)
+{
+	m_wakeup_supported = supported;
+}
+
 void sensor_info::get_raw_data(raw_data_t &data)
 {
 	put(data, (int)m_type);
@@ -175,6 +185,7 @@ void sensor_info::get_raw_data(raw_data_t &data)
 	put(data, m_fifo_count);
 	put(data, m_max_batch_count);
 	put(data, m_supported_events);
+	put(data, m_wakeup_supported);
 }
 
 void sensor_info::set_raw_data(const char *data, int data_len)
@@ -200,6 +211,7 @@ void sensor_info::set_raw_data(const char *data, int data_len)
 	it_r_data = get(it_r_data, m_fifo_count);
 	it_r_data = get(it_r_data, m_max_batch_count);
 	it_r_data = get(it_r_data, m_supported_events);
+	it_r_data = get(it_r_data, m_wakeup_supported);
 }
 
 void sensor_info::show(void)
@@ -218,6 +230,8 @@ void sensor_info::show(void)
 
 	for (unsigned int i = 0; i < m_supported_events.size(); ++i)
 		INFO("supported_events[%u] = 0x%x", i, m_supported_events[i]);
+
+	INFO("Wakeup_supported = %d", m_wakeup_supported);
 }
 
 
@@ -235,6 +249,7 @@ void sensor_info::clear(void)
 	m_fifo_count = 0;
 	m_max_batch_count = 0;
 	m_supported_events.clear();
+	m_wakeup_supported = false;
 }
 
 
@@ -277,6 +292,16 @@ void sensor_info::put(raw_data_t &data, vector<unsigned int> &value)
 	}
 }
 
+void sensor_info::put(raw_data_t &data, bool value)
+{
+	char buffer[sizeof(value)];
+
+	bool *temp = (bool *) buffer;
+	*temp = value;
+
+	copy(&buffer[0], &buffer[sizeof(buffer)], back_inserter(data));
+}
+
 raw_data_iterator sensor_info::get(raw_data_iterator it, int &value)
 {
 	copy(it, it + sizeof(value), (char*) &value);
@@ -315,4 +340,11 @@ raw_data_iterator sensor_info::get(raw_data_iterator it, vector<unsigned int> &v
 	}
 
 	return it;
+}
+
+raw_data_iterator sensor_info::get(raw_data_iterator it, bool &value)
+{
+	copy(it, it + sizeof(value), (char*) &value);
+
+	return it + sizeof(value);
 }

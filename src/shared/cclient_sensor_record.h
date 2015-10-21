@@ -48,6 +48,7 @@ public:
 	bool set_batch(sensor_id_t sensor_id, unsigned int interval, unsigned int latency);
 	bool get_batch(sensor_id_t sensor_id, unsigned int &interval, unsigned int &latency);
 	bool set_option(sensor_id_t sensor_id, int option);
+	bool set_wakeup(sensor_id_t sensor_id, int wakeup);
 
 	bool set_start(sensor_id_t sensor_id, bool start);
 	bool is_started(sensor_id_t sensor_id);

@@ -44,6 +44,7 @@ public:
 	int get_max_batch_count(void);
 	void get_supported_events(std::vector<unsigned int> &events);
 	bool is_supported_event(unsigned int event);
+	bool is_wakeup_supported(void);
 
 	void set_type(sensor_type_t type);
 	void set_id(sensor_id_t id);
@@ -58,6 +59,7 @@ public:
 	void set_max_batch_count(int max_batch_count);
 	void register_supported_event(unsigned int event);
 	void set_supported_events(std::vector<unsigned int> &events);
+	void set_wakeup_supported(bool supported);
 
 	void clear(void);
 
@@ -77,16 +79,19 @@ private:
 	int m_fifo_count;
 	int m_max_batch_count;
 	std::vector<unsigned int> m_supported_events;
+	bool m_wakeup_supported;
 
 	void put(raw_data_t &data, int value);
 	void put(raw_data_t &data, float value);
 	void put(raw_data_t &data, std::string &value);
 	void put(raw_data_t &data, std::vector<unsigned int> &value);
+	void put(raw_data_t &data, bool value);
 
 	raw_data_iterator get(raw_data_iterator it, int &value);
 	raw_data_iterator get(raw_data_iterator it, float &value);
 	raw_data_iterator get(raw_data_iterator it, std::string &value);
 	raw_data_iterator get(raw_data_iterator it, std::vector<unsigned int> &value);
+	raw_data_iterator get(raw_data_iterator it, bool &value);
 };
 
 #endif /* _SENSOR_INFO_H_ */

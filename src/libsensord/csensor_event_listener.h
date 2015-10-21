@@ -98,6 +98,9 @@ public:
 	bool get_sensor_id(int handle, sensor_id_t &sensor_id);
 	bool get_sensor_state(int handle, int &state);
 
+	bool get_sensor_wakeup(int handle, int &sensor_wakeup);
+	bool set_sensor_wakeup(int handle, int sensor_wakeup);
+
 	void get_sensor_rep(sensor_id_t sensor_id, sensor_rep& rep);
 
 	bool has_client_id(void);

@@ -43,6 +43,11 @@ bool sensor_hal::init(void *data)
 	return true;
 }
 
+bool sensor_hal::is_wakeup_supported(void)
+{
+	return false;
+}
+
 bool sensor_hal::set_interval(unsigned long val)
 {
 	return true;
@@ -51,6 +56,11 @@ bool sensor_hal::set_interval(unsigned long val)
 long sensor_hal::set_command(unsigned int cmd, long val)
 {
 	return -1;
+}
+
+bool sensor_hal::set_wakeup(int wakeup)
+{
+	return false;
 }
 
 int sensor_hal::send_sensorhub_data(const char* data, int data_len)

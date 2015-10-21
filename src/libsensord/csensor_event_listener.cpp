@@ -527,6 +527,38 @@ bool csensor_event_listener::get_sensor_state(int handle, int &sensor_state)
 	return true;
 }
 
+bool csensor_event_listener::get_sensor_wakeup(int handle, int &sensor_wakeup)
+{
+	AUTOLOCK(m_handle_info_lock);
+
+	auto it_handle = m_sensor_handle_infos.find(handle);
+
+	if (it_handle == m_sensor_handle_infos.end()) {
+		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		return false;
+	}
+
+	sensor_wakeup = it_handle->second.m_sensor_wakeup;
+
+	return true;
+}
+
+bool csensor_event_listener::set_sensor_wakeup(int handle, int sensor_wakeup)
+{
+	AUTOLOCK(m_handle_info_lock);
+
+	auto it_handle = m_sensor_handle_infos.find(handle);
+
+	if (it_handle == m_sensor_handle_infos.end()) {
+		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		return false;
+	}
+
+	it_handle->second.m_sensor_wakeup = sensor_wakeup;
+
+	return true;
+}
+
 void csensor_event_listener::get_active_event_types(sensor_id_t sensor, event_type_vector &active_event_types)
 {
 	event_type_vector event_types;

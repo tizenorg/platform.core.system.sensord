@@ -50,6 +50,7 @@ enum packet_type_t {
 	CMD_REG,
 	CMD_UNREG,
 	CMD_SET_OPTION,
+	CMD_SET_WAKEUP,
 	CMD_SET_BATCH,
 	CMD_UNSET_BATCH,
 	CMD_SET_COMMAND,
@@ -141,6 +142,10 @@ typedef struct {
 	int option;
 } cmd_set_option_t;
 
+typedef struct {
+	int wakeup;
+} cmd_set_wakeup_t;
+
 typedef struct  {
 	unsigned int cmd;
 	long value;
@@ -168,6 +173,7 @@ typedef struct {
 	int min_interval;
 	int fifo_count;
 	int max_batch_count;
+	bool wakeup_supported;
 } sensor_properties_s;
 
 

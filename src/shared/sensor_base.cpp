@@ -264,9 +264,61 @@ unsigned int sensor_base::get_interval(int client_id, bool is_processor)
 	return m_interval_info_list.get_interval(client_id, is_processor);
 }
 
+bool sensor_base::add_wakeup(int client_id, int wakeup)
+{
+	int prev_wakeup, cur_wakeup;
+
+	AUTOLOCK(m_wakeup_info_list_mutex);
+
+	prev_wakeup = m_wakeup_info_list.is_wakeup_on();
+
+	if (!m_wakeup_info_list.add_wakeup(client_id, wakeup))
+		return false;
+
+	cur_wakeup = m_wakeup_info_list.is_wakeup_on();
+
+	if ((cur_wakeup == SENSOR_WAKEUP_ON) && (prev_wakeup < SENSOR_WAKEUP_ON)) {
+		INFO("Wakeup for sensor[0x%x] is changed from %d to %d by client[%d] adding wakeup",
+			get_id(), prev_wakeup, cur_wakeup, client_id);
+		set_wakeup(client_id, SENSOR_WAKEUP_ON);
+	}
+
+	return true;
+}
+
+bool sensor_base::delete_wakeup(int client_id)
+{
+	int prev_wakeup, cur_wakeup;
+	AUTOLOCK(m_wakeup_info_list_mutex);
+
+	prev_wakeup = m_wakeup_info_list.is_wakeup_on();
+
+	if (!m_wakeup_info_list.delete_wakeup(client_id))
+		return false;
+
+	cur_wakeup = m_wakeup_info_list.is_wakeup_on();
+
+	if ((cur_wakeup < SENSOR_WAKEUP_ON) && (prev_wakeup == SENSOR_WAKEUP_ON)) {
+		INFO("Wakeup for sensor[0x%x] is changed from %d to %d by client[%d] deleting wakeup",
+			get_id(), prev_wakeup, cur_wakeup, client_id);
+		set_wakeup(client_id, SENSOR_WAKEUP_OFF);
+	}
+
+	return true;
+}
+
+int sensor_base::get_wakeup(int client_id)
+{
+	AUTOLOCK(m_wakeup_info_list_mutex);
+
+	return m_wakeup_info_list.is_wakeup_on();
+}
+
 void sensor_base::get_sensor_info(sensor_type_t sensor_type, sensor_info &info)
 {
 	sensor_properties_s properties;
+	properties.wakeup_supported = false;
+
 	get_properties(sensor_type, properties);
 
 	info.set_type(sensor_type);
@@ -289,6 +341,7 @@ void sensor_base::get_sensor_info(sensor_type_t sensor_type, sensor_info &info)
 	}
 
 	info.set_supported_events(events);
+	info.set_wakeup_supported(properties.wakeup_supported);
 
 	return;
 }
@@ -308,9 +361,19 @@ bool sensor_base::is_supported(unsigned int event_type)
 	return true;
 }
 
+bool sensor_base::is_wakeup_supported(void)
+{
+	return false;
+}
+
 long sensor_base::set_command(unsigned int cmd, long value)
 {
 	return -1;
+}
+
+bool sensor_base::set_wakeup(int client_id, int wakeup)
+{
+	return false;
 }
 
 int sensor_base::send_sensorhub_data(const char* data, int data_len)

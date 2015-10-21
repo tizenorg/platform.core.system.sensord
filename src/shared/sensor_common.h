@@ -165,6 +165,19 @@ enum sensor_option_t {
 typedef enum sensor_option_t sensor_option_e;
 #endif
 
+/*
+ *	To prevent naming confliction as using same enums as sensor CAPI use
+ */
+#ifndef __SENSOR_H__
+enum sensor_wakeup_t {
+	SENSOR_WAKEUP_UNKNOWN = -1,
+	SENSOR_WAKEUP_OFF = 0,
+	SENSOR_WAKEUP_ON = 1,
+};
+
+typedef enum sensor_wakeup_t sensor_wakeup_e;
+#endif
+
 enum sensor_interval_t {
 	SENSOR_INTERVAL_FASTEST = 0,
 	SENSOR_INTERVAL_NORMAL = 200,

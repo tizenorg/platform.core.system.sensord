@@ -197,6 +197,14 @@ bool sensord_get_supported_event_types(sensor_t sensor, unsigned int **event_typ
 bool sensord_is_supported_event_type(sensor_t sensor, unsigned int event_type, bool *supported);
 
 /**
+ * @brief Check a wakeup supported or not by this sensor.
+ *
+ * @param[in] sensor a sensor to check a given event type is supporeted.
+ * @return true on success, otherwise false.
+ */
+bool sensord_is_wakeup_supported(sensor_t sensor);
+
+/**
  * @brief Connect a given sensor and get a handle of a given sensor.
  *
  * @param[in] sensor a sensor to connect
@@ -318,6 +326,17 @@ bool sensord_change_event_max_batch_latency(int handle, unsigned int event_type,
  * @return true on success, otherwise false.
  */
 bool sensord_set_option(int handle, int option);
+
+/**
+ * @brief Change the wakeup mode of a connected sensor.
+ *
+ * @param[in] handle a handle represensting a connected sensor.
+ * @param[in] wakeup either one of SENSOR_WAKEUP_OFF and SENSOR_WAKEUP_ON.
+ *				     with SENSOR_WAKEUP_OFF, it stops to listening events when AP is asleep.
+ * 				     with SENSOR_WAKEUP_ON, it continues to listening events even when AP is asleep.
+ * @return true on success, otherwise false.
+ */
+bool sensord_set_wakeup(int handle, int wakeup);
 
 /**
  * @brief Send data to sensorhub

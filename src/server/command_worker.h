@@ -72,6 +72,7 @@ private:
 	bool cmd_set_batch(void *payload);
 	bool cmd_unset_batch(void *payload);
 	bool cmd_set_option(void *payload);
+	bool cmd_set_wakeup(void *payload);
 	bool cmd_set_command(void *payload);
 	bool cmd_get_data(void *payload);
 	bool cmd_send_sensorhub_data(void *payload);

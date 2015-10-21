@@ -104,11 +104,13 @@ public:
 	virtual bool disable(void) = 0;
 	virtual bool set_interval(unsigned long val);
 	virtual bool is_data_ready(bool wait) = 0;
+	virtual bool is_wakeup_supported(void);
 	virtual bool get_properties(sensor_properties_s &properties) {return false;};
 	virtual bool get_properties(sensor_type_t sensor_type, sensor_properties_s &properties) {return false;};
 	virtual int get_sensor_data(sensor_data_t &data);
 	virtual int get_sensor_data(sensorhub_data_t &data);
 	virtual long set_command(unsigned int cmd, long val);
+	virtual bool set_wakeup(int wakeup);
 	virtual int send_sensorhub_data(const char *data, int data_len);
 
 protected:

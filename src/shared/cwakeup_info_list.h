@@ -1,7 +1,7 @@
 /*
  * libsensord-share
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,32 @@
  *
  */
 
-#ifndef CSENSOR_USAGE_H_
-#define CSENSOR_USAGE_H_
+#ifndef _CWAKEUP_INFO_LIST_CLASS_H_
+#define _CWAKEUP_INFO_LIST_CLASS_H_
 
-#include <sf_common.h>
-#include <algorithm>
-#include <vector>
+#include <list>
 
-typedef std::vector<unsigned int> reg_event_vector;
-
-class csensor_usage {
+class cwakeup_info
+{
 public:
-	unsigned int m_interval;
-	unsigned int m_latency;
-	int m_option;
-	int m_wakeup;
-	reg_event_vector m_reg_events;
-	bool m_start;
-
-	csensor_usage();
-	~csensor_usage();
-
-	bool register_event(unsigned int event_type);
-	bool unregister_event(unsigned int event_type);
-	bool is_event_registered(unsigned int event_type);
+	cwakeup_info(int client_id, int wakeup);
+	int client_id;
+	int wakeup;
 };
 
-#endif /* CSENSOR_USAGE_H_ */
+typedef std::list<cwakeup_info>::iterator cwakeup_info_iterator;
+
+class cwakeup_info_list
+{
+private:
+	cwakeup_info_iterator find_if(int client_id);
+
+	std::list<cwakeup_info> m_list;
+
+public:
+	bool add_wakeup(int client_id, int wakeup);
+	bool delete_wakeup(int client_id);
+	int get_wakeup(int client_id);
+	int is_wakeup_on(void);
+};
+#endif
