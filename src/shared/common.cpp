@@ -184,6 +184,9 @@ void copy_sensor_data(sensor_data_t *dest, sensor_data_t *src)
 {
 	memcpy(dest, src, offsetof(sensor_data_t, values));
 	memcpy(dest->values, src->values, src->value_count * sizeof(src->values[0]));
+
+	dest->extra_data_size = src->extra_data_size;
+	dest->extra_data = src->extra_data;
 }
 
 void copy_sensorhub_data(sensorhub_data_t *dest, sensorhub_data_t *src)

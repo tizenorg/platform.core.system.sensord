@@ -121,6 +121,13 @@ typedef struct sensor_data_t {
 	};
 
 	float values[SENSOR_DATA_VALUE_SIZE];
+
+/*
+ * 	If extra_data_size > 0,
+ * 	then use extra_data.
+ */
+	int extra_data_size;
+	void *extra_data;
 } sensor_data_t;
 
 #define SENSOR_HUB_DATA_SIZE	4096

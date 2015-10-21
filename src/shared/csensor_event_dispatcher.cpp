@@ -227,10 +227,22 @@ void csensor_event_dispatcher::send_sensor_events(void* events, int event_cnt, b
 
 			bool ret;
 
-			if (is_hub_event)
+			if (is_hub_event) {
 				ret = (client_socket.send(sensor_hub_events + i, sizeof(sensorhub_event_t)) > 0);
-			else
+			} else if (sensor_events[i].data.extra_data_size > 0) {
+				void *extended_event;
+				int extended_size = sizeof(sensor_event_t) + sensor_events[i].data.extra_data_size;
+
+				extended_event = (void *)malloc(extended_size);
+				memcpy(extended_event, sensor_events + i, sizeof(sensor_event_t));
+				memcpy(extended_event + sizeof(sensor_event_t), sensor_events[i].data.extra_data, sensor_events[i].data.extra_data_size);
+
+				ret = (client_socket.send(extended_event, extended_size) > 0);
+
+				free(extended_event);
+			} else {
 				ret = (client_socket.send(sensor_events + i, sizeof(sensor_event_t)) > 0);
+			}
 
 			if (ret)
 				DBG("Event[0x%x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
