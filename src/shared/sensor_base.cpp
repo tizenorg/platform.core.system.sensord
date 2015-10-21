@@ -314,6 +314,62 @@ int sensor_base::get_wakeup(int client_id)
 	return m_wakeup_info_list.is_wakeup_on();
 }
 
+bool sensor_base::add_batch(int client_id, unsigned int latency)
+{
+	unsigned int prev_max, cur_max;
+
+	AUTOLOCK(m_batch_info_list_mutex);
+
+	prev_max = m_batch_info_list.get_max();
+
+	if (!m_batch_info_list.add_batch(client_id, latency))
+		return false;
+
+	cur_max = m_batch_info_list.get_max();
+
+	if (cur_max != prev_max) {
+		INFO("Max latency for sensor[0x%x] is changed from %dms to %dms by client[%d] adding latency",
+			get_id(), prev_max, cur_max, client_id);
+		set_batch(client_id, cur_max);
+	}
+
+	return true;
+}
+
+bool sensor_base::delete_batch(int client_id)
+{
+	unsigned int prev_max, cur_max;
+	AUTOLOCK(m_batch_info_list_mutex);
+
+	prev_max = m_batch_info_list.get_max();
+
+	if (!m_batch_info_list.delete_batch(client_id))
+		return false;
+
+	cur_max = m_batch_info_list.get_max();
+
+	if (!cur_max) {
+		INFO("No latency for sensor[0x%x] by client[%d] deleting latency, so set to default 0 ms",
+			 get_id(), client_id);
+
+		set_batch(client_id, 0);
+	} else if (cur_max != prev_max) {
+		INFO("Max latency for sensor[0x%x] is changed from %dms to %dms by client[%d] deleting latency",
+			get_id(), prev_max, cur_max, client_id);
+
+		set_batch(client_id, cur_max);
+	}
+
+	return true;
+}
+
+unsigned int sensor_base::get_batch(int client_id)
+{
+	AUTOLOCK(m_batch_info_list_mutex);
+
+	return m_batch_info_list.get_batch(client_id);
+}
+
 void sensor_base::get_sensor_info(sensor_type_t sensor_type, sensor_info &info)
 {
 	sensor_properties_s properties;
@@ -372,6 +428,11 @@ long sensor_base::set_command(unsigned int cmd, long value)
 }
 
 bool sensor_base::set_wakeup(int client_id, int wakeup)
+{
+	return false;
+}
+
+bool sensor_base::set_batch(int client_id, unsigned int latency)
 {
 	return false;
 }

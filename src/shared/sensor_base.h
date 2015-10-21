@@ -30,6 +30,7 @@
 
 #include <cinterval_info_list.h>
 #include <cwakeup_info_list.h>
+#include <cbatch_info_list.h>
 #include <cmutex.h>
 
 #include <common.h>
@@ -71,6 +72,10 @@ public:
 	virtual bool delete_wakeup(int client_id);
 	int get_wakeup(int client_id);
 
+	virtual bool add_batch(int client_id, unsigned int latency);
+	virtual bool delete_batch(int client_id);
+	unsigned int get_batch(int client_id);
+
 	void get_sensor_info(sensor_type_t sensor_type, sensor_info &info);
 	virtual bool get_properties(sensor_type_t sensor_type, sensor_properties_s &properties);
 
@@ -79,6 +84,7 @@ public:
 
 	virtual long set_command(unsigned int cmd, long value);
 	virtual bool set_wakeup(int client_id, int wakeup);
+	virtual bool set_batch(int client_id, unsigned int latency);
 	virtual int send_sensorhub_data(const char* data, int data_len);
 
 	virtual int get_sensor_data(unsigned int type, sensor_data_t &data);
@@ -96,8 +102,10 @@ protected:
 
 	cinterval_info_list m_interval_info_list;
 	cwakeup_info_list m_wakeup_info_list;
+	cbatch_info_list m_batch_info_list;
 	cmutex m_interval_info_list_mutex;
 	cmutex m_wakeup_info_list_mutex;
+	cmutex m_batch_info_list_mutex;
 
 	cmutex m_mutex;
 

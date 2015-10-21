@@ -640,6 +640,13 @@ bool command_worker::cmd_set_batch(void *payload)
 		goto out;
 	}
 
+	if (!m_module->add_batch(m_client_id, cmd->latency)) {
+		ERR("Failed to set latency for client [%d], for sensor [0x%x] with latency [%d]",
+			m_client_id, m_sensor_id, cmd->latency);
+		ret_value = OP_ERROR;
+		goto out;
+	}
+
 	ret_value = OP_SUCCESS;
 
 out:
@@ -669,6 +676,12 @@ bool command_worker::cmd_unset_batch(void *payload)
 
 	if (!m_module->delete_interval(m_client_id, false)) {
 		ERR("Failed to delete interval for client [%d]", m_client_id);
+		ret_value = OP_ERROR;
+		goto out;
+	}
+
+	if (!m_module->delete_batch(m_client_id)) {
+		ERR("Failed to delete latency for client [%d]", m_client_id);
 		ret_value = OP_ERROR;
 		goto out;
 	}

@@ -30,7 +30,7 @@ add_library(sensord-server SHARED
 	cclient_sensor_record.cpp
 	cinterval_info_list.cpp
 	cwakeup_info_list.cpp
-	batch_info_list.cpp
+	cbatch_info_list.cpp
 	sensor_plugin_loader.cpp
 	sensor_hal.cpp
 	sensor_base.cpp
@@ -66,7 +66,7 @@ install(FILES
 	csensor_event_queue.h
 	cinterval_info_list.h
 	cwakeup_info_list.h
-	batch_info_list.h
+	cbatch_info_list.h
 	sensor_plugin_loader.h
 	sensor_hal.h
 	sensor_base.h
