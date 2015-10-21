@@ -28,9 +28,7 @@
 #include <condition_variable>
 #include <string>
 
-#include <cinterval_info_list.h>
-#include <cwakeup_info_list.h>
-#include <cbatch_info_list.h>
+#include <cplugin_info_list.h>
 #include <cmutex.h>
 
 #include <common.h>
@@ -100,12 +98,8 @@ protected:
 	sensor_privilege_t m_privilege;
 	int m_permission;
 
-	cinterval_info_list m_interval_info_list;
-	cwakeup_info_list m_wakeup_info_list;
-	cbatch_info_list m_batch_info_list;
-	cmutex m_interval_info_list_mutex;
-	cmutex m_wakeup_info_list_mutex;
-	cmutex m_batch_info_list_mutex;
+	cplugin_info_list m_plugin_info_list;
+	cmutex m_plugin_info_list_mutex;
 
 	cmutex m_mutex;
 
