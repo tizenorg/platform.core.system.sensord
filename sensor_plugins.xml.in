@@ -1,14 +1,14 @@
 <PLUGIN>
 	<HAL>
-		<MODULE path = "/usr/lib/sensord/libaccel_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libgyro_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libgeo_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libproxi_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/liblight_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libpressure_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libtemperature_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libultraviolet_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libbio_led_red_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensord-plugins/libaccel_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensord-plugins/libgyro_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensord-plugins/libgeo_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensord-plugins/libproxi_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensord-plugins/liblight_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensord-plugins/libpressure_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensord-plugins/libtemperature_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensord-plugins/libultraviolet_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensord-plugins/libbio_led_red_sensor_hal.so"/>
 	</HAL>
 
 	<SENSOR>

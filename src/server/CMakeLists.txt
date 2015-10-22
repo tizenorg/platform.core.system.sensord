@@ -28,6 +28,6 @@ SET(SERVER_SRCS
 
 add_executable(${PROJECT_NAME} ${SERVER_SRCS})
 
-target_link_libraries(${PROJECT_NAME} ${server_pkgs_LDFLAGS} "sensord-server")
+target_link_libraries(${PROJECT_NAME} ${server_pkgs_LDFLAGS} "sensord-server" "sensor-plugins")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

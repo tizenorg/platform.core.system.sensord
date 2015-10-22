@@ -16,6 +16,7 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(vconf)
 BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(capi-system-info)
+BuildRequires:  pkgconfig(sensor-plugins)
 BuildRequires:  pkgconfig(cynara-creds-socket)
 BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
@@ -116,7 +117,6 @@ systemctl daemon-reload
 
 %files -n sensord
 %attr(0644,root,root)/usr/etc/sensor_plugins.xml
-%attr(0644,root,root)/usr/etc/sensors.xml
 %attr(0644,root,root)/usr/etc/virtual_sensors.xml
 %manifest sensord.manifest
 %{_bindir}/sensord

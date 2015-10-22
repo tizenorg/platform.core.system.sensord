@@ -24,9 +24,8 @@ add_definitions(-DLIBDIR="${CMAKE_INSTALL_LIBDIR}")
 
 # Installing files
 CONFIGURE_FILE(sensor_plugins.xml.in sensor_plugins.xml @ONLY)
-CONFIGURE_FILE(sensors.xml.in sensors.xml @ONLY)
 
-INSTALL(FILES sensor_plugins.xml sensors.xml DESTINATION etc)
+INSTALL(FILES sensor_plugins.xml DESTINATION etc)
 INSTALL(FILES virtual_sensors.xml virtual_sensors.xml DESTINATION etc)
 
 # Sub-directory
