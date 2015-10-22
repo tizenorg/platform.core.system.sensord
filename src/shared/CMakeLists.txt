@@ -18,7 +18,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
 
 add_library(sensord-server SHARED
-	crw_lock.cpp
 	worker_thread.cpp
 	cconfig.cpp
 	csensor_config.cpp
@@ -56,7 +55,6 @@ install(TARGETS sensord-share DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES sensord-server.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(FILES ${PROJECT_NAME}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(FILES
-	crw_lock.h
 	worker_thread.h
 	cconfig.h
 	csensor_config.h
