@@ -82,6 +82,17 @@ bool proxi_sensor::process_event(void)
 	AUTOLOCK(m_client_info_mutex);
 	AUTOLOCK(m_mutex);
 
+	if (event.data.values[0] == PROXIMITY_NODE_STATE_FAR) {
+		INFO("PROXIMITY_STATE_FAR state occured\n");
+		event.data.values[0] = PROXIMITY_STATE_FAR;
+	} else if (event.data.values[0] == PROXIMITY_NODE_STATE_NEAR) {
+		INFO("PROXIMITY_STATE_NEAR state occured\n");
+		event.data.values[0] = PROXIMITY_STATE_NEAR;
+	} else {
+		ERR("PROXIMITY_STATE Unknown: %d\n",event.data.values[0]);
+		return false;
+	}
+
 	event.sensor_id = get_id();
 	if (get_client_cnt(PROXIMITY_DISTANCE_DATA_EVENT)) {
 		event.event_type = PROXIMITY_DISTANCE_DATA_EVENT;
