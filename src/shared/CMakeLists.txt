@@ -19,8 +19,6 @@ include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
 
 add_library(sensord-server SHARED
 	worker_thread.cpp
-	cconfig.cpp
-	csensor_config.cpp
 	cvirtual_sensor_config.cpp
 	csensor_event_queue.cpp
 	csensor_event_dispatcher.cpp
@@ -29,7 +27,6 @@ add_library(sensord-server SHARED
 	cclient_sensor_record.cpp
 	cplugin_info_list.cpp
 	sensor_plugin_loader.cpp
-	sensor_hal.cpp
 	sensor_base.cpp
 	physical_sensor.cpp
 	virtual_sensor.cpp
@@ -39,9 +36,6 @@ add_library(sensord-server SHARED
 add_library(sensord-share SHARED
 	cpacket.cpp
 	csocket.cpp
-	cbase_lock.cpp
-	cmutex.cpp
-	common.cpp
 	sensor_info.cpp
 )
 
@@ -56,31 +50,21 @@ install(FILES sensord-server.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(FILES ${PROJECT_NAME}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(FILES
 	worker_thread.h
-	cconfig.h
-	csensor_config.h
 	cvirtual_sensor_config.h
 	csensor_event_queue.h
 	cplugin_info_list.h
 	sensor_plugin_loader.h
-	sensor_hal.h
 	sensor_base.h
 	physical_sensor.h
 	virtual_sensor.h
-	sf_common.h
 	cpacket.h
 	csocket.h
 	cbase_lock.h
-	cmutex.h
-	common.h
 	sensor_info.h
 	iio_common.h
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 )
 
-install(FILES
-	sensor_common.h
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor
-)
 install(FILES sensor_accel.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_geomag.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_light.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)

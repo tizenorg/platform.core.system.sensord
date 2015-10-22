@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 project(light CXX)
 
 SET(SENSOR_NAME light_sensor)
-SET(SENSOR_HAL_NAME light_sensor_hal)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
@@ -19,12 +18,6 @@ add_library(${SENSOR_NAME} SHARED
 		light_sensor.cpp
 		)
 
-add_library(${SENSOR_HAL_NAME} SHARED
-		light_sensor_hal.cpp
-		)
-
 target_link_libraries(${SENSOR_NAME} ${light_pkgs_LDFLAGS} "-lm")
-target_link_libraries(${SENSOR_HAL_NAME} ${light_pkgs_LDFLAGS})
 
 install(TARGETS ${SENSOR_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/sensord)
-install(TARGETS ${SENSOR_HAL_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/sensord)

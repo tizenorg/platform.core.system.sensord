@@ -1,14 +1,14 @@
 <PLUGIN>
 	<HAL>
-		<MODULE path = "/usr/lib/sensord/libaccel_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libgyro_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libgeo_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libproxi_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/liblight_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libpressure_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libtemperature_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libultraviolet_sensor_hal.so"/>
-		<MODULE path = "/usr/lib/sensord/libbio_led_red_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensor-hal/libaccel_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensor-hal/libgyro_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensor-hal/libgeo_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensor-hal/libproxi_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensor-hal/liblight_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensor-hal/libpressure_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensor-hal/libtemperature_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensor-hal/libultraviolet_sensor_hal.so"/>
+		<MODULE path = "/usr/lib/sensor-hal/libbio_led_red_sensor_hal.so"/>
 	</HAL>
 
 	<SENSOR>
