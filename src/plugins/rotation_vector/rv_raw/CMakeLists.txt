@@ -4,7 +4,7 @@ project(rv_raw CXX)
 SET(SENSOR_NAME rv_raw_sensor)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
+include_directories(${CMAKE_SOURCE_DIR}/src/client)
 
 INCLUDE(FindPkgConfig)
 PKG_CHECK_MODULES(rv_raw_pkgs REQUIRED vconf)

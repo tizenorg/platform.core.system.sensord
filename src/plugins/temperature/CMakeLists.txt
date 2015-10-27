@@ -4,7 +4,7 @@ project(temperature CXX)
 SET(SENSOR_NAME temperature_sensor)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
+include_directories(${CMAKE_SOURCE_DIR}/src/client)
 
 INCLUDE(FindPkgConfig)
 PKG_CHECK_MODULES(temp_pkgs REQUIRED vconf)

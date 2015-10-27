@@ -14,7 +14,7 @@ add_definitions(-DPREFIX="${CMAKE_INSTALL_PREFIX}")
 configure_file(${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc @ONLY)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
+include_directories(${CMAKE_SOURCE_DIR}/src/client)
 include_directories(${CMAKE_SOURCE_DIR}/src/shared)
 
 FOREACH(flag ${pkgs_CFLAGS})
@@ -23,7 +23,7 @@ ENDFOREACH(flag)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 
-link_directories(../src/libsensord/)
+link_directories(../src/client/)
 
 add_executable(api-test src/api-test.c)
 add_executable(sensor-test src/sensor-test.c src/check-sensor.c)

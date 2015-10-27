@@ -13,7 +13,7 @@ FOREACH(flag ${server_pkgs_CFLAGS})
 ENDFOREACH(flag)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
+include_directories(${CMAKE_SOURCE_DIR}/src/client)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrt -ldl -pthread -fPIE")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie")

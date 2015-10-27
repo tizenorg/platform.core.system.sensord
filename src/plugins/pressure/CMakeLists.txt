@@ -4,7 +4,7 @@ project(pressure CXX)
 SET(SENSOR_NAME pressure_sensor)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
+include_directories(${CMAKE_SOURCE_DIR}/src/client)
 
 FOREACH(flag ${pressure_pkgs_LDFLAGS})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")

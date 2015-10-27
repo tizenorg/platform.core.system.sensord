@@ -4,7 +4,7 @@ project(geo CXX)
 SET(SENSOR_NAME geo_sensor)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
+include_directories(${CMAKE_SOURCE_DIR}/src/client)
 
 FOREACH(flag ${geo_pkgs_LDFLAGS})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")

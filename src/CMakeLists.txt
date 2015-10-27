@@ -88,6 +88,6 @@ ENDIF()
 
 add_subdirectory(plugins/rotation_vector)
 add_subdirectory(server)
-add_subdirectory(libsensord)
+add_subdirectory(client)
 add_subdirectory(shared)
 

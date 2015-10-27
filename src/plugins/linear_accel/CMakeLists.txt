@@ -4,7 +4,7 @@ project(linear_accel CXX)
 SET(SENSOR_NAME linear_accel_sensor)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src/libsensord)
+include_directories(${CMAKE_SOURCE_DIR}/src/client)
 include_directories(${CMAKE_SOURCE_DIR}/src/plugins/sensor_fusion)
 
 FOREACH(flag ${linear_accel_pkgs_LDFLAGS})
