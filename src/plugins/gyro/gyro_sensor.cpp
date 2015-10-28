@@ -87,7 +87,7 @@ bool gyro_sensor::process_event(void)
 {
 	sensor_event_t event;
 
-	if (m_sensor_hal->is_data_ready(true) == false)
+	if (m_sensor_hal->is_data_ready() == false)
 		return true;
 
 	m_sensor_hal->get_sensor_data(event.data);

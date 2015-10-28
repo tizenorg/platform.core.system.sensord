@@ -98,7 +98,7 @@ bool accel_sensor::process_event(void)
 {
 	sensor_event_t base_event;
 
-	if (!m_sensor_hal->is_data_ready(true))
+	if (!m_sensor_hal->is_data_ready())
 		return true;
 
 	m_sensor_hal->get_sensor_data(base_event.data);
