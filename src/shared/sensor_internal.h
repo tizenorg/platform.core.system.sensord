@@ -43,26 +43,7 @@ extern "C"
 #include <sensor_common.h>
 
 /*header for each sensor type*/
-#include <sensor_accel.h>
-#include <sensor_geomag.h>
-#include <sensor_light.h>
-#include <sensor_proxi.h>
-#include <sensor_gyro.h>
-#include <sensor_pressure.h>
-#include <sensor_context.h>
-#include <sensor_auto_rotation.h>
-#include <sensor_gravity.h>
-#include <sensor_linear_accel.h>
-#include <sensor_orientation.h>
-#include <sensor_rv.h>
-#include <sensor_geomagnetic_rv.h>
-#include <sensor_gaming_rv.h>
-#include <sensor_temperature.h>
-#include <sensor_fusion.h>
-#include <sensor_tilt.h>
-#include <sensor_uncal_gyro.h>
-#include <sensor_ultraviolet.h>
-#include <sensor_bio_led_red.h>
+#include <sensor_types.h>
 
 typedef void (*sensor_cb_t)(sensor_t sensor, unsigned int event_type, sensor_data_t *data, void *user_data);
 typedef void (*sensorhub_cb_t)(sensor_t sensor, unsigned int event_type, sensorhub_data_t *data, void *user_data);
