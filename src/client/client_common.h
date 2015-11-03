@@ -24,7 +24,7 @@
 #include <sensor_internal.h>
 #include <csensor_handle_info.h>
 #include <creg_event_info.h>
-#include <common.h>
+#include <sensor_logs.h>
 
 #define BASE_GATHERING_INTERVAL	100
 

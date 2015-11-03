@@ -22,7 +22,7 @@
 
 #include <string>
 #include <unordered_map>
-#include <common.h>
+#include <sensor_logs.h>
 
 class cconfig
 {

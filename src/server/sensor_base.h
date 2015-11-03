@@ -32,7 +32,7 @@
 #include <cplugin_info_list.h>
 #include <cmutex.h>
 
-#include <common.h>
+#include <sensor_logs.h>
 #include <sensor_common.h>
 #include <worker_thread.h>
 #include <sensor_info.h>

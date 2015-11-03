@@ -22,7 +22,7 @@
 
 #include <creg_event_info.h>
 #include <command_channel.h>
-#include <common.h>
+#include <sensor_logs.h>
 #include <string.h>
 #include <unordered_map>
 

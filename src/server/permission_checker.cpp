@@ -22,7 +22,7 @@
 #include <cynara-session.h>
 #include <permission_checker.h>
 #include <sf_common.h>
-#include <common.h>
+#include <sensor_logs.h>
 #include <sensor_plugin_loader.h>
 #include <sensor_base.h>
 

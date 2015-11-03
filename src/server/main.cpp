@@ -18,7 +18,7 @@
  */
 
 #include <signal.h>
-#include <common.h>
+#include <sensor_logs.h>
 #include <server.h>
 #include <dbus_util.h>
 #include <sensor_plugin_loader.h>

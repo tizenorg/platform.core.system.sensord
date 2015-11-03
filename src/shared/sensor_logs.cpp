@@ -24,7 +24,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
-#include "common.h"
+#include "sensor_logs.h"
 #include <dlog.h>
 #include <stdarg.h>
 #include <stddef.h>

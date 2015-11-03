@@ -16,7 +16,7 @@
  * limitations under the License.
  *
  */
-#include <common.h>
+#include <sensor_logs.h>
 #include <poller.h>
 #include <sf_common.h>
 

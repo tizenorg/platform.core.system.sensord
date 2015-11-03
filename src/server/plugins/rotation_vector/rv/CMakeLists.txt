@@ -5,7 +5,7 @@ SET(SENSOR_NAME rv_sensor)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/client)
-include_directories(${CMAKE_SOURCE_DIR}/src/plugins/sensor_fusion)
+include_directories(${CMAKE_SOURCE_DIR}/src/server/sensor_fusion)
 
 FOREACH(flag ${rv_pkgs_LDFLAGS})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
