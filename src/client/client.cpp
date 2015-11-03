@@ -24,7 +24,7 @@
 #include <client_common.h>
 #include <vconf.h>
 #include <cmutex.h>
-#include <common.h>
+#include <sensor_logs.h>
 #include <sensor_info.h>
 #include <sensor_info_manager.h>
 #include <vector>

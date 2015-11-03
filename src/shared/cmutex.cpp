@@ -18,7 +18,7 @@
  */
 
 #include <cmutex.h>
-#include "common.h"
+#include "sensor_logs.h"
 
 cmutex::cmutex()
 {

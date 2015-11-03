@@ -24,7 +24,7 @@
 #include <sensor_base.h>
 #include <dlfcn.h>
 #include <dirent.h>
-#include <common.h>
+#include <sensor_logs.h>
 #include <unordered_set>
 #include <algorithm>
 

@@ -21,7 +21,7 @@
 #include <errno.h>
 #include <string.h>
 #include <new>
-#include <common.h>
+#include <sensor_logs.h>
 #include <cpacket.h>
 #include <sf_common.h>
 

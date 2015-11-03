@@ -26,7 +26,7 @@
 #include <sys/types.h>
 #include <dlfcn.h>
 
-#include <common.h>
+#include <sensor_logs.h>
 #include <sf_common.h>
 
 #include <virtual_sensor.h>

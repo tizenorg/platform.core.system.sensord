@@ -18,8 +18,8 @@
  */
 
 #include <sensor_common.h>
-#include <common.h>
-#include <sensor_auto_rotation.h>
+#include <sensor_logs.h>
+#include <sensor_types.h>
 #include <auto_rotation_alg_emul.h>
 #include <stdlib.h>
 #include <math.h>

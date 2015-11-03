@@ -18,7 +18,7 @@
  */
 
 #include <cclient_info_manager.h>
-#include <common.h>
+#include <sensor_logs.h>
 #include <csocket.h>
 
 using std::pair;

@@ -17,7 +17,7 @@
  *
  */
 
-#include <common.h>
+#include <sensor_logs.h>
 #include <sf_common.h>
 #include <temperature_sensor.h>
 #include <sensor_plugin_loader.h>

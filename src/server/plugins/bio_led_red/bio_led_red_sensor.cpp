@@ -17,7 +17,7 @@
  *
  */
 
-#include <common.h>
+#include <sensor_logs.h>
 #include <sf_common.h>
 
 #include <bio_led_red_sensor.h>

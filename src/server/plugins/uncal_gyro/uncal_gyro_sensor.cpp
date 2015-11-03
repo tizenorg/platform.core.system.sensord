@@ -25,7 +25,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <dlfcn.h>
-#include <common.h>
+#include <sensor_logs.h>
 #include <sf_common.h>
 #include <uncal_gyro_sensor.h>
 #include <sensor_plugin_loader.h>

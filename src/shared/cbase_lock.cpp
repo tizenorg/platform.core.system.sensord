@@ -20,7 +20,7 @@
 #include <pthread.h>
 #include <cbase_lock.h>
 #include <stdio.h>
-#include <common.h>
+#include <sensor_logs.h>
 #include <errno.h>
 #include <sys/time.h>
 

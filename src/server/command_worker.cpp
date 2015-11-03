@@ -20,12 +20,7 @@
 #include <command_worker.h>
 #include <sensor_plugin_loader.h>
 #include <sensor_info.h>
-#include <sensor_accel.h>
-#include <sensor_gyro.h>
-#include <sensor_geomag.h>
-#include <sensor_orientation.h>
-#include <sensor_linear_accel.h>
-#include <sensor_gravity.h>
+#include <sensor_types.h>
 #include <thread>
 #include <string>
 #include <vector>

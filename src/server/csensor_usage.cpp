@@ -19,7 +19,7 @@
 
 #include <sensor_internal.h>
 #include <csensor_usage.h>
-#include <common.h>
+#include <sensor_logs.h>
 
 csensor_usage::csensor_usage()
 : m_interval(POLL_MAX_HZ_MS)

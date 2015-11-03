@@ -17,7 +17,7 @@
  *
  */
 
-#include <common.h>
+#include <sensor_logs.h>
 #include <dbus_util.h>
 #include <gio/gio.h>
 

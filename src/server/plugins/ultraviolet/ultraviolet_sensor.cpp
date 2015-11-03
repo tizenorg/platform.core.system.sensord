@@ -17,7 +17,7 @@
  *
  */
 
-#include <common.h>
+#include <sensor_logs.h>
 #include <sf_common.h>
 
 #include <ultraviolet_sensor.h>

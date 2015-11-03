@@ -19,7 +19,7 @@
 
 #include <csensor_event_dispatcher.h>
 #include <sensor_plugin_loader.h>
-#include <common.h>
+#include <sensor_logs.h>
 #include <sf_common.h>
 #include <thread>
 #include <vector>

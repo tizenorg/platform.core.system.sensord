@@ -17,7 +17,7 @@
  *
  */
 
-#include <common.h>
+#include <sensor_logs.h>
 
 #if !defined(_SF_COMMON_H_)
 #define _SF_COMMON_H_
