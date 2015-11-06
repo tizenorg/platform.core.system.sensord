@@ -49,4 +49,5 @@ install(FILES sensor_deprecated.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor
 install(FILES sensor_types.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_internal_deprecated.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_internal.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
+install(FILES sensor_common.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 

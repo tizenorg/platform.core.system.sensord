@@ -28,7 +28,7 @@ BuildRequires:  pkgconfig(cynara-session)
 %define geo_state ON
 %define pressure_state ON
 %define temperature_state ON
-%define ultraviolet_state OFF
+%define ultraviolet_state ON
 %define orientation_state ON
 %define gravity_state ON
 %define linear_accel_state ON
@@ -37,7 +37,7 @@ BuildRequires:  pkgconfig(cynara-session)
 %define gaming_rv_state ON
 %define tilt_state ON
 %define uncal_gyro_state ON
-%define bio_led_red_state OFF
+%define bio_led_red_state ON
 %define build_test_suite OFF
 
 %description
@@ -131,7 +131,6 @@ systemctl daemon-reload
 %{_libdir}/libsensor.so.*
 %{_libdir}/sensord/*.so*
 %{_libdir}/libsensord-share.so
-%{_libdir}/libsensord-server.so
 %license LICENSE.APLv2
 
 %files -n libsensord-devel
