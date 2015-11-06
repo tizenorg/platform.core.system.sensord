@@ -3,6 +3,10 @@ project(sensord CXX)
 
 INCLUDE(FindPkgConfig)
 PKG_CHECK_MODULES(server_pkgs REQUIRED glib-2.0 gio-2.0 dlog libsystemd-daemon libxml-2.0 cynara-client cynara-creds-socket cynara-session)
+
+INCLUDE_DIRECTORIES(include)
+FILE(GLOB SERVER_SRCS *.c *.cpp)
+
 FOREACH(flag ${server_pkgs_LDFLAGS})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
 ENDFOREACH(flag)
@@ -13,46 +17,19 @@ ENDFOREACH(flag)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/client)
+include_directories(${CMAKE_SOURCE_DIR}/src/shared)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrt -ldl -pthread -fPIE")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie")
 
-SET(SERVER_SRCS
-	dbus_util.cpp
-	server.cpp
-	command_worker.cpp
-	permission_checker.cpp
-	main.cpp
-
-)
-
-add_library(sensord-server SHARED
-	worker_thread.cpp
-	cvirtual_sensor_config.cpp
-	csensor_event_queue.cpp
-	csensor_event_dispatcher.cpp
-	csensor_usage.cpp
-	cplugin_info_list.cpp
-	sensor_plugin_loader.cpp
-	sensor_base.cpp
-	physical_sensor.cpp
-	virtual_sensor.cpp
-	cclient_info_manager.cpp
-	cclient_sensor_record.cpp
-	cconfig.cpp
-)
-target_link_libraries(sensord-server ${shared_pkgs_LDFLAGS} "-lrt -ldl -pthread" "sensord-share")
-configure_file(sensord-server.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/sensord-server.pc @ONLY)
-install(TARGETS sensord-server DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(FILES sensord-server.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-
 add_executable(${PROJECT_NAME} ${SERVER_SRCS})
 
-target_link_libraries(${PROJECT_NAME} ${server_pkgs_LDFLAGS} "sensord-server")
+target_link_libraries(${PROJECT_NAME} ${lib_pkgs_LDFLAGS} "sensord-devel")
+
+configure_file(sensord-server.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/sensord-server.pc @ONLY)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-
-
+install(FILES sensord-server.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 IF("${ACCEL}" STREQUAL "ON")
 add_subdirectory(plugins/accel)

@@ -28,7 +28,7 @@ BuildRequires:  pkgconfig(cynara-session)
 %define geo_state ON
 %define pressure_state ON
 %define temperature_state ON
-%define ultraviolet_state OFF
+%define ultraviolet_state ON
 %define orientation_state ON
 %define gravity_state ON
 %define linear_accel_state ON
@@ -37,7 +37,7 @@ BuildRequires:  pkgconfig(cynara-session)
 %define gaming_rv_state ON
 %define tilt_state ON
 %define uncal_gyro_state ON
-%define bio_led_red_state OFF
+%define bio_led_red_state ON
 %define build_test_suite OFF
 
 %description
@@ -60,12 +60,12 @@ Requires:   %{name} = %{version}-%{release}
 Sensord library
 
 %package -n libsensord-devel
-Summary:    Sensord library (devel)
+Summary:    Sensord shared library
 Group:      System/Development
 Requires:   %{name} = %{version}-%{release}
 
 %description -n libsensord-devel
-Sensord library (devel)
+Sensord shared library
 
 %if %{build_test_suite} == "ON"
 %package -n sensor-test
@@ -130,17 +130,16 @@ systemctl daemon-reload
 %manifest libsensord.manifest
 %{_libdir}/libsensor.so.*
 %{_libdir}/sensord/*.so*
-%{_libdir}/libsensord-share.so
-%{_libdir}/libsensord-server.so
+%{_libdir}/libsensord-devel.so
 %license LICENSE.APLv2
 
 %files -n libsensord-devel
 %defattr(-,root,root,-)
 %{_includedir}/sensor/*.h
-%{_includedir}/sf_common/*.h
+%{_includedir}/sensord-devel/*.h
 %{_libdir}/libsensor.so
 %{_libdir}/pkgconfig/sensor.pc
-%{_libdir}/pkgconfig/sf_common.pc
+%{_libdir}/pkgconfig/sensord-devel.pc
 %{_libdir}/pkgconfig/sensord-server.pc
 %license LICENSE.APLv2
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(sf_common CXX)
+project(sensord-devel CXX)
 
 INCLUDE(FindPkgConfig)
 PKG_CHECK_MODULES(shared_pkgs REQUIRED dlog libxml-2.0)
@@ -18,7 +18,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/client)
 
 
-add_library(sensord-share SHARED
+add_library(${PROJECT_NAME} SHARED
 	cbase_lock.cpp
 	cmutex.cpp
 	cpacket.cpp
@@ -28,12 +28,12 @@ add_library(sensord-share SHARED
 )
 
 
-target_link_libraries(sensord-share ${shared_pkgs_LDFLAGS} "-lrt -ldl -pthread")
+target_link_libraries(${PROJECT_NAME} ${shared_pkgs_LDFLAGS} "-lrt -ldl -pthread")
 
 configure_file(${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc @ONLY)
 
 
-install(TARGETS sensord-share DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES ${PROJECT_NAME}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(FILES
@@ -49,4 +49,5 @@ install(FILES sensor_deprecated.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor
 install(FILES sensor_types.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_internal_deprecated.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_internal.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
+install(FILES sensor_common.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 
