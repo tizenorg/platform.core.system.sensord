@@ -30,15 +30,6 @@ float scale_gyro = 1150;
 float scale_magnetic = 1;
 int magnetic_alignment_factor = -1;
 
-void pre_process_data(sensor_data<float> *data_out, sensor_data<float> *data_in, float *bias, int *sign, float scale)
-{
-	data_out->m_data.m_vec[0] = sign[0] * (data_in->m_data.m_vec[0] - bias[0]) / scale;
-	data_out->m_data.m_vec[1] = sign[1] * (data_in->m_data.m_vec[1] - bias[1]) / scale;
-	data_out->m_data.m_vec[2] = sign[2] * (data_in->m_data.m_vec[2] - bias[2]) / scale;
-
-	data_out->m_time_stamp = data_in->m_time_stamp;
-}
-
 void orientation_sensor::get_device_orientation(sensor_data<float> *accel_data,
 		sensor_data<float> *gyro_data, sensor_data<float> *magnetic_data)
 {

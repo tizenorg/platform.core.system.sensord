@@ -149,21 +149,3 @@ bool rv_raw_sensor::set_interval(unsigned long interval)
 
 	return m_sensor_hal->set_interval(interval);
 }
-
-extern "C" sensor_module* create(void)
-{
-	rv_raw_sensor *sensor;
-
-	try {
-		sensor = new(std::nothrow) rv_raw_sensor;
-	} catch (int err) {
-		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
-		return NULL;
-	}
-
-	sensor_module *module = new(std::nothrow) sensor_module;
-	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
-
-	module->sensors.push_back(sensor);
-	return module;
-}

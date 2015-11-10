@@ -223,21 +223,3 @@ bool auto_rotation_sensor::get_properties(sensor_type_t sensor_type, sensor_prop
 
 	return true;
 }
-
-extern "C" sensor_module* create(void)
-{
-	auto_rotation_sensor *sensor;
-
-	try {
-		sensor = new(std::nothrow) auto_rotation_sensor;
-	} catch (int err) {
-		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
-		return NULL;
-	}
-
-	sensor_module *module = new(std::nothrow) sensor_module;
-	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
-
-	module->sensors.push_back(sensor);
-	return module;
-}

@@ -116,5 +116,13 @@ quaternion<T> sensor_data2quat(const sensor_data<T> data, const vect<T, REF_VEC_
 	return axis2quat(axis, angle);
 }
 
+template<typename T>
+void pre_process_data(sensor_data<T> &data_out, const T *data_in, T *bias, int *sign, T scale)
+{
+	data_out.m_data.m_vec[0] = sign[0] * (data_in[0] - bias[0]) / scale;
+	data_out.m_data.m_vec[1] = sign[1] * (data_in[1] - bias[1]) / scale;
+	data_out.m_data.m_vec[2] = sign[2] * (data_in[2] - bias[2]) / scale;
+}
+
 #endif /* _SENSOR_DATA_H_ */
 

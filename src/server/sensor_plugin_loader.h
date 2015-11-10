@@ -66,8 +66,6 @@ private:
 	bool load_module(const std::string &path, std::vector<void*> &sensors, void* &handle);
 	bool insert_module(plugin_type type, const std::string &path);
 	void show_sensor_info(void);
-	bool get_paths_from_dir(const std::string &dir_path, std::vector<std::string> &hal_paths, std::vector<std::string> &sensor_paths);
-	bool get_paths_from_config(const std::string &config_path, std::vector<std::string> &hal_paths, std::vector<std::string> &sensor_paths);
 
 	sensor_hal_plugins m_sensor_hals;
 	sensor_plugins m_sensors;

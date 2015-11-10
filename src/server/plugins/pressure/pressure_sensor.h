@@ -43,15 +43,11 @@ private:
 	sensor_hal *m_sensor_hal;
 	float m_pressure;
 	float m_resolution;
-	float m_sea_level_pressure;
-	float m_temperature_offset;
-	float m_temperature_resolution;
 
 	virtual bool on_start(void);
 	virtual bool on_stop(void);
 	bool process_event(void);
-	float pressure_to_altitude(float pressure);
-	void raw_to_base(sensor_data_t &data);
+
 };
 
 #endif

@@ -429,20 +429,3 @@ bool linear_accel_sensor::get_properties(sensor_type_t sensor_type, sensor_prope
 	return true;
 }
 
-extern "C" sensor_module* create(void)
-{
-	linear_accel_sensor *sensor;
-
-	try {
-		sensor = new(std::nothrow) linear_accel_sensor;
-	} catch (int err) {
-		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
-		return NULL;
-	}
-
-	sensor_module *module = new(std::nothrow) sensor_module;
-	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
-
-	module->sensors.push_back(sensor);
-	return module;
-}

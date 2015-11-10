@@ -49,6 +49,9 @@ public:
 			T scaling_factor);
 	template<typename T> friend quaternion<T> sensor_data2quat(const sensor_data<T> data,
 			const vect<T, REF_VEC_SIZE> ref_vec);
+	template<typename T> friend void pre_process_data(sensor_data<T> &data_out,
+			const T *data_in, T *bias, int *sign, T scale);
+
 };
 
 #include "sensor_data.cpp"

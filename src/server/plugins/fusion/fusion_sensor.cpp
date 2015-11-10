@@ -76,13 +76,6 @@ using std::vector;
 #define ELEMENT_ROLL_ROTATION_COMPENSATION						"ROLL_ROTATION_COMPENSATION"
 #define ELEMENT_AZIMUTH_ROTATION_COMPENSATION					"AZIMUTH_ROTATION_COMPENSATION"
 
-void pre_process_data(sensor_data<float> &data_out, const float *data_in, float *bias, int *sign, float scale)
-{
-	data_out.m_data.m_vec[0] = sign[0] * (data_in[0] - bias[0]) / scale;
-	data_out.m_data.m_vec[1] = sign[1] * (data_in[1] - bias[1]) / scale;
-	data_out.m_data.m_vec[2] = sign[2] * (data_in[2] - bias[2]) / scale;
-}
-
 fusion_sensor::fusion_sensor()
 : m_accel_sensor(NULL)
 , m_gyro_sensor(NULL)
@@ -473,22 +466,4 @@ bool fusion_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_
 	properties.max_batch_count = 0;
 
 	return true;
-}
-
-extern "C" sensor_module* create(void)
-{
-	fusion_sensor *sensor;
-
-	try {
-		sensor = new(std::nothrow) fusion_sensor;
-	} catch (int err) {
-		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
-		return NULL;
-	}
-
-	sensor_module *module = new(std::nothrow) sensor_module;
-	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
-
-	module->sensors.push_back(sensor);
-	return module;
 }

@@ -38,7 +38,7 @@ BuildRequires:  pkgconfig(cynara-session)
 %define tilt_state ON
 %define uncal_gyro_state ON
 %define bio_led_red_state ON
-%define build_test_suite OFF
+%define build_test_suite ON
 
 %description
 Sensor daemon
@@ -66,6 +66,14 @@ Requires:   %{name} = %{version}-%{release}
 
 %description -n libsensord-devel
 Sensord shared library
+
+%package -n libsensord-plugin
+Summary:    Sensord plugin library
+Group:      System/Development
+Requires:   %{name} = %{version}-%{release}
+
+%description -n libsensord-plugin
+Sensord plugin library
 
 %if %{build_test_suite} == "ON"
 %package -n sensor-test
@@ -115,7 +123,6 @@ systemctl daemon-reload
 %postun -n libsensord -p /sbin/ldconfig
 
 %files -n sensord
-%attr(0644,root,root)/usr/etc/sensor_plugins.xml
 %attr(0644,root,root)/usr/etc/virtual_sensors.xml
 %manifest sensord.manifest
 %{_bindir}/sensord
@@ -129,7 +136,6 @@ systemctl daemon-reload
 %defattr(-,root,root,-)
 %manifest libsensord.manifest
 %{_libdir}/libsensor.so.*
-%{_libdir}/sensord/*.so*
 %{_libdir}/libsensord-devel.so
 %license LICENSE.APLv2
 
@@ -141,6 +147,11 @@ systemctl daemon-reload
 %{_libdir}/pkgconfig/sensor.pc
 %{_libdir}/pkgconfig/sensord-devel.pc
 %{_libdir}/pkgconfig/sensord-server.pc
+%license LICENSE.APLv2
+
+%files -n libsensord-plugin
+%defattr(-,root,root,-)
+%{_libdir}/libsensord-plugin.so
 %license LICENSE.APLv2
 
 %if %{build_test_suite} == "ON"

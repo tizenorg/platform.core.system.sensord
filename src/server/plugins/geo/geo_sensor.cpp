@@ -167,21 +167,3 @@ void geo_sensor::raw_to_base(sensor_data_t &data)
 	data.values[1] = data.values[1] * m_resolution;
 	data.values[2] = data.values[2] * m_resolution;
 }
-
-extern "C" sensor_module* create(void)
-{
-	geo_sensor *sensor;
-
-	try {
-		sensor = new(std::nothrow) geo_sensor;
-	} catch (int err) {
-		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
-		return NULL;
-	}
-
-	sensor_module *module = new(std::nothrow) sensor_module;
-	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
-
-	module->sensors.push_back(sensor);
-	return module;
-}

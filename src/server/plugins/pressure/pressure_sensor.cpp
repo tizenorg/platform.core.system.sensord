@@ -21,8 +21,6 @@
 #include <sf_common.h>
 #include <pressure_sensor.h>
 #include <sensor_plugin_loader.h>
-#include <algorithm>
-#include <csensor_config.h>
 
 using std::bind1st;
 using std::mem_fun;
@@ -33,11 +31,7 @@ using std::vector;
 #define SENSOR_TYPE_PRESSURE		"PRESSURE"
 #define ELEMENT_NAME			"NAME"
 #define ELEMENT_VENDOR			"VENDOR"
-#define ELEMENT_TEMPERATURE_RESOLUTION	"TEMPERATURE_RESOLUTION"
-#define ELEMENT_TEMPERATURE_OFFSET		"TEMPERATURE_OFFSET"
 #define ATTR_VALUE				"value"
-
-#define SEA_LEVEL_RESOLUTION 0.01
 
 pressure_sensor::pressure_sensor()
 : m_sensor_hal(NULL)
@@ -75,28 +69,6 @@ bool pressure_sensor::init()
 
 	string model_id = m_sensor_hal->get_model_id();
 
-	csensor_config &config = csensor_config::get_instance();
-
-	double temperature_resolution;
-
-	if (!config.get(SENSOR_TYPE_PRESSURE, model_id, ELEMENT_TEMPERATURE_RESOLUTION, temperature_resolution)) {
-		ERR("[TEMPERATURE_RESOLUTION] is empty\n");
-		throw ENXIO;
-	}
-
-	m_temperature_resolution = (float)temperature_resolution;
-	INFO("m_temperature_resolution = %f\n", m_temperature_resolution);
-
-	double temperature_offset;
-
-	if (!config.get(SENSOR_TYPE_PRESSURE, model_id, ELEMENT_TEMPERATURE_OFFSET, temperature_offset)) {
-		ERR("[TEMPERATURE_OFFSET] is empty\n");
-		throw ENXIO;
-	}
-
-	m_temperature_offset = (float)temperature_offset;
-	INFO("m_temperature_offset = %f\n", m_temperature_offset);
-
 	INFO("%s is created!", sensor_base::get_name());
 
 	return true;
@@ -127,7 +99,6 @@ bool pressure_sensor::process_event(void)
 	if (get_client_cnt(PRESSURE_RAW_DATA_EVENT)) {
 		event.sensor_id = get_id();
 		event.event_type = PRESSURE_RAW_DATA_EVENT;
-		raw_to_base(event.data);
 		push(event);
 	}
 
@@ -161,19 +132,7 @@ bool pressure_sensor::get_properties(sensor_type_t sensor_type, sensor_propertie
 
 int pressure_sensor::get_sensor_data(unsigned int type, sensor_data_t &data)
 {
-	int ret;
-
-	ret = m_sensor_hal->get_sensor_data(data);
-
-	if (ret < 0)
-		return -1;
-
-	if (type == PRESSURE_RAW_DATA_EVENT) {
-		raw_to_base(data);
-		return 0;
-	}
-
-	return -1;
+	return m_sensor_hal->get_sensor_data(data);
 }
 
 bool pressure_sensor::set_interval(unsigned long interval)
@@ -183,36 +142,4 @@ bool pressure_sensor::set_interval(unsigned long interval)
 	INFO("Polling interval is set to %dms", interval);
 
 	return m_sensor_hal->set_interval(interval);
-}
-
-float pressure_sensor::pressure_to_altitude(float pressure)
-{
-	return 44330.0f * (1.0f - pow(pressure/m_sea_level_pressure, 1.0f/5.255f));
-}
-
-void pressure_sensor::raw_to_base(sensor_data_t &data)
-{
-	data.values[0] = data.values[0] * m_resolution;
-	m_sea_level_pressure = data.values[1] * SEA_LEVEL_RESOLUTION;
-	data.values[1] = pressure_to_altitude(data.values[0]);
-	data.values[2] = data.values[2] * m_temperature_resolution + m_temperature_offset;
-	data.value_count = 3;
-}
-
-extern "C" sensor_module* create(void)
-{
-	pressure_sensor *sensor;
-
-	try {
-		sensor = new(std::nothrow) pressure_sensor;
-	} catch (int err) {
-		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
-		return NULL;
-	}
-
-	sensor_module *module = new(std::nothrow) sensor_module;
-	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
-
-	module->sensors.push_back(sensor);
-	return module;
 }

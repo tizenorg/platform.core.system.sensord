@@ -182,21 +182,3 @@ void accel_sensor::raw_to_base(sensor_data_t &data)
 	data.values[1] = RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(data.values[1] * m_raw_data_unit);
 	data.values[2] = RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(data.values[2] * m_raw_data_unit);
 }
-
-extern "C" sensor_module* create(void)
-{
-	accel_sensor *sensor;
-
-	try {
-		sensor = new(std::nothrow) accel_sensor;
-	} catch (int err) {
-		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
-		return NULL;
-	}
-
-	sensor_module *module = new(std::nothrow) sensor_module;
-	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
-
-	module->sensors.push_back(sensor);
-	return module;
-}

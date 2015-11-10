@@ -142,21 +142,3 @@ void bio_led_red_sensor::raw_to_base(sensor_data_t &data)
 {
 
 }
-
-extern "C" sensor_module* create(void)
-{
-	bio_led_red_sensor *sensor;
-
-	try {
-		sensor = new(std::nothrow) bio_led_red_sensor;
-	} catch (int err) {
-		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
-		return NULL;
-	}
-
-	sensor_module *module = new(std::nothrow) sensor_module;
-	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
-
-	module->sensors.push_back(sensor);
-	return module;
-}

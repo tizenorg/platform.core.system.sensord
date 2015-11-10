@@ -191,21 +191,3 @@ void light_sensor::raw_to_level(sensor_data_t &data)
 	data.values[0] = (int) adc_to_light_level((int)data.values[0]);
 	data.value_count = 1;
 }
-
-extern "C" sensor_module* create(void)
-{
-	light_sensor *sensor;
-
-	try {
-		sensor = new(std::nothrow) light_sensor;
-	} catch (int err) {
-		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
-		return NULL;
-	}
-
-	sensor_module *module = new(std::nothrow) sensor_module;
-	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
-
-	module->sensors.push_back(sensor);
-	return module;
-}

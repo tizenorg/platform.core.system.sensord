@@ -43,8 +43,8 @@ using std::static_pointer_cast;
 #define HAL_ELEMENT "HAL"
 #define SENSOR_ELEMENT "SENSOR"
 
-#define PLUGINS_CONFIG_PATH "/usr/etc/sensor_plugins.xml"
-#define PLUGINS_DIR_PATH "/sensord"
+#define SENSOR_PLUGINS_DIR_PATH "/usr/lib/libsensord-plugins.so"
+#define HAL_PLUGINS_DIR_PATH "/usr/lib/libsensor-hal.so"
 
 #define SENSOR_INDEX_SHIFT 16
 
@@ -154,47 +154,8 @@ bool sensor_plugin_loader::insert_module(plugin_type type, const string &path)
 
 bool sensor_plugin_loader::load_plugins(void)
 {
-	vector<string> hal_paths, sensor_paths;
-	vector<string> unique_hal_paths, unique_sensor_paths;
-
-	get_paths_from_config(string(PLUGINS_CONFIG_PATH), hal_paths, sensor_paths);
-	get_paths_from_dir(string(LIBDIR) + string(PLUGINS_DIR_PATH), hal_paths, sensor_paths);
-
-	//remove duplicates while keeping the original ordering => unique_*_paths
-	unordered_set<string> s;
-	auto unique = [&s](vector<string> &paths, const string &path) {
-		if (s.insert(path).second)
-			paths.push_back(path);
-	};
-
-	for_each(hal_paths.begin(), hal_paths.end(),
-		[&](const string &path) {
-			unique(unique_hal_paths, path);
-		}
-	);
-
-	for_each(sensor_paths.begin(), sensor_paths.end(),
-		[&](const string &path) {
-			unique(unique_sensor_paths, path);
-		}
-	);
-
-	//load plugins specified by unique_*_paths
-	auto insert = [&](plugin_type type, const string &path) {
-			insert_module(type, path);
-	};
-
-	for_each(unique_hal_paths.begin(), unique_hal_paths.end(),
-		[&](const string &path) {
-			insert(PLUGIN_TYPE_HAL, path);
-		}
-	);
-
-	for_each(unique_sensor_paths.begin(), unique_sensor_paths.end(),
-		[&](const string &path) {
-			insert(PLUGIN_TYPE_SENSOR, path);
-		}
-	);
+	insert_module(PLUGIN_TYPE_HAL, HAL_PLUGINS_DIR_PATH);
+	insert_module(PLUGIN_TYPE_SENSOR, SENSOR_PLUGINS_DIR_PATH);
 
 	show_sensor_info();
 	return true;
@@ -219,115 +180,6 @@ void sensor_plugin_loader::show_sensor_info(void)
 	}
 
 	INFO("===============================================\n");
-}
-
-
-bool sensor_plugin_loader::get_paths_from_dir(const string &dir_path, vector<string> &hal_paths, vector<string> &sensor_paths)
-{
-	const string PLUGIN_POSTFIX = ".so";
-	const string HAL_POSTFIX = "_hal.so";
-
-	DIR *dir = NULL;
-	struct dirent *dir_entry = NULL;
-
-	dir = opendir(dir_path.c_str());
-
-	if (!dir) {
-		ERR("Failed to open dir: %s", dir_path.c_str());
-		return false;
-	}
-
-	string name;
-
-	while ((dir_entry = readdir(dir))) {
-		name = string(dir_entry->d_name);
-
-		if (equal(PLUGIN_POSTFIX.rbegin(), PLUGIN_POSTFIX.rend(), name.rbegin())) {
-			if (equal(HAL_POSTFIX.rbegin(), HAL_POSTFIX.rend(), name.rbegin()))
-				hal_paths.push_back(dir_path + "/" + name);
-			else
-				sensor_paths.push_back(dir_path + "/" + name);
-		}
-	}
-
-	closedir(dir);
-	return true;
-}
-
-bool sensor_plugin_loader::get_paths_from_config(const string &config_path, vector<string> &hal_paths, vector<string> &sensor_paths)
-{
-	xmlDocPtr doc;
-	xmlNodePtr cur;
-
-	doc = xmlParseFile(config_path.c_str());
-
-	if (doc == NULL) {
-		ERR("There is no %s\n", config_path.c_str());
-		return false;
-	}
-
-	cur = xmlDocGetRootElement(doc);
-
-	if (cur == NULL) {
-		ERR("There is no root element in %s\n", config_path.c_str());
-		xmlFreeDoc(doc);
-		return false;
-	}
-
-	if (xmlStrcmp(cur->name, (const xmlChar *)ROOT_ELEMENT)) {
-		ERR("Wrong type document: there is no [%s] root element in %s\n", ROOT_ELEMENT, config_path.c_str());
-		xmlFreeDoc(doc);
-		return false;
-	}
-
-	xmlNodePtr plugin_list_node_ptr;
-	xmlNodePtr module_node_ptr;
-	char* prop = NULL;
-	string path, category;
-
-	plugin_list_node_ptr = cur->xmlChildrenNode;
-
-	while (plugin_list_node_ptr != NULL) {
-		//skip garbage element, [text]
-		if (!xmlStrcmp(plugin_list_node_ptr->name, (const xmlChar *)TEXT_ELEMENT)) {
-			plugin_list_node_ptr = plugin_list_node_ptr->next;
-			continue;
-		}
-
-		DBG("<%s>\n", (const char*)plugin_list_node_ptr->name);
-
-		module_node_ptr = plugin_list_node_ptr->xmlChildrenNode;
-		while (module_node_ptr != NULL) {
-			if (!xmlStrcmp(module_node_ptr->name, (const xmlChar *)TEXT_ELEMENT)) {
-				module_node_ptr = module_node_ptr->next;
-				continue;
-			}
-
-			prop = (char*)xmlGetProp(module_node_ptr, (const xmlChar*)PATH_ATTR);
-			path = prop;
-			free(prop);
-
-			DBG("<%s path=\"%s\">\n", (const char*) module_node_ptr->name, path.c_str());
-
-			category = (const char*) plugin_list_node_ptr->name;
-
-			if (category == string(HAL_ELEMENT))
-				hal_paths.push_back(path);
-			else if (category == string(SENSOR_ELEMENT))
-				sensor_paths.push_back(path);
-
-			DBG("\n");
-			module_node_ptr = module_node_ptr->next;
-		}
-
-		DBG("\n");
-		plugin_list_node_ptr = plugin_list_node_ptr->next;
-	}
-
-	xmlFreeDoc(doc);
-
-	return true;
-
 }
 
 sensor_hal* sensor_plugin_loader::get_sensor_hal(sensor_hal_type_t type)

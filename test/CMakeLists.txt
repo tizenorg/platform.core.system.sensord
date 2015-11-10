@@ -23,7 +23,7 @@ ENDFOREACH(flag)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 
-link_directories(../src/client/)
+link_directories(${CMAKE_SOURCE_DIR}/src/client/)
 
 add_executable(api-test src/api-test.c)
 add_executable(sensor-test src/sensor-test.c src/check-sensor.c)

@@ -301,21 +301,3 @@ bool uncal_gyro_sensor::get_properties(sensor_type_t sensor_type, sensor_propert
 
 	return true;
 }
-
-extern "C" sensor_module* create(void)
-{
-	uncal_gyro_sensor *sensor;
-
-	try {
-		sensor = new(std::nothrow) uncal_gyro_sensor;
-	} catch (int err) {
-		ERR("Failed to create module, err: %d, cause: %s", err, strerror(err));
-		return NULL;
-	}
-
-	sensor_module *module = new(std::nothrow) sensor_module;
-	retvm_if(!module || !sensor, NULL, "Failed to allocate memory");
-
-	module->sensors.push_back(sensor);
-	return module;
-}
