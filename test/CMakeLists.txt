@@ -11,8 +11,6 @@ pkg_check_modules(pkgs REQUIRED glib-2.0)
 add_definitions(${rpkgs_CFLAGS})
 add_definitions(-DPREFIX="${CMAKE_INSTALL_PREFIX}")
 
-configure_file(${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc @ONLY)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/client)
 include_directories(${CMAKE_SOURCE_DIR}/src/shared)

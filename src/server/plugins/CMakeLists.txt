@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(sensord-plugin CXX)
+project(sensord-plugins CXX)
 
 INCLUDE(FindPkgConfig)
 PKG_CHECK_MODULES(plugin_pkgs REQUIRED dlog libxml-2.0)

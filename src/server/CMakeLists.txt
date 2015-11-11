@@ -26,9 +26,6 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie")
 
 add_executable(${PROJECT_NAME} ${SERVER_SRCS})
 
-target_link_libraries(${PROJECT_NAME} ${lib_pkgs_LDFLAGS} "sensord-plugin" "sensord-devel")
-
-configure_file(sensord-server.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/sensord-server.pc @ONLY)
+target_link_libraries(${PROJECT_NAME} ${lib_pkgs_LDFLAGS} "sensord-devel")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-install(FILES sensord-server.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
