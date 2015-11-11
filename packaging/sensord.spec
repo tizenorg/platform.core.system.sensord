@@ -67,12 +67,12 @@ Requires:   %{name} = %{version}-%{release}
 %description -n libsensord-devel
 Sensord shared library
 
-%package -n libsensord-plugin
+%package -n libsensord-plugins
 Summary:    Sensord plugin library
 Group:      System/Development
 Requires:   %{name} = %{version}-%{release}
 
-%description -n libsensord-plugin
+%description -n libsensord-plugins
 Sensord plugin library
 
 %if %{build_test_suite} == "ON"
@@ -145,13 +145,11 @@ systemctl daemon-reload
 %{_includedir}/sensord-devel/*.h
 %{_libdir}/libsensor.so
 %{_libdir}/pkgconfig/sensor.pc
-%{_libdir}/pkgconfig/sensord-devel.pc
-%{_libdir}/pkgconfig/sensord-server.pc
 %license LICENSE.APLv2
 
-%files -n libsensord-plugin
+%files -n libsensord-plugins
 %defattr(-,root,root,-)
-%{_libdir}/libsensord-plugin.so
+%{_libdir}/libsensord-plugins.so
 %license LICENSE.APLv2
 
 %if %{build_test_suite} == "ON"

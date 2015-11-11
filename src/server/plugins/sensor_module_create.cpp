@@ -79,7 +79,7 @@
 #include <rv_raw_sensor.h>
 #endif
 
-#include <sensor_common.h>
+#include <sf_common.h>
 
 extern "C" sensor_module* create(void)
 {
@@ -267,7 +267,6 @@ extern "C" sensor_module* create(void)
 	}
 	if (!bio_led_red_sensor)
 		module->sensors.push_back(bio_led_red_sensor);
-
 #endif
 #if $RV_RAW == 1
 	rv_raw_sensor *rv_raw_sensor = NULL;

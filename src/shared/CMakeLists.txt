@@ -17,7 +17,6 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/client)
 
-
 add_library(${PROJECT_NAME} SHARED
 	cbase_lock.cpp
 	cmutex.cpp
@@ -27,15 +26,10 @@ add_library(${PROJECT_NAME} SHARED
 	sensor_info.cpp
 )
 
-
 target_link_libraries(${PROJECT_NAME} ${shared_pkgs_LDFLAGS} "-lrt -ldl -pthread")
-
-configure_file(${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc @ONLY)
-
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES ${PROJECT_NAME}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(FILES
 	cpacket.h
 	csocket.h
@@ -43,7 +37,6 @@ install(FILES
 	sensor_info.h
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 )
-
 
 install(FILES sensor_deprecated.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_types.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
