@@ -21,23 +21,24 @@ BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
 
 %define accel_state ON
-%define auto_rotation_state ON
-%define gyro_state ON
-%define proxi_state ON
-%define light_state ON
-%define geo_state ON
-%define pressure_state ON
-%define temperature_state ON
-%define ultraviolet_state ON
-%define orientation_state ON
-%define gravity_state ON
-%define linear_accel_state ON
-%define rv_state ON
-%define geomagnetic_rv_state ON
-%define gaming_rv_state ON
-%define tilt_state ON
-%define uncal_gyro_state ON
-%define bio_led_red_state ON
+%define auto_rotation_state OFF
+%define gyro_state OFF
+%define proxi_state OFF
+%define light_state OFF
+%define geo_state OFF
+%define pressure_state OFF
+%define temperature_state OFF
+%define ultraviolet_state OFF
+%define orientation_state OFF
+%define gravity_state OFF
+%define linear_accel_state OFF
+%define rv_state OFF
+%define rv_raw_state OFF
+%define geomagnetic_rv_state OFF
+%define gaming_rv_state OFF
+%define tilt_state OFF
+%define uncal_gyro_state OFF
+%define bio_led_red_state OFF
 %define build_test_suite ON
 
 %description
@@ -95,7 +96,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
 	-DGYRO=%{gyro_state} -DPROXI=%{proxi_state} -DLIGHT=%{light_state} \
 	-DGEO=%{geo_state} -DPRESSURE=%{pressure_state} -DTEMPERATURE=%{temperature_state} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
-	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
+	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} -DRV_RAW=%{rv_raw_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
 	-DUNCAL_GYRO=%{uncal_gyro_state} -DAUTO_ROTATION=%{auto_rotation_state} \
 	-DTILT=%{tilt_state} -DULTRAVIOLET=%{ultraviolet_state} \
