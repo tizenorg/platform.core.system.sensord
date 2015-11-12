@@ -28,6 +28,9 @@
 #ifdef ENABLE_BIO_LED_RED
 #include <bio_led_red_sensor.h>
 #endif
+#ifdef ENABLE_SENSOR_FUSION
+#include <fusion_sensor.h>
+#endif
 #ifdef ENABLE_ORIENTATION
 #include <orientation_sensor.h>
 #endif
@@ -163,7 +166,7 @@ extern "C" sensor_module* create(void)
 		module->sensors.push_back(ultraviolet_sensor_ptr);
 #endif
 
-#ifdef DENABLE_SENSOR_FUSION
+#ifdef ENABLE_SENSOR_FUSION
 	fusion_sensor *fusion_sensor_ptr = NULL;
 	try {
 		fusion_sensor_ptr = new(std::nothrow) fusion_sensor;
