@@ -20,6 +20,7 @@
 #ifndef _AUTO_ROTATION_SENSOR_H_
 #define _AUTO_ROTATION_SENSOR_H_
 
+#include <virtual_sensor.h>
 #include <sensor_internal.h>
 #include <auto_rotation_alg.h>
 

@@ -67,6 +67,13 @@ enum rot_event_type {
 	ROTATION_VECTOR_RAW_DATA_EVENT	= (ROTATION_VECTOR_SENSOR << 16) | 0x0001,
 };
 
+// Rotation Vector Raw
+enum rv_raw_event_type {
+	RV_RAW_RAW_DATA_EVENT	= (RV_RAW_SENSOR << 16) | 0x0001,
+	RV_RAW_CALIBRATION_NEEDED_EVENT	= (RV_RAW_SENSOR << 16) | 0x0002
+};
+
+
 // Ultraviolet
 enum ultraviolet_event_type {
 	ULTRAVIOLET_RAW_DATA_EVENT 	= (ULTRAVIOLET_SENSOR << 16) | 0x0001,
