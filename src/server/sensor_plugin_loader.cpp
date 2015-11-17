@@ -28,6 +28,28 @@
 #include <unordered_set>
 #include <algorithm>
 
+#include <accel_sensor.h>
+#include <gyro_sensor.h>
+#include <geo_sensor.h>
+#include <light_sensor.h>
+#include <proxi_sensor.h>
+#include <pressure_sensor.h>
+#include <bio_led_red_sensor.h>
+#include <temperature_sensor.h>
+#include <ultraviolet_sensor.h>
+#include <rv_raw_sensor.h>
+#include <auto_rotation_sensor.h>
+#include <tilt_sensor.h>
+#include <gravity_sensor.h>
+#include <fusion_sensor.h>
+#include <linear_accel_sensor.h>
+#include <orientation_sensor.h>
+#include <gaming_rv_sensor.h>
+#include <geomagnetic_rv_sensor.h>
+#include <rv_sensor.h>
+#include <uncal_gyro_sensor.h>
+
+
 using std::make_pair;
 using std::equal;
 using std::unordered_set;
@@ -42,6 +64,16 @@ using std::static_pointer_cast;
 #define PATH_ATTR "path"
 #define HAL_ELEMENT "HAL"
 #define SENSOR_ELEMENT "SENSOR"
+
+#define ACCELEROMETER_ENABLED 0x01
+#define GYROSCOPE_ENABLED 0x02
+#define GEOMAGNETIC_ENABLED 0x04
+#define TILT_ENABLED 1
+#define FUSION_ENABLED 1
+#define AUTO_ROTATION_ENABLED 1
+#define GAMING_RV_ENABLED 3
+#define GEOMAGNETIC_RV_ENABLED 5
+#define ORIENTATION_ENABLED 7
 
 #define SENSOR_PLUGINS_DIR_PATH "/usr/lib/libsensord-plugins.so"
 #define HAL_PLUGINS_DIR_PATH "/usr/lib/libsensor-hal.so"
@@ -155,7 +187,259 @@ bool sensor_plugin_loader::insert_module(plugin_type type, const string &path)
 bool sensor_plugin_loader::load_plugins(void)
 {
 	insert_module(PLUGIN_TYPE_HAL, HAL_PLUGINS_DIR_PATH);
-	insert_module(PLUGIN_TYPE_SENSOR, SENSOR_PLUGINS_DIR_PATH);
+
+	int enable_virtual_sensor = 0;
+
+	vector<void*> sensors;
+
+	sensor_hal *accel_hal = get_sensor_hal(SENSOR_HAL_TYPE_ACCELEROMETER);
+	if (accel_hal != NULL) {
+		enable_virtual_sensor |= ACCELEROMETER_ENABLED;
+
+		accel_sensor* accel_sensor_ptr = NULL;
+		try {
+			accel_sensor_ptr = new(std::nothrow) accel_sensor;
+		} catch (int err) {
+			ERR("Failed to create accel_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (accel_sensor_ptr != NULL)
+			sensors.push_back(accel_sensor_ptr);
+	}
+
+	sensor_hal *gyro_hal = get_sensor_hal(SENSOR_HAL_TYPE_GYROSCOPE);
+	if (gyro_hal != NULL) {
+		enable_virtual_sensor |= GYROSCOPE_ENABLED;
+
+		gyro_sensor* gyro_sensor_ptr = NULL;
+		try {
+			gyro_sensor_ptr = new(std::nothrow) gyro_sensor;
+		} catch (int err) {
+			ERR("Failed to create gyro_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (gyro_sensor_ptr != NULL)
+			sensors.push_back(gyro_sensor_ptr);
+	}
+
+	sensor_hal *geo_hal = get_sensor_hal(SENSOR_HAL_TYPE_GEOMAGNETIC);
+	if (geo_hal != NULL) {
+		enable_virtual_sensor |= GEOMAGNETIC_ENABLED;
+
+		geo_sensor* geo_sensor_ptr = NULL;
+		try {
+			geo_sensor_ptr = new(std::nothrow) geo_sensor;
+		} catch (int err) {
+			ERR("Failed to create geo_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (geo_sensor_ptr != NULL)
+			sensors.push_back(geo_sensor_ptr);
+	}
+
+	fusion_sensor* fusion_sensor_ptr = NULL;
+	try {
+		fusion_sensor_ptr = new(std::nothrow) fusion_sensor;
+	} catch (int err) {
+		ERR("Failed to create fusion_sensor module, err: %d, cause: %s", err, strerror(err));
+	}
+	if (fusion_sensor_ptr != NULL)
+		sensors.push_back(fusion_sensor_ptr);
+
+	if (enable_virtual_sensor & TILT_ENABLED == TILT_ENABLED) {
+		tilt_sensor* tilt_sensor_ptr = NULL;
+		try {
+			tilt_sensor_ptr = new(std::nothrow) tilt_sensor;
+		} catch (int err) {
+			ERR("Failed to create tilt_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (tilt_sensor_ptr != NULL)
+			sensors.push_back(tilt_sensor_ptr);
+	}
+	if (enable_virtual_sensor & AUTO_ROTATION_ENABLED == AUTO_ROTATION_ENABLED) {
+		auto_rotation_sensor* auto_rot_sensor_ptr = NULL;
+		try {
+			auto_rot_sensor_ptr = new(std::nothrow) auto_rotation_sensor;
+		} catch (int err) {
+			ERR("Failed to create auto_rotation_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (auto_rot_sensor_ptr != NULL)
+			sensors.push_back(auto_rot_sensor_ptr);
+	}
+	if (enable_virtual_sensor & ORIENTATION_ENABLED == ORIENTATION_ENABLED) {
+		gravity_sensor* gravity_sensor_ptr = NULL;
+		try {
+			gravity_sensor_ptr = new(std::nothrow) gravity_sensor;
+		} catch (int err) {
+			ERR("Failed to create tilt_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (gravity_sensor_ptr != NULL)
+			sensors.push_back(gravity_sensor_ptr);
+
+		linear_accel_sensor* linear_accel_sensor_ptr = NULL;
+		try {
+			linear_accel_sensor_ptr = new(std::nothrow) linear_accel_sensor;
+		} catch (int err) {
+			ERR("Failed to create linear_accel_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (linear_accel_sensor_ptr != NULL)
+			sensors.push_back(linear_accel_sensor_ptr);
+
+		orientation_sensor* orientation_sensor_ptr = NULL;
+		try {
+			orientation_sensor_ptr = new(std::nothrow) orientation_sensor;
+		} catch (int err) {
+			ERR("Failed to create orientation_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (orientation_sensor_ptr != NULL)
+			sensors.push_back(orientation_sensor_ptr);
+
+		rv_sensor* rv_sensor_ptr = NULL;
+		try {
+			rv_sensor_ptr = new(std::nothrow) rv_sensor;
+		} catch (int err) {
+			ERR("Failed to create rv_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (rv_sensor_ptr != NULL)
+			sensors.push_back(rv_sensor_ptr);
+
+		uncal_gyro_sensor* uncal_gyro_sensor_ptr = NULL;
+		try {
+			uncal_gyro_sensor_ptr = new(std::nothrow) uncal_gyro_sensor;
+		} catch (int err) {
+			ERR("Failed to create uncal_gyro_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (uncal_gyro_sensor_ptr != NULL)
+			sensors.push_back(uncal_gyro_sensor_ptr);
+
+	}
+
+	if (enable_virtual_sensor & GAMING_RV_ENABLED == GAMING_RV_ENABLED) {
+		gaming_rv_sensor* gaming_rv_sensor_ptr = NULL;
+		try {
+			gaming_rv_sensor_ptr = new(std::nothrow) gaming_rv_sensor;
+		} catch (int err) {
+			ERR("Failed to create gaming_rv_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (gaming_rv_sensor_ptr != NULL)
+			sensors.push_back(gaming_rv_sensor_ptr);
+	}
+
+	if (enable_virtual_sensor & GEOMAGNETIC_RV_ENABLED == GEOMAGNETIC_RV_ENABLED) {
+		geomagnetic_rv_sensor* geomagnetic_rv_sensor_ptr = NULL;
+		try {
+			geomagnetic_rv_sensor_ptr = new(std::nothrow) geomagnetic_rv_sensor;
+		} catch (int err) {
+			ERR("Failed to create geomagnetic_rv_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (geomagnetic_rv_sensor_ptr != NULL)
+			sensors.push_back(geomagnetic_rv_sensor_ptr);
+	}
+
+	sensor_hal *light_hal = get_sensor_hal(SENSOR_HAL_TYPE_LIGHT);
+	if (light_hal != NULL) {
+		light_sensor* light_sensor_ptr = NULL;
+		try {
+			light_sensor_ptr = new(std::nothrow) light_sensor;
+		} catch (int err) {
+			ERR("Failed to create light_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (light_sensor_ptr != NULL)
+			sensors.push_back(light_sensor_ptr);
+	}
+
+	sensor_hal *proxi_hal = get_sensor_hal(SENSOR_HAL_TYPE_PROXIMITY);
+	if (proxi_hal != NULL) {
+		proxi_sensor* proxi_sensor_ptr = NULL;
+		try {
+			proxi_sensor_ptr = new(std::nothrow) proxi_sensor;
+		} catch (int err) {
+			ERR("Failed to create proxi_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (proxi_sensor_ptr != NULL)
+			sensors.push_back(proxi_sensor_ptr);
+	}
+
+	sensor_hal *pressure_hal = get_sensor_hal(SENSOR_HAL_TYPE_PRESSURE);
+	if (pressure_hal != NULL) {
+		pressure_sensor* pressure_sensor_ptr = NULL;
+		try {
+			pressure_sensor_ptr = new(std::nothrow) pressure_sensor;
+		} catch (int err) {
+			ERR("Failed to create pressure_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (pressure_sensor_ptr != NULL)
+			sensors.push_back(pressure_sensor_ptr);
+	}
+
+	sensor_hal *temp_hal = get_sensor_hal(SENSOR_HAL_TYPE_TEMPERATURE);
+	if (temp_hal != NULL) {
+		temperature_sensor* temp_sensor_ptr = NULL;
+		try {
+			temp_sensor_ptr = new(std::nothrow) temperature_sensor;
+		} catch (int err) {
+			ERR("Failed to create temperature_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (temp_sensor_ptr != NULL)
+			sensors.push_back(temp_sensor_ptr);
+	}
+
+	sensor_hal *ultra_hal = get_sensor_hal(SENSOR_HAL_TYPE_ULTRAVIOLET);
+	if (ultra_hal != NULL) {
+		ultraviolet_sensor* ultra_sensor_ptr = NULL;
+		try {
+			ultra_sensor_ptr = new(std::nothrow) ultraviolet_sensor;
+		} catch (int err) {
+			ERR("Failed to create ultraviolet_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (ultra_sensor_ptr != NULL)
+			sensors.push_back(ultra_sensor_ptr);
+	}
+
+	sensor_hal *bio_led_red_hal = get_sensor_hal(SENSOR_HAL_TYPE_BIO_LED_RED);
+	if (bio_led_red_hal != NULL) {
+		bio_led_red_sensor* bio_led_red_sensor_ptr = NULL;
+		try {
+			bio_led_red_sensor_ptr = new(std::nothrow) bio_led_red_sensor;
+		} catch (int err) {
+			ERR("Failed to create bio_led_red_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (bio_led_red_sensor_ptr != NULL)
+			sensors.push_back(bio_led_red_sensor_ptr);
+	}
+
+	sensor_hal *rv_raw_hal = get_sensor_hal(SENSOR_HAL_TYPE_RV_RAW);
+	if (rv_raw_hal != NULL) {
+		rv_raw_sensor* rv_raw_sensor_ptr = NULL;
+		try {
+			rv_raw_sensor_ptr = new(std::nothrow) rv_raw_sensor;
+		} catch (int err) {
+			ERR("Failed to create rv_raw_sensor module, err: %d, cause: %s", err, strerror(err));
+		}
+		if (rv_raw_sensor_ptr != NULL)
+			sensors.push_back(rv_raw_sensor_ptr);
+	}
+
+	shared_ptr<sensor_base> sensor;
+
+	for (unsigned int i = 0; i < sensors.size(); ++i) {
+		sensor.reset(static_cast<sensor_base*> (sensors[i]));
+
+		if (!sensor->init()) {
+			ERR("Failed to init [%s] module\n", sensor->get_name());
+			continue;
+		}
+
+		DBG("init [%s] module", sensor->get_name());
+
+		vector<sensor_type_t> sensor_types;
+
+		sensor->get_types(sensor_types);
+
+		for (unsigned int i = 0; i < sensor_types.size(); ++i) {
+			int idx;
+			idx = m_sensors.count(sensor_types[i]);
+			sensor->add_id(idx << SENSOR_INDEX_SHIFT | sensor_types[i]);
+			m_sensors.insert(make_pair(sensor_types[i], sensor));
+		}
+	}
 
 	show_sensor_info();
 	return true;
