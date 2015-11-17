@@ -67,6 +67,8 @@ private:
 	bool insert_module(plugin_type type, const std::string &path);
 	void show_sensor_info(void);
 
+	bool get_paths_from_dir(const std::string &dir_path, std::vector<std::string> &hal_paths);
+
 	sensor_hal_plugins m_sensor_hals;
 	sensor_plugins m_sensors;
 
