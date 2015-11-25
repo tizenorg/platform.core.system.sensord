@@ -21,6 +21,7 @@
 #define _SENSOR_PLUGIN_LOADER_CLASS_H_
 
 #include <sensor_common.h>
+#include <sensor_types.h>
 #include <sensor_hal.h>
 
 #include <cmutex.h>

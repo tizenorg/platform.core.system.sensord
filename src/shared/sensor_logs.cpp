@@ -29,6 +29,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <sf_common.h>
+#include <sensor_types.h>
 
 #ifndef EXTAPI
 #define EXTAPI __attribute__((visibility("default")))

@@ -19,6 +19,8 @@
 #ifndef CHECK_SENSOR_H
 #define CHECK_SENSOR_H
 
+#include <sensor_types.h>
+
 #define DEFAULT_EVENT_INTERVAL 100
 
 int get_event(sensor_type_t sensor_type, char str[]);
