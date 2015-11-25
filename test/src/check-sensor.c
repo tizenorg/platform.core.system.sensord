@@ -28,7 +28,8 @@
 
 #include "check-sensor.h"
 
-
+static const int OP_SUCCESS = 0;
+static const int OP_ERROR =  -1;
 
 void printpollinglogs(sensor_type_t type,sensor_data_t data)
 {
@@ -292,9 +293,11 @@ int polling_sensor(sensor_type_t sensor_type, unsigned int event)
 {
 	int result, handle;
 	printf("Polling based\n");
+	sensor_t sensor;
+	sensor = sensord_get_sensor(sensor_type);
+	handle = sensord_connect(sensor);
+	result = sensord_start(handle, 1) ? OP_SUCCESS : OP_ERROR;;
 
-	handle = sf_connect(sensor_type);
-	result = sf_start(handle, 1);
 
 	if (result < 0) {
 		printf("Can't start the sensor\n");
@@ -305,12 +308,12 @@ int polling_sensor(sensor_type_t sensor_type, unsigned int event)
 	sensor_data_t data;
 
 	while(1) {
-		result = sf_get_data(handle, event , &data);
+		result = sensord_get_data(handle, event, &data) ? OP_SUCCESS : OP_ERROR;
 		printpollinglogs(sensor_type, data);
 		usleep(100000);
 	}
 
-	result = sf_disconnect(handle);
+	result = sensord_disconnect(handle) ? OP_SUCCESS : OP_ERROR;
 
 	if (result < 0) {
 		printf("Can't disconnect sensor\n");
