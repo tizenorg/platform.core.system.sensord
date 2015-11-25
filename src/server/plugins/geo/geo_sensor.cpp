@@ -35,7 +35,6 @@ geo_sensor::geo_sensor()
 	m_name = string(SENSOR_NAME);
 
 	register_supported_event(GEOMAGNETIC_RAW_DATA_EVENT);
-	register_supported_event(GEOMAGNETIC_CALIBRATION_NEEDED_EVENT);
 	register_supported_event(GEOMAGNETIC_UNPROCESSED_DATA_EVENT);
 
 	physical_sensor::set_poller(geo_sensor::working, this);

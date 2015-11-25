@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sensor_common.h>
+#include <sensor_types.h>
 
 #include "check-sensor.h"
 

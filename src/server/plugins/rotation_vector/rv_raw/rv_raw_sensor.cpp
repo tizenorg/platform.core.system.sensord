@@ -34,7 +34,6 @@ rv_raw_sensor::rv_raw_sensor()
 	m_name = string(SENSOR_NAME);
 
 	register_supported_event(RV_RAW_RAW_DATA_EVENT);
-	register_supported_event(RV_RAW_CALIBRATION_NEEDED_EVENT);
 
 	physical_sensor::set_poller(rv_raw_sensor::working, this);
 }
