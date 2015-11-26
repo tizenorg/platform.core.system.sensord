@@ -48,7 +48,7 @@ void usage()
 	printf("[ultraviolet] ");
 	printf("[bio_led_red] ");
 	printf("[light]\n");
-	printf("[uncal_gyro]");
+	printf("[gyro_uncal]");
 	printf("event:");
 	printf("[RAW_DATA_EVENT]\n");
 	printf("-p: [polling]\n");
@@ -140,9 +140,9 @@ int main(int argc, char **argv)
 		 sensor_type = ULTRAVIOLET_SENSOR;
 		 event = ULTRAVIOLET_RAW_DATA_EVENT;
 	}
-	else if (strcmp(argv[1], "uncal_gyro") == 0) {
-		 sensor_type = UNCAL_GYROSCOPE_SENSOR;
-		 event = UNCAL_GYRO_RAW_DATA_EVENT;
+	else if (strcmp(argv[1], "gyro_uncal") == 0) {
+		 sensor_type = GYRO_UNCALSCOPE_SENSOR;
+		 event = GYRO_UNCAL_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "bio_led_red") == 0) {
 		 sensor_type = BIO_LED_RED_SENSOR;

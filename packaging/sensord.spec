@@ -28,7 +28,7 @@ BuildRequires:  pkgconfig(cynara-session)
 %define geomagnetic_rv_state OFF
 %define gaming_rv_state OFF
 %define tilt_state OFF
-%define uncal_gyro_state OFF
+%define gyro_uncal_state OFF
 %define build_test_suite ON
 
 %description
@@ -78,7 +78,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
-	-DUNCAL_GYRO=%{uncal_gyro_state} -DAUTO_ROTATION=%{auto_rotation_state} \
+	-DGYRO_UNCAL=%{gyro_uncal_state} -DAUTO_ROTATION=%{auto_rotation_state} \
 	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite} \
 	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
 
