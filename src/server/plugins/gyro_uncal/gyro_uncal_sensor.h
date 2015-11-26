@@ -17,17 +17,17 @@
  *
  */
 
-#ifndef _UNCAL_GYRO_SENSOR_H_
-#define _UNCAL_GYRO_SENSOR_H_
+#ifndef _GYROSCOPE_UNCAL_SENSOR_H_
+#define _GYROSCOPE_UNCAL_SENSOR_H_
 
 #include <sensor_internal.h>
 #include <virtual_sensor.h>
 #include <orientation_filter.h>
 
-class uncal_gyro_sensor : public virtual_sensor {
+class gyro_uncal_sensor : public virtual_sensor {
 public:
-	uncal_gyro_sensor();
-	virtual ~uncal_gyro_sensor();
+	gyro_uncal_sensor();
+	virtual ~gyro_uncal_sensor();
 
 	bool init(void);
 
@@ -51,7 +51,7 @@ private:
 
 	cmutex m_value_mutex;
 
-	unsigned int m_enable_uncal_gyro;
+	unsigned int m_enable_gyro_uncal;
 
 	unsigned long long m_time;
 	unsigned int m_interval;
@@ -67,4 +67,4 @@ private:
 	bool on_stop(void);
 };
 
-#endif /*_UNCAL_GYRO_SENSOR_H_*/
+#endif /*_GYROSCOPE_UNCAL_SENSOR_H_*/

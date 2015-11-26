@@ -27,7 +27,7 @@
 #include <dlfcn.h>
 #include <sensor_logs.h>
 #include <sf_common.h>
-#include <uncal_gyro_sensor.h>
+#include <gyro_uncal_sensor.h>
 #include <sensor_plugin_loader.h>
 #include <orientation_filter.h>
 #include <cvirtual_sensor_config.h>
@@ -35,12 +35,12 @@
 using std::vector;
 using std::string;
 
-#define SENSOR_NAME "UNCAL_GYROSCOPE_SENSOR"
-#define SENSOR_TYPE_UNCAL_GYRO		"UNCAL_GYROSCOPE"
+#define SENSOR_NAME "GYROSCOPE_UNCAL_SENSOR"
+#define SENSOR_TYPE_GYROSCOPE_UNCAL		"GYROSCOPE_UNCAL"
 
 #define GYROSCOPE_ENABLED 0x01
 #define GYRO_BIAS_ENABLED 0x02
-#define UNCAL_GYRO_BIAS_ENABLED 3
+#define GYROSCOPE_UNCAL_BIAS_ENABLED 3
 
 #define INITIAL_VALUE -1
 
@@ -56,7 +56,7 @@ using std::string;
 #define ELEMENT_RAW_DATA_UNIT									"RAW_DATA_UNIT"
 #define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
 
-uncal_gyro_sensor::uncal_gyro_sensor()
+gyro_uncal_sensor::gyro_uncal_sensor()
 : m_accel_sensor(NULL)
 , m_magnetic_sensor(NULL)
 , m_gyro_sensor(NULL)
@@ -72,23 +72,23 @@ uncal_gyro_sensor::uncal_gyro_sensor()
 		m_hardware_fusion = true;
 
 	m_name = string(SENSOR_NAME);
-	register_supported_event(UNCAL_GYRO_RAW_DATA_EVENT);
+	register_supported_event(GYROSCOPE_UNCAL_RAW_DATA_EVENT);
 
-	if (!config.get(SENSOR_TYPE_UNCAL_GYRO, ELEMENT_VENDOR, m_vendor)) {
+	if (!config.get(SENSOR_TYPE_GYROSCOPE_UNCAL, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
 		throw ENXIO;
 	}
 
 	INFO("m_vendor = %s", m_vendor.c_str());
 
-	if (!config.get(SENSOR_TYPE_UNCAL_GYRO, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
+	if (!config.get(SENSOR_TYPE_GYROSCOPE_UNCAL, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
 		ERR("[RAW_DATA_UNIT] is empty\n");
 		throw ENXIO;
 	}
 
 	INFO("m_raw_data_unit = %s", m_raw_data_unit.c_str());
 
-	if (!config.get(SENSOR_TYPE_UNCAL_GYRO, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
+	if (!config.get(SENSOR_TYPE_GYROSCOPE_UNCAL, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
 		ERR("[DEFAULT_SAMPLING_TIME] is empty\n");
 		throw ENXIO;
 	}
@@ -98,12 +98,12 @@ uncal_gyro_sensor::uncal_gyro_sensor()
 	m_interval = m_default_sampling_time * MS_TO_US;
 }
 
-uncal_gyro_sensor::~uncal_gyro_sensor()
+gyro_uncal_sensor::~gyro_uncal_sensor()
 {
-	INFO("uncal_gyro_sensor is destroyed!\n");
+	INFO("gyro_uncal_sensor is destroyed!\n");
 }
 
-bool uncal_gyro_sensor::init(void)
+bool gyro_uncal_sensor::init(void)
 {
 	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
 	m_gyro_sensor = sensor_plugin_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
@@ -122,12 +122,12 @@ bool uncal_gyro_sensor::init(void)
 	return true;
 }
 
-void uncal_gyro_sensor::get_types(vector<sensor_type_t> &types)
+void gyro_uncal_sensor::get_types(vector<sensor_type_t> &types)
 {
-	types.push_back(UNCAL_GYROSCOPE_SENSOR);
+	types.push_back(GYROSCOPE_UNCAL_SENSOR);
 }
 
-bool uncal_gyro_sensor::on_start(void)
+bool gyro_uncal_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
 
@@ -143,9 +143,9 @@ bool uncal_gyro_sensor::on_start(void)
 		m_magnetic_sensor->start();
 	}
 
-	m_fusion_sensor->register_supported_event(FUSION_UNCAL_GYRO_EVENT);
-	m_fusion_sensor->register_supported_event(FUSION_UNCAL_GYRO_ENABLED);
-	m_fusion_sensor->add_client(FUSION_UNCAL_GYRO_EVENT);
+	m_fusion_sensor->register_supported_event(FUSION_GYROSCOPE_UNCAL_EVENT);
+	m_fusion_sensor->register_supported_event(FUSION_GYROSCOPE_UNCAL_ENABLED);
+	m_fusion_sensor->add_client(FUSION_GYROSCOPE_UNCAL_EVENT);
 	m_fusion_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
 	m_fusion_sensor->start();
 
@@ -153,7 +153,7 @@ bool uncal_gyro_sensor::on_start(void)
 	return true;
 }
 
-bool uncal_gyro_sensor::on_stop(void)
+bool gyro_uncal_sensor::on_stop(void)
 {
 	AUTOLOCK(m_mutex);
 
@@ -169,17 +169,17 @@ bool uncal_gyro_sensor::on_stop(void)
 		m_magnetic_sensor->stop();
 	}
 
-	m_fusion_sensor->delete_client(FUSION_UNCAL_GYRO_EVENT);
+	m_fusion_sensor->delete_client(FUSION_GYROSCOPE_UNCAL_EVENT);
 	m_fusion_sensor->delete_interval((intptr_t)this, false);
-	m_fusion_sensor->unregister_supported_event(FUSION_UNCAL_GYRO_EVENT);
-	m_fusion_sensor->unregister_supported_event(FUSION_UNCAL_GYRO_ENABLED);
+	m_fusion_sensor->unregister_supported_event(FUSION_GYROSCOPE_UNCAL_EVENT);
+	m_fusion_sensor->unregister_supported_event(FUSION_GYROSCOPE_UNCAL_ENABLED);
 	m_fusion_sensor->stop();
 
 	deactivate();
 	return true;
 }
 
-bool uncal_gyro_sensor::add_interval(int client_id, unsigned int interval)
+bool gyro_uncal_sensor::add_interval(int client_id, unsigned int interval)
 {
 	AUTOLOCK(m_mutex);
 
@@ -194,7 +194,7 @@ bool uncal_gyro_sensor::add_interval(int client_id, unsigned int interval)
 	return sensor_base::add_interval(client_id, interval, false);
 }
 
-bool uncal_gyro_sensor::delete_interval(int client_id)
+bool gyro_uncal_sensor::delete_interval(int client_id)
 {
 	AUTOLOCK(m_mutex);
 
@@ -209,9 +209,9 @@ bool uncal_gyro_sensor::delete_interval(int client_id)
 	return sensor_base::delete_interval(client_id, false);
 }
 
-void uncal_gyro_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
+void gyro_uncal_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
 {
-	sensor_event_t uncal_gyro_event;
+	sensor_event_t gyro_uncal_event;
 	unsigned long long diff_time;
 
 	if (event.event_type == GYROSCOPE_RAW_DATA_EVENT) {
@@ -226,10 +226,10 @@ void uncal_gyro_sensor::synthesize(const sensor_event_t &event, vector<sensor_ev
 
 		m_gyro.m_time_stamp = event.data.timestamp;
 
-		m_enable_uncal_gyro |= GYROSCOPE_ENABLED;
+		m_enable_gyro_uncal |= GYROSCOPE_ENABLED;
 	}
 
-	if (event.event_type == FUSION_UNCAL_GYRO_EVENT) {
+	if (event.event_type == FUSION_GYROSCOPE_UNCAL_EVENT) {
 		diff_time = event.data.timestamp - m_time;
 
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
@@ -241,40 +241,40 @@ void uncal_gyro_sensor::synthesize(const sensor_event_t &event, vector<sensor_ev
 
 		m_fusion.m_time_stamp = event.data.timestamp;
 
-		m_enable_uncal_gyro |= GYRO_BIAS_ENABLED;
+		m_enable_gyro_uncal |= GYRO_BIAS_ENABLED;
 	}
 
-	if (m_enable_uncal_gyro == UNCAL_GYRO_BIAS_ENABLED) {
-		m_enable_uncal_gyro = 0;
+	if (m_enable_gyro_uncal == GYROSCOPE_UNCAL_BIAS_ENABLED) {
+		m_enable_gyro_uncal = 0;
 
 		m_time = get_timestamp();
-		uncal_gyro_event.sensor_id = get_id();
-		uncal_gyro_event.event_type = UNCAL_GYRO_RAW_DATA_EVENT;
-		uncal_gyro_event.data.value_count = 6;
-		uncal_gyro_event.data.timestamp = m_time;
-		uncal_gyro_event.data.accuracy = SENSOR_ACCURACY_GOOD;
-		uncal_gyro_event.data.values[0] = m_gyro.m_data.m_vec[0];
-		uncal_gyro_event.data.values[1] = m_gyro.m_data.m_vec[1];
-		uncal_gyro_event.data.values[2] = m_gyro.m_data.m_vec[2];
+		gyro_uncal_event.sensor_id = get_id();
+		gyro_uncal_event.event_type = GYROSCOPE_UNCAL_RAW_DATA_EVENT;
+		gyro_uncal_event.data.value_count = 6;
+		gyro_uncal_event.data.timestamp = m_time;
+		gyro_uncal_event.data.accuracy = SENSOR_ACCURACY_GOOD;
+		gyro_uncal_event.data.values[0] = m_gyro.m_data.m_vec[0];
+		gyro_uncal_event.data.values[1] = m_gyro.m_data.m_vec[1];
+		gyro_uncal_event.data.values[2] = m_gyro.m_data.m_vec[2];
 
-		uncal_gyro_event.data.values[3] = m_fusion.m_data.m_vec[0];
-		uncal_gyro_event.data.values[4] = m_fusion.m_data.m_vec[1];
-		uncal_gyro_event.data.values[5] = m_fusion.m_data.m_vec[2];
+		gyro_uncal_event.data.values[3] = m_fusion.m_data.m_vec[0];
+		gyro_uncal_event.data.values[4] = m_fusion.m_data.m_vec[1];
+		gyro_uncal_event.data.values[5] = m_fusion.m_data.m_vec[2];
 
-		push(uncal_gyro_event);
+		push(gyro_uncal_event);
 	}
 
 	return;
 }
 
-int uncal_gyro_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &data)
+int gyro_uncal_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &data)
 {
 	sensor_data_t fusion_data, gyro_data;
 
-	if (event_type != UNCAL_GYRO_RAW_DATA_EVENT)
+	if (event_type != GYROSCOPE_UNCAL_RAW_DATA_EVENT)
 		return -1;
 
-	m_fusion_sensor->get_sensor_data(FUSION_UNCAL_GYRO_ENABLED, fusion_data);
+	m_fusion_sensor->get_sensor_data(FUSION_GYROSCOPE_UNCAL_ENABLED, fusion_data);
 	m_gyro_sensor->get_sensor_data(GYROSCOPE_RAW_DATA_EVENT, gyro_data);
 
 	data.accuracy = fusion_data.accuracy;
@@ -290,7 +290,7 @@ int uncal_gyro_sensor::get_sensor_data(const unsigned int event_type, sensor_dat
 	return 0;
 }
 
-bool uncal_gyro_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
+bool gyro_uncal_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
 {
 	properties.resolution = 0.000001;
 	properties.vendor = m_vendor;

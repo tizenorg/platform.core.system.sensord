@@ -66,8 +66,8 @@
 #ifdef ENABLE_RV
 #include <rv_sensor.h>
 #endif
-#ifdef ENABLE_UNCAL_GYRO
-#include <uncal_gyro_sensor.h>
+#ifdef ENABLE_GYROSCOPE_UNCAL
+#include <gyro_uncal_sensor.h>
 #endif
 
 
@@ -357,15 +357,15 @@ bool sensor_plugin_loader::load_plugins(void)
 		if (rv_sensor_ptr != NULL)
 			sensors.push_back(rv_sensor_ptr);
 #endif
-#ifdef ENABLE_UNCAL_GYRO
-		uncal_gyro_sensor* uncal_gyro_sensor_ptr = NULL;
+#ifdef ENABLE_GYROSCOPE_UNCAL
+		gyro_uncal_sensor* gyro_uncal_sensor_ptr = NULL;
 		try {
-			uncal_gyro_sensor_ptr = new(std::nothrow) uncal_gyro_sensor;
+			gyro_uncal_sensor_ptr = new(std::nothrow) gyro_uncal_sensor;
 		} catch (int err) {
-			ERR("Failed to create uncal_gyro_sensor module, err: %d, cause: %s", err, strerror(err));
+			ERR("Failed to create gyro_uncal_sensor module, err: %d, cause: %s", err, strerror(err));
 		}
-		if (uncal_gyro_sensor_ptr != NULL)
-			sensors.push_back(uncal_gyro_sensor_ptr);
+		if (gyro_uncal_sensor_ptr != NULL)
+			sensors.push_back(gyro_uncal_sensor_ptr);
 #endif
 	}
 

@@ -255,7 +255,7 @@ int main(int argc, char **argv)
 	result = check_sensor_api(GAMING_RV_RAW_DATA_EVENT, interval);
 	fprintf(fp, "Gaming Rotation Vector - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
-	result = check_sensor_api(UNCAL_GYROSCOPE_SENSOR, interval);
+	result = check_sensor_api(GYROSCOPE_UNCAL_SENSOR, interval);
 	fprintf(fp, "Uncal Gyro Sensor - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
 	result = check_sensor_api(TEMPERATURE_RAW_DATA_EVENT, interval);
