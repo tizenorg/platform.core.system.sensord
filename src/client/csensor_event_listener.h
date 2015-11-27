@@ -23,6 +23,7 @@
 #include <glib.h>
 #include <sys/types.h>
 #include <csensor_handle_info.h>
+#include <csensor_client_info.h>
 #include <unistd.h>
 #include <csocket.h>
 #include <string.h>
@@ -58,65 +59,16 @@ typedef struct {
 	void *accuracy_user_data;
 } client_callback_info;
 
-typedef struct sensor_rep
-{
-	bool active;
-	int option;
-	unsigned int interval;
-	unsigned int latency;
-	event_type_vector event_types;
-} sensor_rep;
-
 typedef void (*hup_observer_t)(void);
 
 class csensor_event_listener {
 public:
 	static csensor_event_listener& get_instance(void);
-	int create_handle(sensor_id_t sensor_id);
-	bool delete_handle(int handle);
 	bool start_handle(int handle);
 	bool stop_handle(int handle);
-	bool register_event(int handle, unsigned int event_type, unsigned int interval, unsigned int latency, int cb_type, void *cb, void* user_data);
-	bool unregister_event(int handle, unsigned int event_type);
 
-	bool register_accuracy_cb(int handle, sensor_accuracy_changed_cb_t cb, void* user_data);
-	bool unregister_accuracy_cb(int handle);
-
-	bool set_sensor_params(int handle, int sensor_state, int sensor_option);
-	bool get_sensor_params(int handle, int &sensor_state, int &sensor_option);
-	bool set_sensor_state(int handle, int sensor_state);
-	bool set_sensor_option(int handle, int sensor_option);
-	bool set_event_batch(int handle, unsigned int event_type, unsigned int interval, unsigned int latency);
-	bool get_event_info(int handle, unsigned int event_type, unsigned int &interval, unsigned int &latency, int &cb_type, void* &cb, void* &user_data);
 	void operate_sensor(sensor_id_t sensor, int power_save_state);
 	void get_listening_sensors(sensor_id_vector &sensors);
-
-	bool get_active_batch(sensor_id_t sensor_id, unsigned int &interval, unsigned int &latency);
-	unsigned int get_active_option(sensor_id_t sensor_id);
-	void get_active_event_types(sensor_id_t sensor_id, event_type_vector &active_event_types);
-
-	bool get_sensor_id(int handle, sensor_id_t &sensor_id);
-	bool get_sensor_state(int handle, int &state);
-
-	bool get_sensor_wakeup(int handle, int &sensor_wakeup);
-	bool set_sensor_wakeup(int handle, int sensor_wakeup);
-
-	void get_sensor_rep(sensor_id_t sensor_id, sensor_rep& rep);
-
-	bool has_client_id(void);
-	int get_client_id(void);
-	void set_client_id(int client_id);
-
-	bool is_active(void);
-	bool is_sensor_registered(sensor_id_t sensor_id);
-	bool is_sensor_active(sensor_id_t sensor_id);
-
-	bool add_command_channel(sensor_id_t sensor_id, command_channel *cmd_channel);
-	bool get_command_channel(sensor_id_t sensor_id, command_channel **cmd_channel);
-	bool close_command_channel(void);
-	bool close_command_channel(sensor_id_t sensor_id);
-
-	void get_all_handles(handle_vector &handles);
 
 	bool start_event_listener(void);
 	void stop_event_listener(void);
@@ -132,15 +84,8 @@ private:
 	typedef std::lock_guard<std::mutex> lock;
 	typedef std::unique_lock<std::mutex> ulock;
 
-	sensor_handle_info_map m_sensor_handle_infos;
-	sensor_command_channel_map m_command_channels;
-
-	int m_client_id;
-
 	csocket m_event_socket;
 	poller *m_poller;
-
-	cmutex m_handle_info_lock;
 
 	thread_state m_thread_state;
 	std::mutex m_thread_mutex;
@@ -151,7 +96,7 @@ private:
 	csensor_event_listener();
 	~csensor_event_listener();
 
-	csensor_event_listener(const csensor_event_listener&) {};
+	csensor_event_listener(const csensor_event_listener&);
 	csensor_event_listener& operator=(const csensor_event_listener&);
 
 	bool create_event_channel(void);
@@ -169,10 +114,11 @@ private:
 
 	void post_callback_to_main_loop(client_callback_info *cb_info);
 
-	bool is_event_active(int handle, unsigned int event_type, unsigned long long event_id);
 	bool is_valid_callback(client_callback_info *cb_info);
 	static gboolean callback_dispatcher(gpointer data);
 
 	void set_thread_state(thread_state state);
+
+	csensor_client_info &m_client_info;
 };
 #endif /* CSENSOR_EVENT_LISTENER_H_ */
