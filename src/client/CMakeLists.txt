@@ -21,6 +21,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(${PROJECT_NAME} SHARED
 	client.cpp
+	csensor_client_info.cpp
 	csensor_event_listener.cpp
 	sensor_info_manager.cpp
 	csensor_handle_info.cpp
