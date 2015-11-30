@@ -45,7 +45,6 @@ using std::vector;
 #define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
 #define ELEMENT_ACCEL_STATIC_BIAS								"ACCEL_STATIC_BIAS"
 #define ELEMENT_ACCEL_ROTATION_DIRECTION_COMPENSATION			"ACCEL_ROTATION_DIRECTION_COMPENSATION"
-#define ELEMENT_ACCEL_SCALE										"ACCEL_SCALE"
 #define ELEMENT_LINEAR_ACCEL_SIGN_COMPENSATION					"LINEAR_ACCEL_SIGN_COMPENSATION"
 #define ELEMENT_ORIENTATION_DATA_UNIT							"RAW_DATA_UNIT"
 #define ELEMENT_GRAVITY_SIGN_COMPENSATION						"GRAVITY_SIGN_COMPENSATION"
@@ -56,7 +55,7 @@ using std::vector;
 #define INITIAL_VALUE -1
 #define GRAVITY 9.80665
 #define DEVIATION 0.1
-
+#define ACCEL_SCALE 1
 #define PI 3.141593
 #define AZIMUTH_OFFSET_DEGREES 360
 #define AZIMUTH_OFFSET_RADIANS (2 * PI)
@@ -128,11 +127,7 @@ linear_accel_sensor::linear_accel_sensor()
 
 	INFO("m_accel_rotation_direction_compensation = (%d, %d, %d)", m_accel_rotation_direction_compensation[0], m_accel_rotation_direction_compensation[1], m_accel_rotation_direction_compensation[2]);
 
-
-	if (!config.get(SENSOR_TYPE_LINEAR_ACCEL, ELEMENT_ACCEL_SCALE, &m_accel_scale)) {
-		ERR("[ACCEL_SCALE] is empty\n");
-		throw ENXIO;
-	}
+	m_accel_scale = ACCEL_SCALE;
 
 	INFO("m_accel_scale = %f", m_accel_scale);
 
