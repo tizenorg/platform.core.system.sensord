@@ -149,26 +149,17 @@ fusion_sensor::fusion_sensor()
 
 	INFO("m_geomagnetic_rotation_direction_compensation = (%d, %d, %d)", m_geomagnetic_rotation_direction_compensation[0], m_geomagnetic_rotation_direction_compensation[1], m_geomagnetic_rotation_direction_compensation[2]);
 
-	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_ACCEL_SCALE, &m_accel_scale)) {
-		ERR("[ACCEL_SCALE] is empty\n");
-		throw ENXIO;
-	}
+	m_accel_scale = ACCEL_SCALE;
 
 	INFO("m_accel_scale = %f", m_accel_scale);
 
-	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_GYRO_SCALE, &m_gyro_scale)) {
-		ERR("[GYRO_SCALE] is empty\n");
-		throw ENXIO;
-	}
+	m_gyro_scale = GYRO_SCALE;
 
 	INFO("m_gyro_scale = %f", m_gyro_scale);
 
-	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_GEOMAGNETIC_SCALE, &m_geomagnetic_scale)) {
-		ERR("[GEOMAGNETIC_SCALE] is empty\n");
-		throw ENXIO;
-	}
+	m_geomagnetic_scale = GEOMAGNETIC_SCALE;
 
-	INFO("m_geomagnetic_scale = %f", m_geomagnetic_scale);
+	INFO("m_geomagnetic_scale = %f", m_geomagnetic_scale)
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_MAGNETIC_ALIGNMENT_FACTOR, &m_magnetic_alignment_factor)) {
 		ERR("[MAGNETIC_ALIGNMENT_FACTOR] is empty\n");
