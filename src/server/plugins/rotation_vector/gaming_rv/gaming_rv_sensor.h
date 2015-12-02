@@ -66,9 +66,6 @@ private:
 	float m_gyro_static_bias[3];
 	int m_accel_rotation_direction_compensation[3];
 	int m_gyro_rotation_direction_compensation[3];
-	float m_accel_scale;
-	float m_gyro_scale;
-
 	bool on_start(void);
 	bool on_stop(void);
 };

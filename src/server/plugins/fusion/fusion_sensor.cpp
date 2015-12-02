@@ -68,9 +68,6 @@ using std::vector;
 #define ELEMENT_ACCEL_ROTATION_DIRECTION_COMPENSATION			"ACCEL_ROTATION_DIRECTION_COMPENSATION"
 #define ELEMENT_GYRO_ROTATION_DIRECTION_COMPENSATION			"GYRO_ROTATION_DIRECTION_COMPENSATION"
 #define ELEMENT_GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION		"GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION"
-#define ELEMENT_ACCEL_SCALE										"ACCEL_SCALE"
-#define ELEMENT_GYRO_SCALE										"GYRO_SCALE"
-#define ELEMENT_GEOMAGNETIC_SCALE								"GEOMAGNETIC_SCALE"
 #define ELEMENT_MAGNETIC_ALIGNMENT_FACTOR						"MAGNETIC_ALIGNMENT_FACTOR"
 #define ELEMENT_PITCH_ROTATION_COMPENSATION						"PITCH_ROTATION_COMPENSATION"
 #define ELEMENT_ROLL_ROTATION_COMPENSATION						"ROLL_ROTATION_COMPENSATION"
@@ -148,27 +145,6 @@ fusion_sensor::fusion_sensor()
 	}
 
 	INFO("m_geomagnetic_rotation_direction_compensation = (%d, %d, %d)", m_geomagnetic_rotation_direction_compensation[0], m_geomagnetic_rotation_direction_compensation[1], m_geomagnetic_rotation_direction_compensation[2]);
-
-	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_ACCEL_SCALE, &m_accel_scale)) {
-		ERR("[ACCEL_SCALE] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_accel_scale = %f", m_accel_scale);
-
-	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_GYRO_SCALE, &m_gyro_scale)) {
-		ERR("[GYRO_SCALE] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_gyro_scale = %f", m_gyro_scale);
-
-	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_GEOMAGNETIC_SCALE, &m_geomagnetic_scale)) {
-		ERR("[GEOMAGNETIC_SCALE] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_geomagnetic_scale = %f", m_geomagnetic_scale);
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_MAGNETIC_ALIGNMENT_FACTOR, &m_magnetic_alignment_factor)) {
 		ERR("[MAGNETIC_ALIGNMENT_FACTOR] is empty\n");
@@ -268,7 +244,7 @@ void fusion_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
-		pre_process_data(m_accel, event.data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);
+		pre_process_data(m_accel, event.data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, ACCEL_SCALE);
 
 		m_accel.m_time_stamp = event.data.timestamp;
 
@@ -287,7 +263,7 @@ void fusion_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_
 			if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 				return;
 
-			pre_process_data(m_magnetic, event.data.values, m_geomagnetic_static_bias, m_geomagnetic_rotation_direction_compensation, m_geomagnetic_scale);
+			pre_process_data(m_magnetic, event.data.values, m_geomagnetic_static_bias, m_geomagnetic_rotation_direction_compensation, GEOMAGNETIC_SCALE);
 
 			m_magnetic.m_time_stamp = event.data.timestamp;
 
@@ -307,7 +283,7 @@ void fusion_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_
 				if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 					return;
 
-				pre_process_data(m_gyro, event.data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, m_gyro_scale);
+				pre_process_data(m_gyro, event.data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, GYRO_SCALE);
 
 				m_gyro.m_time_stamp = event.data.timestamp;
 
@@ -393,7 +369,7 @@ int fusion_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t 
 		return -1;
 
 	m_accel_sensor->get_sensor_data(ACCELEROMETER_RAW_DATA_EVENT, accel_data);
-	pre_process_data(accel, accel_data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);
+	pre_process_data(accel, accel_data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, ACCEL_SCALE);
 	accel.m_time_stamp = accel_data.timestamp;
 
 	if (event_type == FUSION_ORIENTATION_ENABLED ||
@@ -402,7 +378,7 @@ int fusion_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t 
 			event_type == FUSION_GYROSCOPE_UNCAL_ENABLED)
 	{
 		m_gyro_sensor->get_sensor_data(GYROSCOPE_RAW_DATA_EVENT, gyro_data);
-		pre_process_data(gyro, gyro_data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, m_gyro_scale);
+		pre_process_data(gyro, gyro_data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, GYRO_SCALE);
 		gyro.m_time_stamp = gyro_data.timestamp;
 	}
 
@@ -412,7 +388,7 @@ int fusion_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t 
 			event_type == FUSION_GYROSCOPE_UNCAL_ENABLED)
 	{
 		m_magnetic_sensor->get_sensor_data(GEOMAGNETIC_RAW_DATA_EVENT, magnetic_data);
-		pre_process_data(magnetic, magnetic_data.values, m_geomagnetic_static_bias, m_geomagnetic_rotation_direction_compensation, m_geomagnetic_scale);
+		pre_process_data(magnetic, magnetic_data.values, m_geomagnetic_static_bias, m_geomagnetic_rotation_direction_compensation, GEOMAGNETIC_SCALE);
 		magnetic.m_time_stamp = magnetic_data.timestamp;
 	}
 

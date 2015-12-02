@@ -128,14 +128,6 @@ linear_accel_sensor::linear_accel_sensor()
 
 	INFO("m_accel_rotation_direction_compensation = (%d, %d, %d)", m_accel_rotation_direction_compensation[0], m_accel_rotation_direction_compensation[1], m_accel_rotation_direction_compensation[2]);
 
-
-	if (!config.get(SENSOR_TYPE_LINEAR_ACCEL, ELEMENT_ACCEL_SCALE, &m_accel_scale)) {
-		ERR("[ACCEL_SCALE] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_accel_scale = %f", m_accel_scale);
-
 	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_GRAVITY_SIGN_COMPENSATION, m_gravity_sign_compensation, 3)) {
 		ERR("[GRAVITY_SIGN_COMPENSATION] is empty\n");
 		throw ENXIO;
@@ -358,9 +350,9 @@ void linear_accel_sensor::synthesize(const sensor_event_t &event, vector<sensor_
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
-		m_accel.m_data.m_vec[0] = m_accel_rotation_direction_compensation[0] * (event.data.values[0] - m_accel_static_bias[0]) / m_accel_scale;
-		m_accel.m_data.m_vec[1] = m_accel_rotation_direction_compensation[1] * (event.data.values[1] - m_accel_static_bias[1]) / m_accel_scale;
-		m_accel.m_data.m_vec[2] = m_accel_rotation_direction_compensation[2] * (event.data.values[2] - m_accel_static_bias[2]) / m_accel_scale;
+		m_accel.m_data.m_vec[0] = m_accel_rotation_direction_compensation[0] * (event.data.values[0] - m_accel_static_bias[0]) / ACCEL_SCALE;
+		m_accel.m_data.m_vec[1] = m_accel_rotation_direction_compensation[1] * (event.data.values[1] - m_accel_static_bias[1]) / ACCEL_SCALE;
+		m_accel.m_data.m_vec[2] = m_accel_rotation_direction_compensation[2] * (event.data.values[2] - m_accel_static_bias[2]) / ACCEL_SCALE;
 
 		m_accel.m_time_stamp = event.data.timestamp;
 
@@ -403,9 +395,9 @@ int linear_accel_sensor::get_sensor_data(const unsigned int event_type, sensor_d
 
 	gravity_data = calculate_gravity(fusion_data);
 
-	accel_data.values[0] = m_accel_rotation_direction_compensation[0] * (accel_data.values[0] - m_accel_static_bias[0]) / m_accel_scale;
-	accel_data.values[1] = m_accel_rotation_direction_compensation[1] * (accel_data.values[1] - m_accel_static_bias[1]) / m_accel_scale;
-	accel_data.values[2] = m_accel_rotation_direction_compensation[2] * (accel_data.values[2] - m_accel_static_bias[2]) / m_accel_scale;
+	accel_data.values[0] = m_accel_rotation_direction_compensation[0] * (accel_data.values[0] - m_accel_static_bias[0]) / ACCEL_SCALE;
+	accel_data.values[1] = m_accel_rotation_direction_compensation[1] * (accel_data.values[1] - m_accel_static_bias[1]) / ACCEL_SCALE;
+	accel_data.values[2] = m_accel_rotation_direction_compensation[2] * (accel_data.values[2] - m_accel_static_bias[2]) / ACCEL_SCALE;
 
 	if (event_type != LINEAR_ACCEL_RAW_DATA_EVENT)
 		return -1;

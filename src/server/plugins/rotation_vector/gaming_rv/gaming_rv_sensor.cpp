@@ -119,20 +119,6 @@ gaming_rv_sensor::gaming_rv_sensor()
 
 	INFO("m_gyro_rotation_direction_compensation = (%d, %d, %d)", m_gyro_rotation_direction_compensation[0], m_gyro_rotation_direction_compensation[1], m_gyro_rotation_direction_compensation[2]);
 
-	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_ACCEL_SCALE, &m_accel_scale)) {
-		ERR("[ACCEL_SCALE] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_accel_scale = %f", m_accel_scale);
-
-	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_GYRO_SCALE, &m_gyro_scale)) {
-		ERR("[GYRO_SCALE] is empty\n");
-		throw ENXIO;
-	}
-
-	INFO("m_gyro_scale = %f", m_gyro_scale);
-
 	m_interval = m_default_sampling_time * MS_TO_US;
 }
 
@@ -234,7 +220,7 @@ void gaming_rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_eve
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
-		pre_process_data(m_accel, event.data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);
+		pre_process_data(m_accel, event.data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, ACCEL_SCALE);
 
 		m_accel.m_time_stamp = event.data.timestamp;
 
@@ -245,7 +231,7 @@ void gaming_rv_sensor::synthesize(const sensor_event_t& event, vector<sensor_eve
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
 			return;
 
-		pre_process_data(m_gyro, event.data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, m_gyro_scale);
+		pre_process_data(m_gyro, event.data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, GYRO_SCALE);
 
 		m_gyro.m_time_stamp = event.data.timestamp;
 
@@ -292,8 +278,8 @@ int gaming_rv_sensor::get_sensor_data(unsigned int event_type, sensor_data_t &da
 	m_accel_sensor->get_sensor_data(ACCELEROMETER_RAW_DATA_EVENT, accel_data);
 	m_gyro_sensor->get_sensor_data(GYROSCOPE_RAW_DATA_EVENT, gyro_data);
 
-	pre_process_data(accel, accel_data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, m_accel_scale);
-	pre_process_data(gyro, gyro_data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, m_gyro_scale);
+	pre_process_data(accel, accel_data.values, m_accel_static_bias, m_accel_rotation_direction_compensation, ACCEL_SCALE);
+	pre_process_data(gyro, gyro_data.values, m_gyro_static_bias, m_gyro_rotation_direction_compensation, GYRO_SCALE);
 	accel.m_time_stamp = accel_data.timestamp;
 	gyro.m_time_stamp = gyro_data.timestamp;
 

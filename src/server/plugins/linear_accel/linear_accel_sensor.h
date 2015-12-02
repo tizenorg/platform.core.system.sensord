@@ -62,7 +62,6 @@ private:
 	int m_default_sampling_time;
 	float m_accel_static_bias[3];
 	int m_accel_rotation_direction_compensation[3];
-	float m_accel_scale;
 	int m_linear_accel_sign_compensation[3];
 	int m_gravity_sign_compensation[3];
 	int m_azimuth_rotation_compensation;
