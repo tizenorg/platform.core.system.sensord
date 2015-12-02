@@ -119,19 +119,14 @@ gaming_rv_sensor::gaming_rv_sensor()
 
 	INFO("m_gyro_rotation_direction_compensation = (%d, %d, %d)", m_gyro_rotation_direction_compensation[0], m_gyro_rotation_direction_compensation[1], m_gyro_rotation_direction_compensation[2]);
 
-	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_ACCEL_SCALE, &m_accel_scale)) {
-		ERR("[ACCEL_SCALE] is empty\n");
-		throw ENXIO;
-	}
+	m_accel_scale = ACCEL_SCALE;
 
 	INFO("m_accel_scale = %f", m_accel_scale);
 
-	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_GYRO_SCALE, &m_gyro_scale)) {
-		ERR("[GYRO_SCALE] is empty\n");
-		throw ENXIO;
-	}
+	m_gyro_scale = GYRO_SCALE;
 
 	INFO("m_gyro_scale = %f", m_gyro_scale);
+
 
 	m_interval = m_default_sampling_time * MS_TO_US;
 }
