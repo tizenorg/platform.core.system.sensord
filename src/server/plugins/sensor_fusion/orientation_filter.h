@@ -36,6 +36,9 @@
 #define V1x3S	3
 #define V1x4S	4
 #define V1x6S	6
+#define ACCEL_SCALE 1
+#define GYRO_SCALE 1146
+#define GEOMAGNETIC_SCALE 1
 
 template <typename TYPE>
 class orientation_filter {
