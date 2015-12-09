@@ -27,7 +27,8 @@
 #include <string.h>
 
 #include "check-sensor.h"
-
+#define OP_SUCCESS 0
+#define OP_ERROR -1
 
 
 void printpollinglogs(sensor_type_t type,sensor_data_t data)
@@ -84,8 +85,8 @@ void printpollinglogs(sensor_type_t type,sensor_data_t data)
 	case(GAMING_RV_SENSOR):
 		printf("Gaming Rv [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2], data.values[3]);
 		break;
-	case(UNCAL_GYROSCOPE_SENSOR):
-		printf("Uncal gyro [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2], data.values[3], data.values[4], data.values[5]);
+	case(GYROSCOPE_UNCAL_SENSOR):
+		printf("Gyroscope Uncal [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2], data.values[3], data.values[4], data.values[5]);
 		break;
 	default:
 		return;
@@ -163,9 +164,9 @@ int get_event(sensor_type_t sensor_type, char str[])
 		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return GAMING_RV_RAW_DATA_EVENT;
 		break;
-	case UNCAL_GYROSCOPE_SENSOR:
+	case GYROSCOPE_UNCAL_SENSOR:
 		if (strcmp(str, "RAW_DATA_EVENT") == 0)
-			return UNCAL_GYRO_RAW_DATA_EVENT;
+			return GYROSCOPE_UNCAL_RAW_DATA_EVENT;
 		break;
 
 	default:
@@ -230,8 +231,8 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 	case GAMING_RV_SENSOR:
 		printf("Gaming RV [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3]);
 		break;
-	case UNCAL_GYROSCOPE_SENSOR:
-		printf("Uncal gyro [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3], data->values[4], data->values[5]);
+	case GYROSCOPE_UNCAL_SENSOR:
+		printf("Gyroscope Uncal [%lld] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f] [%6.6f]\n\n", data->timestamp, data->values[0], data->values[1], data->values[2], data->values[3], data->values[4], data->values[5]);
 		break;
 
 	default:
@@ -292,9 +293,11 @@ int polling_sensor(sensor_type_t sensor_type, unsigned int event)
 {
 	int result, handle;
 	printf("Polling based\n");
+	sensor_t sensor;
+	sensor = sensord_get_sensor(sensor_type);
+	handle = sensord_connect(sensor);
+	result = sensord_start(handle, 1) ? OP_SUCCESS : OP_ERROR;;
 
-	handle = sf_connect(sensor_type);
-	result = sf_start(handle, 1);
 
 	if (result < 0) {
 		printf("Can't start the sensor\n");
@@ -305,12 +308,12 @@ int polling_sensor(sensor_type_t sensor_type, unsigned int event)
 	sensor_data_t data;
 
 	while(1) {
-		result = sf_get_data(handle, event , &data);
+		result = sensord_get_data(handle, event, &data) ? OP_SUCCESS : OP_ERROR;
 		printpollinglogs(sensor_type, data);
 		usleep(100000);
 	}
 
-	result = sf_disconnect(handle);
+	result = sensord_disconnect(handle) ? OP_SUCCESS : OP_ERROR;
 
 	if (result < 0) {
 		printf("Can't disconnect sensor\n");

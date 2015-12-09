@@ -21,6 +21,7 @@
 #define _SENSOR_PLUGIN_LOADER_CLASS_H_
 
 #include <sensor_common.h>
+#include <sensor_types.h>
 #include <sensor_hal.h>
 
 #include <cmutex.h>
@@ -66,6 +67,8 @@ private:
 	bool load_module(const std::string &path, std::vector<void*> &sensors, void* &handle);
 	bool insert_module(plugin_type type, const std::string &path);
 	void show_sensor_info(void);
+
+	bool get_paths_from_dir(const std::string &dir_path, std::vector<std::string> &hal_paths);
 
 	sensor_hal_plugins m_sensor_hals;
 	sensor_plugins m_sensors;

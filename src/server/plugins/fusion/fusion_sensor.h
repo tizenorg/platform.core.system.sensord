@@ -72,9 +72,6 @@ private:
 	int m_accel_rotation_direction_compensation[3];
 	int m_gyro_rotation_direction_compensation[3];
 	int m_geomagnetic_rotation_direction_compensation[3];
-	float m_accel_scale;
-	float m_gyro_scale;
-	float m_geomagnetic_scale;
 	int m_magnetic_alignment_factor;
 
 	bool on_start(void);

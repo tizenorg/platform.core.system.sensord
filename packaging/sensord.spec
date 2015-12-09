@@ -20,25 +20,15 @@ BuildRequires:  pkgconfig(cynara-creds-socket)
 BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
 
-%define accel_state ON
 %define auto_rotation_state OFF
-%define gyro_state OFF
-%define proxi_state OFF
-%define light_state OFF
-%define geo_state OFF
-%define pressure_state OFF
-%define temperature_state OFF
-%define ultraviolet_state OFF
 %define orientation_state OFF
 %define gravity_state OFF
 %define linear_accel_state OFF
 %define rv_state OFF
-%define rv_raw_state OFF
 %define geomagnetic_rv_state OFF
 %define gaming_rv_state OFF
 %define tilt_state OFF
-%define uncal_gyro_state OFF
-%define bio_led_red_state OFF
+%define gyroscope_uncal_state OFF
 %define build_test_suite ON
 
 %description
@@ -68,14 +58,6 @@ Requires:   %{name} = %{version}-%{release}
 %description -n libsensord-devel
 Sensord shared library
 
-%package -n libsensord-plugins
-Summary:    Sensord plugin library
-Group:      System/Development
-Requires:   %{name} = %{version}-%{release}
-
-%description -n libsensord-plugins
-Sensord plugin library
-
 %if %{build_test_suite} == "ON"
 %package -n sensor-test
 Summary:    Sensord library
@@ -92,15 +74,12 @@ Sensor functional testing
 cp %{SOURCE1} .
 cp %{SOURCE2} .
 
-cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DACCEL=%{accel_state} \
-	-DGYRO=%{gyro_state} -DPROXI=%{proxi_state} -DLIGHT=%{light_state} \
-	-DGEO=%{geo_state} -DPRESSURE=%{pressure_state} -DTEMPERATURE=%{temperature_state} \
+cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
-	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} -DRV_RAW=%{rv_raw_state} \
+	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
-	-DUNCAL_GYRO=%{uncal_gyro_state} -DAUTO_ROTATION=%{auto_rotation_state} \
-	-DTILT=%{tilt_state} -DULTRAVIOLET=%{ultraviolet_state} \
-	-DBIO_LED_RED=%{bio_led_red_state} -DTEST_SUITE=%{build_test_suite} \
+	-DGYROSCOPE_UNCAL=%{gyroscope_uncal_state} -DAUTO_ROTATION=%{auto_rotation_state} \
+	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite} \
 	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
 
 %build
@@ -146,11 +125,6 @@ systemctl daemon-reload
 %{_includedir}/sensord-devel/*.h
 %{_libdir}/libsensor.so
 %{_libdir}/pkgconfig/sensor.pc
-%license LICENSE.APLv2
-
-%files -n libsensord-plugins
-%defattr(-,root,root,-)
-%{_libdir}/libsensord-plugins.so
 %license LICENSE.APLv2
 
 %if %{build_test_suite} == "ON"

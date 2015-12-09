@@ -53,7 +53,7 @@ void usage()
 	printf("[gaming_rv] ");
 	printf("[ultraviolet] ");
 	printf("[light]\n");
-	printf("[uncal_gyro]");
+	printf("[gyro_uncal]");
 
 }
 

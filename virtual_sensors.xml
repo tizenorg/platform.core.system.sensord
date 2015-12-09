@@ -12,9 +12,6 @@
 			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="-1" value3="-1" />
 			<GYRO_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
 			<GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="-1" value3="-1" />
-			<ACCEL_SCALE value="1" />
-			<GYRO_SCALE value="1146" />
-			<GEOMAGNETIC_SCALE value="1" />
 			<MAGNETIC_ALIGNMENT_FACTOR value="1" />
 		</FUSION>
 
@@ -43,7 +40,6 @@
 			<DEFAULT_SAMPLING_TIME value="100" />
 			<ACCEL_STATIC_BIAS value1="0" value2="0" value3="0" />
 			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="-1" value3="-1" />
-			<ACCEL_SCALE value="1" />
 			<LINEAR_ACCEL_SIGN_COMPENSATION value1="1" value2="1" value3="1" />
 		</LINEAR_ACCEL>
 
@@ -67,8 +63,6 @@
 			<GYRO_STATIC_BIAS value1="0" value2="0" value3="0" />
 			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="-1" value3="-1" />
 			<GYRO_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
-			<ACCEL_SCALE value="1" />
-			<GYRO_SCALE value="1146" />
 		</GAMING_ROTATION_VECTOR>
 
 		<TILT>
@@ -81,7 +75,7 @@
 		</TILT>
 
 		<UNCAL_GYROSCOPE>
-			<NAME value="UNCAL_GYROSCOPE_SENSOR" />
+			<NAME value="GYROSCOPE_UNCAL_SENSOR" />
 			<VENDOR value="SAMSUNG" />
 			<RAW_DATA_UNIT value="DEGREES" />
 			<DEFAULT_SAMPLING_TIME value="100" />
@@ -100,9 +94,6 @@
 			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
 			<GYRO_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
 			<GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
-			<ACCEL_SCALE value="1" />
-			<GYRO_SCALE value="1150" />
-			<GEOMAGNETIC_SCALE value="1" />
 			<MAGNETIC_ALIGNMENT_FACTOR value="1" />
 		</FUSION>
 
@@ -138,7 +129,6 @@
 			<DEFAULT_SAMPLING_TIME value="100" />
 			<ACCEL_STATIC_BIAS value1="0" value2="0" value3="0" />
 			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
-			<ACCEL_SCALE value="1" />
 			<LINEAR_ACCEL_SIGN_COMPENSATION value1="1" value2="1" value3="1" />
 		</LINEAR_ACCEL>
 
@@ -162,8 +152,6 @@
 			<GYRO_STATIC_BIAS value1="3.5638" value2="-5.8288" value3="-0.79750" />
 			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
 			<GYRO_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
-			<ACCEL_SCALE value="1" />
-			<GYRO_SCALE value="1150" />
 		</GAMING_ROTATION_VECTOR>
 
 		<TILT>
@@ -176,7 +164,7 @@
 		</TILT>
 
 		<UNCAL_GYROSCOPE>
-			<NAME value="UNCAL_GYROSCOPE_SENSOR" />
+			<NAME value="GYROSCOPE_UNCAL_SENSOR" />
 			<VENDOR value="SAMSUNG" />
 			<RAW_DATA_UNIT value="DEGREES" />
 			<DEFAULT_SAMPLING_TIME value="100" />
@@ -195,9 +183,6 @@
 			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="1" value2="-1" value3="1" />
 			<GYRO_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="1" value3="-1" />
 			<GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION value1="1" value2="-1" value3="1" />
-			<ACCEL_SCALE value="1" />
-			<GYRO_SCALE value="1150" />
-			<GEOMAGNETIC_SCALE value="1" />
 			<MAGNETIC_ALIGNMENT_FACTOR value="-1" />
 		</FUSION>
 
@@ -233,7 +218,6 @@
 			<DEFAULT_SAMPLING_TIME value="100" />
 			<ACCEL_STATIC_BIAS value1="0" value2="0" value3="0" />
 			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="1" value2="1" value3="1" />
-			<ACCEL_SCALE value="1" />
 			<LINEAR_ACCEL_SIGN_COMPENSATION value1="1" value2="1" value3="1" />
 		</LINEAR_ACCEL>
 
@@ -257,8 +241,6 @@
 			<GYRO_STATIC_BIAS value1="-0.54385" value2="0.24325" value3="0.87875" />
 			<ACCEL_ROTATION_DIRECTION_COMPENSATION value1="1" value2="-1" value3="1" />
 			<GYRO_ROTATION_DIRECTION_COMPENSATION value1="-1" value2="1" value3="-1" />
-			<ACCEL_SCALE value="1" />
-			<GYRO_SCALE value="1150" />
 		</GAMING_ROTATION_VECTOR>
 
 		<TILT>
@@ -271,7 +253,7 @@
 		</TILT>
 
 		<UNCAL_GYROSCOPE>
-			<NAME value="UNCAL_GYROSCOPE_SENSOR" />
+			<NAME value="GYROSCOPE_UNCAL_SENSOR" />
 			<VENDOR value="SAMSUNG" />
 			<RAW_DATA_UNIT value="DEGREES" />
 			<DEFAULT_SAMPLING_TIME value="100" />
