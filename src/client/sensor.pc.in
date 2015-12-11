@@ -5,9 +5,9 @@ exec_prefix=@EXEC_PREFIX@
 libdir=@LIBDIR@
 includedir=@INCLUDEDIR@/sensor
 
-Name: libsensord
-Description: Sensord library
-Version: @VERSION@
-Requires:
-Libs: -L${libdir} -lsensor
-Cflags: -I${includedir}
+Name: @PC_NAME@
+Description: @PC_DESCRIPTION@
+Version: @PC_VERSION@
+Requires: @PC_DEPENDENTS@
+Libs: -L${libdir} @PC_LDFLAGS@
+Cflags: -I${includedir} @PC_CFLAGS@
