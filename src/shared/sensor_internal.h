@@ -36,6 +36,7 @@ extern "C"
 #endif
 
 #include <sys/types.h>
+#include <glib.h>
 
 #include <sensor_internal_deprecated.h>
 
@@ -296,6 +297,16 @@ bool sensord_change_event_interval(int handle, unsigned int event_type, unsigned
  * @return true on success, otherwise false.
  */
 bool sensord_change_event_max_batch_latency(int handle, unsigned int event_type, unsigned int max_batch_latency);
+
+/**
+ * @brief Change the maincontext of a specifed event type in a connected sensor.
+ *
+ * @param[in] handle a handle represensting a connected sensor.
+ * @param[in] event_type an event type to change interval.
+ * @param[in] maincontext an event is passed to default GMainLoop as default. And it can be changed to specific GMainContext.
+ * @return true on success, otherwise false.
+ */
+bool sensord_change_event_maincontext(int handle, unsigned int event_type, GMainContext *maincontext);
 
 /**
  * @brief Change the option of a connected sensor.

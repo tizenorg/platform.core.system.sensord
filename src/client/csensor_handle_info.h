@@ -25,6 +25,7 @@
 #include <sensor_logs.h>
 #include <string.h>
 #include <unordered_map>
+#include <glib.h>
 
 typedef std::unordered_map<unsigned int,creg_event_info> event_info_map;
 
@@ -47,6 +48,7 @@ public:
 	bool delete_reg_event_info(unsigned int event_type);
 
 	bool change_reg_event_batch(unsigned int event_type, unsigned int interval, unsigned int latency);
+	bool change_reg_event_maincontext(unsigned int event_type, GMainContext *maincontext);
 
 	creg_event_info* get_reg_event_info(const unsigned int event_type);
 	void get_reg_event_types(event_type_vector &event_types);

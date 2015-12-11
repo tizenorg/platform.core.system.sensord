@@ -41,12 +41,13 @@ public:
 	void *m_user_data;
 	unsigned long long m_previous_event_time;
 	bool	m_fired;
+	GMainContext *m_maincontext;
 
 	creg_event_info():m_id(0), m_handle(-1),
 			type(0), m_interval(POLL_1HZ_MS),
 			m_latency(0),
 			m_cb_type(SENSOR_EVENT_CB), m_cb(NULL), m_user_data(NULL),
-			m_previous_event_time(0), m_fired(false){}
+			m_previous_event_time(0), m_fired(false), m_maincontext(NULL){}
 
 	~creg_event_info(){}
 };
