@@ -25,10 +25,8 @@
 #include <sensor_common.h>
 #include <unistd.h>
 #include <string.h>
-
 #include "check-sensor.h"
-#define OP_SUCCESS 0
-#define OP_ERROR -1
+
 
 
 void printpollinglogs(sensor_type_t type,sensor_data_t data)
@@ -296,10 +294,10 @@ int polling_sensor(sensor_type_t sensor_type, unsigned int event)
 	sensor_t sensor;
 	sensor = sensord_get_sensor(sensor_type);
 	handle = sensord_connect(sensor);
-	result = sensord_start(handle, 1) ? OP_SUCCESS : OP_ERROR;;
+	result = sensord_start(handle, 1);
 
 
-	if (result < 0) {
+	if (!result) {
 		printf("Can't start the sensor\n");
 		printf("Error\n\n\n\n");
 		return -1;
@@ -308,14 +306,14 @@ int polling_sensor(sensor_type_t sensor_type, unsigned int event)
 	sensor_data_t data;
 
 	while(1) {
-		result = sensord_get_data(handle, event, &data) ? OP_SUCCESS : OP_ERROR;
+		result = sensord_get_data(handle, event, &data);
 		printpollinglogs(sensor_type, data);
 		usleep(100000);
 	}
 
-	result = sensord_disconnect(handle) ? OP_SUCCESS : OP_ERROR;
+	result = sensord_disconnect(handle);
 
-	if (result < 0) {
+	if (!result) {
 		printf("Can't disconnect sensor\n");
 		printf("Error\n\n\n\n");
 		return -1;
