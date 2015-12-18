@@ -464,7 +464,10 @@ bool csensor_event_listener::create_event_channel(void)
 		return false;
 	}
 
-	m_event_socket.set_connection_mode();
+	if (!m_event_socket.set_connection_mode()) {
+		ERR("Failed to set connection mode for client %s", get_client_name());
+		return false;
+	}
 
 	client_id = m_client_info.get_client_id();
 

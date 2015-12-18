@@ -336,7 +336,7 @@ bool csocket::connect(const char *sock_path)
 	} else if (!ret) {
 		ERR("select timeout: %d seconds elapsed for %s", tv.tv_sec, get_client_name());
 		close();
-		return true;
+		return false;
 	}
 
 	if (!FD_ISSET(m_sock_fd, &write_fds)) {

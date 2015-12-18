@@ -95,7 +95,7 @@ int main(int argc, char **argv)
 	char file_name[50];
 
 	for (i = 0; i < MAXSIZE; i++) {
-		sprintf(file_name, "output_%d", sensors[i]);
+		snprintf(file_name, sizeof(file_name), "output_%d", sensors[i]);
 		file_output[i] = fopen(file_name, "w+");
 		sensor_t sensor = sensord_get_sensor(sensors[i]);
 		handle[i] = sensord_connect(sensor);
