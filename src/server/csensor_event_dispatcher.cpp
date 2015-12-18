@@ -30,6 +30,7 @@ using std::vector;
 #define MAX_PENDING_CONNECTION 32
 
 csensor_event_dispatcher::csensor_event_dispatcher()
+: m_lcd_on(false)
 {
 }
 

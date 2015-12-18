@@ -39,6 +39,7 @@ using std::vector;
 
 accel_sensor::accel_sensor()
 : m_sensor_hal(NULL)
+, m_raw_data_unit(0.0f)
 , m_interval(POLL_1HZ_MS)
 {
 	m_name = string(SENSOR_NAME);

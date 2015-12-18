@@ -29,6 +29,7 @@ using std::vector;
 
 temperature_sensor::temperature_sensor()
 : m_sensor_hal(NULL)
+, m_temperature(0.0f)
 , m_resolution(0.0f)
 {
 	m_name = string(SENSOR_NAME);
