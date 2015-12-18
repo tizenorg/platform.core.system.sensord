@@ -196,9 +196,6 @@ void csensor_event_listener::handle_events(void* event)
 			event_data.event_data = &(sensor_event->data);
 			event_data.event_data_size = sizeof(sensor_event->data);
 		}
-
-		if (sensor_event->data.extra_data_size > 0)
-			sensor_event->data.extra_data = (void *)event + sizeof(sensor_event_t);
 	}
 
 	{	/* scope for the lock */
