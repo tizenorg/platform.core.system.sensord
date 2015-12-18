@@ -19,6 +19,7 @@ BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(cynara-creds-socket)
 BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
+Requires:   libsensord = %{version}-%{release}
 
 %define auto_rotation_state OFF
 %define orientation_state OFF
@@ -34,18 +35,9 @@ BuildRequires:  pkgconfig(cynara-session)
 %description
 Sensor daemon
 
-%package sensord
-Summary:    Sensor daemon
-Group:      System/Sensor Framework
-Requires:   %{name} = %{version}-%{release}
-
-%description sensord
-Sensor daemon
-
 %package -n libsensord
 Summary:    Sensord library
 Group:      System/Libraries
-Requires:   %{name} = %{version}-%{release}
 
 %description -n libsensord
 Sensord library
@@ -53,7 +45,7 @@ Sensord library
 %package -n libsensord-devel
 Summary:    Sensord shared library
 Group:      System/Development
-Requires:   %{name} = %{version}-%{release}
+Requires:   libsensord = %{version}-%{release}
 
 %description -n libsensord-devel
 Sensord shared library
@@ -62,7 +54,6 @@ Sensord shared library
 %package -n sensor-test
 Summary:    Sensord library
 Group:      System/Testing
-Requires:   %{name} = %{version}-%{release}
 
 %description -n sensor-test
 Sensor functional testing
@@ -102,7 +93,7 @@ systemctl daemon-reload
 
 %postun -n libsensord -p /sbin/ldconfig
 
-%files -n sensord
+%files
 %attr(0644,root,root)/usr/etc/virtual_sensors.xml
 %manifest sensord.manifest
 %{_bindir}/sensord
