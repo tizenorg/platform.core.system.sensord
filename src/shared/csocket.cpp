@@ -110,6 +110,7 @@ bool csocket::bind (const char *sock_path)
 
 	m_addr.sun_family = AF_UNIX;
 
+	sock_path[sizeof(sock_path)-1] = '\0';
 	strncpy(m_addr.sun_path, sock_path, sizeof(m_addr.sun_path));
 	m_addr.sun_path[sizeof(m_addr.sun_path)-1] = '\0';
 
@@ -310,6 +311,7 @@ bool csocket::connect(const char *sock_path)
 
 	m_addr.sun_family = AF_UNIX;
 
+	sock_path[sizeof(sock_path)-1] = '\0';
 	strncpy(m_addr.sun_path, sock_path, sizeof(m_addr.sun_path));
 	m_addr.sun_path[sizeof(m_addr.sun_path)-1] = '\0';
 
