@@ -37,7 +37,7 @@ add_library(${PROJECT_NAME} SHARED
 	poller.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} ${lib_pkgs_LDFLAGS} "sensord-devel")
+target_link_libraries(${PROJECT_NAME} ${lib_pkgs_LDFLAGS} "sensord-shared")
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES SOVERSION ${VERSION_MAJOR})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES VERSION ${VERSION})
 

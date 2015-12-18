@@ -2,7 +2,7 @@ Name:       sensord
 Summary:    Sensor daemon
 Version:    2.0.0
 Release:    0
-Group:     	System/Sensor Framework
+Group:		System/Sensor Framework
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:	sensord.manifest
@@ -38,6 +38,7 @@ Sensor daemon
 %package -n libsensord
 Summary:    Sensord library
 Group:      System/Libraries
+Requires:   %{name} = %{version}-%{release}
 
 %description -n libsensord
 Sensord library
@@ -107,13 +108,13 @@ systemctl daemon-reload
 %defattr(-,root,root,-)
 %manifest libsensord.manifest
 %{_libdir}/libsensor.so.*
-%{_libdir}/libsensord-devel.so
+%{_libdir}/libsensord-shared.so
 %license LICENSE.APLv2
 
 %files -n libsensord-devel
 %defattr(-,root,root,-)
 %{_includedir}/sensor/*.h
-%{_includedir}/sensord-devel/*.h
+%{_includedir}/sensord-shared/*.h
 %{_libdir}/libsensor.so
 %{_libdir}/pkgconfig/sensor.pc
 %license LICENSE.APLv2

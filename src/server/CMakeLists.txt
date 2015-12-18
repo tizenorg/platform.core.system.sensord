@@ -31,6 +31,6 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie")
 
 add_executable(${PROJECT_NAME} ${SERVER_SRCS} ${PLUGIN_SRCS})
 
-target_link_libraries(${PROJECT_NAME} ${lib_pkgs_LDFLAGS} "sensord-devel")
+target_link_libraries(${PROJECT_NAME} ${lib_pkgs_LDFLAGS} "sensord-shared")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
