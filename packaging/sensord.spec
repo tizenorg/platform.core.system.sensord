@@ -108,13 +108,13 @@ systemctl daemon-reload
 %defattr(-,root,root,-)
 %manifest libsensord.manifest
 %{_libdir}/libsensor.so.*
-%{_libdir}/libsensord-devel.so
+%{_libdir}/libsensord-shared.so
 %license LICENSE.APLv2
 
 %files -n libsensord-devel
 %defattr(-,root,root,-)
 %{_includedir}/sensor/*.h
-%{_includedir}/sensord-devel/*.h
+%{_includedir}/sensord-shared/*.h
 %{_libdir}/libsensor.so
 %{_libdir}/pkgconfig/sensor.pc
 %license LICENSE.APLv2

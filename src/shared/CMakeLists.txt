@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(sensord-devel CXX)
+project(sensord-shared CXX)
 
 INCLUDE(FindPkgConfig)
 PKG_CHECK_MODULES(shared_pkgs REQUIRED dlog libxml-2.0)
@@ -43,4 +43,3 @@ install(FILES sensor_types.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_internal_deprecated.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_internal.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_common.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
-
