@@ -33,7 +33,9 @@ csocket::csocket()
 
 
 csocket::csocket(int sock_fd)
-: m_send_flags(MSG_NOSIGNAL)
+: m_sock_fd(-1)
+, m_sock_type(SOCK_STREAM)
+, m_send_flags(MSG_NOSIGNAL)
 , m_recv_flags(MSG_NOSIGNAL)
 {
 	m_sock_fd = sock_fd;
@@ -43,6 +45,10 @@ csocket::csocket(int sock_fd)
 
 
 csocket::csocket(const csocket &sock)
+: m_sock_fd(-1)
+, m_sock_type(SOCK_STREAM)
+, m_send_flags(MSG_NOSIGNAL)
+, m_recv_flags(MSG_NOSIGNAL)
 {
 	if (this == &sock)
 		return;
