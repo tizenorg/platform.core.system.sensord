@@ -143,7 +143,7 @@ bool get_proc_name(pid_t pid, char *process_name)
 {
 	char buf[NAME_MAX];
 
-	if (sprintf(buf, "%d process", pid) < 1) {
+	if (snprintf(buf, sizeof(buf), "%d process", pid) < 1) {
 		return false;
 	}
 
