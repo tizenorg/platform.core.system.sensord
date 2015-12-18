@@ -4,8 +4,15 @@ project(sensor CXX)
 SET(VERSION_MAJOR 1)
 SET(VERSION "${VERSION_MAJOR}.1.0")
 
+SET(PC_NAME "sensor")
+SET(PC_DESCRIPTION "Sensord library")
+SET(PC_VERSION ${FULLVER})
+SET(PC_LDFLAGS "-lsensor")
+SET(DEPENDENTS "vconf glib-2.0")
+SET(PC_DEPENDENTS "glib-2.0")
+
 INCLUDE(FindPkgConfig)
-PKG_CHECK_MODULES(lib_pkgs REQUIRED vconf glib-2.0)
+PKG_CHECK_MODULES(lib_pkgs REQUIRED ${DEPENDENTS})
 
 FOREACH(flag ${lib_pkgs_LDFLAGS})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")

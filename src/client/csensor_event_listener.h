@@ -57,6 +57,7 @@ typedef struct {
 	unsigned long long timestamp;
 	int accuracy;
 	void *accuracy_user_data;
+	GMainContext *maincontext;
 } client_callback_info;
 
 typedef void (*hup_observer_t)(void);

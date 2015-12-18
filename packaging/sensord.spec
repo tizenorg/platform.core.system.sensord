@@ -1,6 +1,6 @@
 Name:       sensord
 Summary:    Sensor daemon
-Version:    1.0.0
+Version:    1.1.0
 Release:    0
 Group:     	System/Sensor Framework
 License:    Apache-2.0
