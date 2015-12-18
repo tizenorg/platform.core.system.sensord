@@ -222,10 +222,12 @@ void csensor_event_dispatcher::send_sensor_events(void* events, int event_cnt, b
 
 		while (it_client_id != id_vec.end()) {
 			csocket client_socket;
-
-			client_info_manager.get_event_socket(*it_client_id, client_socket);
-
 			bool ret;
+
+			if (!client_info_manager.get_event_socket(*it_client_id, client_socket)) {
+				++it_client_id;
+				continue;
+			}
 
 			if (is_hub_event)
 				ret = (client_socket.send(sensor_hub_events + i, sizeof(sensorhub_event_t)) > 0);
@@ -240,7 +242,6 @@ void csensor_event_dispatcher::send_sensor_events(void* events, int event_cnt, b
 			++it_client_id;
 		}
 	}
-
 }
 
 cclient_info_manager& csensor_event_dispatcher::get_client_info_manager(void)
@@ -311,7 +312,11 @@ void csensor_event_dispatcher::request_last_event(int client_id, sensor_id_t sen
 	csocket client_socket;
 
 	if (client_info_manager.get_registered_events(client_id, sensor_id, event_vec)) {
-		client_info_manager.get_event_socket(client_id, client_socket);
+		if (!client_info_manager.get_event_socket(client_id, client_socket)) {
+			ERR("Failed to get event socket from %s",
+					client_info_manager.get_client_info(client_id));
+			return;
+		}
 
 		auto it_event = event_vec.begin();
 		while (it_event != event_vec.end()) {
