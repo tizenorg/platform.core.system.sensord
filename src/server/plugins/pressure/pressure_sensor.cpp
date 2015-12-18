@@ -35,6 +35,7 @@ using std::vector;
 
 pressure_sensor::pressure_sensor()
 : m_sensor_hal(NULL)
+, m_pressure(0.0f)
 , m_resolution(0.0f)
 {
 	m_name = string(SENSOR_NAME);
