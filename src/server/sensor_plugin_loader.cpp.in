@@ -99,7 +99,7 @@ using std::static_pointer_cast;
 #define LINEAR_ACCEL_ENABLED 7
 #define ORIENTATION_ENABLED 7
 
-#define HAL_PLUGINS_DIR_PATH "/usr/lib/sensor-hal"
+#define HAL_PLUGINS_DIR_PATH "/usr/lib/sensor"
 
 #define SENSOR_INDEX_SHIFT 16
 
