@@ -39,6 +39,8 @@ extern "C"
 /*header for each sensor type*/
 #include <sensor_types.h>
 
+#include <sensor_deprecated.h>
+
 #define MAX_KEY_LEN 30
 
 typedef struct {
