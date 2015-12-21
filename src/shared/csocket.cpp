@@ -154,8 +154,10 @@ bool csocket::accept(csocket& client_socket) const
 
 	do {
 		client_socket.m_sock_fd = ::accept(m_sock_fd, (sockaddr *)&m_addr, (socklen_t *)&addr_length);
-		if (!client_socket.is_valid())
+		if (!client_socket.is_valid()) {
 			err = errno;
+			::close(client_socket.m_sock_fd);
+		}
 	} while (err == EINTR);
 
 	if (!client_socket.is_valid()) {
