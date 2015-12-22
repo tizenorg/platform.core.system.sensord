@@ -35,6 +35,7 @@ using std::stringstream;
 #define DEFAULT_ATTR1		"value1"
 #define DEFAULT_ATTR2		"value2"
 #define DEFAULT_ATTR3		"value3"
+#define DEFAULT_DEVICE	"Default"
 
 cvirtual_sensor_config::cvirtual_sensor_config()
 {
@@ -148,7 +149,6 @@ bool cvirtual_sensor_config::load_config(const string& config_path)
 					attr_ptr = attr_ptr->next;
 				}
 
-
 				element_node_ptr = element_node_ptr->next;
 			}
 
@@ -169,7 +169,16 @@ bool cvirtual_sensor_config::get(const string& sensor_type, const string& elemen
 
 	if (it_device_list == m_virtual_sensor_config.end())	{
 		ERR("There is no <%s> device\n",m_device_id.c_str());
-		return false;
+
+		m_device_id = DEFAULT_DEVICE;
+		it_device_list = m_virtual_sensor_config.find(m_device_id);
+
+		if (it_device_list == m_virtual_sensor_config.end()) {
+			ERR("There is no Default device\n");
+			return false;
+		}
+
+		INFO("m_device_id is set to Default\n");
 	}
 
 	auto it_virtual_sensor_list = it_device_list->second.find(sensor_type);

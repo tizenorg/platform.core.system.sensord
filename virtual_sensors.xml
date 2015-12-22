@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <VIRTUAL_SENSOR>
+	<DEVICE type="Default">
+		<AUTO_ROTATION>
+			<NAME value="AUTO_ROTATION_SENSOR" />
+			<VENDOR value="SAMSUNG" />
+			<RAW_DATA_UNIT value="DEGREES" />
+			<DEFAULT_SAMPLING_TIME value="200" />
+		</AUTO_ROTATION>
+	</DEVICE>
+
 	<DEVICE type="Mobile-Emulator">
 		<FUSION>
 			<NAME value="FUSION_SENSOR" />
