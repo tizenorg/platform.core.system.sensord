@@ -1,6 +1,6 @@
 Name:       sensord
 Summary:    Sensor daemon
-Version:    2.0.0
+Version:    2.0.1
 Release:    0
 Group:		System/Sensor Framework
 License:    Apache-2.0
@@ -21,7 +21,7 @@ BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
 Requires:   libsensord = %{version}-%{release}
 
-%define auto_rotation_state OFF
+%define auto_rotation_state ON
 %define orientation_state OFF
 %define gravity_state OFF
 %define linear_accel_state OFF
