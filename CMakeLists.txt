@@ -19,9 +19,6 @@ MESSAGE("FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
 add_definitions(-DUSE_DLOG_LOG)
 add_definitions(-DLIBDIR="${CMAKE_INSTALL_LIBDIR}")
 
-# Internal Debugging Options
-#add_definitions(-Wall -g -D_DEBUG)
-
 # Installing files
 INSTALL(FILES virtual_sensors.xml virtual_sensors.xml DESTINATION etc)
 
