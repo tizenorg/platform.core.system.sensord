@@ -38,7 +38,7 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 
 bool check_sensor_api(unsigned int event_type, int cond_value)
 {
-	int result, handle;
+	int handle;
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 
@@ -126,9 +126,8 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 		return false;
 	}
 
-	result = sensord_register_event(handle, event_type, cond_value, 0, callback, NULL);
-
-	if (result < 0) {
+	result_boolean = sensord_register_event(handle, event_type, cond_value, 0, callback, NULL);
+	if (!result_boolean) {
 		free(output2);
 		free(output_list);
 		fprintf(fp, "Sensor - %d, event - %d, failed at sensord_register_event\n", sensor_type, event_type);
@@ -136,7 +135,6 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 	}
 
 	result_boolean = sensord_start(handle, 1);
-
 	if (!result_boolean) {
 		sensord_unregister_event(handle, event_type);
 		sensord_disconnect(handle);
@@ -177,7 +175,6 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 	}
 
 	result_boolean = sensord_unregister_event(handle, event_type);
-
 	if (!result_boolean) {
 		free(output2);
 		free(output_list);
@@ -186,7 +183,6 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 	}
 
 	result_boolean = sensord_stop(handle);
-
 	if (!result_boolean) {
 		free(output2);
 		free(output_list);
@@ -195,7 +191,6 @@ bool check_sensor_api(unsigned int event_type, int cond_value)
 	}
 
 	result_boolean = sensord_disconnect(handle);
-
 	if (!result_boolean) {
 		free(output2);
 		free(output_list);
