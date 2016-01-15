@@ -29,6 +29,8 @@
 #define MS_TO_US 1000
 #define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
+#define EVENT_BUFFER_SIZE sizeof(sensorhub_event_t)
+
 using std::thread;
 using std::pair;
 using std::vector;
@@ -53,7 +55,6 @@ csensor_event_listener::csensor_event_listener(const csensor_event_listener& lis
 , m_client_info(listener.m_client_info)
 {
 }
-
 
 csensor_event_listener& csensor_event_listener::get_instance(void)
 {
@@ -113,7 +114,6 @@ client_callback_info* csensor_event_listener::handle_calibration_cb(csensor_hand
 	cal_event_info = handle_info.get_reg_event_info(cal_event_type);
 	if ((accuracy == SENSOR_ACCURACY_BAD) && !handle_info.m_bad_accuracy &&	cal_event_info) {
 		sensor_event_data_t cal_event_data;
-		sensor_data_t cal_data;
 		void *cal_sensor_data;
 
 		cal_event_info->m_previous_event_time = time;
@@ -122,19 +122,22 @@ client_callback_info* csensor_event_listener::handle_calibration_cb(csensor_hand
 		if (!event_info)
 			return NULL;
 
+		sensor_data_t *cal_data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
+		retvm_if(!cal_data, NULL, "Failed to allocate memory");
+
 		if (event_info->m_cb_type == SENSOR_LEGACY_CB) {
 			cal_event_data.event_data = (void *)&(accuracy);
 			cal_event_data.event_data_size = sizeof(accuracy);
 			cal_sensor_data = &cal_event_data;
 		} else {
-			cal_data.accuracy = accuracy;
-			cal_data.timestamp = time;
-			cal_data.values[0] = accuracy;
-			cal_data.value_count = 1;
-			cal_sensor_data = &cal_data;
+			cal_data->accuracy = accuracy;
+			cal_data->timestamp = time;
+			cal_data->values[0] = accuracy;
+			cal_data->value_count = 1;
+			cal_sensor_data = cal_data;
 		}
 
-		cal_callback_info = get_callback_info(handle_info.m_sensor_id, cal_event_info, cal_sensor_data);
+		cal_callback_info = get_callback_info(handle_info.m_sensor_id, cal_event_info, cal_sensor_data, cal_sensor_data);
 
 		m_client_info.set_bad_accuracy(handle_info.m_handle, true);
 
@@ -222,9 +225,9 @@ void csensor_event_listener::handle_events(void* event)
 				client_callback_infos.push_back(cal_callback_info);
 
 			if (event_info->m_cb_type == SENSOR_LEGACY_CB)
-				callback_info = get_callback_info(sensor_id, event_info, &event_data);
+				callback_info = get_callback_info(sensor_id, event_info, &event_data, event);
 			else
-				callback_info = get_callback_info(sensor_id, event_info, sensor_data);
+				callback_info = get_callback_info(sensor_id, event_info, sensor_data, event);
 
 			if (!callback_info) {
 				ERR("Failed to get callback_info");
@@ -259,7 +262,7 @@ void csensor_event_listener::handle_events(void* event)
 }
 
 
-client_callback_info* csensor_event_listener::get_callback_info(sensor_id_t sensor_id, const creg_event_info *event_info, void* sensor_data)
+client_callback_info* csensor_event_listener::get_callback_info(sensor_id_t sensor_id, const creg_event_info *event_info, void* sensor_data, void *buffer)
 {
 	client_callback_info* callback_info;
 
@@ -278,7 +281,10 @@ client_callback_info* csensor_event_listener::get_callback_info(sensor_id_t sens
 	callback_info->accuracy = -1;
 	callback_info->accuracy_user_data = NULL;
 	callback_info->maincontext = event_info->m_maincontext;
+	callback_info->sensor_data = sensor_data;
+	callback_info->buffer = buffer;
 
+	/*
 	if (event_info->m_cb_type == SENSOR_EVENT_CB) {
 		callback_info->sensor_data = new(std::nothrow) char[sizeof(sensor_data_t)];
 
@@ -326,6 +332,7 @@ client_callback_info* csensor_event_listener::get_callback_info(sensor_id_t sens
 		else
 			memcpy(dest_sensor_data->event_data, src_sensor_data->event_data, src_sensor_data->event_data_size);
 	}
+	*/
 
 	return callback_info;
 }
@@ -372,7 +379,7 @@ gboolean csensor_event_listener::callback_dispatcher(gpointer data)
 		delete[] (char *)data->event_data;
 	}
 
-	delete[] (char*)(cb_info->sensor_data);
+	free(cb_info->buffer);
 	delete cb_info;
 
 /*
@@ -383,7 +390,7 @@ gboolean csensor_event_listener::callback_dispatcher(gpointer data)
 
 
 
-bool csensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, int &event)
+ssize_t csensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, int &event)
 {
 	ssize_t len;
 
@@ -391,39 +398,55 @@ bool csensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, int
 
 	if (!len) {
 		if(!m_poller->poll(event))
-			return false;
+			return -1;
 		len = m_event_socket.recv(buffer, buffer_len);
 
 		if (!len) {
 			INFO("%s failed to read after poll!", get_client_name());
-			return false;
+			return -1;
 		}
 	}
 
 	if (len < 0) {
 		INFO("%s failed to recv event from event socket", get_client_name());
-		return false;
+		return -1;
 	}
 
-	return true;
+	return len;
 }
 
 
 
 void csensor_event_listener::listen_events(void)
 {
-	sensorhub_event_t buffer;
 	int event;
+	ssize_t len = -1;
 
 	do {
 		lock l(m_thread_mutex);
 		if (m_thread_state == THREAD_STATE_START) {
-			if (!sensor_event_poll(&buffer, sizeof(buffer), event)) {
-				INFO("sensor_event_poll failed");
+			void *buffer = malloc(EVENT_BUFFER_SIZE);
+
+			if (!buffer) {
+				ERR("Failed to allocate memory");
 				break;
 			}
 
-			handle_events(&buffer);
+			len = sensor_event_poll(buffer, EVENT_BUFFER_SIZE, event);
+			if (len <= 0) {
+				INFO("sensor_event_poll failed");
+				free(buffer);
+				break;
+			}
+
+			void *buffer_shrinked = realloc(buffer, len);
+			if (!buffer_shrinked) {
+				ERR("Failed to allocate memory");
+				free(buffer);
+				break;
+			}
+
+			handle_events(buffer_shrinked);
 		} else {
 			break;
 		}

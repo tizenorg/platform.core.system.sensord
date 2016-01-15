@@ -58,6 +58,7 @@ typedef struct {
 	int accuracy;
 	void *accuracy_user_data;
 	GMainContext *maincontext;
+	void *buffer;
 } client_callback_info;
 
 typedef void (*hup_observer_t)(void);
@@ -103,13 +104,13 @@ private:
 	bool create_event_channel(void);
 	void close_event_channel(void);
 
-	bool sensor_event_poll(void* buffer, int buffer_len, int &event);
+	ssize_t sensor_event_poll(void* buffer, int buffer_len, int &event);
 
 	void listen_events(void);
 	client_callback_info* handle_calibration_cb(csensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy);
 	void handle_events(void* event);
 
-	client_callback_info* get_callback_info(sensor_id_t sensor_id, const creg_event_info *event_info, void *sensor_data);
+	client_callback_info* get_callback_info(sensor_id_t sensor_id, const creg_event_info *event_info, void *sensor_data, void *buffer);
 
 	unsigned long long renew_event_id(void);
 
