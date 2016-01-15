@@ -579,14 +579,13 @@ API bool sensord_get_supported_event_types(sensor_t sensor, unsigned int **event
 	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !event_types || !count,
 		false, "Invalid param: sensor (%p), event_types(%p), count(%)", sensor, event_types, count);
 
-	vector<unsigned int> event_vec;
-
-	info->get_supported_events(event_vec);
-	*event_types = (unsigned int *) malloc(sizeof(unsigned int) * event_vec.size());
+	unsigned int event_type;
+	event_type = info->get_supported_event();
+	*event_types = (unsigned int *) malloc(sizeof(unsigned int));
 	retvm_if(!*event_types, false, "Failed to allocate memory");
 
-	copy(event_vec.begin(), event_vec.end(), *event_types);
-	*count = event_vec.size();
+	(*event_types)[0] = event_type;
+	*count = 1;
 
 	return true;
 }

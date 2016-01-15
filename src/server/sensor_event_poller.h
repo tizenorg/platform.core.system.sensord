@@ -1,7 +1,7 @@
 /*
- * sensord
+ * libsensord-share
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,25 @@
  *
  */
 
-#ifndef SERVER_H_
-#define SERVER_H_
+#include <map>
+#include <poller.h>
+#include <physical_sensor.h>
 
-#include <glib.h>
-#include <csocket.h>
+typedef std::multimap<int, physical_sensor *> fd_sensor_plugins;
 
-class server
-{
-private:
-	GMainLoop *m_mainloop;
-	csocket m_client_accep_socket;
-
-	server();
-	~server();
-
-	void poll_event(void);
-	void accept_client(void);
-	int get_systemd_socket(const char *name);
+class sensor_event_poller {
 public:
-	void run(void);
-	void stop(void);
-	static server& get_instance();
-};
+	sensor_event_poller();
+	virtual ~sensor_event_poller();
 
-#endif
+	bool poll();
+private:
+	poller m_poller;
+	fd_sensor_plugins m_fd_sensors;
+
+	void init_fd();
+	void init_sensor_map();
+	bool add_poll_fd(int fd);
+	bool ready_event(int fd);
+	bool process_event(int fd);
+};

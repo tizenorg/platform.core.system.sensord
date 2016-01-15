@@ -1,5 +1,5 @@
 /*
- * sensord
+ * libsensord
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -17,28 +17,28 @@
  *
  */
 
-#ifndef SERVER_H_
-#define SERVER_H_
+#ifndef _POLLER_H_
+#define _POLLER_H_
 
-#include <glib.h>
-#include <csocket.h>
+#include <sys/types.h>
+#include <sys/epoll.h>
+#include <unistd.h>
+#include <queue>
 
-class server
-{
-private:
-	GMainLoop *m_mainloop;
-	csocket m_client_accep_socket;
-
-	server();
-	~server();
-
-	void poll_event(void);
-	void accept_client(void);
-	int get_systemd_socket(const char *name);
+class poller {
 public:
-	void run(void);
-	void stop(void);
-	static server& get_instance();
+	poller();
+	poller(int fd);
+	virtual ~poller();
+
+	bool add_fd(int fd);
+	bool poll(struct epoll_event &event);
+private:
+	int m_epfd;
+	std::queue<struct epoll_event> m_event_queue;
+
+	void init();
+	bool fill_event_queue(void);
 };
 
-#endif
+#endif /* _POLLER_H_ */

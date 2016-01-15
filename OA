@@ -1,0 +1,49 @@
+[1mdiff --git a/src/server/sensor_base.cpp b/src/server/sensor_base.cpp[m
+[1mindex c4cf4ad..479860f 100644[m
+[1m--- a/src/server/sensor_base.cpp[m
+[1m+++ b/src/server/sensor_base.cpp[m
+[36m@@ -64,11 +64,6 @@[m [msensor_type_t sensor_base::get_type(void)[m
+ 	return static_cast<sensor_type_t>(m_handle.type);[m
+ }[m
+ [m
+[31m-uint32_t sensor_base::get_handle_id(void)[m
+[31m-{[m
+[31m-	return m_handle.id;[m
+[31m-}[m
+[31m-[m
+ int sensor_base::get_poll_fd()[m
+ {[m
+ 	return m_sensor_hal->get_poll_fd();[m
+[1mdiff --git a/src/server/sensor_base.h b/src/server/sensor_base.h[m
+[1mindex fc8bd8b..60aa178 100644[m
+[1m--- a/src/server/sensor_base.h[m
+[1m+++ b/src/server/sensor_base.h[m
+[36m@@ -51,7 +51,6 @@[m [mpublic:[m
+ 	/* module info */[m
+ 	const char* get_name(void);[m
+ 	sensor_type_t get_type();[m
+[31m-	uint32_t get_handle_id();[m
+ 	int get_poll_fd();[m
+ [m
+ 	/* start/stop */[m
+[1mdiff --git a/src/server/sensor_event_poller.h b/src/server/sensor_event_poller.h[m
+[1mindex dde4235..c33b58e 100644[m
+[1m--- a/src/server/sensor_event_poller.h[m
+[1m+++ b/src/server/sensor_event_poller.h[m
+[36m@@ -20,8 +20,6 @@[m
+ #include <map>[m
+ #include <poller.h>[m
+ [m
+[31m-typedef std::multimap<int, sensor_base *> fd_sensor_t;[m
+[31m-[m
+ class sensor_event_poller {[m
+ public:[m
+ 	sensor_event_poller();[m
+[36m@@ -30,7 +28,6 @@[m [mpublic:[m
+ 	bool poll();[m
+ private:[m
+ 	poller m_poller;[m
+[31m-	fd_sensor_t m_fd_sensors;[m
+ [m
+ 	void init_fd();[m
+ 	void init_sensor_map();[m

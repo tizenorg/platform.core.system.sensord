@@ -30,14 +30,15 @@ public:
 	virtual ~auto_rotation_sensor();
 
 	bool init();
-	virtual void get_types(std::vector<sensor_type_t> &types);
-
-	static bool working(void *inst);
+	/* module info */
+	virtual sensor_type_t get_type();
+	virtual unsigned int get_event_type(void);
+	virtual const char* get_name(void);
 
 	void synthesize(const sensor_event_t& event, std::vector<sensor_event_t> &outs);
 
-	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
-	virtual bool get_properties(sensor_type_t sensor_type, sensor_properties_s &properties);
+	int get_sensor_data(sensor_data_t &data);
+	virtual bool get_properties(sensor_properties_s &properties);
 private:
 	sensor_base *m_accel_sensor;
 	cmutex m_value_mutex;

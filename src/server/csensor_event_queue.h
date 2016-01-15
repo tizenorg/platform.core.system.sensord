@@ -20,6 +20,8 @@
 #if !defined(_CSENSOR_EVENT_QUEUE_CLASS_H_)
 #define _CSENSOR_EVENT_QUEUE_CLASS_H_
 #include <sf_common.h>
+#include <cstring>
+#include <utility>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
@@ -34,9 +36,9 @@ private:
 
 	class compare {
 	public:
-		bool operator() (void* &v1,void *&v2) {
-			sensor_event_t *e1 = (sensor_event_t *)v1;
-			sensor_event_t *e2 = (sensor_event_t *)v2;
+		bool operator() (std::pair<void *, int> v1, std::pair<void *, int> v2) {
+			sensor_event_t *e1 = (sensor_event_t *)v1.first;
+			sensor_event_t *e2 = (sensor_event_t *)v2.first;
 			bool prioritize_e1 = true;
 			bool prioritize_e2 = true;
 
@@ -72,7 +74,7 @@ private:
 		}
 	};
 
-	std::priority_queue<void*, std::vector<void*>, compare> m_queue;
+	std::priority_queue<std::pair<void*, int>, std::vector<std::pair<void*, int>>, compare> m_queue;
 
 	std::mutex m_mutex;
 	std::condition_variable m_cond_var;
@@ -84,15 +86,27 @@ private:
 	~csensor_event_queue() {};
 	csensor_event_queue(const csensor_event_queue &) {};
 	csensor_event_queue& operator=(const csensor_event_queue &);
-	void push_internal(void *event);
+	void push_internal(void *event, int length);
 public:
 	static csensor_event_queue& get_instance();
-	void push(const sensor_event_t &event);
-	void push(sensor_event_t *event);
-	void push(const sensorhub_event_t &event);
-	void push(sensorhub_event_t *event);
-
-	void* pop(void);
+	template<typename T> void push(const T &event);
+	template<typename T> void push(T *event);
+	void* pop(int *length);
 };
 
+template<typename T>
+void csensor_event_queue::push(const T &event)
+{
+	void *new_event = malloc(sizeof(event));
+	if (!new_event)
+		return;
+	memcpy(new_event, &event, sizeof(event));
+	push_internal(new_event, sizeof(event));
+}
+
+template<typename T>
+void csensor_event_queue::push(T *event)
+{
+	push_internal(event, sizeof(event));
+}
 #endif

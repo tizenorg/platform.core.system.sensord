@@ -22,6 +22,9 @@
 #include <sensor_plugin_loader.h>
 #include <command_worker.h>
 #include <thread>
+#include <sys/types.h>
+#include <sys/epoll.h>
+#include <sensor_event_poller.h>
 
 using std::thread;
 
@@ -82,6 +85,18 @@ void server::accept_client(void)
 	}
 }
 
+void server::poll_event(void)
+{
+	INFO("Event poller is started");
+
+	sensor_event_poller poller;
+
+	if (!poller.poll()) {
+		ERR("Failed to poll event");
+		return;
+	}
+}
+
 void server::run(void)
 {
 	int sock_fd = -1;
@@ -117,6 +132,9 @@ void server::run(void)
 
 	thread client_accepter(&server::accept_client, this);
 	client_accepter.detach();
+
+	thread event_poller(&server::poll_event, this);
+	event_poller.detach();
 
 	sd_notify(0, "READY=1");
 

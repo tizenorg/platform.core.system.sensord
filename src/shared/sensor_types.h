@@ -43,7 +43,8 @@ typedef enum {
 	BIO_LED_RED_SENSOR,
 	RV_RAW_SENSOR,
 	GYROSCOPE_UNCAL_SENSOR,
-	UNCAL_GEOMAGNETIC_SENSOR
+	UNCAL_GEOMAGNETIC_SENSOR,
+	WRIST_UP_SENSOR,
 } sensor_type_t;
 
 // Sensor Event Types
@@ -117,6 +118,9 @@ enum event_types_t {
 	FUSION_GEOMAGNETIC_ROTATION_VECTOR_ENABLED = (FUSION_SENSOR << 16) | 0x0007,
 	FUSION_TILT_ENABLED = (FUSION_SENSOR << 16) | 0x0008,
 	FUSION_GYROSCOPE_UNCAL_ENABLED = (FUSION_SENSOR << 16) | 0x0009,
+
+	CONTEXT_EVENT_REPORT = (CONTEXT_SENSOR << 16) | 0x0001,
+	CONTEXT_WRIST_UP_EVENT_REPORT = (WRIST_UP_SENSOR << 16) | 0x0001,
 };
 
 enum proxi_change_state {
@@ -224,6 +228,83 @@ enum motion_property_id {
 	MOTION_PROPERTY_LCD_TOUCH_OFF,
 	MOTION_PROPERTY_CHECK_GYRO_CAL_STATUS,
 };
+
+/**
+ * @defgroup SENSOR_PEDO Pedometer Sensor
+ * @ingroup SENSOR_FRAMEWORK
+ *
+ * These APIs are used to control the Pedometer sensor.
+ * @{
+ */
+
+enum pedo_data_id {
+	PEDOMETER_BASE_DATA_SET	= (PEDOMETER_SENSOR << 16) | 0x0001,
+};
+
+enum pedo_event_type {
+	PEDOMETER_EVENT_STEP_COUNT	= (PEDOMETER_SENSOR << 16) | 0x0001,
+};
+
+enum pedo_property_id {
+	PEDOMETER_PROPERTY_UNKNOWN	= 0,
+};
+
+enum pedo_status {
+	PEDOMETER_STATUS_UNKNOWN = 0,
+	PEDOMETER_STATUS_STOP,
+	PEDOMETER_STATUS_WALK,
+	PEDOMETER_STATUS_RUN,
+};
+
+#define SENSOR_PEDOMETER_DATA_DIFFS_SIZE	20
+
+/**
+ * sensor_data_t extension for Pedometer sensor
+ * The internal structure should be aligned with sensor_data_t.
+ */
+typedef struct {
+	int accuracy;
+	unsigned long long timestamp;
+	/* In case of Pedometer, value_count = 8 */
+	int value_count;
+	/* In case of Pedometer, values = {
+	 *		step count,
+	 *		walk step count,
+	 *		run step count,
+	 *		moving distance,
+	 *		calorie burned,
+	 *		last speed
+	 *		last stepping frequency (steps per sec)
+	 *		last step status (walking, running, ...),
+	 * }
+	 */
+	float values[SENSOR_DATA_VALUE_SIZE];
+	/* Additional data attributes (not in sensor_data_t)*/
+	int diffs_count;
+	struct differences {
+		int timestamp;
+		int total_step;
+		int walk_step;
+		int run_step;
+		float distance;
+		float calorie;
+		float speed;
+	} diffs[SENSOR_PEDOMETER_DATA_DIFFS_SIZE];
+} pedo_data_t;
+
+/**
+ * sensor_event_t extension for Pedometer sensor.
+ * The internal structure should be aligned with sensor_event_t.
+ */
+typedef struct {
+	unsigned int event_type;
+	sensor_id_t sensor_id;
+	pedo_data_t data;
+} pedo_event_t;
+
+/**
+ * @}
+ */
 
 #ifdef __cplusplus
 }
