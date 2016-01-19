@@ -18,14 +18,13 @@
  */
 
 #include <csensor_event_dispatcher.h>
-#include <sensor_plugin_loader.h>
 #include <sensor_logs.h>
 #include <sf_common.h>
 #include <thread>
-#include <vector>
 
 using std::thread;
 using std::vector;
+using std::pair;
 
 #define MAX_PENDING_CONNECTION 32
 
@@ -130,9 +129,6 @@ void csensor_event_dispatcher::accept_connections(void)
 
 void csensor_event_dispatcher::dispatch_event(void)
 {
-	const int MAX_EVENT_PER_SENSOR = 16;
-	const int MAX_SENSOR_EVENT = 1 + (sensor_plugin_loader::get_instance().get_virtual_sensors().size()
-		* MAX_EVENT_PER_SENSOR);
 	const int MAX_SYNTH_PER_SENSOR = 5;
 
 	vector<sensor_event_t> v_sensor_events(MAX_SYNTH_PER_SENSOR);
@@ -141,8 +137,8 @@ void csensor_event_dispatcher::dispatch_event(void)
 
 	while (true) {
 		bool is_hub_event = false;
-
-		void *seed_event = get_event_queue().pop();
+		int seed_event_len = 0;
+		void *seed_event = get_event_queue().pop(&seed_event_len);
 		unsigned int event_type = *((unsigned int *)(seed_event));
 
 		if (is_sensorhub_event(event_type))
@@ -150,11 +146,10 @@ void csensor_event_dispatcher::dispatch_event(void)
 
 		if (is_hub_event) {
 			sensorhub_event_t *sensorhub_event = (sensorhub_event_t *)seed_event;
-			send_sensor_events(sensorhub_event, 1, true);
+			send_sensorhub_events(sensorhub_event);
 		} else {
-			sensor_event_t sensor_events[MAX_SENSOR_EVENT];
-			unsigned int event_cnt = 0;
-			sensor_events[event_cnt++] = *((sensor_event_t *)seed_event);
+			vector< pair<void*, int> > sensor_events;
+			sensor_events.push_back(pair<void*, int>(seed_event, seed_event_len));
 
 			virtual_sensors v_sensors = get_active_virtual_sensors();
 
@@ -166,55 +161,48 @@ void csensor_event_dispatcher::dispatch_event(void)
 				(*it_v_sensor)->synthesize(*((sensor_event_t *)seed_event), v_sensor_events);
 				synthesized_cnt = v_sensor_events.size();
 
-				for (int i = 0; i < synthesized_cnt; ++i)
-					sensor_events[event_cnt++] = v_sensor_events[i];
+				for (int i = 0; i < synthesized_cnt; ++i) {
+					sensor_event_t *v_event = (sensor_event_t*)malloc(sizeof(sensor_event_t));
+					if (!v_event) {
+						ERR("Failed to allocate memory");
+						continue;
+					}
+
+					memcpy(v_event, &v_sensor_events[i], sizeof(sensor_event_t));
+					sensor_events.push_back(pair<void*, int>(v_event, sizeof(sensor_event_t)));
+				}
 
 				++it_v_sensor;
 			}
 
-			sort_sensor_events(sensor_events, event_cnt);
+			sort_sensor_events(sensor_events);
 
-			for (unsigned int i = 0; i < event_cnt; ++i) {
-				if (is_record_event(sensor_events[i].event_type))
-					put_last_event(sensor_events[i].event_type, sensor_events[i]);
+			for (unsigned int i = 0; i < sensor_events.size(); ++i) {
+				if (is_record_event(((sensor_event_t*)(sensor_events[i].first))->event_type))
+					put_last_event(((sensor_event_t*)(sensor_events[i].first))->event_type, *((sensor_event_t*)(sensor_events[i].first)));
 			}
 
-			send_sensor_events(sensor_events, event_cnt, false);
+			send_sensor_events(sensor_events);
 		}
-
-		if (is_hub_event)
-			delete (sensorhub_event_t *)seed_event;
-		else
-			delete (sensor_event_t *)seed_event;
 	}
 }
 
 
-void csensor_event_dispatcher::send_sensor_events(void* events, int event_cnt, bool is_hub_event)
+void csensor_event_dispatcher::send_sensor_events(vector< pair<void*, int> > &events)
 {
 	sensor_event_t *sensor_events = NULL;
-	sensorhub_event_t *sensor_hub_events = NULL;
 	cclient_info_manager& client_info_manager = get_client_info_manager();
 
 	const int RESERVED_CLIENT_CNT = 20;
 	static client_id_vec id_vec(RESERVED_CLIENT_CNT);
 
-	if (is_hub_event)
-		sensor_hub_events = (sensorhub_event_t *)events;
-	else
-		sensor_events = (sensor_event_t *)events;
-
-	for (int i = 0; i < event_cnt; ++i) {
+	for (unsigned int i = 0; i < events.size(); ++i) {
 		sensor_id_t sensor_id;
 		unsigned int event_type;
-
-		if (is_hub_event) {
-			sensor_id = sensor_hub_events[i].sensor_id;
-			event_type = sensor_hub_events[i].event_type;
-		} else {
-			sensor_id = sensor_events[i].sensor_id;
-			event_type = sensor_events[i].event_type;
-		}
+		sensor_events = (sensor_event_t*)events[i].first;
+		int length = events[i].second;
+		sensor_id = sensor_events->sensor_id;
+		event_type = sensor_events->event_type;
 
 		id_vec.clear();
 		client_info_manager.get_listener_ids(sensor_id, event_type, id_vec);
@@ -223,17 +211,8 @@ void csensor_event_dispatcher::send_sensor_events(void* events, int event_cnt, b
 
 		while (it_client_id != id_vec.end()) {
 			csocket client_socket;
-			bool ret;
-
-			if (!client_info_manager.get_event_socket(*it_client_id, client_socket)) {
-				++it_client_id;
-				continue;
-			}
-
-			if (is_hub_event)
-				ret = (client_socket.send(sensor_hub_events + i, sizeof(sensorhub_event_t)) > 0);
-			else
-				ret = (client_socket.send(sensor_events + i, sizeof(sensor_event_t)) > 0);
+			client_info_manager.get_event_socket(*it_client_id, client_socket);
+			bool ret = (client_socket.send(sensor_events, length) > 0);
 
 			if (ret)
 				DBG("Event[0x%x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
@@ -242,7 +221,46 @@ void csensor_event_dispatcher::send_sensor_events(void* events, int event_cnt, b
 
 			++it_client_id;
 		}
+
+		free(sensor_events);
 	}
+}
+
+void csensor_event_dispatcher::send_sensorhub_events(void* events)
+{
+	sensorhub_event_t *sensor_hub_events;
+	cclient_info_manager& client_info_manager = get_client_info_manager();
+
+	const int RESERVED_CLIENT_CNT = 20;
+	static client_id_vec id_vec(RESERVED_CLIENT_CNT);
+
+	sensor_hub_events = (sensorhub_event_t *)events;
+
+	sensor_id_t sensor_id;
+	unsigned int event_type;
+
+	sensor_id = sensor_hub_events->sensor_id;
+	event_type = sensor_hub_events->event_type;
+
+	id_vec.clear();
+	client_info_manager.get_listener_ids(sensor_id, event_type, id_vec);
+
+	auto it_client_id = id_vec.begin();
+
+	while (it_client_id != id_vec.end()) {
+		csocket client_socket;
+		client_info_manager.get_event_socket(*it_client_id, client_socket);
+		bool ret = (client_socket.send(sensor_hub_events, sizeof(sensorhub_event_t)) > 0);
+
+		if (ret)
+			DBG("Event[0x%x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
+		else
+			ERR("Failed to send event[0x%x] to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
+
+		++it_client_id;
+	}
+
+	free(sensor_hub_events);
 }
 
 cclient_info_manager& csensor_event_dispatcher::get_client_info_manager(void)
@@ -296,15 +314,16 @@ virtual_sensors csensor_event_dispatcher::get_active_virtual_sensors(void)
 	return m_active_virtual_sensors;
 }
 
-void csensor_event_dispatcher::sort_sensor_events(sensor_event_t *events, unsigned int cnt)
-{
-	std::sort(events, events + cnt,
-		[](const sensor_event_t& a, const sensor_event_t &b)->bool {
-			return a.data.timestamp < b.data.timestamp;
-		}
-	);
-}
+struct sort_comp {
+	bool operator()(const pair<void*, int> &left, const pair<void*, int> &right) {
+		return ((sensor_event_t*)(left.first))->data.timestamp < ((sensor_event_t*)(right.first))->data.timestamp;
+	}
+};
 
+void csensor_event_dispatcher::sort_sensor_events(vector< pair<void*, int> > &events)
+{
+	std::sort(events.begin(), events.end(), sort_comp());
+}
 
 void csensor_event_dispatcher::request_last_event(int client_id, sensor_id_t sensor_id)
 {

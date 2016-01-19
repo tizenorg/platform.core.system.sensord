@@ -26,63 +26,30 @@ csensor_event_queue& csensor_event_queue::get_instance()
 	return inst;
 }
 
-void csensor_event_queue::push(const sensor_event_t &event)
-{
-	sensor_event_t *new_event = new(std::nothrow) sensor_event_t;
-	retm_if(!new_event, "Failed to allocate memory");
-	*new_event = event;
-
-	push_internal(new_event);
-}
-
-void csensor_event_queue::push(sensor_event_t *event)
-{
-	push_internal(event);
-}
-
-void csensor_event_queue::push(const sensorhub_event_t &event)
-{
-	sensorhub_event_t *new_event = new(std::nothrow) sensorhub_event_t;
-	retm_if(!new_event, "Failed to allocate memory");
-	*new_event = event;
-
-	push_internal(new_event);
-}
-
-void csensor_event_queue::push(sensorhub_event_t *event)
-{
-	push_internal(event);
-}
-
-void csensor_event_queue::push_internal(void *event)
+void csensor_event_queue::push_internal(void *event, int length)
 {
 	lock l(m_mutex);
 	bool wake = m_queue.empty();
 
 	if (m_queue.size() >= QUEUE_FULL_SIZE) {
 		ERR("Queue is full, drop it!");
-
-		unsigned int event_type = *((unsigned int *)(event));
-
-		if (is_sensorhub_event(event_type))
-			delete (sensorhub_event_t *)event;
-		else
-			delete (sensor_event_t *)event;
+		free(event);
 	} else
-		m_queue.push(event);
+		m_queue.push(std::pair<void*, int>(event, length));
 
 	if (wake)
 		m_cond_var.notify_one();
 }
 
-void* csensor_event_queue::pop(void)
+void* csensor_event_queue::pop(int *length)
 {
 	ulock u(m_mutex);
 	while (m_queue.empty())
 		m_cond_var.wait(u);
 
-	void* event = m_queue.top();
+	std::pair<void*, int> event = m_queue.top();
 	m_queue.pop();
-	return event;
-}
 
+	*length = event.second;
+	return event.first;
+}
