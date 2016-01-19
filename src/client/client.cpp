@@ -36,7 +36,7 @@ using std::vector;
 #define API __attribute__((visibility("default")))
 #endif
 
-#define MIN_INTERVAL 10
+#define DEFAULT_INTERVAL POLL_10HZ_MS
 
 static const int OP_SUCCESS = 0;
 static const int OP_ERROR =  -1;
@@ -768,8 +768,8 @@ static bool register_event(int handle, unsigned int event_type, unsigned int int
 		return false;
 	}
 
-	if (interval < MIN_INTERVAL)
-		interval = MIN_INTERVAL;
+	if (interval == 0)
+		interval = DEFAULT_INTERVAL;
 
 	INFO("%s registers event %s[0x%x] for sensor %s[%d] with interval: %d, latency: %d,  cb: 0x%x, user_data: 0x%x",
 		get_client_name(), get_event_name(event_type), event_type, get_sensor_name(sensor_id),
@@ -973,9 +973,6 @@ static bool change_event_batch(int handle, unsigned int event_type, unsigned int
 		return false;
 	}
 
-	if (interval == 0)
-		interval = 1;
-
 	INFO("%s changes batch of event %s[0x%x] for %s[%d] to (%d, %d)", get_client_name(), get_event_name(event_type),
 			event_type, get_sensor_name(sensor_id), handle, interval, latency);
 
@@ -983,8 +980,8 @@ static bool change_event_batch(int handle, unsigned int event_type, unsigned int
 
 	client_info.get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb_type, prev_cb, prev_user_data);
 
-	if (interval < MIN_INTERVAL)
-		interval = MIN_INTERVAL;
+	if (interval == 0)
+		interval = DEFAULT_INTERVAL;
 
 	if (!client_info.set_event_batch(handle, event_type, interval, latency))
 		return false;
