@@ -20,26 +20,24 @@
 #ifndef _POLLER_H_
 #define _POLLER_H_
 
-#include <glib.h>
 #include <sys/types.h>
 #include <sys/epoll.h>
-#include <poller.h>
 #include <unistd.h>
-#include <sf_common.h>
-#include <algorithm>
 #include <queue>
 
 class poller {
 public:
+	poller();
 	poller(int fd);
-	~poller();
+	virtual ~poller();
 
-	bool poll(int &event);
+	bool add_fd(int fd);
+	bool poll(struct epoll_event &event);
 private:
 	int m_epfd;
-	std::queue<int> m_event_queue;
+	std::queue<struct epoll_event> m_event_queue;
 
-	bool create(int fd);
+	void init();
 	bool fill_event_queue(void);
 };
 

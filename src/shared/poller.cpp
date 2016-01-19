@@ -20,16 +20,32 @@
 #include <poller.h>
 #include <sf_common.h>
 
-poller::poller(int fd)
-: m_epfd(-1)
+#define EPOLL_MAX 32
+
+poller::poller()
 {
-	create(fd);
+	init();
 }
 
-bool poller::create(int fd)
+poller::poller(int fd)
 {
-	m_epfd = epoll_create(1);
+	init();
+	add_fd(fd);
+}
 
+poller::~poller()
+{
+	if (m_epfd)
+		close(m_epfd);
+}
+
+void poller::init()
+{
+	m_epfd = epoll_create(EPOLL_MAX);
+}
+
+bool poller::add_fd(int fd)
+{
 	struct epoll_event event;
 
 	event.data.fd = fd;
@@ -43,7 +59,6 @@ bool poller::create(int fd)
 	return true;
 }
 
-
 bool poller::fill_event_queue(void)
 {
 	const int EPOLL_MAX_EVENT = 1;
@@ -52,9 +67,8 @@ bool poller::fill_event_queue(void)
 	int nr_events = epoll_wait(m_epfd, event_items, EPOLL_MAX_EVENT, -1);
 
 	if (nr_events < 0) {
-		if (errno == EINTR) {
+		if (errno == EINTR)
 			return true;
-		}
 
 		ERR("Epoll failed errrno : %d , errstr : %s", errno, strerror(errno));
 		return false;
@@ -66,16 +80,14 @@ bool poller::fill_event_queue(void)
 	}
 
     for (int i = 0; i < nr_events; i++)
-		m_event_queue.push(event_items[i].events);
+		m_event_queue.push(event_items[i]);
 
 	return true;
 }
 
 
-bool poller::poll(int &event)
+bool poller::poll(struct epoll_event &event)
 {
-	event = 0;
-
 	while (true) {
 		if (m_event_queue.empty()) {
 			if (!fill_event_queue())
@@ -86,12 +98,12 @@ bool poller::poll(int &event)
 			event = m_event_queue.front();
 			m_event_queue.pop();
 
-			if (event & EPOLLERR) {
+			if (event.events & EPOLLERR) {
 				ERR("Poll error!");
 				return false;
 			}
 
-			if (event & EPOLLHUP) {
+			if (event.events & EPOLLHUP) {
 				INFO("Poll: Connetion is closed from the other side");
 				return false;
 			}
@@ -100,10 +112,3 @@ bool poller::poll(int &event)
 		}
 	}
 }
-
-poller::~poller()
-{
-	if (m_epfd)
-		close(m_epfd);
-}
-
