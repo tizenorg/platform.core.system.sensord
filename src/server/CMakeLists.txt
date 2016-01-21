@@ -4,7 +4,7 @@ project(sensord CXX)
 INCLUDE(FindPkgConfig)
 PKG_CHECK_MODULES(server_pkgs REQUIRED glib-2.0 gio-2.0 dlog libsystemd-daemon libxml-2.0 cynara-client cynara-creds-socket cynara-session)
 
-#add_subdirectory(plugins)
+add_subdirectory(plugins)
 
 add_definitions(${PLUGIN_DEFS})
 
