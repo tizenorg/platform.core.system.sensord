@@ -27,6 +27,8 @@
 #include <virtual_sensor.h>
 #include <unordered_map>
 #include <list>
+#include <vector>
+
 
 typedef std::unordered_map<unsigned int, sensor_event_t> event_type_last_event_map;
 typedef std::list<virtual_sensor *> virtual_sensors;
@@ -51,7 +53,8 @@ private:
 	void accept_event_channel(csocket client_socket);
 
 	void dispatch_event(void);
-	void send_sensor_events(void* events, int event_cnt, bool is_hub_event);
+	void send_sensor_events(std::vector< std::pair<void*, int> > &events);
+	void send_sensorhub_events(void* events);
 	static cclient_info_manager& get_client_info_manager(void);
 	static csensor_event_queue& get_event_queue(void);
 
@@ -62,7 +65,7 @@ private:
 	bool has_active_virtual_sensor(virtual_sensor *sensor);
 	virtual_sensors get_active_virtual_sensors(void);
 
-	void sort_sensor_events(sensor_event_t *events, unsigned int cnt);
+	void sort_sensor_events(std::vector< std::pair<void*, int> > &events);
 public:
 	static csensor_event_dispatcher& get_instance();
 	bool run(void);
