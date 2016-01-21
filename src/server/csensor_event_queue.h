@@ -89,24 +89,9 @@ private:
 	void push_internal(void *event, int length);
 public:
 	static csensor_event_queue& get_instance();
-	template<typename T> void push(const T &event);
-	template<typename T> void push(T *event);
+
+	void push(sensor_event_t *event, int event_length);
 	void* pop(int *length);
 };
 
-template<typename T>
-void csensor_event_queue::push(const T &event)
-{
-	void *new_event = malloc(sizeof(event));
-	if (!new_event)
-		return;
-	memcpy(new_event, &event, sizeof(event));
-	push_internal(new_event, sizeof(event));
-}
-
-template<typename T>
-void csensor_event_queue::push(T *event)
-{
-	push_internal(event, sizeof(event));
-}
 #endif

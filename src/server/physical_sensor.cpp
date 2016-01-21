@@ -20,8 +20,10 @@
 #include <physical_sensor.h>
 #include <csensor_event_queue.h>
 
+#define UNKNOWN_NAME "UNKNOWN_SENSOR"
 
 physical_sensor::physical_sensor()
+: m_sensor_hal(NULL)
 {
 
 }
@@ -31,44 +33,127 @@ physical_sensor::~physical_sensor()
 
 }
 
-bool physical_sensor::push(const sensor_event_t &event)
+sensor_type_t physical_sensor::get_type(void)
 {
-	csensor_event_queue::get_instance().push(event);
-	return true;
+	return static_cast<sensor_type_t>(m_handle.type);
 }
 
-bool physical_sensor::push(sensor_event_t *event)
+unsigned int physical_sensor::get_event_type(void)
 {
-	csensor_event_queue::get_instance().push(event);
-	return true;
+	return m_handle.event_type;
 }
 
-bool physical_sensor::push(const sensorhub_event_t &event)
+const char* physical_sensor::get_name()
 {
-	csensor_event_queue::get_instance().push(event);
-	return true;
+	if (m_handle.name.empty())
+		return UNKNOWN_NAME;
+
+	return m_handle.name.c_str();
 }
 
-bool physical_sensor::push(sensorhub_event_t *event)
+void physical_sensor::set_sensor_handle(sensor_handle_t handle)
 {
-	csensor_event_queue::get_instance().push(event);
-	return true;
+	m_handle.id = handle.id;
+	m_handle.name = handle.name;
+	m_handle.type = handle.type;
+	m_handle.event_type = handle.event_type;
 }
 
-void physical_sensor::set_poller(working_func_t func, void *arg)
+void physical_sensor::set_sensor_hal(sensor_hal *hal)
 {
-	m_sensor_data_poller.set_context(arg);
-	m_sensor_data_poller.set_working(func);
+	m_sensor_hal = hal;
 }
 
-
-bool physical_sensor::start_poll(void)
+int physical_sensor::get_poll_fd()
 {
-	return m_sensor_data_poller.start();
+	AUTOLOCK(m_mutex);
 
+	if (!m_sensor_hal)
+		return -1;
+
+	return m_sensor_hal->get_poll_fd();
 }
 
-bool physical_sensor::stop_poll(void)
+bool physical_sensor::on_start()
 {
-	return m_sensor_data_poller.pause();
+	AUTOLOCK(m_mutex);
+
+	return m_sensor_hal->enable(m_handle.id);
 }
+
+bool physical_sensor::on_stop()
+{
+	AUTOLOCK(m_mutex);
+
+	return m_sensor_hal->disable(m_handle.id);
+}
+
+long physical_sensor::set_command(unsigned int cmd, long value)
+{
+	AUTOLOCK(m_mutex);
+
+	return m_sensor_hal->set_command(m_handle.id, std::to_string(cmd), std::to_string(value));
+}
+
+bool physical_sensor::set_interval(unsigned long interval)
+{
+	AUTOLOCK(m_mutex);
+
+	INFO("Polling interval is set to %dms", interval);
+
+	return m_sensor_hal->set_interval(m_handle.id, interval);
+}
+
+bool physical_sensor::set_batch(unsigned long latency)
+{
+	AUTOLOCK(m_mutex);
+
+	INFO("Polling interval is set to %dms", latency);
+
+	return m_sensor_hal->set_batch_latency(m_handle.id, latency);
+}
+
+bool physical_sensor::set_wakeup(int wakeup)
+{
+	return false;
+}
+
+bool physical_sensor::is_data_ready(void)
+{
+	AUTOLOCK(m_mutex);
+
+	return m_sensor_hal->is_data_ready();
+}
+
+int physical_sensor::get_sensor_data(sensor_data_t &data)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_hal->get_sensor_data(m_handle.id, data)) {
+		ERR("Failed to get sensor data");
+		return -1;
+	}
+
+	return 0;
+}
+
+int physical_sensor::get_sensor_event(sensor_event_t **event)
+{
+	AUTOLOCK(m_mutex);
+
+	int event_length = -1;
+	event_length = m_sensor_hal->get_sensor_event(m_handle.id, event);
+
+	if (event_length < 0) {
+		ERR("Failed to get sensor event");
+		return -1;
+	}
+
+	return event_length;
+}
+
+bool physical_sensor::get_properties(sensor_properties_s &properties)
+{
+	return m_sensor_hal->get_properties(m_handle.id, properties);
+}
+

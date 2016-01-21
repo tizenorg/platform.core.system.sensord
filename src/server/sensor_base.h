@@ -36,96 +36,100 @@
 #include <sensor_common.h>
 #include <worker_thread.h>
 #include <sensor_info.h>
+#include <sensor_hal.h>
 
 class sensor_base
 {
-private:
-	typedef std::unordered_map<unsigned int, unsigned int> client_info;
-
 public:
 	sensor_base();
 	virtual ~sensor_base();
 
-	virtual bool init(void);
-	void add_id(sensor_id_t id);
-	sensor_id_t get_id(sensor_type_t sensor_type);
-	virtual void get_types(std::vector<sensor_type_t> &types) {};
-
-	sensor_privilege_t get_privilege(void);
-	int get_permission(void);
+	/* module info */
+	virtual sensor_type_t get_type();
+	virtual unsigned int get_event_type(void);
 	virtual const char* get_name(void);
-	virtual bool is_virtual(void);
 
+	/* start/stop */
 	bool start(void);
 	bool stop(void);
-	bool is_started(void);
 
-	virtual bool add_client(unsigned int event_type);
-	virtual bool delete_client(unsigned int event_type);
-
-	virtual bool add_interval(int client_id, unsigned int interval, bool is_processor);
-	virtual bool delete_interval(int client_id, bool is_processor);
+	/* interval / batch / wakeup */
+	bool add_interval(int client_id, unsigned int interval, bool is_processor);
+	bool delete_interval(int client_id, bool is_processor);
 	unsigned int get_interval(int client_id, bool is_processor);
 
-	virtual bool add_wakeup(int client_id, int wakeup);
-	virtual bool delete_wakeup(int client_id);
-	int get_wakeup(int client_id);
-
-	virtual bool add_batch(int client_id, unsigned int latency);
-	virtual bool delete_batch(int client_id);
+	bool add_batch(int client_id, unsigned int latency);
+	bool delete_batch(int client_id);
 	unsigned int get_batch(int client_id);
 
-	void get_sensor_info(sensor_type_t sensor_type, sensor_info &info);
-	virtual bool get_properties(sensor_type_t sensor_type, sensor_properties_s &properties);
-
-	bool is_supported(unsigned int event_type);
+	bool add_wakeup(int client_id, int wakeup);
+	bool delete_wakeup(int client_id);
+	int get_wakeup(int client_id);
 	bool is_wakeup_supported(void);
 
+	/* get data */
+	virtual int get_sensor_data(sensor_data_t &data);
+	virtual int get_sensor_event(sensor_event_t **event);
+
+	/* id */
+	void set_id(sensor_id_t id);
+	sensor_id_t get_id(void);
+
+	/* privilege */
+	sensor_privilege_t get_privilege(void);
+	int get_permission(void);
+
+	bool is_started(void);
+	virtual bool is_virtual(void);
+
+	/* sensor info */
+	virtual void get_sensor_info(sensor_info &info);
+
+	/* push event to queue */
+	bool push(sensor_event_t *event, int event_length);
+	/*
+	bool push(const sensor_event_t &event);
+	bool push(sensor_event_t *event);
+	bool push(const sensorhub_event_t &event);
+	bool push(sensorhub_event_t *event);
+	*/
+
+	/* for sensorhub */
 	virtual long set_command(unsigned int cmd, long value);
-	virtual bool set_wakeup(int client_id, int wakeup);
-	virtual bool set_batch(int client_id, unsigned int latency);
 	virtual int send_sensorhub_data(const char* data, int data_len);
-
-	virtual int get_sensor_data(unsigned int type, sensor_data_t &data);
-
-	void register_supported_event(unsigned int event_type);
-	void unregister_supported_event(unsigned int event_type);
 protected:
-	typedef std::lock_guard<std::mutex> lock;
-	typedef std::lock_guard<std::recursive_mutex> rlock;
-	typedef std::unique_lock<std::mutex> ulock;
+	cmutex m_mutex;
 
-	std::map<sensor_type_t, sensor_id_t> m_ids;
+	void set_privilege(sensor_privilege_t privilege);
+	void set_permission(int permission);
+
+private:
+	sensor_id_t m_unique_id;
+	sensor_handle_t m_handle;
 	sensor_privilege_t m_privilege;
+
 	int m_permission;
 
 	cplugin_info_list m_plugin_info_list;
 	cmutex m_plugin_info_list_mutex;
 
-	cmutex m_mutex;
-
 	unsigned int m_client;
 	cmutex m_client_mutex;
 
-	client_info m_client_info;
-	cmutex m_client_info_mutex;
-
-	std::vector<unsigned int> m_supported_event_info;
 	bool m_started;
 
-	std::string m_name;
+	virtual bool set_interval(unsigned long interval);
+	virtual bool set_batch(unsigned long latency);
+	virtual bool set_wakeup(int wakeup);
 
-	sensor_id_t get_id(void);
-	void set_privilege(sensor_privilege_t privilege);
-	void set_permission(int permission);
-	unsigned int get_client_cnt(unsigned int event_type);
-	virtual bool set_interval(unsigned long val);
+	/* get properties */
+	virtual bool get_properties(sensor_properties_s &properties);
+
+	virtual bool on_start(void);
+	virtual bool on_stop(void);
 
 	static unsigned long long get_timestamp(void);
 	static unsigned long long get_timestamp(timeval *t);
-private:
-	virtual bool on_start(void);
-	virtual bool on_stop(void);
 };
 
 #endif
