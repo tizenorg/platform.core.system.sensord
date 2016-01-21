@@ -60,10 +60,6 @@ auto_rotation_sensor::auto_rotation_sensor()
 , m_alg(NULL)
 {
 	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
-	m_name = string(SENSOR_NAME);
-
-	register_supported_event(AUTO_ROTATION_CHANGE_STATE_EVENT);
-
 
 	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");
@@ -87,6 +83,8 @@ auto_rotation_sensor::auto_rotation_sensor()
 	INFO("m_default_sampling_time = %d", m_default_sampling_time);
 
 	m_interval = m_default_sampling_time * MS_TO_US;
+
+	init();
 }
 
 auto_rotation_sensor::~auto_rotation_sensor()
@@ -94,6 +92,21 @@ auto_rotation_sensor::~auto_rotation_sensor()
 	delete m_alg;
 
 	INFO("auto_rotation_sensor is destroyed!\n");
+}
+
+sensor_type_t auto_rotation_sensor::get_type(void)
+{
+	return AUTO_ROTATION_SENSOR;
+}
+
+unsigned int auto_rotation_sensor::get_event_type(void)
+{
+	return (AUTO_ROTATION_SENSOR << 16) | 0x0001;
+}
+
+const char* auto_rotation_sensor::get_name(void)
+{
+	return SENSOR_NAME;
 }
 
 bool auto_rotation_sensor::check_lib(void)
@@ -135,18 +148,12 @@ bool auto_rotation_sensor::init()
 	return true;
 }
 
-void auto_rotation_sensor::get_types(vector<sensor_type_t> &types)
-{
-	types.push_back(AUTO_ROTATION_SENSOR);
-}
-
 bool auto_rotation_sensor::on_start(void)
 {
 	m_rotation = AUTO_ROTATION_DEGREE_UNKNOWN;
 
 	m_alg->start();
 
-	m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->add_interval((intptr_t)this , (m_interval/MS_TO_US), true);
 	m_accel_sensor->start();
 
@@ -155,7 +162,6 @@ bool auto_rotation_sensor::on_start(void)
 
 bool auto_rotation_sensor::on_stop(void)
 {
-	m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
 	m_accel_sensor->delete_interval((intptr_t)this , true);
 	m_accel_sensor->stop();
 
@@ -164,8 +170,6 @@ bool auto_rotation_sensor::on_stop(void)
 
 void auto_rotation_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &outs)
 {
-	AUTOLOCK(m_mutex);
-
 	if (event.event_type == ACCELEROMETER_RAW_DATA_EVENT) {
 		int rotation;
 		float acc[3];
@@ -176,7 +180,6 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event, vector<sensor
 		if (!m_alg->get_rotation(acc, event.data.timestamp, m_rotation, rotation))
 			return;
 
-		AUTOLOCK(m_value_mutex);
 		sensor_event_t rotation_event;
 
 		INFO("Rotation: %d, ACC[0]: %f, ACC[1]: %f, ACC[2]: %f", rotation, event.data.values[0], event.data.values[1], event.data.values[2]);
@@ -195,13 +198,8 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event, vector<sensor
 	return;
 }
 
-int auto_rotation_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &data)
+int auto_rotation_sensor::get_sensor_data(sensor_data_t &data)
 {
-	if (event_type != AUTO_ROTATION_CHANGE_STATE_EVENT)
-		return -1;
-
-	AUTOLOCK(m_value_mutex);
-
 	data.accuracy = SENSOR_ACCURACY_GOOD;
 	data.timestamp = m_rotation_time;
 	data.values[0] = m_rotation;
@@ -210,7 +208,7 @@ int auto_rotation_sensor::get_sensor_data(const unsigned int event_type, sensor_
 	return 0;
 }
 
-bool auto_rotation_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
+bool auto_rotation_sensor::get_properties(sensor_properties_s &properties)
 {
 	properties.name = "Auto Rotation Sensor";
 	properties.vendor = "Samsung Electronics";
