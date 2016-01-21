@@ -152,20 +152,15 @@ void command_worker::make_sensor_raw_data_map(void)
 	auto it_sensor = sensors.begin();
 
 	while (it_sensor != last) {
+		(*it_sensor)->get_sensor_info(info);
+		permission = (*it_sensor)->get_permission();
 
-		vector<sensor_type_t> types;
-		(*it_sensor)->get_types(types);
+		sensor_raw_data_map::iterator it_sensor_raw_data;
+		it_sensor_raw_data = m_sensor_raw_data_map.insert(std::make_pair(permission, raw_data_t()));
 
-		for (unsigned int i = 0; i < types.size(); ++i) {
-			(*it_sensor)->get_sensor_info(types[i], info);
-			permission = (*it_sensor)->get_permission();
+		info.get_raw_data(it_sensor_raw_data->second);
+		info.clear();
 
-			sensor_raw_data_map::iterator it_sensor_raw_data;
-			it_sensor_raw_data = m_sensor_raw_data_map.insert(std::make_pair(permission, raw_data_t()));
-
-			info.get_raw_data(it_sensor_raw_data->second);
-			info.clear();
-		}
 		++it_sensor;
 	}
 }
@@ -213,25 +208,12 @@ bool command_worker::working(void *ctx)
 bool command_worker::stopped(void *ctx)
 {
 	string info;
-	event_type_vector event_vec;
 	command_worker *inst = (command_worker *)ctx;
 
 	inst->get_info(info);
 	INFO("%s is stopped", info.c_str());
 
 	if ((inst->m_module) && (inst->m_client_id != CLIENT_ID_INVALID)) {
-
-		get_client_info_manager().get_registered_events(inst->m_client_id, inst->m_sensor_id, event_vec);
-
-		auto it_event = event_vec.begin();
-
-		while (it_event != event_vec.end()) {
-			WARN("Does not unregister event[0x%x] before connection broken for [%s]!!", *it_event, inst->m_module->get_name());
-			if (!inst->m_module->delete_client(*it_event))
-				ERR("Unregistering event[0x%x] failed", *it_event);
-
-			++it_event;
-		}
 
 		if (get_client_info_manager().is_started(inst->m_client_id, inst->m_sensor_id)) {
 			WARN("Does not receive cmd_stop before connection broken for [%s]!!", inst->m_module->get_name());
@@ -556,7 +538,6 @@ bool command_worker::cmd_register_event(void *payload)
 	}
 
 	insert_priority_list(cmd->event_type);
-	m_module->add_client(cmd->event_type);
 
 	ret_value = OP_SUCCESS;
 	DBG("Registering Event [0x%x] is done for client [%d]", cmd->event_type, m_client_id);
@@ -584,13 +565,6 @@ bool command_worker::cmd_unregister_event(void *payload)
 
 	if (!get_client_info_manager().unregister_event(m_client_id, m_sensor_id, cmd->event_type)) {
 		ERR("Failed to unregister event [0x%x] for client [%d] from client info manager",
-			cmd->event_type, m_client_id);
-		ret_value = OP_ERROR;
-		goto out;
-	}
-
-	if (!m_module->delete_client(cmd->event_type)) {
-		ERR("Failed to unregister event [0x%x] for client [%d]",
 			cmd->event_type, m_client_id);
 		ret_value = OP_ERROR;
 		goto out;
@@ -777,15 +751,12 @@ out:
 bool command_worker::cmd_get_data(void *payload)
 {
 	const unsigned int GET_DATA_MIN_INTERVAL = 10;
-	cmd_get_data_t *cmd;
 	int state = OP_ERROR;
 	bool adjusted = false;
 
 	sensor_data_t data;
 
 	DBG("CMD_GET_VALUE Handler invoked\n");
-
-	cmd = (cmd_get_data_t*)payload;
 
 	if (!is_permission_allowed()) {
 		ERR("Permission denied to get data for client [%d], for sensor [0x%x]",
@@ -794,7 +765,7 @@ bool command_worker::cmd_get_data(void *payload)
 		goto out;
 	}
 
-	state = m_module->get_sensor_data(cmd->type, data);
+	state = m_module->get_sensor_data(data);
 
 	// In case of not getting sensor data, wait short time and retry again
 	// 1. changing interval to be less than 10ms
@@ -819,7 +790,7 @@ bool command_worker::cmd_get_data(void *payload)
 		while (!state && !data.timestamp && (retry++ < RETRY_CNT)) {
 			INFO("Wait sensor[0x%x] data updated for client [%d] #%d", m_sensor_id, m_client_id, retry);
 			usleep((retry == 1) ? INIT_WAIT_TIME : WAIT_TIME);
-			state = m_module->get_sensor_data(cmd->type, data);
+			state = m_module->get_sensor_data(data);
 		}
 
 		if (adjusted)

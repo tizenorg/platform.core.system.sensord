@@ -28,17 +28,19 @@ public:
 	virtual_sensor();
 	virtual ~virtual_sensor();
 
+	/* module info */
+	virtual sensor_type_t get_type() = 0;
+	virtual unsigned int get_event_type(void) = 0;
+	virtual const char* get_name(void) = 0;
+
 	virtual void synthesize(const sensor_event_t& event, std::vector<sensor_event_t> &outs) = 0;
-	virtual int get_sensor_data(const unsigned int event_type, sensor_data_t &data) = 0;
-	bool is_virtual(void);
-	bool m_hardware_fusion;
-
+	virtual int get_sensor_data(sensor_data_t &data) = 0;
+	virtual bool is_virtual(void);
 protected:
-
 	bool activate(void);
 	bool deactivate(void);
-
-	bool push(sensor_event_t const &event);
+private:
+	bool m_hardware_fusion;
 };
 
 #endif

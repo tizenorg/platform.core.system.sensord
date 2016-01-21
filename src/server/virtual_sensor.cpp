@@ -47,10 +47,3 @@ bool virtual_sensor::deactivate(void)
 {
 	return csensor_event_dispatcher::get_instance().delete_active_virtual_sensor(this);
 }
-
-bool virtual_sensor::push(sensor_event_t const &event)
-{
-	csensor_event_queue::get_instance().push(event);
-	return true;
-}
-
