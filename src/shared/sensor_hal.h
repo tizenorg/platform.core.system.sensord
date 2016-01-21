@@ -107,6 +107,7 @@ typedef struct sensor_handle_t {
 	std::string name;
 	sensor_hal_type type;
 	unsigned int event_type; // for Internal API
+	sensor_properties_s properties;
 } sensor_handle_t;
 
 /*

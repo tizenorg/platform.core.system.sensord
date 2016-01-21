@@ -57,6 +57,7 @@ void physical_sensor::set_sensor_handle(sensor_handle_t handle)
 	m_handle.name = handle.name;
 	m_handle.type = handle.type;
 	m_handle.event_type = handle.event_type;
+	m_handle.properties = handle.properties;
 }
 
 void physical_sensor::set_sensor_hal(sensor_hal *hal)
