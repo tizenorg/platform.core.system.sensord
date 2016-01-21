@@ -27,23 +27,36 @@
 class physical_sensor : public sensor_base
 {
 public:
-	typedef worker_thread::trans_func_t working_func_t;
-
-private:
-	worker_thread m_sensor_data_poller;
-
-protected:
 	physical_sensor();
 	virtual ~physical_sensor();
 
-	bool push(const sensor_event_t  &event);
-	bool push(sensor_event_t *event);
-	bool push(const sensorhub_event_t &event);
-	bool push(sensorhub_event_t *event);
+	/* setting module */
+	void set_sensor_handle(sensor_handle_t handle);
+	void set_sensor_hal(sensor_hal *hal);
+	
+	/* module info */
+	virtual sensor_type_t get_type();
+	virtual unsigned int get_event_type(void);
+	virtual const char* get_name(void);
 
-	void set_poller(working_func_t func, void *arg);
-	bool start_poll(void);
-	bool stop_poll(void);
+	int get_poll_fd();
+
+	/* get data */
+	bool is_data_ready(void);
+	virtual int get_sensor_data(sensor_data_t &data);
+	virtual int get_sensor_event(sensor_event_t **event);
+
+private:
+	sensor_handle_t m_handle;
+	sensor_hal *m_sensor_hal;
+
+	virtual bool set_interval(unsigned long interval);
+	virtual bool set_wakeup(int wakeup);
+	virtual bool set_batch(unsigned long latency);
+	virtual bool on_start();
+	virtual bool on_stop();
+	virtual long set_command(unsigned int cmd, long value);
+	virtual bool get_properties(sensor_properties_s &properties);
 };
 
 #endif

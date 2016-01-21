@@ -43,7 +43,7 @@ public:
 	int get_min_interval(void);
 	int get_fifo_count(void);
 	int get_max_batch_count(void);
-	void get_supported_events(std::vector<unsigned int> &events);
+	unsigned int get_supported_event();
 	bool is_supported_event(unsigned int event);
 	bool is_wakeup_supported(void);
 
@@ -58,8 +58,7 @@ public:
 	void set_min_interval(int min_interval);
 	void set_fifo_count(int fifo_count);
 	void set_max_batch_count(int max_batch_count);
-	void register_supported_event(unsigned int event);
-	void set_supported_events(std::vector<unsigned int> &events);
+	void set_supported_event(unsigned int event);
 	void set_wakeup_supported(bool supported);
 
 	void clear(void);
@@ -79,19 +78,19 @@ private:
 	int m_min_interval;
 	int m_fifo_count;
 	int m_max_batch_count;
-	std::vector<unsigned int> m_supported_events;
+	unsigned int m_supported_event;
 	bool m_wakeup_supported;
 
 	void put(raw_data_t &data, int value);
+	void put(raw_data_t &data, unsigned int value);
 	void put(raw_data_t &data, float value);
 	void put(raw_data_t &data, std::string &value);
-	void put(raw_data_t &data, std::vector<unsigned int> &value);
 	void put(raw_data_t &data, bool value);
 
 	raw_data_iterator get(raw_data_iterator it, int &value);
+	raw_data_iterator get(raw_data_iterator it, unsigned int &value);
 	raw_data_iterator get(raw_data_iterator it, float &value);
 	raw_data_iterator get(raw_data_iterator it, std::string &value);
-	raw_data_iterator get(raw_data_iterator it, std::vector<unsigned int> &value);
 	raw_data_iterator get(raw_data_iterator it, bool &value);
 };
 
