@@ -22,6 +22,7 @@
 
 #include <glib.h>
 #include <sys/types.h>
+#include <sys/epoll.h>
 #include <csensor_handle_info.h>
 #include <csensor_client_info.h>
 #include <unistd.h>
@@ -104,7 +105,7 @@ private:
 	bool create_event_channel(void);
 	void close_event_channel(void);
 
-	bool sensor_event_poll(void* buffer, int buffer_len, int &event);
+	ssize_t sensor_event_poll(void* buffer, int buffer_len, struct epoll_event &event);
 
 	void listen_events(void);
 	client_callback_info* handle_calibration_cb(csensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy);

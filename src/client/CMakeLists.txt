@@ -34,7 +34,6 @@ add_library(${PROJECT_NAME} SHARED
 	csensor_handle_info.cpp
 	client_common.cpp
 	command_channel.cpp
-	poller.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${lib_pkgs_LDFLAGS} "sensord-shared")
@@ -43,7 +42,6 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES VERSION ${VERSION})
 
 configure_file(${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc @ONLY)
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT RuntimeLibraries)
-install(FILES poller.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES creg_event_info.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES csensor_event_listener.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_info_manager.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)

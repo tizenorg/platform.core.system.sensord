@@ -391,7 +391,7 @@ gboolean csensor_event_listener::callback_dispatcher(gpointer data)
 
 
 
-bool csensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, int &event)
+ssize_t csensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, struct epoll_event &event)
 {
 	ssize_t len;
 
@@ -420,7 +420,7 @@ bool csensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, int
 
 void csensor_event_listener::listen_events(void)
 {
-	int event;
+	struct epoll_event event;
 	ssize_t len = -1;
 
 	do {
@@ -468,7 +468,7 @@ void csensor_event_listener::listen_events(void)
 
 	INFO("Event listener thread is terminated.");
 
-	if (m_client_info.has_client_id() && (event & EPOLLHUP)) {
+	if (m_client_info.has_client_id() && (event.events & EPOLLHUP)) {
 		if (m_hup_observer)
 			m_hup_observer();
 	}
