@@ -24,6 +24,7 @@ add_library(${PROJECT_NAME} SHARED
 	csocket.cpp
 	sensor_logs.cpp
 	sensor_info.cpp
+	poller.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${shared_pkgs_LDFLAGS} "-lrt -ldl -pthread")
@@ -35,6 +36,7 @@ install(FILES
 	csocket.h
 	cbase_lock.h
 	sensor_info.h
+	poller.h
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 )
 
