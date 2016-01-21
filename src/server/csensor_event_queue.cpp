@@ -54,3 +54,7 @@ void* csensor_event_queue::pop(int *length)
 	return event.first;
 }
 
+void csensor_event_queue::push(sensor_event_t *event, int event_length)
+{
+	push_internal(event, event_length);
+}

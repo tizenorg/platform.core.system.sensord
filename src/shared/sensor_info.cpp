@@ -81,16 +81,14 @@ int sensor_info::get_max_batch_count(void)
 	return m_max_batch_count;
 }
 
-void sensor_info::get_supported_events(vector<unsigned int> &events)
+unsigned int sensor_info::get_supported_event()
 {
-	events = m_supported_events;
+	return m_supported_event;
 }
 
 bool sensor_info::is_supported_event(unsigned int event)
 {
-	auto iter = find(m_supported_events.begin(), m_supported_events.end(), event);
-
-	if (iter == m_supported_events.end())
+	if (event != m_supported_event)
 		return false;
 
 	return true;
@@ -156,14 +154,9 @@ void sensor_info::set_max_batch_count(int max_batch_count)
 	m_max_batch_count = max_batch_count;
 }
 
-void sensor_info::register_supported_event(unsigned int event)
+void sensor_info::set_supported_event(unsigned int event)
 {
-	m_supported_events.push_back(event);
-}
-
-void sensor_info::set_supported_events(vector<unsigned int> &events)
-{
-	copy(events.begin(), events.end(), back_inserter(m_supported_events));
+	m_supported_event = event;
 }
 
 void sensor_info::set_wakeup_supported(bool supported)
@@ -184,7 +177,7 @@ void sensor_info::get_raw_data(raw_data_t &data)
 	put(data, m_min_interval);
 	put(data, m_fifo_count);
 	put(data, m_max_batch_count);
-	put(data, m_supported_events);
+	put(data, m_supported_event);
 	put(data, m_wakeup_supported);
 }
 
@@ -210,7 +203,7 @@ void sensor_info::set_raw_data(const char *data, int data_len)
 	it_r_data = get(it_r_data, m_min_interval);
 	it_r_data = get(it_r_data, m_fifo_count);
 	it_r_data = get(it_r_data, m_max_batch_count);
-	it_r_data = get(it_r_data, m_supported_events);
+	it_r_data = get(it_r_data, m_supported_event);
 	it_r_data = get(it_r_data, m_wakeup_supported);
 }
 
@@ -227,9 +220,7 @@ void sensor_info::show(void)
 	INFO("Min_interval = %d", m_min_interval);
 	INFO("Fifo_count = %d", m_fifo_count);
 	INFO("Max_batch_count = %d", m_max_batch_count);
-
-	for (unsigned int i = 0; i < m_supported_events.size(); ++i)
-		INFO("supported_events[%u] = 0x%x", i, m_supported_events[i]);
+	INFO("supported_event = 0x%x", m_supported_event);
 
 	INFO("Wakeup_supported = %d", m_wakeup_supported);
 }
@@ -248,7 +239,7 @@ void sensor_info::clear(void)
 	m_min_interval = 0;
 	m_fifo_count = 0;
 	m_max_batch_count = 0;
-	m_supported_events.clear();
+	m_supported_event = 0;
 	m_wakeup_supported = false;
 }
 
@@ -258,6 +249,16 @@ void sensor_info::put(raw_data_t &data, int value)
 	char buffer[sizeof(value)];
 
 	int *temp = (int *) buffer;
+	*temp = value;
+
+	copy(&buffer[0], &buffer[sizeof(buffer)], back_inserter(data));
+}
+
+void sensor_info::put(raw_data_t &data, unsigned int value)
+{
+	char buffer[sizeof(value)];
+
+	unsigned int *temp = (unsigned int *) buffer;
 	*temp = value;
 
 	copy(&buffer[0], &buffer[sizeof(buffer)], back_inserter(data));
@@ -280,18 +281,6 @@ void sensor_info::put(raw_data_t &data, string &value)
 	copy(value.begin(), value.end(), back_inserter(data));
 }
 
-void sensor_info::put(raw_data_t &data, vector<unsigned int> &value)
-{
-	put(data, (int) value.size());
-
-	auto it = value.begin();
-
-	while (it != value.end()) {
-		put(data, (int) *it);
-		++it;
-	}
-}
-
 void sensor_info::put(raw_data_t &data, bool value)
 {
 	char buffer[sizeof(value)];
@@ -303,6 +292,13 @@ void sensor_info::put(raw_data_t &data, bool value)
 }
 
 raw_data_iterator sensor_info::get(raw_data_iterator it, int &value)
+{
+	copy(it, it + sizeof(value), (char*) &value);
+
+	return it + sizeof(value);
+}
+
+raw_data_iterator sensor_info::get(raw_data_iterator it, unsigned int &value)
 {
 	copy(it, it + sizeof(value), (char*) &value);
 
@@ -325,21 +321,6 @@ raw_data_iterator sensor_info::get(raw_data_iterator it, string &value)
 	copy(it, it + len, back_inserter(value));
 
 	return it + len;
-}
-
-raw_data_iterator sensor_info::get(raw_data_iterator it, vector<unsigned int> &value)
-{
-	int len;
-
-	it = get(it, len);
-
-	int ele;
-	for (int i = 0; i < len; ++i) {
-		it = get(it, ele);
-		value.push_back(ele);
-	}
-
-	return it;
 }
 
 raw_data_iterator sensor_info::get(raw_data_iterator it, bool &value)
