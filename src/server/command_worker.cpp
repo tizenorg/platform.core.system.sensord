@@ -18,7 +18,7 @@
  */
 
 #include <command_worker.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 #include <sensor_info.h>
 #include <sensor_types.h>
 #include <thread>
@@ -144,7 +144,7 @@ void command_worker::make_sensor_raw_data_map(void)
 	sensor_info info;
 	int permission;
 
-	sensors = sensor_plugin_loader::get_instance().get_sensors(ALL_SENSOR);
+	sensors = sensor_loader::get_instance().get_sensors(ALL_SENSOR);
 
     std::sort(sensors.begin(), sensors.end());
     auto last = std::unique(sensors.begin(), sensors.end());
@@ -397,7 +397,7 @@ bool command_worker::cmd_hello(void *payload)
 	if (m_permission == SENSOR_PERMISSION_NONE)
 		get_client_info_manager().get_permission(m_client_id, m_permission);
 
-	m_module = (sensor_base *)sensor_plugin_loader::get_instance().get_sensor(cmd->sensor);
+	m_module = (sensor_base *)sensor_loader::get_instance().get_sensor(cmd->sensor);
 
 	if (!m_module) {
 		ERR("Sensor type[%d] is not supported", cmd->sensor);

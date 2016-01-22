@@ -28,7 +28,7 @@
 #include <sensor_logs.h>
 #include <sf_common.h>
 #include <linear_accel_sensor.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 #include <virtual_sensor_config.h>
 
 using std::string;
@@ -81,7 +81,7 @@ linear_accel_sensor::linear_accel_sensor()
 	m_enable_linear_accel = 0;
 	register_supported_event(LINEAR_ACCEL_RAW_DATA_EVENT);
 
-	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
+	sensor_hal *fusion_sensor_hal = sensor_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
 	if (!fusion_sensor_hal)
 		m_hardware_fusion = false;
 	else
@@ -174,11 +174,11 @@ linear_accel_sensor::~linear_accel_sensor()
 
 bool linear_accel_sensor::init()
 {
-	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
-	m_gyro_sensor = sensor_plugin_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
-	m_magnetic_sensor = sensor_plugin_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
+	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
+	m_gyro_sensor = sensor_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
+	m_magnetic_sensor = sensor_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
 
-	m_fusion_sensor = sensor_plugin_loader::get_instance().get_sensor(FUSION_SENSOR);
+	m_fusion_sensor = sensor_loader::get_instance().get_sensor(FUSION_SENSOR);
 
 	if (!m_accel_sensor || !m_gyro_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
 		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, mag: 0x%x, fusion: 0x%x",

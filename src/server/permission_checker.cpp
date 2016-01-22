@@ -23,7 +23,7 @@
 #include <permission_checker.h>
 #include <sf_common.h>
 #include <sensor_logs.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 #include <sensor_base.h>
 
 static cynara *cynara_env = NULL;
@@ -82,7 +82,7 @@ void permission_checker::init()
 	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_BIO, true, "http://tizen.org/privilege/healthinfo"));
 
 	std::vector<sensor_base *> sensors;
-	sensors = sensor_plugin_loader::get_instance().get_sensors(ALL_SENSOR);
+	sensors = sensor_loader::get_instance().get_sensors(ALL_SENSOR);
 
 	for (unsigned int i = 0; i < sensors.size(); ++i)
 		m_permission_set |= sensors[i]->get_permission();

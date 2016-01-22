@@ -28,7 +28,7 @@
 #include <sensor_logs.h>
 #include <sf_common.h>
 #include <tilt_sensor.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 #include <orientation_filter.h>
 #include <virtual_sensor_config.h>
 
@@ -109,8 +109,8 @@ tilt_sensor::~tilt_sensor()
 
 bool tilt_sensor::init(void)
 {
-	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
-	m_fusion_sensor = sensor_plugin_loader::get_instance().get_sensor(FUSION_SENSOR);
+	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
+	m_fusion_sensor = sensor_loader::get_instance().get_sensor(FUSION_SENSOR);
 
 	if (!m_accel_sensor || !m_fusion_sensor) {
 		ERR("Failed to load sensors,  accel: 0x%x, fusion: 0x%x",

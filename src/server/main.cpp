@@ -21,7 +21,7 @@
 #include <sensor_logs.h>
 #include <server.h>
 #include <dbus_util.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 #include <string>
 
 using std::string;
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
 	signal_init();
 
-	sensor_plugin_loader::get_instance().load_plugins();
+	sensor_loader::get_instance().load_sensors();
 
 	server::get_instance().run();
 
