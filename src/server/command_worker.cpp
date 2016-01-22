@@ -31,13 +31,12 @@
 using std::string;
 using std::vector;
 using std::make_pair;
-using std::set;
 
 command_worker::cmd_handler_t command_worker::m_cmd_handlers[];
 sensor_raw_data_map command_worker::m_sensor_raw_data_map;
 cpacket command_worker::m_sensor_list;
 
-set<unsigned int> priority_list;
+std::set<unsigned int> priority_list;
 
 command_worker::command_worker(const csocket& socket)
 : m_client_id(CLIENT_ID_INVALID)
@@ -141,27 +140,34 @@ void command_worker::get_sensor_list(int permissions, cpacket &sensor_list)
 void command_worker::make_sensor_raw_data_map(void)
 {
 	vector<sensor_base *> sensors;
+	vector<sensor_type_t> types;
+	std::vector<sensor_type_t>::iterator it_type;
+	std::vector<sensor_base *>::iterator it_sensor;
 	sensor_info info;
 	int permission;
 
-	sensors = sensor_loader::get_instance().get_sensors(ALL_SENSOR);
+	types = sensor_loader::get_instance().get_sensor_types();
 
-    std::sort(sensors.begin(), sensors.end());
-    auto last = std::unique(sensors.begin(), sensors.end());
+	it_type = types.begin();
+	while (it_type != types.end()) {
+		sensor_type_t type;
+		type = *it_type;
 
-	auto it_sensor = sensors.begin();
+		sensors = sensor_loader::get_instance().get_sensors(type);
+		it_sensor = sensors.begin();
 
-	while (it_sensor != last) {
-		(*it_sensor)->get_sensor_info(info);
-		permission = (*it_sensor)->get_permission();
+		while (it_sensor != sensors.end()) {
+			(*it_sensor)->get_sensor_info(info);
+			permission = (*it_sensor)->get_permission();
 
-		sensor_raw_data_map::iterator it_sensor_raw_data;
-		it_sensor_raw_data = m_sensor_raw_data_map.insert(std::make_pair(permission, raw_data_t()));
+			sensor_raw_data_map::iterator it_sensor_raw_data;
+			it_sensor_raw_data = m_sensor_raw_data_map.insert(std::make_pair(permission, raw_data_t()));
 
-		info.get_raw_data(it_sensor_raw_data->second);
-		info.clear();
-
-		++it_sensor;
+			info.get_raw_data(it_sensor_raw_data->second);
+			info.clear();
+			++it_sensor;
+		}
+		++it_type;
 	}
 }
 

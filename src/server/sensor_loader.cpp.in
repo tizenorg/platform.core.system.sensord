@@ -252,6 +252,20 @@ sensor_base* sensor_loader::get_sensor(sensor_id_t id)
 	return sensors[index];
 }
 
+vector<sensor_type_t> sensor_loader::get_sensor_types(void)
+{
+	vector<sensor_type_t> sensor_types;
+
+	auto it = m_sensors.begin();
+
+	while (it != m_sensors.end()) {
+		sensor_types.push_back((sensor_type_t)(it->first));
+		it = m_sensors.upper_bound(it->first);
+	}
+
+	return sensor_types;
+}
+
 vector<sensor_base *> sensor_loader::get_sensors(sensor_type_t type)
 {
 	vector<sensor_base *> sensor_list;

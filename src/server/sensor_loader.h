@@ -59,6 +59,7 @@ public:
 	sensor_base* get_sensor(sensor_type_t type);
 	sensor_base* get_sensor(sensor_id_t id);
 
+	std::vector<sensor_type_t> get_sensor_types(void);
 	std::vector<sensor_base *> get_sensors(sensor_type_t type);
 	std::vector<sensor_base *> get_virtual_sensors(void);
 };
