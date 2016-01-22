@@ -17,25 +17,25 @@
  *
  */
 
-#ifndef _CCONFIG_H_
-#define _CCONFIG_H_
+#ifndef _DEVICE_CONFIG_H_
+#define _DEVICE_CONFIG_H_
 
 #include <string>
 #include <unordered_map>
 #include <sensor_logs.h>
 
-class cconfig
+class device_config
 {
 protected:
 	virtual bool load_config(const std::string& config_path) = 0;
 
 	std::string m_device_id;
 public:
-	cconfig();
-	virtual ~cconfig();
+	device_config();
+	virtual ~device_config();
 
 	bool get_device_id(void);
 
 };
 
-#endif /* _CCONFIG_H_ */
+#endif /* _DEVICE_CONFIG_H_ */

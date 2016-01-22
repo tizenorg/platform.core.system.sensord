@@ -17,8 +17,8 @@
  *
  */
 
-#if !defined(_COMMON_H_)
-#define _COMMON_H_
+#ifndef _SENSOR_LOGS_H_
+#define _SENSOR_LOGS_H_
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -228,5 +228,4 @@ void copy_sensorhub_data(sensorhub_data_t *dest, sensorhub_data_t *src);
 }
 #endif
 
-#endif
-//! End of a file
+#endif /* _SENSOR_LOGS_H_ */

@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef CSOCKET_H_
-#define CSOCKET_H_
+#ifndef _CSOCKET_H_
+#define _CSOCKET_H_
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -76,4 +76,4 @@ private:
 	int m_recv_flags;
 };
 
-#endif /* CSOCKET_H_ */
+#endif /* _CSOCKET_H_ */

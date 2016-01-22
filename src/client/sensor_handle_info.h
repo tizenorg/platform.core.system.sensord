@@ -17,19 +17,19 @@
  *
  */
 
-#ifndef CSENSOR_HANDLE_INFO_H_
-#define CSENSOR_HANDLE_INFO_H_
+#ifndef _SENSOR_HANDLE_INFO_H_
+#define _SENSOR_HANDLE_INFO_H_
 
-#include <creg_event_info.h>
+#include <reg_event_info.h>
 #include <command_channel.h>
 #include <sensor_logs.h>
 #include <string.h>
 #include <unordered_map>
 #include <glib.h>
 
-typedef std::unordered_map<unsigned int,creg_event_info> event_info_map;
+typedef std::unordered_map<unsigned int,reg_event_info> event_info_map;
 
-class csensor_handle_info {
+class sensor_handle_info {
 public:
 	int m_handle;
 	sensor_id_t m_sensor_id;
@@ -41,8 +41,8 @@ public:
 	sensor_accuracy_changed_cb_t m_accuracy_cb;
 	void *m_accuracy_user_data;
 
-	csensor_handle_info();
-	~csensor_handle_info();
+	sensor_handle_info();
+	~sensor_handle_info();
 
 	bool add_reg_event_info(unsigned int event_type, unsigned int interval, unsigned int latency, int cb_type, void *cb,void *user_data);
 	bool delete_reg_event_info(unsigned int event_type);
@@ -50,7 +50,7 @@ public:
 	bool change_reg_event_batch(unsigned int event_type, unsigned int interval, unsigned int latency);
 	bool change_reg_event_maincontext(unsigned int event_type, GMainContext *maincontext);
 
-	creg_event_info* get_reg_event_info(const unsigned int event_type);
+	reg_event_info* get_reg_event_info(const unsigned int event_type);
 	void get_reg_event_types(event_type_vector &event_types);
 	void get_batch(unsigned int &interval, unsigned int &latency);
 	unsigned int get_reg_event_count(void);
@@ -63,4 +63,4 @@ private:
 };
 
 
-#endif /* CSENSOR_HANDLE_INFO_H_ */
+#endif /* _SENSOR_HANDLE_INFO_H_ */

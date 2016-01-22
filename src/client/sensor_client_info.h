@@ -17,12 +17,12 @@
  *
  */
 
-#ifndef CSENSOR_CLIENT_INFO_H_
-#define CSENSOR_CLIENT_INFO_H_
+#ifndef _SENSOR_CLIENT_INFO_H_
+#define _SENSOR_CLIENT_INFO_H_
 
 #include <glib.h>
 #include <sys/types.h>
-#include <csensor_handle_info.h>
+#include <sensor_handle_info.h>
 #include <unistd.h>
 #include <csocket.h>
 #include <string.h>
@@ -49,7 +49,7 @@ using std::condition_variable;
 
 typedef vector<unsigned int> handle_vector;
 typedef vector<sensor_id_t> sensor_id_vector;
-typedef unordered_map<int,csensor_handle_info> sensor_handle_info_map;
+typedef unordered_map<int,sensor_handle_info> sensor_handle_info_map;
 typedef unordered_map<sensor_id_t, command_channel*> sensor_command_channel_map;
 
 typedef struct sensor_rep
@@ -61,9 +61,9 @@ typedef struct sensor_rep
 	event_type_vector event_types;
 } sensor_rep;
 
-class csensor_client_info {
+class sensor_client_info {
 public:
-	static csensor_client_info& get_instance(void);
+	static sensor_client_info& get_instance(void);
 	int create_handle(sensor_id_t sensor_id);
 	bool delete_handle(int handle);
 	bool register_event(int handle, unsigned int event_type,
@@ -114,8 +114,8 @@ public:
 
 	void clear(void);
 
-	csensor_client_info();
-	~csensor_client_info();
+	sensor_client_info();
+	~sensor_client_info();
 
 private:
 	sensor_handle_info_map m_sensor_handle_infos;
@@ -125,4 +125,4 @@ private:
 
 	cmutex m_handle_info_lock;
 };
-#endif /* CSENSOR_CLIENT_INFO_H_ */
+#endif /* _SENSOR_CLIENT_INFO_H_ */

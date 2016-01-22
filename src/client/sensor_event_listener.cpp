@@ -17,7 +17,7 @@
  *
  */
 
-#include <csensor_event_listener.h>
+#include <sensor_event_listener.h>
 #include <client_common.h>
 #include <sf_common.h>
 #include <sensor_info_manager.h>
@@ -36,20 +36,20 @@ using std::thread;
 using std::pair;
 using std::vector;
 
-csensor_event_listener::csensor_event_listener()
+sensor_event_listener::sensor_event_listener()
 : m_poller(NULL)
 , m_thread_state(THREAD_STATE_TERMINATE)
 , m_hup_observer(NULL)
-, m_client_info(csensor_client_info::get_instance())
+, m_client_info(sensor_client_info::get_instance())
 {
 }
 
-csensor_event_listener::~csensor_event_listener()
+sensor_event_listener::~sensor_event_listener()
 {
 	stop_event_listener();
 }
 
-csensor_event_listener::csensor_event_listener(const csensor_event_listener& listener)
+sensor_event_listener::sensor_event_listener(const sensor_event_listener& listener)
 : m_poller(listener.m_poller)
 , m_thread_state(listener.m_thread_state)
 , m_hup_observer(listener.m_hup_observer)
@@ -57,23 +57,23 @@ csensor_event_listener::csensor_event_listener(const csensor_event_listener& lis
 {
 }
 
-csensor_event_listener& csensor_event_listener::get_instance(void)
+sensor_event_listener& sensor_event_listener::get_instance(void)
 {
-	static csensor_event_listener inst;
+	static sensor_event_listener inst;
 	return inst;
 }
 
-bool csensor_event_listener::start_handle(int handle)
+bool sensor_event_listener::start_handle(int handle)
 {
 	return m_client_info.set_sensor_state(handle, SENSOR_STATE_STARTED);
 }
 
-bool csensor_event_listener::stop_handle(int handle)
+bool sensor_event_listener::stop_handle(int handle)
 {
 	return m_client_info.set_sensor_state(handle, SENSOR_STATE_STOPPED);
 }
 
-void csensor_event_listener::operate_sensor(sensor_id_t sensor, int power_save_state)
+void sensor_event_listener::operate_sensor(sensor_id_t sensor, int power_save_state)
 {
 	sensor_handle_info_map handles_info;
 
@@ -102,11 +102,11 @@ void csensor_event_listener::operate_sensor(sensor_id_t sensor, int power_save_s
 	}
 }
 
-client_callback_info* csensor_event_listener::handle_calibration_cb(csensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy)
+client_callback_info* sensor_event_listener::handle_calibration_cb(sensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy)
 {
 	unsigned int cal_event_type = get_calibration_event_type(event_type);
-	creg_event_info *event_info = NULL;
-	creg_event_info *cal_event_info = NULL;
+	reg_event_info *event_info = NULL;
+	reg_event_info *cal_event_info = NULL;
 	client_callback_info* cal_callback_info = NULL;
 
 	if (!cal_event_type)
@@ -152,10 +152,10 @@ client_callback_info* csensor_event_listener::handle_calibration_cb(csensor_hand
 }
 
 
-void csensor_event_listener::handle_events(void* event)
+void sensor_event_listener::handle_events(void* event)
 {
 	unsigned long long cur_time;
-	creg_event_info *event_info = NULL;
+	reg_event_info *event_info = NULL;
 	sensor_event_data_t event_data;
 	sensor_id_t sensor_id;
 	sensor_handle_info_map handles_info;
@@ -207,7 +207,7 @@ void csensor_event_listener::handle_events(void* event)
 
 		for (auto it_handle = handles_info.begin(); it_handle != handles_info.end(); ++it_handle) {
 
-			csensor_handle_info &sensor_handle_info = it_handle->second;
+			sensor_handle_info &sensor_handle_info = it_handle->second;
 
 			event_info = sensor_handle_info.get_reg_event_info(event_type);
 			if ((sensor_handle_info.m_sensor_id != sensor_id) ||
@@ -263,7 +263,7 @@ void csensor_event_listener::handle_events(void* event)
 }
 
 
-client_callback_info* csensor_event_listener::get_callback_info(sensor_id_t sensor_id, const creg_event_info *event_info, void* sensor_data, void *buffer)
+client_callback_info* sensor_event_listener::get_callback_info(sensor_id_t sensor_id, const reg_event_info *event_info, void* sensor_data, void *buffer)
 {
 	client_callback_info* callback_info;
 
@@ -338,7 +338,7 @@ client_callback_info* csensor_event_listener::get_callback_info(sensor_id_t sens
 	return callback_info;
 }
 
-void csensor_event_listener::post_callback_to_main_loop(client_callback_info* cb_info)
+void sensor_event_listener::post_callback_to_main_loop(client_callback_info* cb_info)
 {
 	if (cb_info->maincontext) {
 		GSource *_source = g_idle_source_new();
@@ -350,16 +350,16 @@ void csensor_event_listener::post_callback_to_main_loop(client_callback_info* cb
 	}
 }
 
-bool csensor_event_listener::is_valid_callback(client_callback_info *cb_info)
+bool sensor_event_listener::is_valid_callback(client_callback_info *cb_info)
 {
 	return m_client_info.is_event_active(cb_info->handle, cb_info->event_type, cb_info->event_id);
 }
 
-gboolean csensor_event_listener::callback_dispatcher(gpointer data)
+gboolean sensor_event_listener::callback_dispatcher(gpointer data)
 {
 	client_callback_info *cb_info = (client_callback_info*) data;
 
-	if (csensor_event_listener::get_instance().is_valid_callback(cb_info)) {
+	if (sensor_event_listener::get_instance().is_valid_callback(cb_info)) {
 		if (cb_info->accuracy_cb)
 			cb_info->accuracy_cb(cb_info->sensor, cb_info->timestamp, cb_info->accuracy, cb_info->accuracy_user_data);
 
@@ -391,7 +391,7 @@ gboolean csensor_event_listener::callback_dispatcher(gpointer data)
 
 
 
-ssize_t csensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, struct epoll_event &event)
+ssize_t sensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, struct epoll_event &event)
 {
 	ssize_t len;
 
@@ -418,7 +418,7 @@ ssize_t csensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, 
 
 
 
-void csensor_event_listener::listen_events(void)
+void sensor_event_listener::listen_events(void)
 {
 	struct epoll_event event;
 	ssize_t len = -1;
@@ -475,7 +475,7 @@ void csensor_event_listener::listen_events(void)
 
 }
 
-bool csensor_event_listener::create_event_channel(void)
+bool sensor_event_listener::create_event_channel(void)
 {
 	int client_id;
 	event_channel_ready_t event_channel_ready;
@@ -519,13 +519,13 @@ bool csensor_event_listener::create_event_channel(void)
 }
 
 
-void csensor_event_listener::close_event_channel(void)
+void sensor_event_listener::close_event_channel(void)
 {
 	m_event_socket.close();
 }
 
 
-void csensor_event_listener::stop_event_listener(void)
+void sensor_event_listener::stop_event_listener(void)
 {
 	const int THREAD_TERMINATING_TIMEOUT = 2;
 
@@ -543,13 +543,13 @@ void csensor_event_listener::stop_event_listener(void)
 	}
 }
 
-void csensor_event_listener::set_thread_state(thread_state state)
+void sensor_event_listener::set_thread_state(thread_state state)
 {
 	lock l(m_thread_mutex);
 	m_thread_state = state;
 }
 
-void csensor_event_listener::clear(void)
+void sensor_event_listener::clear(void)
 {
 	close_event_channel();
 	stop_event_listener();
@@ -559,12 +559,12 @@ void csensor_event_listener::clear(void)
 }
 
 
-void csensor_event_listener::set_hup_observer(hup_observer_t observer)
+void sensor_event_listener::set_hup_observer(hup_observer_t observer)
 {
 	m_hup_observer = observer;
 }
 
-bool csensor_event_listener::start_event_listener(void)
+bool sensor_event_listener::start_event_listener(void)
 {
 	if (!create_event_channel()) {
 		ERR("Event channel is not established for %s", get_client_name());
@@ -578,7 +578,7 @@ bool csensor_event_listener::start_event_listener(void)
 
 	set_thread_state(THREAD_STATE_START);
 
-	thread listener(&csensor_event_listener::listen_events, this);
+	thread listener(&sensor_event_listener::listen_events, this);
 	listener.detach();
 
 	return true;

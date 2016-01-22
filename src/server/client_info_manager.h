@@ -17,22 +17,22 @@
  *
  */
 
-#ifndef CCLIENT_INFO_MANAGER_H_
-#define CCLIENT_INFO_MANAGER_H_
+#ifndef _CLIENT_INFO_MANAGER_H_
+#define _CLIENT_INFO_MANAGER_H_
 
-#include <cclient_sensor_record.h>
+#include <client_sensor_record.h>
 #include <unordered_map>
 #include <sensor_logs.h>
 #include <cmutex.h>
 #include <vector>
 
-typedef std::unordered_map<int,cclient_sensor_record> client_id_sensor_record_map;
+typedef std::unordered_map<int,client_sensor_record> client_id_sensor_record_map;
 typedef std::vector<int> client_id_vec;
 
 
-class cclient_info_manager {
+class client_info_manager {
 public:
-	static cclient_info_manager& get_instance();
+	static client_info_manager& get_instance();
 	int create_client_record(void);
 	bool remove_client_record(int client_id);
 	bool has_client_record(int client_id);
@@ -68,10 +68,10 @@ private:
 	client_id_sensor_record_map m_clients;
 	cmutex m_mutex;
 
-	cclient_info_manager();
-	~cclient_info_manager();
-	cclient_info_manager(cclient_info_manager const&) {};
-	cclient_info_manager& operator=(cclient_info_manager const&);
+	client_info_manager();
+	~client_info_manager();
+	client_info_manager(client_info_manager const&) {};
+	client_info_manager& operator=(client_info_manager const&);
 };
 
-#endif /* CCLIENT_INFO_MANAGER_H_ */
+#endif /* _CLIENT_INFO_MANAGER_H_ */

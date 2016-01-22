@@ -19,6 +19,7 @@
 
 #ifndef _COMMAND_CHANNEL_H_
 #define _COMMAND_CHANNEL_H_
+
 #include <sf_common.h>
 #include <sensor_internal.h>
 #include <cpacket.h>

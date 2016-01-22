@@ -43,4 +43,4 @@ private:
 	bool m_hardware_fusion;
 };
 
-#endif
+#endif /* _VIRTUAL_SENSOR_H_ */

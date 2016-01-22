@@ -17,8 +17,8 @@
  *
  */
 
-#if !defined(_CPACKET_CLASS_H_)
-#define _CPACKET_CLASS_H_
+#ifndef _CPACKET_H_
+#define _CPACKET_H_
 
 typedef struct packet_header {
 	int cmd;
@@ -47,5 +47,4 @@ private:
 	packet_header *m_packet;
 };
 
-#endif
-// End of a file
+#endif /* _CPACKET_H_ */

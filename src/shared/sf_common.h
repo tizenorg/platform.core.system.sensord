@@ -17,14 +17,14 @@
  *
  */
 
-#include <sensor_logs.h>
-
-#if !defined(_SF_COMMON_H_)
+#ifndef _SF_COMMON_H_
 #define _SF_COMMON_H_
+
 #include <unistd.h>
 #include <sensor_common.h>
 #include <string>
 #include <vector>
+#include <sensor_logs.h>
 
 #define COMMAND_CHANNEL_PATH			"/tmp/sensord_command_socket"
 #define EVENT_CHANNEL_PATH				"/tmp/sensord_event_socket"
@@ -238,4 +238,4 @@ enum sensor_permission_t {
 #define BIO_SENSOR_PRIVELEGE_NAME "sensord::bio"
 #define BIO_SENSOR_ACCESS_RIGHT "rw"
 
-#endif
+#endif /* _SF_COMMON_H_ */

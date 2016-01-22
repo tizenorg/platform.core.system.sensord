@@ -17,10 +17,10 @@
  *
  */
 
-#if !defined(_CVIRTUAL_SENSOR_CONFIG_CLASS_H_)
-#define _CVIRTUAL_SENSOR_CONFIG_CLASS_H_
+#ifndef _VIRTUAL_SENSOR_CONFIG_H_
+#define _VIRTUAL_SENSOR_CONFIG_H_
 
-#include <cconfig.h>
+#include <device_config.h>
 
 #define VIRTUAL_SENSOR_CONFIG_FILE_PATH "/usr/etc/virtual_sensors.xml"
 
@@ -40,7 +40,7 @@ typedef std::unordered_map<std::string,Element> Virtual_sensor;
 *		...
 */
 
-typedef std::unordered_map<std::string,Virtual_sensor> virtual_sensor_config;
+typedef std::unordered_map<std::string,Virtual_sensor> virtual_sensor_configs;
 /*
 * a Virtual_sensor_config represents virtual_sensors.xml
 * <ORIENTATION/>
@@ -49,7 +49,7 @@ typedef std::unordered_map<std::string,Virtual_sensor> virtual_sensor_config;
 *
 */
 
-typedef std::unordered_map<std::string,virtual_sensor_config> virtual_sensor_device_config;
+typedef std::unordered_map<std::string,virtual_sensor_configs> virtual_sensor_device_configs;
 /*
 * a virtual_sensor_device_config represents virtual_sensors.xml
 * <emulator/>
@@ -57,19 +57,19 @@ typedef std::unordered_map<std::string,virtual_sensor_config> virtual_sensor_dev
 *
 */
 
-class cvirtual_sensor_config : public cconfig
+class virtual_sensor_config : public device_config
 {
 private:
-	cvirtual_sensor_config();
-	cvirtual_sensor_config(cvirtual_sensor_config const&) {};
-	cvirtual_sensor_config& operator=(cvirtual_sensor_config const&);
+	virtual_sensor_config();
+	virtual_sensor_config(virtual_sensor_config const&) {};
+	virtual_sensor_config& operator=(virtual_sensor_config const&);
 
 	bool load_config(const std::string& config_path);
 
-	virtual_sensor_device_config m_virtual_sensor_config;
+	virtual_sensor_device_configs m_virtual_sensor_configs;
 
 public:
-	static cvirtual_sensor_config& get_instance(void);
+	static virtual_sensor_config& get_instance(void);
 
 	bool get(const std::string& sensor_type, const std::string& element, const std::string& attr, std::string& value);
 	bool get(const std::string& sensor_type, const std::string& element, const std::string& attr, float *value);
@@ -82,4 +82,4 @@ public:
 	bool is_supported(const std::string &sensor_type);
 };
 
-#endif
+#endif /* _VIRTUAL_SENSOR_CONFIG_H_ */

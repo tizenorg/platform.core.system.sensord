@@ -17,13 +17,13 @@
  *
  */
 
-#include <cclient_sensor_record.h>
+#include <client_sensor_record.h>
 #include <sensor_logs.h>
 
 using std::pair;
 using std::string;
 
-cclient_sensor_record::cclient_sensor_record()
+client_sensor_record::client_sensor_record()
 : m_client_id(0)
 , m_pid(-1)
 , m_permission(SENSOR_PERMISSION_NONE)
@@ -31,20 +31,20 @@ cclient_sensor_record::cclient_sensor_record()
 
 }
 
-cclient_sensor_record::~cclient_sensor_record()
+client_sensor_record::~client_sensor_record()
 {
 	m_sensor_usages.clear();
 	close_event_socket();
 }
 
-bool cclient_sensor_record::register_event(sensor_id_t sensor_id, unsigned int event_type)
+bool client_sensor_record::register_event(sensor_id_t sensor_id, unsigned int event_type)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage == m_sensor_usages.end()) {
-		csensor_usage usage;
+		sensor_usage usage;
 		usage.register_event(event_type);
-		m_sensor_usages.insert(pair<sensor_id_t,csensor_usage>(sensor_id, usage));
+		m_sensor_usages.insert(pair<sensor_id_t,sensor_usage>(sensor_id, usage));
 		return true;
 	}
 
@@ -56,7 +56,7 @@ bool cclient_sensor_record::register_event(sensor_id_t sensor_id, unsigned int e
 	return true;
 }
 
-bool cclient_sensor_record::unregister_event(sensor_id_t sensor_id, unsigned int event_type)
+bool client_sensor_record::unregister_event(sensor_id_t sensor_id, unsigned int event_type)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
@@ -73,14 +73,14 @@ bool cclient_sensor_record::unregister_event(sensor_id_t sensor_id, unsigned int
 	return true;
 }
 
-bool cclient_sensor_record::set_option(sensor_id_t sensor_id, int option)
+bool client_sensor_record::set_option(sensor_id_t sensor_id, int option)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage == m_sensor_usages.end()) {
-		csensor_usage usage;
+		sensor_usage usage;
 		usage.m_option = option;
-		m_sensor_usages.insert(pair<sensor_id_t, csensor_usage>(sensor_id, usage));
+		m_sensor_usages.insert(pair<sensor_id_t, sensor_usage>(sensor_id, usage));
 	} else {
 		it_usage->second.m_option = option;
 	}
@@ -88,14 +88,14 @@ bool cclient_sensor_record::set_option(sensor_id_t sensor_id, int option)
 	return true;
 }
 
-bool cclient_sensor_record::set_wakeup(sensor_id_t sensor_id, int wakeup)
+bool client_sensor_record::set_wakeup(sensor_id_t sensor_id, int wakeup)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage == m_sensor_usages.end()) {
-		csensor_usage usage;
+		sensor_usage usage;
 		usage.m_wakeup = wakeup;
-		m_sensor_usages.insert(pair<sensor_id_t, csensor_usage>(sensor_id, usage));
+		m_sensor_usages.insert(pair<sensor_id_t, sensor_usage>(sensor_id, usage));
 	} else {
 		it_usage->second.m_wakeup = wakeup;
 	}
@@ -103,14 +103,14 @@ bool cclient_sensor_record::set_wakeup(sensor_id_t sensor_id, int wakeup)
 	return true;
 }
 
-bool cclient_sensor_record::set_start(sensor_id_t sensor_id, bool start)
+bool client_sensor_record::set_start(sensor_id_t sensor_id, bool start)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage == m_sensor_usages.end()) {
-		csensor_usage usage;
+		sensor_usage usage;
 		usage.m_start = start;
-		m_sensor_usages.insert(pair<sensor_id_t, csensor_usage>(sensor_id, usage));
+		m_sensor_usages.insert(pair<sensor_id_t, sensor_usage>(sensor_id, usage));
 	} else {
 		it_usage->second.m_start = start;
 	}
@@ -118,7 +118,7 @@ bool cclient_sensor_record::set_start(sensor_id_t sensor_id, bool start)
 	return true;
 }
 
-bool cclient_sensor_record::is_started(sensor_id_t sensor_id)
+bool client_sensor_record::is_started(sensor_id_t sensor_id)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
@@ -128,15 +128,15 @@ bool cclient_sensor_record::is_started(sensor_id_t sensor_id)
 	return it_usage->second.m_start;
 }
 
-bool cclient_sensor_record::set_batch(sensor_id_t sensor_id, unsigned int interval, unsigned int latency)
+bool client_sensor_record::set_batch(sensor_id_t sensor_id, unsigned int interval, unsigned int latency)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage == m_sensor_usages.end()) {
-		csensor_usage usage;
+		sensor_usage usage;
 		usage.m_interval = interval;
 		usage.m_latency = latency;
-		m_sensor_usages.insert(pair<sensor_id_t, csensor_usage>(sensor_id, usage));
+		m_sensor_usages.insert(pair<sensor_id_t, sensor_usage>(sensor_id, usage));
 	} else {
 		it_usage->second.m_interval = interval;
 		it_usage->second.m_latency = latency;
@@ -145,7 +145,7 @@ bool cclient_sensor_record::set_batch(sensor_id_t sensor_id, unsigned int interv
 	return true;
 }
 
-bool cclient_sensor_record::get_batch(sensor_id_t sensor_id, unsigned int &interval, unsigned int &latency)
+bool client_sensor_record::get_batch(sensor_id_t sensor_id, unsigned int &interval, unsigned int &latency)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
@@ -160,7 +160,7 @@ bool cclient_sensor_record::get_batch(sensor_id_t sensor_id, unsigned int &inter
 	return true;
 }
 
-bool cclient_sensor_record::is_listening_event(sensor_id_t sensor_id, unsigned int event_type)
+bool client_sensor_record::is_listening_event(sensor_id_t sensor_id, unsigned int event_type)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
@@ -173,7 +173,7 @@ bool cclient_sensor_record::is_listening_event(sensor_id_t sensor_id, unsigned i
 	return false;
 }
 
-bool cclient_sensor_record::add_sensor_usage(sensor_id_t sensor_id)
+bool client_sensor_record::add_sensor_usage(sensor_id_t sensor_id)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
@@ -182,12 +182,12 @@ bool cclient_sensor_record::add_sensor_usage(sensor_id_t sensor_id)
 		return false;
 	}
 
-	csensor_usage usage;
-	m_sensor_usages.insert(pair<sensor_id_t,csensor_usage> (sensor_id, usage));
+	sensor_usage usage;
+	m_sensor_usages.insert(pair<sensor_id_t,sensor_usage> (sensor_id, usage));
 	return true;
 }
 
-bool cclient_sensor_record::remove_sensor_usage(sensor_id_t sensor_id)
+bool client_sensor_record::remove_sensor_usage(sensor_id_t sensor_id)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
@@ -199,7 +199,7 @@ bool cclient_sensor_record::remove_sensor_usage(sensor_id_t sensor_id)
 	return true;
 }
 
-bool cclient_sensor_record::has_sensor_usage(void)
+bool client_sensor_record::has_sensor_usage(void)
 {
 	if (m_sensor_usages.empty())
 		return false;
@@ -208,7 +208,7 @@ bool cclient_sensor_record::has_sensor_usage(void)
 }
 
 
-bool cclient_sensor_record::has_sensor_usage(sensor_id_t sensor_id)
+bool client_sensor_record::has_sensor_usage(sensor_id_t sensor_id)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
@@ -221,7 +221,7 @@ bool cclient_sensor_record::has_sensor_usage(sensor_id_t sensor_id)
 }
 
 
-bool cclient_sensor_record::get_registered_events(sensor_id_t sensor_id, event_type_vector &event_vec)
+bool client_sensor_record::get_registered_events(sensor_id_t sensor_id, event_type_vector &event_vec)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
@@ -236,12 +236,12 @@ bool cclient_sensor_record::get_registered_events(sensor_id_t sensor_id, event_t
 
 }
 
-void cclient_sensor_record::set_client_id(int client_id)
+void client_sensor_record::set_client_id(int client_id)
 {
 	m_client_id = client_id;
 }
 
-void cclient_sensor_record::set_client_info(pid_t pid, const string &name)
+void client_sensor_record::set_client_info(pid_t pid, const string &name)
 {
 	char client_info[NAME_MAX + 32];
 	m_pid = pid;
@@ -250,34 +250,34 @@ void cclient_sensor_record::set_client_info(pid_t pid, const string &name)
 	m_client_info.assign(client_info);
 }
 
-const char* cclient_sensor_record::get_client_info(void)
+const char* client_sensor_record::get_client_info(void)
 {
 	return m_client_info.c_str();
 }
 
-void cclient_sensor_record::set_permission(int permission)
+void client_sensor_record::set_permission(int permission)
 {
 	m_permission = permission;
 }
 
-int cclient_sensor_record::get_permission(void)
+int client_sensor_record::get_permission(void)
 {
 	return  m_permission;
 }
 
 
-void cclient_sensor_record::set_event_socket(const csocket &socket)
+void client_sensor_record::set_event_socket(const csocket &socket)
 {
 	m_event_socket = socket;
 }
 
-void cclient_sensor_record::get_event_socket(csocket &socket)
+void client_sensor_record::get_event_socket(csocket &socket)
 {
 	socket = m_event_socket;
 }
 
 
-bool cclient_sensor_record::close_event_socket(void)
+bool client_sensor_record::close_event_socket(void)
 {
 	return m_event_socket.close();
 }

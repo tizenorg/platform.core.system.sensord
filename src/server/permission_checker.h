@@ -58,4 +58,4 @@ public:
 	int get_permission(int sock_fd);
 };
 
-#endif /* COMMAND_WORKER_H_ */
+#endif /* _PERMISSION_CHECKER_H_ */

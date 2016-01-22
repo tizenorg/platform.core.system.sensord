@@ -143,4 +143,4 @@ public:
 	/* TODO: use get_sensors() instead of get_properties() */
 	virtual bool get_properties(uint32_t id, sensor_properties_s &properties) = 0;
 };
-#endif /*_SENSOR_HAL_H_*/
+#endif /* _SENSOR_HAL_H_ */

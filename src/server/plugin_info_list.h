@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _CPLUGIN_INFO_LIST_CLASS_H_
-#define _CPLUGIN_INFO_LIST_CLASS_H_
+#ifndef _PLUGIN_INFO_LIST_H_
+#define _PLUGIN_INFO_LIST_H_
 
 #include <list>
 
@@ -53,7 +53,7 @@ public:
 
 typedef std::list<cwakeup_info>::iterator cwakeup_info_iterator;
 
-class cplugin_info_list
+class plugin_info_list
 {
 private:
 	static bool comp_interval_info(cinterval_info a, cinterval_info b);
@@ -84,4 +84,4 @@ public:
 	int get_wakeup(int client_id);
 	int is_wakeup_on(void);
 };
-#endif
+#endif /* _PLUGIN_INFO_LIST_H_ */

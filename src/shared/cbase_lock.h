@@ -17,8 +17,8 @@
  *
  */
 
-#if !defined(_CBASE_LOCK_CLASS_H_)
-#define _CBASE_LOCK_CLASS_H_
+#ifndef _CBASE_LOCK_H_
+#define _CBASE_LOCK_H_
 
 #include <pthread.h>
 
@@ -83,5 +83,4 @@ public:
 	~Autolock();
 };
 
-#endif
-// End of a file
+#endif /* _CBASE_LOCK_H_ */

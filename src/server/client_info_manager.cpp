@@ -17,28 +17,28 @@
  *
  */
 
-#include <cclient_info_manager.h>
+#include <client_info_manager.h>
 #include <sensor_logs.h>
 #include <csocket.h>
 
 using std::pair;
 using std::string;
 
-cclient_info_manager::cclient_info_manager()
+client_info_manager::client_info_manager()
 {
 }
-cclient_info_manager::~cclient_info_manager()
+client_info_manager::~client_info_manager()
 {
 	m_clients.clear();
 }
 
-cclient_info_manager& cclient_info_manager::get_instance()
+client_info_manager& client_info_manager::get_instance()
 {
-	static cclient_info_manager inst;
+	static client_info_manager inst;
 	return inst;
 }
 
-bool cclient_info_manager::get_registered_events(int client_id, sensor_id_t sensor_id, event_type_vector &event_vec)
+bool client_info_manager::get_registered_events(int client_id, sensor_id_t sensor_id, event_type_vector &event_vec)
 {
 	AUTOLOCK(m_mutex);
 
@@ -56,7 +56,7 @@ bool cclient_info_manager::get_registered_events(int client_id, sensor_id_t sens
 }
 
 
-bool cclient_info_manager::register_event(int client_id, sensor_id_t sensor_id, unsigned int event_type)
+bool client_info_manager::register_event(int client_id, sensor_id_t sensor_id, unsigned int event_type)
 {
 	AUTOLOCK(m_mutex);
 
@@ -73,7 +73,7 @@ bool cclient_info_manager::register_event(int client_id, sensor_id_t sensor_id, 
 	return true;
 }
 
-bool cclient_info_manager::unregister_event(int client_id, sensor_id_t sensor_id, unsigned int event_type)
+bool client_info_manager::unregister_event(int client_id, sensor_id_t sensor_id, unsigned int event_type)
 {
 	AUTOLOCK(m_mutex);
 
@@ -90,7 +90,7 @@ bool cclient_info_manager::unregister_event(int client_id, sensor_id_t sensor_id
 	return true;
 }
 
-bool cclient_info_manager::set_batch(int client_id, sensor_id_t sensor_id, unsigned int interval, unsigned latency)
+bool client_info_manager::set_batch(int client_id, sensor_id_t sensor_id, unsigned int interval, unsigned latency)
 {
 	AUTOLOCK(m_mutex);
 
@@ -104,7 +104,7 @@ bool cclient_info_manager::set_batch(int client_id, sensor_id_t sensor_id, unsig
 	return it_record->second.set_batch(sensor_id, interval, latency);
 }
 
-bool cclient_info_manager::get_batch(int client_id, sensor_id_t sensor_id, unsigned int &interval, unsigned int &latency)
+bool client_info_manager::get_batch(int client_id, sensor_id_t sensor_id, unsigned int &interval, unsigned int &latency)
 {
 	AUTOLOCK(m_mutex);
 
@@ -118,7 +118,7 @@ bool cclient_info_manager::get_batch(int client_id, sensor_id_t sensor_id, unsig
 	return it_record->second.get_batch(sensor_id, interval, latency);
 }
 
-bool cclient_info_manager::set_option(int client_id, sensor_id_t sensor_id, int option)
+bool client_info_manager::set_option(int client_id, sensor_id_t sensor_id, int option)
 {
 	AUTOLOCK(m_mutex);
 
@@ -135,7 +135,7 @@ bool cclient_info_manager::set_option(int client_id, sensor_id_t sensor_id, int 
 	return true;
 }
 
-bool cclient_info_manager::set_wakeup(int client_id, sensor_id_t sensor_id, int wakeup)
+bool client_info_manager::set_wakeup(int client_id, sensor_id_t sensor_id, int wakeup)
 {
 	AUTOLOCK(m_mutex);
 
@@ -152,7 +152,7 @@ bool cclient_info_manager::set_wakeup(int client_id, sensor_id_t sensor_id, int 
 	return true;
 }
 
-bool cclient_info_manager::set_start(int client_id, sensor_id_t sensor_id, bool start)
+bool client_info_manager::set_start(int client_id, sensor_id_t sensor_id, bool start)
 {
 	AUTOLOCK(m_mutex);
 
@@ -170,7 +170,7 @@ bool cclient_info_manager::set_start(int client_id, sensor_id_t sensor_id, bool 
 
 }
 
-bool cclient_info_manager::is_started(int client_id, sensor_id_t sensor_id)
+bool client_info_manager::is_started(int client_id, sensor_id_t sensor_id)
 {
 	AUTOLOCK(m_mutex);
 
@@ -184,13 +184,13 @@ bool cclient_info_manager::is_started(int client_id, sensor_id_t sensor_id)
 	return it_record->second.is_started(sensor_id);
 }
 
-int cclient_info_manager::create_client_record(void)
+int client_info_manager::create_client_record(void)
 {
 	AUTOLOCK(m_mutex);
 
 	int client_id = 0;
 
-	cclient_sensor_record client_record;
+	client_sensor_record client_record;
 
 	while (m_clients.count(client_id) > 0)
 		client_id++;
@@ -202,13 +202,13 @@ int cclient_info_manager::create_client_record(void)
 
 	client_record.set_client_id(client_id);
 
-	m_clients.insert(pair<int,cclient_sensor_record> (client_id, client_record));
+	m_clients.insert(pair<int,client_sensor_record> (client_id, client_record));
 
 	return client_id;
 }
 
 
-bool cclient_info_manager::remove_client_record(int client_id)
+bool client_info_manager::remove_client_record(int client_id)
 {
 	AUTOLOCK(m_mutex);
 
@@ -227,7 +227,7 @@ bool cclient_info_manager::remove_client_record(int client_id)
 }
 
 
-bool cclient_info_manager::has_client_record(int client_id)
+bool client_info_manager::has_client_record(int client_id)
 {
 	AUTOLOCK(m_mutex);
 
@@ -237,7 +237,7 @@ bool cclient_info_manager::has_client_record(int client_id)
 }
 
 
-void cclient_info_manager::set_client_info(int client_id, pid_t pid, const string &name)
+void client_info_manager::set_client_info(int client_id, pid_t pid, const string &name)
 {
 	AUTOLOCK(m_mutex);
 
@@ -253,7 +253,7 @@ void cclient_info_manager::set_client_info(int client_id, pid_t pid, const strin
 	return;
 }
 
-const char* cclient_info_manager::get_client_info(int client_id)
+const char* client_info_manager::get_client_info(int client_id)
 {
 	AUTOLOCK(m_mutex);
 
@@ -267,7 +267,7 @@ const char* cclient_info_manager::get_client_info(int client_id)
 	return it_record->second.get_client_info();
 }
 
-bool cclient_info_manager::set_permission(int client_id, int permission)
+bool client_info_manager::set_permission(int client_id, int permission)
 {
 	AUTOLOCK(m_mutex);
 
@@ -282,7 +282,7 @@ bool cclient_info_manager::set_permission(int client_id, int permission)
 	return true;
 }
 
-bool cclient_info_manager::get_permission(int client_id, int &permission)
+bool client_info_manager::get_permission(int client_id, int &permission)
 {
 	AUTOLOCK(m_mutex);
 
@@ -297,7 +297,7 @@ bool cclient_info_manager::get_permission(int client_id, int &permission)
 	return true;
 }
 
-bool cclient_info_manager::create_sensor_record(int client_id, sensor_id_t sensor_id)
+bool client_info_manager::create_sensor_record(int client_id, sensor_id_t sensor_id)
 {
 	AUTOLOCK(m_mutex);
 
@@ -313,7 +313,7 @@ bool cclient_info_manager::create_sensor_record(int client_id, sensor_id_t senso
 	return true;
 }
 
-bool cclient_info_manager::remove_sensor_record(int client_id, sensor_id_t sensor_id)
+bool client_info_manager::remove_sensor_record(int client_id, sensor_id_t sensor_id)
 {
 	AUTOLOCK(m_mutex);
 
@@ -334,7 +334,7 @@ bool cclient_info_manager::remove_sensor_record(int client_id, sensor_id_t senso
 }
 
 
-bool cclient_info_manager::has_sensor_record(int client_id, sensor_id_t sensor_id)
+bool client_info_manager::has_sensor_record(int client_id, sensor_id_t sensor_id)
 {
 	AUTOLOCK(m_mutex);
 
@@ -351,7 +351,7 @@ bool cclient_info_manager::has_sensor_record(int client_id, sensor_id_t sensor_i
 	return true;
 }
 
-bool cclient_info_manager::has_sensor_record(int client_id)
+bool client_info_manager::has_sensor_record(int client_id)
 {
 	AUTOLOCK(m_mutex);
 
@@ -368,7 +368,7 @@ bool cclient_info_manager::has_sensor_record(int client_id)
 	return true;
 }
 
-bool cclient_info_manager::get_listener_ids(sensor_id_t sensor_id, unsigned int event_type, client_id_vec &id_vec)
+bool client_info_manager::get_listener_ids(sensor_id_t sensor_id, unsigned int event_type, client_id_vec &id_vec)
 {
 	AUTOLOCK(m_mutex);
 
@@ -384,7 +384,7 @@ bool cclient_info_manager::get_listener_ids(sensor_id_t sensor_id, unsigned int 
 	return true;
 }
 
-bool cclient_info_manager::get_event_socket(int client_id, csocket &socket)
+bool client_info_manager::get_event_socket(int client_id, csocket &socket)
 {
 	AUTOLOCK(m_mutex);
 
@@ -400,7 +400,7 @@ bool cclient_info_manager::get_event_socket(int client_id, csocket &socket)
 	return true;
 }
 
-bool cclient_info_manager::set_event_socket(int client_id, const csocket &socket)
+bool client_info_manager::set_event_socket(int client_id, const csocket &socket)
 {
 
 	AUTOLOCK(m_mutex);

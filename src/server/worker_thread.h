@@ -78,4 +78,4 @@ public:
 	void set_context(void *ctx);
 };
 
-#endif
+#endif /* _WORKER_THREAD_H_ */

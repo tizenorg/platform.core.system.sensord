@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef __SENSOR_COMMON_H__
-#define __SENSOR_COMMON_H__
+#ifndef _SENSOR_COMMON_H_
+#define _SENSOR_COMMON_H_
 
 #ifndef DEPRECATED
 #define DEPRECATED __attribute__((deprecated))
@@ -150,5 +150,4 @@ typedef enum {
 #endif
 
 
-#endif
-//! End of a file
+#endif /* _SENSOR_COMMON_H_ */

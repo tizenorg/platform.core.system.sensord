@@ -18,10 +18,10 @@
  */
 
 #include <sensor_internal.h>
-#include <csensor_usage.h>
+#include <sensor_usage.h>
 #include <sensor_logs.h>
 
-csensor_usage::csensor_usage()
+sensor_usage::sensor_usage()
 : m_interval(POLL_MAX_HZ_MS)
 , m_latency(0)
 , m_option(SENSOR_OPTION_DEFAULT)
@@ -30,12 +30,12 @@ csensor_usage::csensor_usage()
 {
 
 }
-csensor_usage::~csensor_usage()
+sensor_usage::~sensor_usage()
 {
 	m_reg_events.clear();
 }
 
-bool csensor_usage::register_event(unsigned int event_type)
+bool sensor_usage::register_event(unsigned int event_type)
 {
 	auto it_event = find(m_reg_events.begin(), m_reg_events.end(), event_type);
 
@@ -48,7 +48,7 @@ bool csensor_usage::register_event(unsigned int event_type)
 	return true;
 }
 
-bool csensor_usage::unregister_event(unsigned int event_type)
+bool sensor_usage::unregister_event(unsigned int event_type)
 {
 	auto it_event = find(m_reg_events.begin(), m_reg_events.end(), event_type);
 
@@ -62,7 +62,7 @@ bool csensor_usage::unregister_event(unsigned int event_type)
 	return true;
 }
 
-bool csensor_usage::is_event_registered(unsigned int event_type)
+bool sensor_usage::is_event_registered(unsigned int event_type)
 {
 	auto it_event = find (m_reg_events.begin(), m_reg_events.end(), event_type);
 

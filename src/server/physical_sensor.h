@@ -59,4 +59,4 @@ private:
 	virtual bool get_properties(sensor_properties_s &properties);
 };
 
-#endif
+#endif /* _PHYSICAL_SENSOR_H_ */

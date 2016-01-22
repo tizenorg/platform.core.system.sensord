@@ -18,7 +18,7 @@
  */
 
 #include <virtual_sensor.h>
-#include <csensor_event_dispatcher.h>
+#include <sensor_event_dispatcher.h>
 
 
 virtual_sensor::virtual_sensor()
@@ -40,10 +40,10 @@ bool virtual_sensor::is_virtual(void)
 
 bool virtual_sensor::activate(void)
 {
-	return csensor_event_dispatcher::get_instance().add_active_virtual_sensor(this);
+	return sensor_event_dispatcher::get_instance().add_active_virtual_sensor(this);
 }
 
 bool virtual_sensor::deactivate(void)
 {
-	return csensor_event_dispatcher::get_instance().delete_active_virtual_sensor(this);
+	return sensor_event_dispatcher::get_instance().delete_active_virtual_sensor(this);
 }

@@ -17,7 +17,7 @@
  *
  */
 
-#include <cconfig.h>
+#include <device_config.h>
 #include <fstream>
 #include <string>
 
@@ -25,17 +25,17 @@ using std::ifstream;
 using std::string;
 using std::istringstream;
 
-cconfig::cconfig(void)
+device_config::device_config(void)
 {
 
 }
 
-cconfig::~cconfig(void)
+device_config::~device_config(void)
 {
 
 }
 
-bool cconfig::get_device_id(void)
+bool device_config::get_device_id(void)
 {
 	const string INFO_INI_PATH = "/etc/info.ini";
 	const string START_DELIMETER = "Model=";

@@ -127,7 +127,7 @@ void server::run(void)
 		}
 	}
 
-	csensor_event_dispatcher::get_instance().run();
+	sensor_event_dispatcher::get_instance().run();
 
 	thread client_accepter(&server::accept_client, this);
 	client_accepter.detach();

@@ -29,4 +29,4 @@ enum dbus_ret{
 void init_dbus(void);
 void fini_dbus(void);
 
-#endif /* SENSORD_GDBUS_H_ */
+#endif /* _DBUS_UTIL_H_ */

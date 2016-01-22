@@ -29,7 +29,7 @@
 #include <string>
 #include <sensor_internal.h>
 
-#include <cplugin_info_list.h>
+#include <plugin_info_list.h>
 #include <cmutex.h>
 
 #include <sensor_logs.h>
@@ -110,7 +110,7 @@ private:
 
 	int m_permission;
 
-	cplugin_info_list m_plugin_info_list;
+	plugin_info_list m_plugin_info_list;
 	cmutex m_plugin_info_list_mutex;
 
 	unsigned int m_client;
@@ -132,4 +132,4 @@ private:
 	static unsigned long long get_timestamp(timeval *t);
 };
 
-#endif
+#endif /* _SENSOR_BASE_H_ */

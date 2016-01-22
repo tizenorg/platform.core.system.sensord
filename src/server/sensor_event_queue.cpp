@@ -17,16 +17,16 @@
  *
  */
 
-#include <csensor_event_queue.h>
+#include <sensor_event_queue.h>
 #include "sensor_logs.h"
 
-csensor_event_queue& csensor_event_queue::get_instance()
+sensor_event_queue& sensor_event_queue::get_instance()
 {
-	static csensor_event_queue inst;
+	static sensor_event_queue inst;
 	return inst;
 }
 
-void csensor_event_queue::push_internal(void *event, int length)
+void sensor_event_queue::push_internal(void *event, int length)
 {
 	lock l(m_mutex);
 	bool wake = m_queue.empty();
@@ -41,7 +41,7 @@ void csensor_event_queue::push_internal(void *event, int length)
 		m_cond_var.notify_one();
 }
 
-void* csensor_event_queue::pop(int *length)
+void* sensor_event_queue::pop(int *length)
 {
 	ulock u(m_mutex);
 	while (m_queue.empty())
@@ -54,7 +54,7 @@ void* csensor_event_queue::pop(int *length)
 	return event.first;
 }
 
-void csensor_event_queue::push(sensor_event_t *event, int event_length)
+void sensor_event_queue::push(sensor_event_t *event, int event_length)
 {
 	push_internal(event, event_length);
 }

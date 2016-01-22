@@ -28,10 +28,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(${PROJECT_NAME} SHARED
 	client.cpp
-	csensor_client_info.cpp
-	csensor_event_listener.cpp
+	sensor_client_info.cpp
+	sensor_event_listener.cpp
 	sensor_info_manager.cpp
-	csensor_handle_info.cpp
+	sensor_handle_info.cpp
 	client_common.cpp
 	command_channel.cpp
 )
@@ -42,10 +42,10 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES VERSION ${VERSION})
 
 configure_file(${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc @ONLY)
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT RuntimeLibraries)
-install(FILES creg_event_info.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
-install(FILES csensor_event_listener.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
+install(FILES reg_event_info.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
+install(FILES sensor_event_listener.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES sensor_info_manager.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
-install(FILES csensor_handle_info.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
+install(FILES sensor_handle_info.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES client_common.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
 install(FILES ${PROJECT_NAME}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 

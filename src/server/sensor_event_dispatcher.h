@@ -21,8 +21,8 @@
 #define _SENSOR_EVENT_DISPATCHER_H_
 
 #include <sf_common.h>
-#include <csensor_event_queue.h>
-#include <cclient_info_manager.h>
+#include <sensor_event_queue.h>
+#include <client_info_manager.h>
 #include <csocket.h>
 #include <virtual_sensor.h>
 #include <unordered_map>
@@ -33,7 +33,7 @@
 typedef std::unordered_map<unsigned int, sensor_event_t> event_type_last_event_map;
 typedef std::list<virtual_sensor *> virtual_sensors;
 
-class csensor_event_dispatcher
+class sensor_event_dispatcher
 {
 private:
 	bool m_lcd_on;
@@ -44,10 +44,10 @@ private:
 	virtual_sensors m_active_virtual_sensors;
 	cmutex m_active_virtual_sensors_mutex;
 
-	csensor_event_dispatcher();
-	~csensor_event_dispatcher();
-	csensor_event_dispatcher(csensor_event_dispatcher const&) {};
-	csensor_event_dispatcher& operator=(csensor_event_dispatcher const&);
+	sensor_event_dispatcher();
+	~sensor_event_dispatcher();
+	sensor_event_dispatcher(sensor_event_dispatcher const&) {};
+	sensor_event_dispatcher& operator=(sensor_event_dispatcher const&);
 
 	void accept_connections(void);
 	void accept_event_channel(csocket client_socket);
@@ -55,8 +55,8 @@ private:
 	void dispatch_event(void);
 	void send_sensor_events(std::vector< std::pair<void*, int> > &events);
 	void send_sensorhub_events(void* events);
-	static cclient_info_manager& get_client_info_manager(void);
-	static csensor_event_queue& get_event_queue(void);
+	static client_info_manager& get_client_info_manager(void);
+	static sensor_event_queue& get_event_queue(void);
 
 	bool is_record_event(unsigned int event_type);
 	void put_last_event(unsigned int event_type, const sensor_event_t &event);
@@ -67,7 +67,7 @@ private:
 
 	void sort_sensor_events(std::vector< std::pair<void*, int> > &events);
 public:
-	static csensor_event_dispatcher& get_instance();
+	static sensor_event_dispatcher& get_instance();
 	bool run(void);
 	void request_last_event(int client_id, sensor_id_t sensor_id);
 
@@ -75,4 +75,4 @@ public:
 	bool delete_active_virtual_sensor(virtual_sensor *sensor);
 };
 
-#endif
+#endif /* _SENSOR_EVENT_DISPATCHER_H_ */

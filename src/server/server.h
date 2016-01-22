@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef SERVER_H_
-#define SERVER_H_
+#ifndef _SERVER_H_
+#define _SERVER_H_
 
 #include <glib.h>
 #include <csocket.h>
@@ -41,4 +41,4 @@ public:
 	static server& get_instance();
 };
 
-#endif
+#endif /* _SERVER_H_ */

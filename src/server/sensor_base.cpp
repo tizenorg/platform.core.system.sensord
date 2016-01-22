@@ -24,7 +24,7 @@
 #include <utility>
 
 #include <functional>
-#include <csensor_event_queue.h>
+#include <sensor_event_queue.h>
 
 using std::make_pair;
 using std::vector;
@@ -401,7 +401,7 @@ bool sensor_base::push(sensor_event_t *event, int event_length)
 	if (m_client <= 0)
 		return false;
 
-	csensor_event_queue::get_instance().push(event, event_length);
+	sensor_event_queue::get_instance().push(event, event_length);
 	return true;
 }
 
@@ -413,7 +413,7 @@ bool sensor_base::push(const sensor_event_t &event)
 	if (m_client <= 0)
 		return false;
 
-	csensor_event_queue::get_instance().push(event);
+	sensor_event_queue::get_instance().push(event);
 	return true;
 }
 
@@ -424,7 +424,7 @@ bool sensor_base::push(sensor_event_t *event)
 	if (m_client <= 0)
 		return false;
 
-	csensor_event_queue::get_instance().push(event);
+	sensor_event_queue::get_instance().push(event);
 	return true;
 }
 
@@ -435,7 +435,7 @@ bool sensor_base::push(const sensorhub_event_t &event)
 	if (m_client <= 0)
 		return false;
 
-	csensor_event_queue::get_instance().push(event);
+	sensor_event_queue::get_instance().push(event);
 	return true;
 }
 
@@ -446,7 +446,7 @@ bool sensor_base::push(sensorhub_event_t *event)
 	if (m_client <= 0)
 		return false;
 
-	csensor_event_queue::get_instance().push(event);
+	sensor_event_queue::get_instance().push(event);
 	return true;
 }
 */

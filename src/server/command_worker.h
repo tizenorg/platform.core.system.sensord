@@ -17,12 +17,12 @@
  *
  */
 
-#ifndef COMMAND_WORKER_H_
-#define COMMAND_WORKER_H_
+#ifndef _COMMAND_WORKER_H_
+#define _COMMAND_WORKER_H_
 
 #include <worker_thread.h>
-#include <cclient_info_manager.h>
-#include <csensor_event_dispatcher.h>
+#include <client_info_manager.h>
+#include <sensor_event_dispatcher.h>
 #include <sensor_base.h>
 #include <map>
 #include <cpacket.h>
@@ -83,8 +83,8 @@ private:
 	int get_permission(void);
 	bool is_permission_allowed(void);
 
-	static cclient_info_manager& get_client_info_manager(void);
-	static csensor_event_dispatcher& get_event_dispathcher(void);
+	static client_info_manager& get_client_info_manager(void);
+	static sensor_event_dispatcher& get_event_dispathcher(void);
 public:
 	command_worker(const csocket& socket);
 	virtual ~command_worker();
@@ -93,4 +93,4 @@ public:
 
 };
 
-#endif /* COMMAND_WORKER_H_ */
+#endif /* _COMMAND_WORKER_H_ */

@@ -17,6 +17,9 @@
  *
  */
 
+#ifndef _SENSOR_EVENT_POLLER_H_
+#define _SENSOR_EVENT_POLLER_H_
+
 #include <map>
 #include <poller.h>
 #include <physical_sensor.h>
@@ -39,3 +42,5 @@ private:
 	bool is_data_ready(int fd);
 	bool process_event(int fd);
 };
+
+#endif /* _SENSOR_EVENT_POLLER_H_ */

@@ -17,8 +17,8 @@
  *
  */
 
-#if !defined(_SENSOR_PLUGIN_LOADER_CLASS_H_)
-#define _SENSOR_PLUGIN_LOADER_CLASS_H_
+#ifndef _SENSOR_PLUGIN_LOADER_H_
+#define _SENSOR_PLUGIN_LOADER_H_
 
 #include <sensor_common.h>
 #include <sensor_types.h>
@@ -61,4 +61,4 @@ public:
 	std::vector<sensor_base *> get_sensors(sensor_type_t type);
 	std::vector<sensor_base*> get_virtual_sensors(void);
 };
-#endif	/* _SENSOR_PLUGIN_LOADER_CLASS_H_ */
+#endif	/* _SENSOR_PLUGIN_LOADER_H_ */

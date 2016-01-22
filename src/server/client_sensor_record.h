@@ -17,22 +17,22 @@
  *
  */
 
-#ifndef CCLIENT_SENSOR_RECORD_H_
-#define CCLIENT_SENSOR_RECORD_H_
+#ifndef _CLIENT_SENSOR_RECORD_H_
+#define _CLIENT_SENSOR_RECORD_H_
 
 #include <sensor_internal.h>
 #include <sf_common.h>
-#include <csensor_usage.h>
+#include <sensor_usage.h>
 #include <csocket.h>
 #include <unordered_map>
 #include <string>
 
-typedef std::unordered_map<sensor_id_t, csensor_usage> sensor_usage_map;
+typedef std::unordered_map<sensor_id_t, sensor_usage> sensor_usage_map;
 
-class cclient_sensor_record {
+class client_sensor_record {
 public:
-	cclient_sensor_record();
-	~cclient_sensor_record();
+	client_sensor_record();
+	~client_sensor_record();
 
 	void set_client_id(int client_id);
 
@@ -75,4 +75,4 @@ private:
 	sensor_usage_map m_sensor_usages;
 };
 
-#endif /* CCLIENT_SENSOR_RECORD_H_ */
+#endif /* _CLIENT_SENSOR_RECORD_H_ */

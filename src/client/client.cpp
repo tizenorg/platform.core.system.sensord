@@ -20,7 +20,7 @@
 #include <sf_common.h>
 #include <sensor_internal_deprecated.h>
 #include <sensor_internal.h>
-#include <csensor_event_listener.h>
+#include <sensor_event_listener.h>
 #include <client_common.h>
 #include <vconf.h>
 #include <cmutex.h>
@@ -41,8 +41,8 @@ using std::vector;
 static const int OP_SUCCESS = 0;
 static const int OP_ERROR =  -1;
 
-static csensor_event_listener &event_listener = csensor_event_listener::get_instance();
-static csensor_client_info &client_info = csensor_client_info::get_instance();
+static sensor_event_listener &event_listener = sensor_event_listener::get_instance();
+static sensor_client_info &client_info = sensor_client_info::get_instance();
 static cmutex lock;
 
 static int g_power_save_state = 0;
