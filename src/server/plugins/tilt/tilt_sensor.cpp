@@ -30,7 +30,7 @@
 #include <tilt_sensor.h>
 #include <sensor_plugin_loader.h>
 #include <orientation_filter.h>
-#include <cvirtual_sensor_config.h>
+#include <virtual_sensor_config.h>
 
 using std::string;
 using std::vector;
@@ -58,7 +58,7 @@ tilt_sensor::tilt_sensor()
 , m_fusion_sensor(NULL)
 , m_time(0)
 {
-	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
+	virtual_sensor_config &config = virtual_sensor_config::get_instance();
 
 	m_name = string(SENSOR_NAME);
 	register_supported_event(TILT_RAW_DATA_EVENT);

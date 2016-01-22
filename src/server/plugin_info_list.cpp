@@ -17,7 +17,7 @@
  *
  */
 
-#include <cplugin_info_list.h>
+#include <plugin_info_list.h>
 #include <algorithm>
 
 
@@ -40,17 +40,17 @@ cwakeup_info::cwakeup_info(int client_id, int wakeup)
 	this->wakeup = wakeup;
 }
 
-bool cplugin_info_list::comp_interval_info(cinterval_info a, cinterval_info b)
+bool plugin_info_list::comp_interval_info(cinterval_info a, cinterval_info b)
 {
 	return a.interval < b.interval;
 }
 
-bool cplugin_info_list::comp_batch_info(cbatch_info a, cbatch_info b)
+bool plugin_info_list::comp_batch_info(cbatch_info a, cbatch_info b)
 {
 	return a.latency < b.latency;
 }
 
-cinterval_info_iterator cplugin_info_list::find_if_interval_info(int client_id, bool is_processor)
+cinterval_info_iterator plugin_info_list::find_if_interval_info(int client_id, bool is_processor)
 {
 	auto iter = m_interval_info_list.begin();
 
@@ -64,7 +64,7 @@ cinterval_info_iterator cplugin_info_list::find_if_interval_info(int client_id, 
 	return iter;
 }
 
-cbatch_info_iterator cplugin_info_list::find_if_batch_info(int client_id)
+cbatch_info_iterator plugin_info_list::find_if_batch_info(int client_id)
 {
 	auto iter = m_batch_info_list.begin();
 
@@ -78,7 +78,7 @@ cbatch_info_iterator cplugin_info_list::find_if_batch_info(int client_id)
 	return iter;
 }
 
-cwakeup_info_iterator cplugin_info_list::find_if_wakeup_info(int client_id)
+cwakeup_info_iterator plugin_info_list::find_if_wakeup_info(int client_id)
 {
 	auto iter = m_wakeup_info_list.begin();
 
@@ -92,7 +92,7 @@ cwakeup_info_iterator cplugin_info_list::find_if_wakeup_info(int client_id)
 	return iter;
 }
 
-bool cplugin_info_list::add_interval(int client_id, unsigned int interval, bool is_processor)
+bool plugin_info_list::add_interval(int client_id, unsigned int interval, bool is_processor)
 {
 	auto iter = find_if_interval_info(client_id, is_processor);
 
@@ -104,7 +104,7 @@ bool cplugin_info_list::add_interval(int client_id, unsigned int interval, bool 
 	return true;
 }
 
-bool cplugin_info_list::delete_interval(int client_id, bool is_processor)
+bool plugin_info_list::delete_interval(int client_id, bool is_processor)
 {
 	auto iter = find_if_interval_info(client_id, is_processor);
 
@@ -116,7 +116,7 @@ bool cplugin_info_list::delete_interval(int client_id, bool is_processor)
 	return true;
 }
 
-unsigned int cplugin_info_list::get_interval(int client_id, bool is_processor)
+unsigned int plugin_info_list::get_interval(int client_id, bool is_processor)
 {
 	auto iter = find_if_interval_info(client_id, is_processor);
 
@@ -126,7 +126,7 @@ unsigned int cplugin_info_list::get_interval(int client_id, bool is_processor)
 	return iter->interval;
 }
 
-unsigned int cplugin_info_list::get_min_interval(void)
+unsigned int plugin_info_list::get_min_interval(void)
 {
 	if (m_interval_info_list.empty())
 		return 0;
@@ -136,7 +136,7 @@ unsigned int cplugin_info_list::get_min_interval(void)
 	return iter->interval;
 }
 
-bool cplugin_info_list::add_batch(int client_id, unsigned int latency)
+bool plugin_info_list::add_batch(int client_id, unsigned int latency)
 {
 	auto iter = find_if_batch_info(client_id);
 
@@ -148,7 +148,7 @@ bool cplugin_info_list::add_batch(int client_id, unsigned int latency)
 	return true;
 }
 
-bool cplugin_info_list::delete_batch(int client_id)
+bool plugin_info_list::delete_batch(int client_id)
 {
 	auto iter = find_if_batch_info(client_id);
 
@@ -160,7 +160,7 @@ bool cplugin_info_list::delete_batch(int client_id)
 	return true;
 }
 
-unsigned int cplugin_info_list::get_batch(int client_id)
+unsigned int plugin_info_list::get_batch(int client_id)
 {
 	auto iter = find_if_batch_info(client_id);
 
@@ -170,7 +170,7 @@ unsigned int cplugin_info_list::get_batch(int client_id)
 	return iter->latency;
 }
 
-unsigned int cplugin_info_list::get_max_batch(void)
+unsigned int plugin_info_list::get_max_batch(void)
 {
 	if (m_batch_info_list.empty())
 		return 0;
@@ -180,7 +180,7 @@ unsigned int cplugin_info_list::get_max_batch(void)
 	return iter->latency;
 }
 
-bool cplugin_info_list::add_wakeup(int client_id, int wakeup)
+bool plugin_info_list::add_wakeup(int client_id, int wakeup)
 {
 	auto iter = find_if_wakeup_info(client_id);
 
@@ -192,7 +192,7 @@ bool cplugin_info_list::add_wakeup(int client_id, int wakeup)
 	return true;
 }
 
-bool cplugin_info_list::delete_wakeup(int client_id)
+bool plugin_info_list::delete_wakeup(int client_id)
 {
 	auto iter = find_if_wakeup_info(client_id);
 
@@ -204,7 +204,7 @@ bool cplugin_info_list::delete_wakeup(int client_id)
 	return true;
 }
 
-int cplugin_info_list::get_wakeup(int client_id)
+int plugin_info_list::get_wakeup(int client_id)
 {
 	auto iter = find_if_wakeup_info(client_id);
 
@@ -214,7 +214,7 @@ int cplugin_info_list::get_wakeup(int client_id)
 	return iter->wakeup;
 }
 
-int cplugin_info_list::is_wakeup_on(void)
+int plugin_info_list::is_wakeup_on(void)
 {
 	if (m_wakeup_info_list.empty())
 		return -1;

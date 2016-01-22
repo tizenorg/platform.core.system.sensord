@@ -1,5 +1,5 @@
 /*
- * libsensord
+ * libsensord-share
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -17,40 +17,30 @@
  *
  */
 
-#ifndef CREG_EVENT_INFO_H_
-#define CREG_EVENT_INFO_H_
+#ifndef CSENSOR_USAGE_H_
+#define CSENSOR_USAGE_H_
 
-#include <sensor_internal.h>
 #include <sf_common.h>
+#include <algorithm>
+#include <vector>
 
-typedef enum {
-	SENSOR_EVENT_CB,
-	SENSORHUB_EVENT_CB,
-	SENSOR_LEGACY_CB,
-} event_cb_type_t;
+typedef std::vector<unsigned int> reg_event_vector;
 
-class creg_event_info {
+class sensor_usage {
 public:
-	unsigned long long m_id;
-	int m_handle;
-	unsigned int type;
 	unsigned int m_interval;
 	unsigned int m_latency;
-	int m_cb_type;
-	void *m_cb;
-	void *m_user_data;
-	unsigned long long m_previous_event_time;
-	bool	m_fired;
-	GMainContext *m_maincontext;
+	int m_option;
+	int m_wakeup;
+	reg_event_vector m_reg_events;
+	bool m_start;
 
-	creg_event_info():m_id(0), m_handle(-1),
-			type(0), m_interval(POLL_1HZ_MS),
-			m_latency(0),
-			m_cb_type(SENSOR_EVENT_CB), m_cb(NULL), m_user_data(NULL),
-			m_previous_event_time(0), m_fired(false), m_maincontext(NULL){}
+	sensor_usage();
+	~sensor_usage();
 
-	~creg_event_info(){}
+	bool register_event(unsigned int event_type);
+	bool unregister_event(unsigned int event_type);
+	bool is_event_registered(unsigned int event_type);
 };
 
-
-#endif /* CREG_EVENT_INFO_H_ */
+#endif /* CSENSOR_USAGE_H_ */

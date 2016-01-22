@@ -17,7 +17,7 @@
  *
  */
 
-#include <csensor_event_dispatcher.h>
+#include <sensor_event_dispatcher.h>
 #include <sensor_logs.h>
 #include <sf_common.h>
 #include <thread>
@@ -28,22 +28,22 @@ using std::pair;
 
 #define MAX_PENDING_CONNECTION 32
 
-csensor_event_dispatcher::csensor_event_dispatcher()
+sensor_event_dispatcher::sensor_event_dispatcher()
 : m_lcd_on(false)
 {
 }
 
-csensor_event_dispatcher::~csensor_event_dispatcher() { }
+sensor_event_dispatcher::~sensor_event_dispatcher() { }
 
 
-csensor_event_dispatcher& csensor_event_dispatcher::get_instance()
+sensor_event_dispatcher& sensor_event_dispatcher::get_instance()
 {
-	static csensor_event_dispatcher inst;
+	static sensor_event_dispatcher inst;
 	return inst;
 }
 
 
-bool csensor_event_dispatcher::run(void)
+bool sensor_event_dispatcher::run(void)
 {
 	INFO("Starting Event Dispatcher\n");
 
@@ -63,20 +63,20 @@ bool csensor_event_dispatcher::run(void)
 		return false;
 	}
 
-	thread accepter(&csensor_event_dispatcher::accept_connections, this);
+	thread accepter(&sensor_event_dispatcher::accept_connections, this);
 	accepter.detach();
 
-	thread dispatcher(&csensor_event_dispatcher::dispatch_event, this);
+	thread dispatcher(&sensor_event_dispatcher::dispatch_event, this);
 	dispatcher.detach();
 
 	return true;
 }
 
-void csensor_event_dispatcher::accept_event_channel(csocket client_socket)
+void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 {
 	int client_id;
 	event_channel_ready_t event_channel_ready;
-	cclient_info_manager& client_info_manager = get_client_info_manager();
+	client_info_manager& client_info_manager = get_client_info_manager();
 
 	client_socket.set_connection_mode();
 
@@ -108,7 +108,7 @@ void csensor_event_dispatcher::accept_event_channel(csocket client_socket)
 	}
 }
 
-void csensor_event_dispatcher::accept_connections(void)
+void sensor_event_dispatcher::accept_connections(void)
 {
 	INFO("Event channel acceptor is started.\n");
 
@@ -122,12 +122,12 @@ void csensor_event_dispatcher::accept_connections(void)
 
 		INFO("New client connected (socket_fd : %d)\n", client_socket.get_socket_fd());
 
-		thread event_channel_creator(&csensor_event_dispatcher::accept_event_channel, this, client_socket);
+		thread event_channel_creator(&sensor_event_dispatcher::accept_event_channel, this, client_socket);
 		event_channel_creator.detach();
 	}
 }
 
-void csensor_event_dispatcher::dispatch_event(void)
+void sensor_event_dispatcher::dispatch_event(void)
 {
 	const int MAX_SYNTH_PER_SENSOR = 5;
 
@@ -188,10 +188,10 @@ void csensor_event_dispatcher::dispatch_event(void)
 }
 
 
-void csensor_event_dispatcher::send_sensor_events(vector< pair<void*, int> > &events)
+void sensor_event_dispatcher::send_sensor_events(vector< pair<void*, int> > &events)
 {
 	sensor_event_t *sensor_events = NULL;
-	cclient_info_manager& client_info_manager = get_client_info_manager();
+	client_info_manager& client_info_manager = get_client_info_manager();
 
 	const int RESERVED_CLIENT_CNT = 20;
 	static client_id_vec id_vec(RESERVED_CLIENT_CNT);
@@ -226,10 +226,10 @@ void csensor_event_dispatcher::send_sensor_events(vector< pair<void*, int> > &ev
 	}
 }
 
-void csensor_event_dispatcher::send_sensorhub_events(void* events)
+void sensor_event_dispatcher::send_sensorhub_events(void* events)
 {
 	sensorhub_event_t *sensor_hub_events;
-	cclient_info_manager& client_info_manager = get_client_info_manager();
+	client_info_manager& client_info_manager = get_client_info_manager();
 
 	const int RESERVED_CLIENT_CNT = 20;
 	static client_id_vec id_vec(RESERVED_CLIENT_CNT);
@@ -263,28 +263,28 @@ void csensor_event_dispatcher::send_sensorhub_events(void* events)
 	free(sensor_hub_events);
 }
 
-cclient_info_manager& csensor_event_dispatcher::get_client_info_manager(void)
+client_info_manager& sensor_event_dispatcher::get_client_info_manager(void)
 {
-	return cclient_info_manager::get_instance();
+	return client_info_manager::get_instance();
 }
 
-csensor_event_queue& csensor_event_dispatcher::get_event_queue(void)
+sensor_event_queue& sensor_event_dispatcher::get_event_queue(void)
 {
-	return csensor_event_queue::get_instance();
+	return sensor_event_queue::get_instance();
 }
 
-bool csensor_event_dispatcher::is_record_event(unsigned int event_type)
+bool sensor_event_dispatcher::is_record_event(unsigned int event_type)
 {
 	return false;
 }
 
-void csensor_event_dispatcher::put_last_event(unsigned int event_type, const sensor_event_t &event)
+void sensor_event_dispatcher::put_last_event(unsigned int event_type, const sensor_event_t &event)
 {
 	AUTOLOCK(m_last_events_mutex);
 	m_last_events[event_type] = event;
 }
 
-bool csensor_event_dispatcher::get_last_event(unsigned int event_type, sensor_event_t &event)
+bool sensor_event_dispatcher::get_last_event(unsigned int event_type, sensor_event_t &event)
 {
 	AUTOLOCK(m_last_events_mutex);
 
@@ -297,7 +297,7 @@ bool csensor_event_dispatcher::get_last_event(unsigned int event_type, sensor_ev
 	return true;
 }
 
-bool csensor_event_dispatcher::has_active_virtual_sensor(virtual_sensor *sensor)
+bool sensor_event_dispatcher::has_active_virtual_sensor(virtual_sensor *sensor)
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 
@@ -307,7 +307,7 @@ bool csensor_event_dispatcher::has_active_virtual_sensor(virtual_sensor *sensor)
 }
 
 
-virtual_sensors csensor_event_dispatcher::get_active_virtual_sensors(void)
+virtual_sensors sensor_event_dispatcher::get_active_virtual_sensors(void)
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 
@@ -320,14 +320,14 @@ struct sort_comp {
 	}
 };
 
-void csensor_event_dispatcher::sort_sensor_events(vector< pair<void*, int> > &events)
+void sensor_event_dispatcher::sort_sensor_events(vector< pair<void*, int> > &events)
 {
 	std::sort(events.begin(), events.end(), sort_comp());
 }
 
-void csensor_event_dispatcher::request_last_event(int client_id, sensor_id_t sensor_id)
+void sensor_event_dispatcher::request_last_event(int client_id, sensor_id_t sensor_id)
 {
-	cclient_info_manager& client_info_manager = get_client_info_manager();
+	client_info_manager& client_info_manager = get_client_info_manager();
 	event_type_vector event_vec;
 	csocket client_socket;
 
@@ -355,7 +355,7 @@ void csensor_event_dispatcher::request_last_event(int client_id, sensor_id_t sen
 }
 
 
-bool csensor_event_dispatcher::add_active_virtual_sensor(virtual_sensor * sensor)
+bool sensor_event_dispatcher::add_active_virtual_sensor(virtual_sensor * sensor)
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 
@@ -369,7 +369,7 @@ bool csensor_event_dispatcher::add_active_virtual_sensor(virtual_sensor * sensor
 	return true;
 }
 
-bool csensor_event_dispatcher::delete_active_virtual_sensor(virtual_sensor * sensor)
+bool sensor_event_dispatcher::delete_active_virtual_sensor(virtual_sensor * sensor)
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 

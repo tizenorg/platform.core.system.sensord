@@ -17,30 +17,25 @@
  *
  */
 
-#ifndef CSENSOR_USAGE_H_
-#define CSENSOR_USAGE_H_
+#ifndef _CCONFIG_H_
+#define _CCONFIG_H_
 
-#include <sf_common.h>
-#include <algorithm>
-#include <vector>
+#include <string>
+#include <unordered_map>
+#include <sensor_logs.h>
 
-typedef std::vector<unsigned int> reg_event_vector;
+class device_config
+{
+protected:
+	virtual bool load_config(const std::string& config_path) = 0;
 
-class csensor_usage {
+	std::string m_device_id;
 public:
-	unsigned int m_interval;
-	unsigned int m_latency;
-	int m_option;
-	int m_wakeup;
-	reg_event_vector m_reg_events;
-	bool m_start;
+	device_config();
+	virtual ~device_config();
 
-	csensor_usage();
-	~csensor_usage();
+	bool get_device_id(void);
 
-	bool register_event(unsigned int event_type);
-	bool unregister_event(unsigned int event_type);
-	bool is_event_registered(unsigned int event_type);
 };
 
-#endif /* CSENSOR_USAGE_H_ */
+#endif /* _CCONFIG_H_ */

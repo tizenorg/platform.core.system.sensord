@@ -29,7 +29,7 @@
 
 extern std::set<unsigned int> priority_list;
 
-class csensor_event_queue
+class sensor_event_queue
 {
 private:
 	static const unsigned int QUEUE_FULL_SIZE = 1000;
@@ -82,13 +82,13 @@ private:
 	typedef std::lock_guard<std::mutex> lock;
 	typedef std::unique_lock<std::mutex> ulock;
 
-	csensor_event_queue() {};
-	~csensor_event_queue() {};
-	csensor_event_queue(const csensor_event_queue &) {};
-	csensor_event_queue& operator=(const csensor_event_queue &);
+	sensor_event_queue() {};
+	~sensor_event_queue() {};
+	sensor_event_queue(const sensor_event_queue &) {};
+	sensor_event_queue& operator=(const sensor_event_queue &);
 	void push_internal(void *event, int length);
 public:
-	static csensor_event_queue& get_instance();
+	static sensor_event_queue& get_instance();
 
 	void push(sensor_event_t *event, int event_length);
 	void* pop(int *length);

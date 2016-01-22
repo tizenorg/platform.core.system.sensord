@@ -22,8 +22,8 @@
 
 /*header for each sensor type*/
 #include <sensor_internal.h>
-#include <csensor_handle_info.h>
-#include <creg_event_info.h>
+#include <sensor_handle_info.h>
+#include <reg_event_info.h>
 #include <sensor_logs.h>
 
 #define BASE_GATHERING_INTERVAL	100
@@ -59,7 +59,7 @@ typedef struct {
 	int sensor_state;
 	int sensor_option;
 	sensor_type_t sensor;
-	creg_event_info event_info;
+	reg_event_info event_info;
 } log_info;
 
 bool is_one_shot_event(unsigned int event_type);
@@ -73,7 +73,7 @@ const char* get_log_element_name(log_id id, unsigned int type);
 const char* get_sensor_name(sensor_id_t sensor_id);
 const char* get_event_name(unsigned int event_type);
 const char* get_data_name(unsigned int data_id);
-void print_event_occurrence_log(csensor_handle_info &sensor_handle_info, const creg_event_info *event_info);
+void print_event_occurrence_log(sensor_handle_info &sensor_handle_info, const reg_event_info *event_info);
 
 class sensor_info;
 sensor_info *sensor_to_sensor_info(sensor_t sensor);

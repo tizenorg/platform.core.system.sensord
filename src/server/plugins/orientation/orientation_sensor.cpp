@@ -30,7 +30,7 @@
 #include <orientation_sensor.h>
 #include <sensor_plugin_loader.h>
 #include <orientation_filter.h>
-#include <cvirtual_sensor_config.h>
+#include <virtual_sensor_config.h>
 
 using std::string;
 using std::vector;
@@ -62,7 +62,7 @@ orientation_sensor::orientation_sensor()
 , m_fusion_sensor(NULL)
 , m_time(0)
 {
-	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
+	virtual_sensor_config &config = virtual_sensor_config::get_instance();
 
 	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
 	if (!fusion_sensor_hal)

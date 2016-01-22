@@ -23,8 +23,8 @@
 #include <glib.h>
 #include <sys/types.h>
 #include <sys/epoll.h>
-#include <csensor_handle_info.h>
-#include <csensor_client_info.h>
+#include <sensor_handle_info.h>
+#include <sensor_client_info.h>
 #include <unistd.h>
 #include <csocket.h>
 #include <string.h>
@@ -42,7 +42,7 @@
 
 typedef std::vector<unsigned int> handle_vector;
 typedef std::vector<sensor_id_t> sensor_id_vector;
-typedef std::unordered_map<int,csensor_handle_info> sensor_handle_info_map;
+typedef std::unordered_map<int,sensor_handle_info> sensor_handle_info_map;
 typedef std::unordered_map<sensor_id_t, command_channel*> sensor_command_channel_map;
 
 typedef struct {
@@ -64,9 +64,9 @@ typedef struct {
 
 typedef void (*hup_observer_t)(void);
 
-class csensor_event_listener {
+class sensor_event_listener {
 public:
-	static csensor_event_listener& get_instance(void);
+	static sensor_event_listener& get_instance(void);
 	bool start_handle(int handle);
 	bool stop_handle(int handle);
 
@@ -96,11 +96,11 @@ private:
 
 	hup_observer_t m_hup_observer;
 
-	csensor_event_listener();
-	~csensor_event_listener();
+	sensor_event_listener();
+	~sensor_event_listener();
 
-	csensor_event_listener(const csensor_event_listener&);
-	csensor_event_listener& operator=(const csensor_event_listener&);
+	sensor_event_listener(const sensor_event_listener&);
+	sensor_event_listener& operator=(const sensor_event_listener&);
 
 	bool create_event_channel(void);
 	void close_event_channel(void);
@@ -108,10 +108,10 @@ private:
 	ssize_t sensor_event_poll(void* buffer, int buffer_len, struct epoll_event &event);
 
 	void listen_events(void);
-	client_callback_info* handle_calibration_cb(csensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy);
+	client_callback_info* handle_calibration_cb(sensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy);
 	void handle_events(void* event);
 
-	client_callback_info* get_callback_info(sensor_id_t sensor_id, const creg_event_info *event_info, void *sensor_data, void *buffer);
+	client_callback_info* get_callback_info(sensor_id_t sensor_id, const reg_event_info *event_info, void *sensor_data, void *buffer);
 
 	unsigned long long renew_event_id(void);
 
@@ -122,6 +122,6 @@ private:
 
 	void set_thread_state(thread_state state);
 
-	csensor_client_info &m_client_info;
+	sensor_client_info &m_client_info;
 };
 #endif /* CSENSOR_EVENT_LISTENER_H_ */

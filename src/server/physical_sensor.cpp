@@ -18,7 +18,7 @@
  */
 
 #include <physical_sensor.h>
-#include <csensor_event_queue.h>
+#include <sensor_event_queue.h>
 
 #define UNKNOWN_NAME "UNKNOWN_SENSOR"
 

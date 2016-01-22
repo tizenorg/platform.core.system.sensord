@@ -32,7 +32,7 @@
 #include <virtual_sensor.h>
 #include <auto_rotation_sensor.h>
 #include <sensor_plugin_loader.h>
-#include <cvirtual_sensor_config.h>
+#include <virtual_sensor_config.h>
 #include <auto_rotation_alg.h>
 #include <auto_rotation_alg_emul.h>
 
@@ -59,7 +59,7 @@ auto_rotation_sensor::auto_rotation_sensor()
 , m_rotation_time(1) // rotation state is valid from initial state, so set rotation time to non-zero value
 , m_alg(NULL)
 {
-	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
+	virtual_sensor_config &config = virtual_sensor_config::get_instance();
 
 	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_VENDOR, m_vendor)) {
 		ERR("[VENDOR] is empty\n");

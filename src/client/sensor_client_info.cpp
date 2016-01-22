@@ -17,7 +17,7 @@
  *
  */
 
-#include <csensor_event_listener.h>
+#include <sensor_event_listener.h>
 #include <client_common.h>
 #include <sf_common.h>
 #include <sensor_info_manager.h>
@@ -31,26 +31,26 @@
 using std::thread;
 using std::pair;
 
-csensor_client_info::csensor_client_info()
+sensor_client_info::sensor_client_info()
 : m_client_id(CLIENT_ID_INVALID)
 {
 }
 
-csensor_client_info::~csensor_client_info()
+sensor_client_info::~sensor_client_info()
 {
 }
 
 
-csensor_client_info& csensor_client_info::get_instance(void)
+sensor_client_info& sensor_client_info::get_instance(void)
 {
-	static csensor_client_info inst;
+	static sensor_client_info inst;
 	return inst;
 }
 
 
-int csensor_client_info::create_handle(sensor_id_t sensor)
+int sensor_client_info::create_handle(sensor_id_t sensor)
 {
-	csensor_handle_info handle_info;
+	sensor_handle_info handle_info;
 	int handle = 0;
 
 	AUTOLOCK(m_handle_info_lock);
@@ -71,12 +71,12 @@ int csensor_client_info::create_handle(sensor_id_t sensor)
 	handle_info.m_accuracy_cb = NULL;
 	handle_info.m_accuracy_user_data = NULL;
 
-	m_sensor_handle_infos.insert(pair<int,csensor_handle_info> (handle, handle_info));
+	m_sensor_handle_infos.insert(pair<int,sensor_handle_info> (handle, handle_info));
 
 	return handle;
 }
 
-bool csensor_client_info::delete_handle(int handle)
+bool sensor_client_info::delete_handle(int handle)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -92,14 +92,14 @@ bool csensor_client_info::delete_handle(int handle)
 }
 
 
-bool csensor_client_info::is_active()
+bool sensor_client_info::is_active()
 {
 	AUTOLOCK(m_handle_info_lock);
 
 	return !m_sensor_handle_infos.empty();
 }
 
-bool csensor_client_info::register_event(int handle, unsigned int event_type,
+bool sensor_client_info::register_event(int handle, unsigned int event_type,
 		unsigned int interval, unsigned int latency, int cb_type, void *cb, void* user_data)
 {
 	AUTOLOCK(m_handle_info_lock);
@@ -117,7 +117,7 @@ bool csensor_client_info::register_event(int handle, unsigned int event_type,
 	return true;
 }
 
-bool csensor_client_info::unregister_event(int handle, unsigned int event_type)
+bool sensor_client_info::unregister_event(int handle, unsigned int event_type)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -134,7 +134,7 @@ bool csensor_client_info::unregister_event(int handle, unsigned int event_type)
 	return true;
 }
 
-bool csensor_client_info::register_accuracy_cb(int handle, sensor_accuracy_changed_cb_t cb, void* user_data)
+bool sensor_client_info::register_accuracy_cb(int handle, sensor_accuracy_changed_cb_t cb, void* user_data)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -152,7 +152,7 @@ bool csensor_client_info::register_accuracy_cb(int handle, sensor_accuracy_chang
 	return true;
 }
 
-bool csensor_client_info::unregister_accuracy_cb(int handle)
+bool sensor_client_info::unregister_accuracy_cb(int handle)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -170,7 +170,7 @@ bool csensor_client_info::unregister_accuracy_cb(int handle)
 	return true;
 }
 
-bool csensor_client_info::set_sensor_params(int handle, int sensor_state, int sensor_option)
+bool sensor_client_info::set_sensor_params(int handle, int sensor_state, int sensor_option)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -187,7 +187,7 @@ bool csensor_client_info::set_sensor_params(int handle, int sensor_state, int se
 	return true;
 }
 
-bool csensor_client_info::get_sensor_params(int handle, int &sensor_state, int &sensor_option)
+bool sensor_client_info::get_sensor_params(int handle, int &sensor_state, int &sensor_option)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -204,7 +204,7 @@ bool csensor_client_info::get_sensor_params(int handle, int &sensor_state, int &
 	return true;
 }
 
-bool csensor_client_info::set_sensor_state(int handle, int sensor_state)
+bool sensor_client_info::set_sensor_state(int handle, int sensor_state)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -220,7 +220,7 @@ bool csensor_client_info::set_sensor_state(int handle, int sensor_state)
 	return true;
 }
 
-bool csensor_client_info::set_sensor_option(int handle, int sensor_option)
+bool sensor_client_info::set_sensor_option(int handle, int sensor_option)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -236,7 +236,7 @@ bool csensor_client_info::set_sensor_option(int handle, int sensor_option)
 	return true;
 }
 
-bool csensor_client_info::set_event_batch(int handle, unsigned int event_type, unsigned int interval, unsigned int latency)
+bool sensor_client_info::set_event_batch(int handle, unsigned int event_type, unsigned int interval, unsigned int latency)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -253,7 +253,7 @@ bool csensor_client_info::set_event_batch(int handle, unsigned int event_type, u
 	return true;
 }
 
-bool csensor_client_info::set_event_maincontext(int handle, unsigned int event_type, GMainContext *maincontext)
+bool sensor_client_info::set_event_maincontext(int handle, unsigned int event_type, GMainContext *maincontext)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -270,7 +270,7 @@ bool csensor_client_info::set_event_maincontext(int handle, unsigned int event_t
 	return true;
 }
 
-bool csensor_client_info::set_accuracy(int handle, int accuracy)
+bool sensor_client_info::set_accuracy(int handle, int accuracy)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -286,7 +286,7 @@ bool csensor_client_info::set_accuracy(int handle, int accuracy)
 	return true;
 }
 
-bool csensor_client_info::set_bad_accuracy(int handle, int bad_accuracy)
+bool sensor_client_info::set_bad_accuracy(int handle, int bad_accuracy)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -302,7 +302,7 @@ bool csensor_client_info::set_bad_accuracy(int handle, int bad_accuracy)
 	return true;
 }
 
-bool csensor_client_info::get_event_info(int handle, unsigned int event_type, unsigned int &interval, unsigned int &latency, int &cb_type, void* &cb, void* &user_data)
+bool sensor_client_info::get_event_info(int handle, unsigned int event_type, unsigned int &interval, unsigned int &latency, int &cb_type, void* &cb, void* &user_data)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -313,7 +313,7 @@ bool csensor_client_info::get_event_info(int handle, unsigned int event_type, un
 		return false;
 	}
 
-	const creg_event_info *event_info;
+	const reg_event_info *event_info;
 
 	event_info = it_handle->second.get_reg_event_info(event_type);
 
@@ -331,7 +331,7 @@ bool csensor_client_info::get_event_info(int handle, unsigned int event_type, un
 }
 
 
-void csensor_client_info::get_listening_sensors(sensor_id_vector &sensors)
+void sensor_client_info::get_listening_sensors(sensor_id_vector &sensors)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -346,7 +346,7 @@ void csensor_client_info::get_listening_sensors(sensor_id_vector &sensors)
 	unique(sensors.begin(),sensors.end());
 }
 
-void csensor_client_info::get_sensor_rep(sensor_id_t sensor, sensor_rep& rep) {
+void sensor_client_info::get_sensor_rep(sensor_id_t sensor, sensor_rep& rep) {
 	const unsigned int INVALID_BATCH_VALUE = std::numeric_limits<unsigned int>::max();
 
 	rep.active = is_sensor_active(sensor);
@@ -359,7 +359,7 @@ void csensor_client_info::get_sensor_rep(sensor_id_t sensor, sensor_rep& rep) {
 	get_active_event_types(sensor, rep.event_types);
 }
 
-bool csensor_client_info::add_command_channel(sensor_id_t sensor, command_channel *cmd_channel)
+bool sensor_client_info::add_command_channel(sensor_id_t sensor, command_channel *cmd_channel)
 {
 	auto it_channel = m_command_channels.find(sensor);
 
@@ -373,7 +373,7 @@ bool csensor_client_info::add_command_channel(sensor_id_t sensor, command_channe
 	return true;
 
 }
-bool csensor_client_info::get_command_channel(sensor_id_t sensor, command_channel **cmd_channel)
+bool sensor_client_info::get_command_channel(sensor_id_t sensor, command_channel **cmd_channel)
 {
 	auto it_channel = m_command_channels.find(sensor);
 
@@ -388,7 +388,7 @@ bool csensor_client_info::get_command_channel(sensor_id_t sensor, command_channe
 }
 
 
-bool csensor_client_info::close_command_channel(void)
+bool sensor_client_info::close_command_channel(void)
 {
 	auto it_channel = m_command_channels.begin();
 
@@ -402,7 +402,7 @@ bool csensor_client_info::close_command_channel(void)
 	return true;
 }
 
-bool csensor_client_info::close_command_channel(sensor_id_t sensor_id)
+bool sensor_client_info::close_command_channel(sensor_id_t sensor_id)
 {
 	auto it_channel = m_command_channels.find(sensor_id);
 
@@ -419,22 +419,22 @@ bool csensor_client_info::close_command_channel(sensor_id_t sensor_id)
 }
 
 
-bool csensor_client_info::has_client_id(void)
+bool sensor_client_info::has_client_id(void)
 {
 	return (m_client_id != CLIENT_ID_INVALID);
 }
 
-int csensor_client_info::get_client_id(void)
+int sensor_client_info::get_client_id(void)
 {
 	return m_client_id;
 }
 
-void csensor_client_info::set_client_id(int client_id)
+void sensor_client_info::set_client_id(int client_id)
 {
 	m_client_id = client_id;
 }
 
-bool csensor_client_info::get_active_batch(sensor_id_t sensor, unsigned int &interval, unsigned int &latency)
+bool sensor_client_info::get_active_batch(sensor_id_t sensor, unsigned int &interval, unsigned int &latency)
 {
 	unsigned int min_interval = POLL_MAX_HZ_MS;
 	unsigned int min_latency = std::numeric_limits<unsigned int>::max();
@@ -470,7 +470,7 @@ bool csensor_client_info::get_active_batch(sensor_id_t sensor, unsigned int &int
 	return true;
 }
 
-unsigned int csensor_client_info::get_active_option(sensor_id_t sensor)
+unsigned int sensor_client_info::get_active_option(sensor_id_t sensor)
 {
 	int active_option = SENSOR_OPTION_DEFAULT;
 	bool active_sensor_found = false;
@@ -497,7 +497,7 @@ unsigned int csensor_client_info::get_active_option(sensor_id_t sensor)
 	return active_option;
 }
 
-bool csensor_client_info::get_sensor_id(int handle, sensor_id_t &sensor)
+bool sensor_client_info::get_sensor_id(int handle, sensor_id_t &sensor)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -513,7 +513,7 @@ bool csensor_client_info::get_sensor_id(int handle, sensor_id_t &sensor)
 	return true;
 }
 
-bool csensor_client_info::get_sensor_state(int handle, int &sensor_state)
+bool sensor_client_info::get_sensor_state(int handle, int &sensor_state)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -529,7 +529,7 @@ bool csensor_client_info::get_sensor_state(int handle, int &sensor_state)
 	return true;
 }
 
-bool csensor_client_info::get_sensor_wakeup(int handle, int &sensor_wakeup)
+bool sensor_client_info::get_sensor_wakeup(int handle, int &sensor_wakeup)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -545,7 +545,7 @@ bool csensor_client_info::get_sensor_wakeup(int handle, int &sensor_wakeup)
 	return true;
 }
 
-bool csensor_client_info::set_sensor_wakeup(int handle, int sensor_wakeup)
+bool sensor_client_info::set_sensor_wakeup(int handle, int sensor_wakeup)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -561,7 +561,7 @@ bool csensor_client_info::set_sensor_wakeup(int handle, int sensor_wakeup)
 	return true;
 }
 
-void csensor_client_info::get_active_event_types(sensor_id_t sensor, event_type_vector &active_event_types)
+void sensor_client_info::get_active_event_types(sensor_id_t sensor, event_type_vector &active_event_types)
 {
 	event_type_vector event_types;
 
@@ -587,7 +587,7 @@ void csensor_client_info::get_active_event_types(sensor_id_t sensor, event_type_
 }
 
 
-void csensor_client_info::get_all_handles(handle_vector &handles)
+void sensor_client_info::get_all_handles(handle_vector &handles)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -599,7 +599,7 @@ void csensor_client_info::get_all_handles(handle_vector &handles)
 	}
 }
 
-void csensor_client_info::get_sensor_handle_info(sensor_id_t sensor, sensor_handle_info_map &handles_info) {
+void sensor_client_info::get_sensor_handle_info(sensor_id_t sensor, sensor_handle_info_map &handles_info) {
 
 	AUTOLOCK(m_handle_info_lock);
 
@@ -607,26 +607,26 @@ void csensor_client_info::get_sensor_handle_info(sensor_id_t sensor, sensor_hand
 
 	while (it_handle != m_sensor_handle_infos.end()) {
 		if (it_handle->second.m_sensor_id == sensor) {
-			handles_info.insert(pair<int,csensor_handle_info> (it_handle->first, it_handle->second));
+			handles_info.insert(pair<int,sensor_handle_info> (it_handle->first, it_handle->second));
 		}
 
 		++it_handle;
 	}
 }
 
-void csensor_client_info::get_all_handle_info(sensor_handle_info_map &handles_info) {
+void sensor_client_info::get_all_handle_info(sensor_handle_info_map &handles_info) {
 
 	AUTOLOCK(m_handle_info_lock);
 
 	auto it_handle = m_sensor_handle_infos.begin();
 
 	while (it_handle != m_sensor_handle_infos.end()) {
-		handles_info.insert(pair<int,csensor_handle_info> (it_handle->first, it_handle->second));
+		handles_info.insert(pair<int,sensor_handle_info> (it_handle->first, it_handle->second));
 		++it_handle;
 	}
 }
 
-bool csensor_client_info::is_sensor_registered(sensor_id_t sensor)
+bool sensor_client_info::is_sensor_registered(sensor_id_t sensor)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -643,7 +643,7 @@ bool csensor_client_info::is_sensor_registered(sensor_id_t sensor)
 }
 
 
-bool csensor_client_info::is_sensor_active(sensor_id_t sensor)
+bool sensor_client_info::is_sensor_active(sensor_id_t sensor)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -660,9 +660,9 @@ bool csensor_client_info::is_sensor_active(sensor_id_t sensor)
 	return false;
 }
 
-bool csensor_client_info::is_event_active(int handle, unsigned int event_type, unsigned long long event_id)
+bool sensor_client_info::is_event_active(int handle, unsigned int event_type, unsigned long long event_id)
 {
-	creg_event_info *event_info;
+	reg_event_info *event_info;
 
 	AUTOLOCK(m_handle_info_lock);
 
@@ -681,7 +681,7 @@ bool csensor_client_info::is_event_active(int handle, unsigned int event_type, u
 	return true;
 }
 
-void csensor_client_info::clear(void)
+void sensor_client_info::clear(void)
 {
 	close_command_channel();
 	m_sensor_handle_infos.clear();

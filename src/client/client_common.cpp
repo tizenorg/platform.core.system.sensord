@@ -200,7 +200,7 @@ unsigned long long get_timestamp(void)
 	return ((unsigned long long)(t.tv_sec)*1000000000LL + t.tv_nsec) / 1000;
 }
 
-void print_event_occurrence_log(csensor_handle_info &sensor_handle_info, const creg_event_info *event_info)
+void print_event_occurrence_log(sensor_handle_info &sensor_handle_info, const reg_event_info *event_info)
 {
 	log_attr *log_attr;
 

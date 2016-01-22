@@ -18,14 +18,14 @@
  */
 
 #include <client_common.h>
-#include <csensor_handle_info.h>
+#include <sensor_handle_info.h>
 #include <limits>
 
 using std::pair;
 
-unsigned long long csensor_handle_info::m_event_id = 0;
+unsigned long long sensor_handle_info::m_event_id = 0;
 
-csensor_handle_info::csensor_handle_info()
+sensor_handle_info::sensor_handle_info()
 : m_handle(0)
 , m_sensor_id(UNKNOWN_SENSOR)
 , m_sensor_state(SENSOR_STATE_UNKNOWN)
@@ -39,12 +39,12 @@ csensor_handle_info::csensor_handle_info()
 
 }
 
-csensor_handle_info::~csensor_handle_info()
+sensor_handle_info::~sensor_handle_info()
 {
 	clear_all_events();
 }
 
-creg_event_info* csensor_handle_info::get_reg_event_info(unsigned int event_type)
+reg_event_info* sensor_handle_info::get_reg_event_info(unsigned int event_type)
 {
 	auto it_event = m_reg_event_infos.find(event_type);
 
@@ -56,7 +56,7 @@ creg_event_info* csensor_handle_info::get_reg_event_info(unsigned int event_type
 	return &(it_event->second);
 }
 
-void csensor_handle_info::get_reg_event_types(event_type_vector &event_types)
+void sensor_handle_info::get_reg_event_types(event_type_vector &event_types)
 {
 	auto it_event = m_reg_event_infos.begin();
 
@@ -66,9 +66,9 @@ void csensor_handle_info::get_reg_event_types(event_type_vector &event_types)
 	}
 }
 
-bool csensor_handle_info::add_reg_event_info(unsigned int event_type, unsigned int interval, unsigned int latency, int cb_type, void *cb, void *user_data)
+bool sensor_handle_info::add_reg_event_info(unsigned int event_type, unsigned int interval, unsigned int latency, int cb_type, void *cb, void *user_data)
 {
-	creg_event_info event_info;
+	reg_event_info event_info;
 
 	auto it_event = m_reg_event_infos.find(event_type);
 
@@ -86,12 +86,12 @@ bool csensor_handle_info::add_reg_event_info(unsigned int event_type, unsigned i
 	event_info.m_cb = cb;
 	event_info.m_user_data = user_data;
 
-	m_reg_event_infos.insert(pair<unsigned int,creg_event_info> (event_type, event_info));
+	m_reg_event_infos.insert(pair<unsigned int,reg_event_info> (event_type, event_info));
 
 	return true;
 }
 
-bool csensor_handle_info::delete_reg_event_info(unsigned int event_type)
+bool sensor_handle_info::delete_reg_event_info(unsigned int event_type)
 {
 	auto it_event = m_reg_event_infos.find(event_type);
 
@@ -105,18 +105,18 @@ bool csensor_handle_info::delete_reg_event_info(unsigned int event_type)
 	return true;
 }
 
-void csensor_handle_info::clear_all_events(void)
+void sensor_handle_info::clear_all_events(void)
 {
 	m_reg_event_infos.clear();
 }
 
 
-unsigned long long csensor_handle_info::renew_event_id(void)
+unsigned long long sensor_handle_info::renew_event_id(void)
 {
 	return m_event_id++;
 }
 
-bool csensor_handle_info::change_reg_event_batch(unsigned int event_type, unsigned int interval, unsigned int latency)
+bool sensor_handle_info::change_reg_event_batch(unsigned int event_type, unsigned int interval, unsigned int latency)
 {
 	auto it_event = m_reg_event_infos.find(event_type);
 
@@ -132,7 +132,7 @@ bool csensor_handle_info::change_reg_event_batch(unsigned int event_type, unsign
 	return true;
 }
 
-bool csensor_handle_info::change_reg_event_maincontext(unsigned int event_type, GMainContext *maincontext)
+bool sensor_handle_info::change_reg_event_maincontext(unsigned int event_type, GMainContext *maincontext)
 {
 	auto it_event = m_reg_event_infos.find(event_type);
 
@@ -146,7 +146,7 @@ bool csensor_handle_info::change_reg_event_maincontext(unsigned int event_type, 
 	return true;
 }
 
-void csensor_handle_info::get_batch(unsigned int &interval, unsigned int &latency)
+void sensor_handle_info::get_batch(unsigned int &interval, unsigned int &latency)
 {
 	if (m_reg_event_infos.empty()) {
 		DBG("No events are registered for client %s", get_client_name());
@@ -176,7 +176,7 @@ void csensor_handle_info::get_batch(unsigned int &interval, unsigned int &latenc
 	latency = min_latency;
 }
 
-unsigned int csensor_handle_info::get_reg_event_count(void)
+unsigned int sensor_handle_info::get_reg_event_count(void)
 {
 	return m_reg_event_infos.size();
 }

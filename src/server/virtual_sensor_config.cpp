@@ -17,7 +17,7 @@
  *
  */
 
-#include <cvirtual_sensor_config.h>
+#include <virtual_sensor_config.h>
 #include "sensor_logs.h"
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -37,14 +37,14 @@ using std::stringstream;
 #define DEFAULT_ATTR3		"value3"
 #define DEFAULT_DEVICE	"Default"
 
-cvirtual_sensor_config::cvirtual_sensor_config()
+virtual_sensor_config::virtual_sensor_config()
 {
 }
 
-cvirtual_sensor_config& cvirtual_sensor_config::get_instance(void)
+virtual_sensor_config& virtual_sensor_config::get_instance(void)
 {
 	static bool load_done = false;
-	static cvirtual_sensor_config inst;
+	static virtual_sensor_config inst;
 
 	if (!load_done) {
 		inst.load_config(VIRTUAL_SENSOR_CONFIG_FILE_PATH);
@@ -59,12 +59,12 @@ cvirtual_sensor_config& cvirtual_sensor_config::get_instance(void)
 	return inst;
 }
 
-bool cvirtual_sensor_config::load_config(const string& config_path)
+bool virtual_sensor_config::load_config(const string& config_path)
 {
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 
-	DBG("cvirtual_sensor_config::load_config(\"%s\") is called!\n",config_path.c_str());
+	DBG("virtual_sensor_config::load_config(\"%s\") is called!\n",config_path.c_str());
 
 	doc = xmlParseFile(config_path.c_str());
 
@@ -107,7 +107,7 @@ bool cvirtual_sensor_config::load_config(const string& config_path)
 		free(prop);
 
 		//insert device to device_list
-		m_virtual_sensor_config[device_type];
+		m_virtual_sensor_configs[device_type];
 		DBG("<type=\"%s\">\n",device_type.c_str());
 
 		virtual_sensor_node_ptr = device_node_ptr->xmlChildrenNode;
@@ -119,7 +119,7 @@ bool cvirtual_sensor_config::load_config(const string& config_path)
 				continue;
 			}
 
-			m_virtual_sensor_config[device_type][(const char*)virtual_sensor_node_ptr->name];
+			m_virtual_sensor_configs[device_type][(const char*)virtual_sensor_node_ptr->name];
 			DBG("<type=\"%s\"><%s>\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name);
 
 			element_node_ptr = virtual_sensor_node_ptr->xmlChildrenNode;
@@ -131,7 +131,7 @@ bool cvirtual_sensor_config::load_config(const string& config_path)
 				}
 
 				//insert Element to Model
-				m_virtual_sensor_config[device_type][(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name];
+				m_virtual_sensor_configs[device_type][(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name];
 				DBG("<type=\"%s\"><%s><%s>\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name);
 
 				attr_ptr = element_node_ptr->properties;
@@ -144,7 +144,7 @@ bool cvirtual_sensor_config::load_config(const string& config_path)
 					free(prop);
 
 					//insert attribute to Element
-					m_virtual_sensor_config[device_type][(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name][key]=value;
+					m_virtual_sensor_configs[device_type][(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name][key]=value;
 					DBG("<type=\"%s\"><%s><%s \"%s\"=\"%s\">\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name,key.c_str(),value.c_str());
 					attr_ptr = attr_ptr->next;
 				}
@@ -163,17 +163,17 @@ bool cvirtual_sensor_config::load_config(const string& config_path)
 	return true;
 }
 
-bool cvirtual_sensor_config::get(const string& sensor_type, const string& element, const string& attr, string& value)
+bool virtual_sensor_config::get(const string& sensor_type, const string& element, const string& attr, string& value)
 {
-	auto it_device_list = m_virtual_sensor_config.find(m_device_id);
+	auto it_device_list = m_virtual_sensor_configs.find(m_device_id);
 
-	if (it_device_list == m_virtual_sensor_config.end())	{
+	if (it_device_list == m_virtual_sensor_configs.end())	{
 		ERR("There is no <%s> device\n",m_device_id.c_str());
 
 		m_device_id = DEFAULT_DEVICE;
-		it_device_list = m_virtual_sensor_config.find(m_device_id);
+		it_device_list = m_virtual_sensor_configs.find(m_device_id);
 
-		if (it_device_list == m_virtual_sensor_config.end()) {
+		if (it_device_list == m_virtual_sensor_configs.end()) {
 			ERR("There is no Default device\n");
 			return false;
 		}
@@ -207,7 +207,7 @@ bool cvirtual_sensor_config::get(const string& sensor_type, const string& elemen
 	return true;
 }
 
-bool cvirtual_sensor_config::get(const string& sensor_type, const string& element, const string& attr, float *value)
+bool virtual_sensor_config::get(const string& sensor_type, const string& element, const string& attr, float *value)
 {
 	string str_value;
 
@@ -221,7 +221,7 @@ bool cvirtual_sensor_config::get(const string& sensor_type, const string& elemen
 	return true;
 }
 
-bool cvirtual_sensor_config::get(const string& sensor_type, const string& element, const string& attr, int *value)
+bool virtual_sensor_config::get(const string& sensor_type, const string& element, const string& attr, int *value)
 {
 	string str_value;
 
@@ -235,7 +235,7 @@ bool cvirtual_sensor_config::get(const string& sensor_type, const string& elemen
 	return true;
 }
 
-bool cvirtual_sensor_config::get(const string& sensor_type, const string& element, string& value)
+bool virtual_sensor_config::get(const string& sensor_type, const string& element, string& value)
 {
 	if (get(sensor_type, element, DEFAULT_ATTR, value))
 		return true;
@@ -243,7 +243,7 @@ bool cvirtual_sensor_config::get(const string& sensor_type, const string& elemen
 	return false;
 }
 
-bool cvirtual_sensor_config::get(const string& sensor_type, const string& element, float *value, int count)
+bool virtual_sensor_config::get(const string& sensor_type, const string& element, float *value, int count)
 {
 	if (count == 1)
 	{
@@ -275,7 +275,7 @@ bool cvirtual_sensor_config::get(const string& sensor_type, const string& elemen
 	return false;
 }
 
-bool cvirtual_sensor_config::get(const string& sensor_type, const string& element, int *value, int count)
+bool virtual_sensor_config::get(const string& sensor_type, const string& element, int *value, int count)
 {
 	if (count == 1)
 	{
@@ -307,11 +307,11 @@ bool cvirtual_sensor_config::get(const string& sensor_type, const string& elemen
 	return false;
 }
 
-bool cvirtual_sensor_config::is_supported(const string& sensor_type)
+bool virtual_sensor_config::is_supported(const string& sensor_type)
 {
-	auto it_device_list = m_virtual_sensor_config.find(m_device_id);
+	auto it_device_list = m_virtual_sensor_configs.find(m_device_id);
 
-	if (it_device_list == m_virtual_sensor_config.end())
+	if (it_device_list == m_virtual_sensor_configs.end())
 		return false;
 
 	auto it_virtual_sensor_list = it_device_list->second.find(sensor_type);

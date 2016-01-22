@@ -868,14 +868,14 @@ bool command_worker::is_permission_allowed(void)
 }
 
 
-cclient_info_manager& command_worker::get_client_info_manager(void)
+client_info_manager& command_worker::get_client_info_manager(void)
 {
-	return cclient_info_manager::get_instance();
+	return client_info_manager::get_instance();
 }
 
-csensor_event_dispatcher& command_worker::get_event_dispathcher(void)
+sensor_event_dispatcher& command_worker::get_event_dispathcher(void)
 {
-	return csensor_event_dispatcher::get_instance();
+	return sensor_event_dispatcher::get_instance();
 }
 
 void insert_priority_list(unsigned int event_type)

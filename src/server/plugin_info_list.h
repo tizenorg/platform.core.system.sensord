@@ -53,7 +53,7 @@ public:
 
 typedef std::list<cwakeup_info>::iterator cwakeup_info_iterator;
 
-class cplugin_info_list
+class plugin_info_list
 {
 private:
 	static bool comp_interval_info(cinterval_info a, cinterval_info b);
