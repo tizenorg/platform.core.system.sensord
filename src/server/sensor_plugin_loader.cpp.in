@@ -150,7 +150,12 @@ bool sensor_plugin_loader::insert_sensors(sensor_hal *hal)
 		int idx;
 		idx = m_sensors.count(sensors[i].type);
 
-		phy_sensor = new physical_sensor();
+		phy_sensor = new(std::nothrow) physical_sensor();
+		if (!phy_sensor) {
+			ERR("Memory allocation failed[%s]", sensors[i].name.c_str());
+			continue;
+		}
+
 		phy_sensor->set_id(idx << SENSOR_INDEX_SHIFT | sensors[i].type);
 		phy_sensor->set_sensor_handle(sensors[i]);
 		phy_sensor->set_sensor_hal(hal);
