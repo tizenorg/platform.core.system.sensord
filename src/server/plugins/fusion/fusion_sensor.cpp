@@ -28,7 +28,7 @@
 #include <sensor_logs.h>
 #include <sf_common.h>
 #include <fusion_sensor.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 #include <orientation_filter.h>
 #include <virtual_sensor_config.h>
 #include <algorithm>
@@ -165,9 +165,9 @@ fusion_sensor::~fusion_sensor()
 
 bool fusion_sensor::init(void)
 {
-	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
-	m_gyro_sensor = sensor_plugin_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
-	m_magnetic_sensor = sensor_plugin_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
+	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
+	m_gyro_sensor = sensor_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
+	m_magnetic_sensor = sensor_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
 
 	if (!m_accel_sensor) {
 		ERR("Failed to load accel sensor: 0x%x", m_accel_sensor);

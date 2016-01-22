@@ -23,7 +23,7 @@
 #define UNKNOWN_NAME "UNKNOWN_SENSOR"
 
 physical_sensor::physical_sensor()
-: m_sensor_hal(NULL)
+: m_sensor_device(NULL)
 {
 
 }
@@ -43,7 +43,7 @@ unsigned int physical_sensor::get_event_type(void)
 	return m_handle.event_type;
 }
 
-const char* physical_sensor::get_name()
+const char* physical_sensor::get_name(void)
 {
 	if (m_handle.name.empty())
 		return UNKNOWN_NAME;
@@ -60,40 +60,40 @@ void physical_sensor::set_sensor_handle(sensor_handle_t handle)
 	m_handle.properties = handle.properties;
 }
 
-void physical_sensor::set_sensor_hal(sensor_hal *hal)
+void physical_sensor::set_sensor_device(sensor_device *device)
 {
-	m_sensor_hal = hal;
+	m_sensor_device = device;
 }
 
 int physical_sensor::get_poll_fd()
 {
 	AUTOLOCK(m_mutex);
 
-	if (!m_sensor_hal)
+	if (!m_sensor_device)
 		return -1;
 
-	return m_sensor_hal->get_poll_fd();
+	return m_sensor_device->get_poll_fd();
 }
 
 bool physical_sensor::on_start()
 {
 	AUTOLOCK(m_mutex);
 
-	return m_sensor_hal->enable(m_handle.id);
+	return m_sensor_device->enable(m_handle.id);
 }
 
 bool physical_sensor::on_stop()
 {
 	AUTOLOCK(m_mutex);
 
-	return m_sensor_hal->disable(m_handle.id);
+	return m_sensor_device->disable(m_handle.id);
 }
 
 long physical_sensor::set_command(unsigned int cmd, long value)
 {
 	AUTOLOCK(m_mutex);
 
-	return m_sensor_hal->set_command(m_handle.id, std::to_string(cmd), std::to_string(value));
+	return m_sensor_device->set_command(m_handle.id, std::to_string(cmd), std::to_string(value));
 }
 
 bool physical_sensor::set_interval(unsigned long interval)
@@ -102,7 +102,7 @@ bool physical_sensor::set_interval(unsigned long interval)
 
 	INFO("Polling interval is set to %dms", interval);
 
-	return m_sensor_hal->set_interval(m_handle.id, interval);
+	return m_sensor_device->set_interval(m_handle.id, interval);
 }
 
 bool physical_sensor::set_batch(unsigned long latency)
@@ -111,7 +111,7 @@ bool physical_sensor::set_batch(unsigned long latency)
 
 	INFO("Polling interval is set to %dms", latency);
 
-	return m_sensor_hal->set_batch_latency(m_handle.id, latency);
+	return m_sensor_device->set_batch_latency(m_handle.id, latency);
 }
 
 bool physical_sensor::set_wakeup(int wakeup)
@@ -123,14 +123,14 @@ bool physical_sensor::is_data_ready(void)
 {
 	AUTOLOCK(m_mutex);
 
-	return m_sensor_hal->is_data_ready();
+	return m_sensor_device->is_data_ready();
 }
 
 int physical_sensor::get_sensor_data(sensor_data_t &data)
 {
 	AUTOLOCK(m_mutex);
 
-	if (!m_sensor_hal->get_sensor_data(m_handle.id, data)) {
+	if (!m_sensor_device->get_sensor_data(m_handle.id, data)) {
 		ERR("Failed to get sensor data");
 		return -1;
 	}
@@ -143,7 +143,7 @@ int physical_sensor::get_sensor_event(sensor_event_t **event)
 	AUTOLOCK(m_mutex);
 
 	int event_length = -1;
-	event_length = m_sensor_hal->get_sensor_event(m_handle.id, event);
+	event_length = m_sensor_device->get_sensor_event(m_handle.id, event);
 
 	if (event_length < 0) {
 		ERR("Failed to get sensor event");
@@ -155,6 +155,6 @@ int physical_sensor::get_sensor_event(sensor_event_t **event)
 
 bool physical_sensor::get_properties(sensor_properties_s &properties)
 {
-	return m_sensor_hal->get_properties(m_handle.id, properties);
+	return m_sensor_device->get_properties(m_handle.id, properties);
 }
 

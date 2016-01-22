@@ -1,0 +1,285 @@
+/*
+ * libsensord-share
+ *
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <sensor_loader.h>
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+#include <sensor_hal.h>
+#include <sensor_base.h>
+#include <physical_sensor.h>
+#include <dlfcn.h>
+#include <dirent.h>
+#include <sensor_logs.h>
+#include <unordered_set>
+#include <algorithm>
+
+#ifdef ENABLE_AUTO_ROTATION
+#include <auto_rotation_sensor.h>
+#endif
+
+using std::vector;
+using std::string;
+
+#define DEVICE_PLUGINS_DIR_PATH "/usr/lib/sensor"
+#define SENSOR_INDEX_SHIFT 16
+
+sensor_loader::sensor_loader()
+{
+}
+
+sensor_loader& sensor_loader::get_instance()
+{
+	static sensor_loader inst;
+	return inst;
+}
+
+bool sensor_loader::load_devices(const string &path, vector<void*> &devices, void* &handle)
+{
+	INFO("load device: [%s]", path.c_str());
+
+	void *_handle = dlopen(path.c_str(), RTLD_NOW);
+
+	if (!_handle) {
+		ERR("Failed to dlopen(%s), dlerror : %s", path.c_str(), dlerror());
+		return false;
+	}
+
+	dlerror();
+
+	create_t create_devices = (create_t) dlsym(_handle, "create");
+
+	if (!create_devices) {
+		ERR("Failed to find symbols in %s", path.c_str());
+		dlclose(_handle);
+		return false;
+	}
+
+	sensor_devices *_devices = create_devices();
+
+	if (!_devices) {
+		ERR("Failed to create devices, path is %s\n", path.c_str());
+		dlclose(_handle);
+		return false;
+	}
+
+	devices.clear();
+	devices.swap(_devices->devices);
+
+	delete _devices;
+	handle = _handle;
+
+	return true;
+}
+
+physical_sensor* sensor_loader::create_sensor(sensor_handle_t handle, sensor_device *device)
+{
+	int index;
+	physical_sensor *sensor;
+
+	index = m_sensors.count(handle.type);
+
+	sensor = new(std::nothrow) physical_sensor();
+	if (!sensor) {
+		ERR("Memory allocation failed[%s]", handle.name.c_str());
+		return NULL;
+	}
+
+	sensor->set_id(index << SENSOR_INDEX_SHIFT | handle.type);
+	sensor->set_sensor_handle(handle);
+	sensor->set_sensor_device(device);
+
+	return sensor;
+}
+
+bool sensor_loader::insert_sensors(std::vector<void *> devices)
+{
+	sensor_device *device;
+	vector<sensor_handle_t> handles;
+	physical_sensor *sensor;
+
+	for (void *device_ptr : devices) {
+		device = static_cast<sensor_device *>(device_ptr);
+		device->get_sensors(handles);
+
+		for (unsigned int i = 0; i < handles.size(); ++i) {
+			sensor = create_sensor(handles[i], device);
+			if (!sensor)
+				continue;
+
+			std::shared_ptr<sensor_base> sensor_ptr(sensor);
+			m_sensors.insert(std::make_pair(handles[i].type, sensor_ptr));
+
+			INFO("inserted [%s] sensor", sensor->get_name());
+		}
+	}
+
+	return true;
+}
+
+bool sensor_loader::load_sensors(void)
+{
+	vector<string> device_plugin_paths;
+	vector<string> unique_device_plugin_paths;
+
+	get_paths_from_dir(string(DEVICE_PLUGINS_DIR_PATH), device_plugin_paths);
+
+	std::unordered_set<string> s;
+	auto unique = [&s](vector<string> &paths, const string &path) {
+		if (s.insert(path).second)
+			paths.push_back(path);
+	};
+
+	for_each(device_plugin_paths.begin(), device_plugin_paths.end(),
+		[&](const string &path) {
+			unique(unique_device_plugin_paths, path);
+		}
+	);
+
+	for_each(unique_device_plugin_paths.begin(), unique_device_plugin_paths.end(),
+		[&](const string &path) {
+			void *handle;
+			std::vector<void *> devices;
+
+			load_devices(path, devices, handle);
+			insert_sensors(devices);
+		}
+	);
+
+#ifdef ENABLE_AUTO_ROTATION
+	auto_rotation_sensor* auto_rot_sensor_ptr = NULL;
+	try {
+		auto_rot_sensor_ptr = new(std::nothrow) auto_rotation_sensor;
+	} catch (int err) {
+		ERR("Failed to create auto_rotation_sensor, err: %d, cause: %s", err, strerror(err));
+	}
+	if (auto_rot_sensor_ptr != NULL) {
+		std::shared_ptr<sensor_base> sensor(auto_rot_sensor_ptr);
+		sensor_device_type type;
+
+		type = static_cast<sensor_device_type>(sensor->get_type());
+		sensor->set_id(type);
+
+		m_sensors.insert(std::make_pair(type, sensor));
+	}
+#endif
+
+	show_sensor_info();
+	return true;
+}
+
+void sensor_loader::show_sensor_info(void)
+{
+	INFO("========== Loaded sensor information ==========\n");
+
+	int index = 0;
+
+	auto it = m_sensors.begin();
+
+	while (it != m_sensors.end()) {
+		sensor_base *sensor = it->second.get();
+
+		sensor_info info;
+		sensor->get_sensor_info(info);
+		INFO("No:%d [%s]\n", ++index, sensor->get_name());
+		info.show();
+		it++;
+	}
+
+	INFO("===============================================\n");
+}
+
+bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &plugin_paths)
+{
+	DIR *dir = NULL;
+	struct dirent *dir_entry = NULL;
+
+	dir = opendir(dir_path.c_str());
+
+	if (!dir) {
+		ERR("Failed to open dir: %s", dir_path.c_str());
+		return false;
+	}
+
+	string name;
+
+	while ((dir_entry = readdir(dir))) {
+		name = string(dir_entry->d_name);
+		plugin_paths.push_back(dir_path + "/" + name);
+	}
+
+	closedir(dir);
+	return true;
+}
+
+sensor_base* sensor_loader::get_sensor(sensor_type_t type)
+{
+	auto it_plugins = m_sensors.find(static_cast<sensor_device_type>(type));
+
+	if (it_plugins == m_sensors.end())
+		return NULL;
+
+	return it_plugins->second.get();
+}
+
+sensor_base* sensor_loader::get_sensor(sensor_id_t id)
+{
+	vector<sensor_base *> sensors;
+
+	sensor_type_t type = static_cast<sensor_type_t> (id & SENSOR_TYPE_MASK);
+	unsigned int index = id >> SENSOR_INDEX_SHIFT;
+
+	sensors = get_sensors(type);
+
+	if (sensors.size() <= index)
+		return NULL;
+
+	return sensors[index];
+}
+
+vector<sensor_base *> sensor_loader::get_sensors(sensor_type_t type)
+{
+	vector<sensor_base *> sensor_list;
+	std::pair<sensor_map_t::iterator, sensor_map_t::iterator> ret;
+
+	if ((int)(type) == (int)SENSOR_DEVICE_ALL)
+		ret = std::make_pair(m_sensors.begin(), m_sensors.end());
+	else
+		ret = m_sensors.equal_range(static_cast<sensor_device_type>(type));
+
+	for (auto it = ret.first; it != ret.second; ++it)
+		sensor_list.push_back(it->second.get());
+
+	return sensor_list;
+}
+
+vector<sensor_base *> sensor_loader::get_virtual_sensors(void)
+{
+	vector<sensor_base *> virtual_list;
+	sensor_base* sensor;
+
+	for (auto sensor_it = m_sensors.begin(); sensor_it != m_sensors.end(); ++sensor_it) {
+		sensor = sensor_it->second.get();
+
+		if (sensor && sensor->is_virtual() == true) {
+			virtual_list.push_back(sensor);
+		}
+	}
+
+	return virtual_list;
+}

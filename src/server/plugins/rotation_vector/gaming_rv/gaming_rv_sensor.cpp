@@ -28,7 +28,7 @@
 #include <sensor_logs.h>
 #include <sf_common.h>
 #include <gaming_rv_sensor.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 #include <orientation_filter.h>
 #include <virtual_sensor_config.h>
 
@@ -65,7 +65,7 @@ gaming_rv_sensor::gaming_rv_sensor()
 {
 	virtual_sensor_config &config = virtual_sensor_config::get_instance();
 
-	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
+	sensor_hal *fusion_sensor_hal = sensor_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
 	if (!fusion_sensor_hal)
 		m_hardware_fusion = false;
 	else
@@ -129,8 +129,8 @@ gaming_rv_sensor::~gaming_rv_sensor()
 
 bool gaming_rv_sensor::init()
 {
-	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
-	m_gyro_sensor = sensor_plugin_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
+	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
+	m_gyro_sensor = sensor_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
 
 	if (!m_accel_sensor || !m_gyro_sensor) {
 		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x",

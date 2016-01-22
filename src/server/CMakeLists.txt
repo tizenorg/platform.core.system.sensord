@@ -8,7 +8,7 @@ add_subdirectory(plugins)
 
 add_definitions(${PLUGIN_DEFS})
 
-configure_file(sensor_plugin_loader.cpp.in sensor_plugin_loader.cpp)
+configure_file(sensor_loader.cpp.in sensor_loader.cpp)
 
 INCLUDE_DIRECTORIES(include)
 FILE(GLOB SERVER_SRCS *.c *.cpp)

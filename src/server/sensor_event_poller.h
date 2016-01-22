@@ -24,7 +24,7 @@
 #include <poller.h>
 #include <physical_sensor.h>
 
-typedef std::multimap<int, physical_sensor *> fd_sensor_plugins;
+typedef std::multimap<int, physical_sensor *> fd_sensors_t;
 
 class sensor_event_poller {
 public:
@@ -34,7 +34,7 @@ public:
 	bool poll();
 private:
 	poller m_poller;
-	fd_sensor_plugins m_fd_sensors;
+	fd_sensors_t m_fd_sensors;
 
 	void init_fd();
 	void init_sensor_map();

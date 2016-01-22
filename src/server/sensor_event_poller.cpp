@@ -21,7 +21,7 @@
 #include <sensor_base.h>
 #include <physical_sensor.h>
 #include <sensor_event_poller.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 
 #define EPOLL_MAX_FD 32
 
@@ -41,7 +41,7 @@ void sensor_event_poller::init_sensor_map()
 	physical_sensor *sensor;
 
 	std::vector<sensor_base *> sensors;
-	sensors = sensor_plugin_loader::get_instance().get_sensors(ALL_SENSOR);
+	sensors = sensor_loader::get_instance().get_sensors(ALL_SENSOR);
 
 	auto it_sensor = sensors.begin();
 
@@ -61,7 +61,7 @@ void sensor_event_poller::init_sensor_map()
 
 void sensor_event_poller::init_fd()
 {
-	fd_sensor_plugins::iterator it;
+	fd_sensors_t::iterator it;
 	for (it = m_fd_sensors.begin(); it != m_fd_sensors.end(); it = m_fd_sensors.upper_bound(it->first)) {
 		if (!add_poll_fd(it->first))
 			continue;
@@ -95,14 +95,14 @@ bool sensor_event_poller::poll()
 
 bool sensor_event_poller::is_data_ready(int fd)
 {
-	fd_sensor_plugins::iterator it;
+	fd_sensors_t::iterator it;
 	physical_sensor *sensor;
 
 	it = m_fd_sensors.find(fd);
 	sensor = dynamic_cast<physical_sensor *>(it->second);
 
 	if (!sensor) {
-		ERR("Failed to get sensor plugin");
+		ERR("Failed to get sensor");
 		return false;
 	}
 
@@ -115,7 +115,7 @@ bool sensor_event_poller::is_data_ready(int fd)
 bool sensor_event_poller::process_event(int fd)
 {
 	physical_sensor *sensor;
-	std::pair<fd_sensor_plugins::iterator, fd_sensor_plugins::iterator> ret;
+	std::pair<fd_sensors_t::iterator, fd_sensors_t::iterator> ret;
 
 	ret = m_fd_sensors.equal_range(fd);
 

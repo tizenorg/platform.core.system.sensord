@@ -31,7 +31,7 @@
 
 #include <virtual_sensor.h>
 #include <auto_rotation_sensor.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 #include <virtual_sensor_config.h>
 #include <auto_rotation_alg.h>
 #include <auto_rotation_alg_emul.h>
@@ -124,7 +124,7 @@ auto_rotation_alg *auto_rotation_sensor::get_alg()
 
 bool auto_rotation_sensor::init()
 {
-	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
+	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
 
 	if (!m_accel_sensor) {
 		ERR("cannot load accel sensor_hal[%s]", sensor_base::get_name());
