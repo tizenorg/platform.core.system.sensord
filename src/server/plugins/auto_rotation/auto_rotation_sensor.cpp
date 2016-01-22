@@ -170,31 +170,31 @@ bool auto_rotation_sensor::on_stop(void)
 
 void auto_rotation_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &outs)
 {
-	if (event.event_type == ACCELEROMETER_RAW_DATA_EVENT) {
-		int rotation;
-		float acc[3];
-		acc[0] = event.data.values[0];
-		acc[1] = event.data.values[1];
-		acc[2] = event.data.values[2];
-
-		if (!m_alg->get_rotation(acc, event.data.timestamp, m_rotation, rotation))
-			return;
-
-		sensor_event_t rotation_event;
-
-		INFO("Rotation: %d, ACC[0]: %f, ACC[1]: %f, ACC[2]: %f", rotation, event.data.values[0], event.data.values[1], event.data.values[2]);
-		rotation_event.sensor_id = get_id();
-		rotation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
-		rotation_event.event_type = AUTO_ROTATION_CHANGE_STATE_EVENT;
-		rotation_event.data.timestamp = event.data.timestamp;
-		rotation_event.data.values[0] = rotation;
-		rotation_event.data.value_count = 1;
-		outs.push_back(rotation_event);
-		m_rotation = rotation;
-		m_rotation_time = event.data.timestamp;
-
+	if (event.event_type != ACCELEROMETER_RAW_DATA_EVENT)
 		return;
-	}
+
+	int rotation;
+	float acc[3];
+	acc[0] = event.data.values[0];
+	acc[1] = event.data.values[1];
+	acc[2] = event.data.values[2];
+
+	if (!m_alg->get_rotation(acc, event.data.timestamp, m_rotation, rotation))
+		return;
+
+	sensor_event_t rotation_event;
+
+	INFO("Rotation: %d, ACC[0]: %f, ACC[1]: %f, ACC[2]: %f", rotation, event.data.values[0], event.data.values[1], event.data.values[2]);
+	rotation_event.sensor_id = get_id();
+	rotation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
+	rotation_event.event_type = AUTO_ROTATION_CHANGE_STATE_EVENT;
+	rotation_event.data.timestamp = event.data.timestamp;
+	rotation_event.data.values[0] = rotation;
+	rotation_event.data.value_count = 1;
+	outs.push_back(rotation_event);
+	m_rotation = rotation;
+	m_rotation_time = event.data.timestamp;
+
 	return;
 }
 
