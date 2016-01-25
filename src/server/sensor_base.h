@@ -87,19 +87,11 @@ public:
 
 	/* push event to queue */
 	bool push(sensor_event_t *event, int event_length);
-	/*
-	bool push(const sensor_event_t &event);
-	bool push(sensor_event_t *event);
-	bool push(const sensorhub_event_t &event);
-	bool push(sensorhub_event_t *event);
-	*/
 
 	/* for sensorhub */
 	virtual long set_command(unsigned int cmd, long value);
 	virtual int send_sensorhub_data(const char* data, int data_len);
 protected:
-	cmutex m_mutex;
-
 	void set_privilege(sensor_privilege_t privilege);
 	void set_permission(int permission);
 

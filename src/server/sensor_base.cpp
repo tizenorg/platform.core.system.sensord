@@ -49,7 +49,6 @@ sensor_type_t sensor_base::get_type(void)
 
 bool sensor_base::start()
 {
-	AUTOLOCK(m_mutex);
 	AUTOLOCK(m_client_mutex);
 
 	++m_client;
@@ -70,7 +69,6 @@ bool sensor_base::start()
 
 bool sensor_base::stop(void)
 {
-	AUTOLOCK(m_mutex);
 	AUTOLOCK(m_client_mutex);
 
 	--m_client;
@@ -323,7 +321,6 @@ int sensor_base::get_permission(void)
 
 bool sensor_base::is_started(void)
 {
-	AUTOLOCK(m_mutex);
 	AUTOLOCK(m_client_mutex);
 
 	return m_started;
@@ -403,52 +400,6 @@ bool sensor_base::push(sensor_event_t *event, int event_length)
 	sensor_event_queue::get_instance().push(event, event_length);
 	return true;
 }
-
-/*
-bool sensor_base::push(const sensor_event_t &event)
-{
-	AUTOLOCK(m_client_mutex);
-
-	if (m_client <= 0)
-		return false;
-
-	sensor_event_queue::get_instance().push(event);
-	return true;
-}
-
-bool sensor_base::push(sensor_event_t *event)
-{
-	AUTOLOCK(m_client_mutex);
-
-	if (m_client <= 0)
-		return false;
-
-	sensor_event_queue::get_instance().push(event);
-	return true;
-}
-
-bool sensor_base::push(const sensorhub_event_t &event)
-{
-	AUTOLOCK(m_client_mutex);
-
-	if (m_client <= 0)
-		return false;
-
-	sensor_event_queue::get_instance().push(event);
-	return true;
-}
-
-bool sensor_base::push(sensorhub_event_t *event)
-{
-	AUTOLOCK(m_client_mutex);
-
-	if (m_client <= 0)
-		return false;
-
-	sensor_event_queue::get_instance().push(event);
-	return true;
-}
-*/
 
 unsigned long long sensor_base::get_timestamp(void)
 {
