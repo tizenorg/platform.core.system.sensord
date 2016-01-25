@@ -28,6 +28,9 @@ public:
 	virtual_sensor();
 	virtual ~virtual_sensor();
 
+	/* initialize sensor */
+	virtual bool init();
+
 	/* module info */
 	virtual sensor_type_t get_type() = 0;
 	virtual unsigned int get_event_type(void) = 0;

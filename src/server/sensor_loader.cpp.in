@@ -92,7 +92,7 @@ physical_sensor* sensor_loader::create_sensor(sensor_handle_t handle, sensor_dev
 	int index;
 	physical_sensor *sensor;
 
-	index = m_sensors.count(handle.type);
+	index = m_sensors.count((sensor_type_t)handle.type);
 
 	sensor = new(std::nothrow) physical_sensor();
 	if (!sensor) {
@@ -107,7 +107,7 @@ physical_sensor* sensor_loader::create_sensor(sensor_handle_t handle, sensor_dev
 	return sensor;
 }
 
-bool sensor_loader::insert_sensors(std::vector<void *> devices)
+bool sensor_loader::load_physical_sensors(std::vector<void *> devices)
 {
 	sensor_device *device;
 	vector<sensor_handle_t> handles;
@@ -125,7 +125,7 @@ bool sensor_loader::insert_sensors(std::vector<void *> devices)
 				continue;
 
 			std::shared_ptr<sensor_base> sensor_ptr(sensor);
-			m_sensors.insert(std::make_pair(handles[i].type, sensor_ptr));
+			m_sensors.insert(std::make_pair((sensor_type_t)(handles[i].type), sensor_ptr));
 
 			INFO("inserted [%s] sensor", sensor->get_name());
 		}
@@ -159,30 +159,46 @@ bool sensor_loader::load_sensors(void)
 			std::vector<void *> devices;
 
 			load_devices(path, devices, handle);
-			insert_sensors(devices);
+			load_physical_sensors(devices);
 		}
 	);
 
-#ifdef ENABLE_AUTO_ROTATION
-	auto_rotation_sensor* auto_rot_sensor_ptr = NULL;
-	try {
-		auto_rot_sensor_ptr = new(std::nothrow) auto_rotation_sensor;
-	} catch (int err) {
-		ERR("Failed to create auto_rotation_sensor, err: %d, cause: %s", err, strerror(err));
-	}
-	if (auto_rot_sensor_ptr != NULL) {
-		std::shared_ptr<sensor_base> sensor(auto_rot_sensor_ptr);
-		sensor_device_type type;
-
-		type = static_cast<sensor_device_type>(sensor->get_type());
-		sensor->set_id(type);
-
-		m_sensors.insert(std::make_pair(type, sensor));
-	}
-#endif
+	load_virtual_sensors();
 
 	show_sensor_info();
 	return true;
+}
+
+template <typename _sensor>
+void sensor_loader::load_virtual_sensor(const char *name)
+{
+	virtual_sensor *instance = NULL;
+
+	try {
+		instance = new _sensor;
+	} catch (std::exception &e) {
+		ERR("Failed to create %s sensor, exception: %s", name, e.what());
+		return;
+	} catch (int err) {
+		ERR("Failed to create %s sensor err: %d, cause: %s", name, err, strerror(err));
+		return;
+	}
+
+	if (!instance->init()) {
+		ERR("Failed to init %s", name);
+		return;
+	}
+
+	std::shared_ptr<sensor_base> sensor(instance);
+	sensor_type_t type = sensor->get_type();
+
+	sensor->set_id(type);
+	m_sensors.insert(std::make_pair(type, sensor));
+}
+
+void sensor_loader::load_virtual_sensors(void)
+{
+	load_virtual_sensor<auto_rotation_sensor>("Auto Rotation");
 }
 
 void sensor_loader::show_sensor_info(void)
@@ -231,7 +247,7 @@ bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &p
 
 sensor_base* sensor_loader::get_sensor(sensor_type_t type)
 {
-	auto it_plugins = m_sensors.find(static_cast<sensor_device_type>(type));
+	auto it_plugins = m_sensors.find(type);
 
 	if (it_plugins == m_sensors.end())
 		return NULL;
@@ -276,7 +292,7 @@ vector<sensor_base *> sensor_loader::get_sensors(sensor_type_t type)
 	if ((int)(type) == (int)SENSOR_DEVICE_ALL)
 		ret = std::make_pair(m_sensors.begin(), m_sensors.end());
 	else
-		ret = m_sensors.equal_range(static_cast<sensor_device_type>(type));
+		ret = m_sensors.equal_range(type);
 
 	for (auto it = ret.first; it != ret.second; ++it)
 		sensor_list.push_back(it->second.get());

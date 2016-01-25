@@ -32,6 +32,11 @@ virtual_sensor::~virtual_sensor()
 
 }
 
+bool virtual_sensor::init(void)
+{
+	return false;
+}
+
 bool virtual_sensor::is_virtual(void)
 {
 	return true;
