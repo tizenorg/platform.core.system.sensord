@@ -115,6 +115,8 @@ bool sensor_loader::insert_sensors(std::vector<void *> devices)
 
 	for (void *device_ptr : devices) {
 		device = static_cast<sensor_device *>(device_ptr);
+
+		handles.clear();
 		device->get_sensors(handles);
 
 		for (unsigned int i = 0; i < handles.size(); ++i) {
