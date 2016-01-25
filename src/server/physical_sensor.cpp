@@ -22,6 +22,8 @@
 
 #define UNKNOWN_NAME "UNKNOWN_SENSOR"
 
+cmutex physical_sensor::m_mutex;
+
 physical_sensor::physical_sensor()
 : m_sensor_device(NULL)
 {

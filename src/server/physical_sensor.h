@@ -47,6 +47,8 @@ public:
 	virtual int get_sensor_event(sensor_event_t **event);
 
 private:
+	static cmutex m_mutex;
+
 	sensor_handle_t m_handle;
 	sensor_device *m_sensor_device;
 
