@@ -29,7 +29,10 @@ public:
 	auto_rotation_sensor();
 	virtual ~auto_rotation_sensor();
 
-	/* module info */
+	/* initialize sensor */
+	bool init();
+
+	/* sensor info */
 	virtual sensor_type_t get_type();
 	virtual unsigned int get_event_type(void);
 	virtual const char* get_name(void);
@@ -50,8 +53,6 @@ private:
 	std::string m_vendor;
 	std::string m_raw_data_unit;
 	int m_default_sampling_time;
-
-	bool init();
 
 	auto_rotation_alg *get_alg();
 	virtual bool on_start(void);

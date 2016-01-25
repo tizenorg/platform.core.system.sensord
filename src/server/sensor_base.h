@@ -105,7 +105,6 @@ protected:
 
 private:
 	sensor_id_t m_unique_id;
-	sensor_handle_t m_handle;
 	sensor_privilege_t m_privilege;
 
 	int m_permission;

@@ -117,6 +117,8 @@ typedef struct sensor_handle_t {
 class sensor_device
 {
 public:
+	virtual ~sensor_device() {}
+
 	uint32_t get_hal_version(void)
 	{
 		return SENSOR_HAL_VERSION(1, 0);

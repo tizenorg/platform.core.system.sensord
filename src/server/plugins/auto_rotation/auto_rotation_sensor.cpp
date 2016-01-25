@@ -83,8 +83,6 @@ auto_rotation_sensor::auto_rotation_sensor()
 	INFO("m_default_sampling_time = %d", m_default_sampling_time);
 
 	m_interval = m_default_sampling_time * MS_TO_US;
-
-	init();
 }
 
 auto_rotation_sensor::~auto_rotation_sensor()
@@ -122,12 +120,12 @@ auto_rotation_alg *auto_rotation_sensor::get_alg()
 	return new auto_rotation_alg_emul();
 }
 
-bool auto_rotation_sensor::init()
+bool auto_rotation_sensor::init(void)
 {
 	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
 
 	if (!m_accel_sensor) {
-		ERR("cannot load accel sensor_hal[%s]", sensor_base::get_name());
+		ERR("cannot load accel sensor_hal from %s", get_name());
 		return false;
 	}
 
@@ -143,7 +141,7 @@ bool auto_rotation_sensor::init()
 
 	set_privilege(SENSOR_PRIVILEGE_INTERNAL);
 
-	INFO("%s is created!\n", sensor_base::get_name());
+	INFO("%s is created!\n", get_name());
 
 	return true;
 }

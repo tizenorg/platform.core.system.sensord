@@ -33,11 +33,11 @@
 #include <set>
 #include <memory>
 #include <physical_sensor.h>
+#include <virtual_sensor.h>
 
-class sensor_hal;
 class sensor_base;
 
-typedef std::multimap<sensor_device_type, std::shared_ptr<sensor_base>> sensor_map_t;
+typedef std::multimap<sensor_type_t, std::shared_ptr<sensor_base>> sensor_map_t;
 
 class sensor_loader
 {
@@ -45,11 +45,15 @@ private:
 	sensor_loader();
 
 	bool load_devices(const std::string &path, std::vector<void *> &devices, void* &handle);
-	physical_sensor* create_sensor(sensor_handle_t handle, sensor_device *device);
-	bool insert_sensors(std::vector<void *> hals);
-	void show_sensor_info(void);
 
-	bool get_paths_from_dir(const std::string &dir_path, std::vector<std::string> &hal_paths);
+	physical_sensor* create_sensor(sensor_handle_t handle, sensor_device *device);
+	bool load_physical_sensors(std::vector<void *> devices);
+
+	template <typename _sensor> void load_virtual_sensor(const char *name);
+	void load_virtual_sensors(void);
+
+	void show_sensor_info(void);
+	bool get_paths_from_dir(const std::string &dir_path, std::vector<std::string> &plugin_paths);
 
 	sensor_map_t m_sensors;
 public:

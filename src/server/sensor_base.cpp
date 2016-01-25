@@ -40,7 +40,6 @@ sensor_base::sensor_base()
 
 sensor_base::~sensor_base()
 {
-	INFO("%s is destroyed!\n", m_handle.name.c_str());
 }
 
 sensor_type_t sensor_base::get_type(void)
