@@ -20,6 +20,9 @@
 #ifndef __SENSOR_COMMON_H__
 #define __SENSOR_COMMON_H__
 
+#include <sensor_types.h>
+#include <stdint.h>
+
 #ifndef DEPRECATED
 #define DEPRECATED __attribute__((deprecated))
 #endif
@@ -42,7 +45,17 @@ extern "C"
  * @{
  */
 
-typedef unsigned int sensor_id_t;
+/*
+typedef union {
+	struct {
+		sensor_type_t type;
+		int16_t sensor_id;
+		int16_t device_id;
+	} __attribute__((packed));
+	int64_t id;
+} sensor_id_t;
+*/
+typedef int64_t sensor_id_t;
 
 typedef void *sensor_t;
 
@@ -136,7 +149,6 @@ enum sensor_interval_t {
 	SENSOR_INTERVAL_FASTEST = 0,
 	SENSOR_INTERVAL_NORMAL = 200,
 };
-
 
 typedef enum {
 	CONDITION_NO_OP,

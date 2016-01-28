@@ -37,6 +37,7 @@ using std::vector;
 using std::string;
 
 #define DEVICE_PLUGINS_DIR_PATH "/usr/lib/sensor"
+#define SENSOR_TYPE_SHIFT 32
 #define SENSOR_INDEX_SHIFT 16
 
 sensor_loader::sensor_loader()
@@ -89,18 +90,18 @@ bool sensor_loader::load_devices(const string &path, vector<void*> &devices, voi
 
 physical_sensor* sensor_loader::create_sensor(sensor_handle_t handle, sensor_device *device)
 {
-	int index;
+	int16_t index;
 	physical_sensor *sensor;
 
-	index = m_sensors.count((sensor_type_t)handle.type);
+	index = (int16_t) (m_sensors.count((sensor_type_t)handle.type));
 
 	sensor = new(std::nothrow) physical_sensor();
 	if (!sensor) {
-		ERR("Memory allocation failed[%s]", handle.name.c_str());
+		ERR("Memory allocation failed[%s]", handle.name);
 		return NULL;
 	}
 
-	sensor->set_id(index << SENSOR_INDEX_SHIFT | handle.type);
+	sensor->set_id(handle.type << SENSOR_TYPE_SHIFT | index << SENSOR_INDEX_SHIFT | handle.id);
 	sensor->set_sensor_handle(handle);
 	sensor->set_sensor_device(device);
 
@@ -172,6 +173,7 @@ bool sensor_loader::load_sensors(void)
 template <typename _sensor>
 void sensor_loader::load_virtual_sensor(const char *name)
 {
+	int32_t index;
 	virtual_sensor *instance = NULL;
 
 	try {
@@ -192,8 +194,9 @@ void sensor_loader::load_virtual_sensor(const char *name)
 
 	std::shared_ptr<sensor_base> sensor(instance);
 	sensor_type_t type = sensor->get_type();
+	index = m_sensors.count(type);
 
-	sensor->set_id(type);
+	sensor->set_id(type << SENSOR_TYPE_SHIFT | index);
 	m_sensors.insert(std::make_pair(type, sensor));
 }
 

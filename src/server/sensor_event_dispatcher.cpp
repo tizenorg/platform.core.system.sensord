@@ -158,7 +158,7 @@ void sensor_event_dispatcher::dispatch_event(void)
 			while (it_v_sensor != v_sensors.end()) {
 				int synthesized_cnt;
 				v_sensor_events.clear();
-				(*it_v_sensor)->synthesize(*((sensor_event_t *)seed_event), v_sensor_events);
+				(*it_v_sensor)->synthesize(*((sensor_event_t *)seed_event));
 				synthesized_cnt = v_sensor_events.size();
 
 				for (int i = 0; i < synthesized_cnt; ++i) {
@@ -316,7 +316,7 @@ virtual_sensors sensor_event_dispatcher::get_active_virtual_sensors(void)
 
 struct sort_comp {
 	bool operator()(const pair<void*, int> &left, const pair<void*, int> &right) {
-		return ((sensor_event_t*)(left.first))->data.timestamp < ((sensor_event_t*)(right.first))->data.timestamp;
+		return ((sensor_event_t*)(left.first))->data->timestamp < ((sensor_event_t*)(right.first))->data->timestamp;
 	}
 };
 

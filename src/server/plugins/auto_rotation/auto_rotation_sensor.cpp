@@ -55,9 +55,11 @@ using std::vector;
 
 auto_rotation_sensor::auto_rotation_sensor()
 : m_accel_sensor(NULL)
-, m_rotation(0)
-, m_rotation_time(1) // rotation state is valid from initial state, so set rotation time to non-zero value
 , m_alg(NULL)
+, m_rotation(0)
+, m_interval(1)
+, m_rotation_time(1) // rotation state is valid from initial state, so set rotation time to non-zero value
+, m_default_sampling_time(1)
 {
 	virtual_sensor_config &config = virtual_sensor_config::get_instance();
 
@@ -92,34 +94,6 @@ auto_rotation_sensor::~auto_rotation_sensor()
 	INFO("auto_rotation_sensor is destroyed!\n");
 }
 
-sensor_type_t auto_rotation_sensor::get_type(void)
-{
-	return AUTO_ROTATION_SENSOR;
-}
-
-unsigned int auto_rotation_sensor::get_event_type(void)
-{
-	return (AUTO_ROTATION_SENSOR << 16) | 0x0001;
-}
-
-const char* auto_rotation_sensor::get_name(void)
-{
-	return SENSOR_NAME;
-}
-
-bool auto_rotation_sensor::check_lib(void)
-{
-	if (access(AUTO_ROTATION_LIB, F_OK) < 0)
-		return false;
-
-	return true;
-}
-
-auto_rotation_alg *auto_rotation_sensor::get_alg()
-{
-	return new auto_rotation_alg_emul();
-}
-
 bool auto_rotation_sensor::init(void)
 {
 	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
@@ -139,11 +113,109 @@ bool auto_rotation_sensor::init(void)
 	if (!m_alg->open())
 		return false;
 
-	set_privilege(SENSOR_PRIVILEGE_INTERNAL);
-
 	INFO("%s is created!\n", get_name());
 
 	return true;
+}
+
+sensor_type_t auto_rotation_sensor::get_type(void)
+{
+	return AUTO_ROTATION_SENSOR;
+}
+
+unsigned int auto_rotation_sensor::get_event_type(void)
+{
+	return (AUTO_ROTATION_SENSOR << 16) | 0x0001;
+}
+
+const char* auto_rotation_sensor::get_name(void)
+{
+	return SENSOR_NAME;
+}
+
+bool auto_rotation_sensor::get_sensor_info(sensor_info &info)
+{
+	info.set_type(get_type());
+	info.set_id(get_id());
+	info.set_privilege(SENSOR_PRIVILEGE_PUBLIC); // FIXME
+	info.set_name("Auto Rotation Sensor");
+	info.set_vendor("Samsung Electronics");
+	info.set_min_range(AUTO_ROTATION_DEGREE_UNKNOWN);
+	info.set_max_range(AUTO_ROTATION_DEGREE_270);
+	info.set_resolution(1);
+	info.set_min_interval(1);
+	info.set_fifo_count(0);
+	info.set_max_batch_count(0);
+	info.set_supported_event(get_event_type());
+	info.set_wakeup_supported(false);
+
+	return true;
+}
+
+void auto_rotation_sensor::synthesize(const sensor_event_t& event)
+{
+	if (event.event_type != ACCELEROMETER_RAW_DATA_EVENT)
+		return;
+
+	int rotation;
+	float acc[3];
+	acc[0] = event.data->values[0];
+	acc[1] = event.data->values[1];
+	acc[2] = event.data->values[2];
+
+	if (!m_alg->get_rotation(acc, event.data->timestamp, m_rotation, rotation))
+		return;
+
+	m_rotation = rotation;
+	m_rotation_time = event.data->timestamp;
+
+	sensor_event_t *rotation_event;
+	sensor_data_t *rotation_data;
+	unsigned int data_length;
+
+	rotation_event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
+
+	data_length = get_data(&rotation_data);
+
+	rotation_event->sensor_id = get_id();
+	rotation_event->event_type = AUTO_ROTATION_CHANGE_STATE_EVENT;
+	rotation_event->data = rotation_data;
+	rotation_event->data_length = data_length;
+
+	push(rotation_event, sizeof(sensor_event_t));
+
+	DBG("Rotation: %d, ACC[0]: %f, ACC[1]: %f, ACC[2]: %f", rotation, event.data.values[0], event.data.values[1], event.data.values[2]);
+	return;
+}
+
+int auto_rotation_sensor::get_data(sensor_data_t **data)
+{
+	sensor_data_t *sensor_data;
+	sensor_data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
+
+	sensor_data->accuracy = SENSOR_ACCURACY_GOOD;
+	sensor_data->timestamp = m_rotation_time;
+	sensor_data->values[0] = m_rotation;
+	sensor_data->value_count = 1;
+
+	*data = sensor_data;
+
+	return sizeof(sensor_data_t);
+}
+
+bool auto_rotation_sensor::set_interval(unsigned long interval)
+{
+	return false;
+}
+
+bool auto_rotation_sensor::set_batch_latency(unsigned long latency)
+{
+	return false;
+}
+
+bool auto_rotation_sensor::set_wakeup(int wakeup)
+{
+	return false;
 }
 
 bool auto_rotation_sensor::on_start(void)
@@ -166,56 +238,16 @@ bool auto_rotation_sensor::on_stop(void)
 	return deactivate();
 }
 
-void auto_rotation_sensor::synthesize(const sensor_event_t& event, vector<sensor_event_t> &outs)
+bool auto_rotation_sensor::check_lib(void)
 {
-	if (event.event_type != ACCELEROMETER_RAW_DATA_EVENT)
-		return;
-
-	int rotation;
-	float acc[3];
-	acc[0] = event.data.values[0];
-	acc[1] = event.data.values[1];
-	acc[2] = event.data.values[2];
-
-	if (!m_alg->get_rotation(acc, event.data.timestamp, m_rotation, rotation))
-		return;
-
-	sensor_event_t rotation_event;
-
-	INFO("Rotation: %d, ACC[0]: %f, ACC[1]: %f, ACC[2]: %f", rotation, event.data.values[0], event.data.values[1], event.data.values[2]);
-	rotation_event.sensor_id = get_id();
-	rotation_event.data.accuracy = SENSOR_ACCURACY_GOOD;
-	rotation_event.event_type = AUTO_ROTATION_CHANGE_STATE_EVENT;
-	rotation_event.data.timestamp = event.data.timestamp;
-	rotation_event.data.values[0] = rotation;
-	rotation_event.data.value_count = 1;
-	outs.push_back(rotation_event);
-	m_rotation = rotation;
-	m_rotation_time = event.data.timestamp;
-
-	return;
-}
-
-int auto_rotation_sensor::get_sensor_data(sensor_data_t &data)
-{
-	data.accuracy = SENSOR_ACCURACY_GOOD;
-	data.timestamp = m_rotation_time;
-	data.values[0] = m_rotation;
-	data.value_count = 1;
-
-	return 0;
-}
-
-bool auto_rotation_sensor::get_properties(sensor_properties_s &properties)
-{
-	properties.name = "Auto Rotation Sensor";
-	properties.vendor = "Samsung Electronics";
-	properties.min_range = AUTO_ROTATION_DEGREE_UNKNOWN;
-	properties.max_range = AUTO_ROTATION_DEGREE_270;
-	properties.min_interval = 1;
-	properties.resolution = 1;
-	properties.fifo_count = 0;
-	properties.max_batch_count = 0;
+	if (access(AUTO_ROTATION_LIB, F_OK) < 0)
+		return false;
 
 	return true;
 }
+
+auto_rotation_alg *auto_rotation_sensor::get_alg()
+{
+	return new auto_rotation_alg_emul();
+}
+

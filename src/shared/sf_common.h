@@ -161,27 +161,11 @@ typedef struct {
 	int client_id;
 } event_channel_ready_t;
 
-
-typedef struct {
-	std::string name;
-	std::string vendor;
-	float min_range;
-	float max_range;
-	float resolution;
-	int min_interval;
-	int fifo_count;
-	int max_batch_count;
-	bool wakeup_supported;
-} sensor_properties_s;
-
-
-/*
- * When modifying it, check copy_sensor*_data()
- */
 typedef struct sensor_event_t {
 	unsigned int event_type;
 	sensor_id_t sensor_id;
-	sensor_data_t data;
+	unsigned int data_length;
+	sensor_data_t *data;
 } sensor_event_t;
 
 

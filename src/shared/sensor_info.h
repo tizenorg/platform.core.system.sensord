@@ -20,6 +20,7 @@
 #ifndef _SENSOR_INFO_H_
 #define _SENSOR_INFO_H_
 
+#include <stdint.h>
 #include <sf_common.h>
 #include <sensor_common.h>
 #include <sensor_types.h>
@@ -83,12 +84,14 @@ private:
 
 	void put(raw_data_t &data, int value);
 	void put(raw_data_t &data, unsigned int value);
+	void put(raw_data_t &data, int64_t value);
 	void put(raw_data_t &data, float value);
 	void put(raw_data_t &data, std::string &value);
 	void put(raw_data_t &data, bool value);
 
 	raw_data_iterator get(raw_data_iterator it, int &value);
 	raw_data_iterator get(raw_data_iterator it, unsigned int &value);
+	raw_data_iterator get(raw_data_iterator it, int64_t &value);
 	raw_data_iterator get(raw_data_iterator it, float &value);
 	raw_data_iterator get(raw_data_iterator it, std::string &value);
 	raw_data_iterator get(raw_data_iterator it, bool &value);

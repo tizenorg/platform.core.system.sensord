@@ -184,16 +184,16 @@ void sensor_event_listener::handle_events(void* event)
 		sensor_event_t *sensor_event = (sensor_event_t *)event;
 		sensor_id = sensor_event->sensor_id;
 		sensor_data = &(sensor_event->data);
-		cur_time = sensor_event->data.timestamp;
-		accuracy = sensor_event->data.accuracy;
+		cur_time = sensor_event->data->timestamp;
+		accuracy = sensor_event->data->accuracy;
 
 		if (is_single_state_event(event_type)) {
-			single_state_event_data = (int) sensor_event->data.values[0];
+			single_state_event_data = (int) sensor_event->data->values[0];
 			event_data.event_data = (void *)&(single_state_event_data);
 			event_data.event_data_size = sizeof(single_state_event_data);
 		} else if (is_panning_event(event_type)) {
-			panning_data.x = (int)sensor_event->data.values[0];
-			panning_data.y = (int)sensor_event->data.values[1];
+			panning_data.x = (int)sensor_event->data->values[0];
+			panning_data.y = (int)sensor_event->data->values[1];
 			event_data.event_data = (void *)&panning_data;
 			event_data.event_data_size = sizeof(panning_data);
 		} else {

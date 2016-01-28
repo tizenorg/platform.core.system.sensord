@@ -42,7 +42,6 @@ bool virtual_sensor::is_virtual(void)
 	return true;
 }
 
-
 bool virtual_sensor::activate(void)
 {
 	return sensor_event_dispatcher::get_instance().add_active_virtual_sensor(this);
