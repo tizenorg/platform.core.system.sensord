@@ -42,30 +42,8 @@ sensor_event_dispatcher& sensor_event_dispatcher::get_instance()
 	return inst;
 }
 
-
 bool sensor_event_dispatcher::run(void)
 {
-	INFO("Starting Event Dispatcher\n");
-
-	if (!m_accept_socket.create(SOCK_SEQPACKET)) {
-		ERR("Listener Socket Creation failed in Server \n");
-		return false;
-	}
-
-	if(!m_accept_socket.bind(EVENT_CHANNEL_PATH)) {
-		ERR("Listener Socket Binding failed in Server \n");
-		m_accept_socket.close();
-		return false;
-	}
-
-	if(!m_accept_socket.listen(MAX_PENDING_CONNECTION)) {
-		ERR("Socket Listen failed in Server \n");
-		return false;
-	}
-
-	thread accepter(&sensor_event_dispatcher::accept_connections, this);
-	accepter.detach();
-
 	thread dispatcher(&sensor_event_dispatcher::dispatch_event, this);
 	dispatcher.detach();
 
@@ -74,57 +52,40 @@ bool sensor_event_dispatcher::run(void)
 
 void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 {
-	int client_id;
-	event_channel_ready_t event_channel_ready;
-	client_info_manager& client_info_manager = get_client_info_manager();
+	thread th = thread([&, client_socket]() mutable {
+		int client_id;
+		event_channel_ready_t event_channel_ready;
+		client_info_manager& client_info_manager = get_client_info_manager();
 
-	client_socket.set_connection_mode();
+		client_socket.set_connection_mode();
 
-	if (client_socket.recv(&client_id, sizeof(client_id)) <= 0) {
-		ERR("Failed to receive client id on socket fd[%d]", client_socket.get_socket_fd());
-		return;
-	}
-
-	client_socket.set_transfer_mode();
-
-	AUTOLOCK(m_mutex);
-
-	if(!get_client_info_manager().set_event_socket(client_id, client_socket)) {
-		ERR("Failed to store event socket[%d] for %s", client_socket.get_socket_fd(),
-			client_info_manager.get_client_info(client_id));
-		return;
-	}
-
-	event_channel_ready.magic = EVENT_CHANNEL_MAGIC;
-	event_channel_ready.client_id = client_id;
-
-	INFO("Event channel is accepted for %s on socket[%d]",
-		client_info_manager.get_client_info(client_id), client_socket.get_socket_fd());
-
-	if (client_socket.send(&event_channel_ready, sizeof(event_channel_ready)) <= 0) {
-		ERR("Failed to send event_channel_ready packet to %s on socket fd[%d]",
-			client_info_manager.get_client_info(client_id), client_socket.get_socket_fd());
-		return;
-	}
-}
-
-void sensor_event_dispatcher::accept_connections(void)
-{
-	INFO("Event channel acceptor is started.\n");
-
-	while (true) {
-		csocket client_socket;
-
-		if (!m_accept_socket.accept(client_socket)) {
-			ERR("Accepting socket failed in Server \n");
-			continue;
+		if (client_socket.recv(&client_id, sizeof(client_id)) <= 0) {
+			ERR("Failed to receive client id on socket fd[%d]", client_socket.get_socket_fd());
+			return;
 		}
 
-		INFO("New client connected (socket_fd : %d)\n", client_socket.get_socket_fd());
+		client_socket.set_transfer_mode();
 
-		thread event_channel_creator(&sensor_event_dispatcher::accept_event_channel, this, client_socket);
-		event_channel_creator.detach();
-	}
+		if(!get_client_info_manager().set_event_socket(client_id, client_socket)) {
+			ERR("Failed to store event socket[%d] for %s", client_socket.get_socket_fd(),
+				client_info_manager.get_client_info(client_id));
+			return;
+		}
+
+		event_channel_ready.magic = EVENT_CHANNEL_MAGIC;
+		event_channel_ready.client_id = client_id;
+
+		INFO("Event channel is accepted for %s on socket[%d]",
+			client_info_manager.get_client_info(client_id), client_socket.get_socket_fd());
+
+		if (client_socket.send(&event_channel_ready, sizeof(event_channel_ready)) <= 0) {
+			ERR("Failed to send event_channel_ready packet to %s on socket fd[%d]",
+				client_info_manager.get_client_info(client_id), client_socket.get_socket_fd());
+			return;
+		}
+	});
+
+	th.detach();
 }
 
 void sensor_event_dispatcher::dispatch_event(void)

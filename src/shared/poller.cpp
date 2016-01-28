@@ -28,8 +28,9 @@ poller::poller()
 }
 
 poller::poller(int fd)
-: poller()
+//: poller()
 {
+	m_epfd = epoll_create(EPOLL_MAX);
 	add_fd(fd);
 }
 

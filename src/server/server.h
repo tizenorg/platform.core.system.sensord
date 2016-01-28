@@ -27,13 +27,20 @@ class server
 {
 private:
 	GMainLoop *m_mainloop;
-	csocket m_client_accep_socket;
+	csocket m_command_channel_accept_socket;
+	csocket m_event_channel_accept_socket;
 
 	server();
 	~server();
 
 	void poll_event(void);
-	void accept_client(void);
+
+	bool listen_command_channel(void);
+	bool listen_event_channel(void);
+
+	void accept_command_channel(void);
+	void accept_event_channel(void);
+
 	int get_systemd_socket(const char *name);
 public:
 	void run(void);

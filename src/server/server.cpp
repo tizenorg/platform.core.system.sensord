@@ -25,6 +25,8 @@
 #include <sys/epoll.h>
 #include <sensor_event_poller.h>
 
+#define SYSTEMD_SOCKET_MAX    2
+
 using std::thread;
 
 server::server()
@@ -41,46 +43,75 @@ server::~server()
 int server::get_systemd_socket(const char *name)
 {
 	int type = SOCK_STREAM;
-	const int listening = 1;
+	int listening = 1;
 	size_t length = 0;
 	int fd = -1;
+	int fd_env = 1;
+	int fd_index;
 
-	if (sd_listen_fds(1) != 1)
+	if (!strcmp(name, EVENT_CHANNEL_PATH)) {
+		type = SOCK_SEQPACKET;
+		listening = -1;
+		fd_env = 0;
+	}
+
+	if (sd_listen_fds(fd_env) < 0) {
+		ERR("Failed to listen fds from systemd");
 		return -1;
+	}
 
-	fd = SD_LISTEN_FDS_START + 0;
+	for (fd_index = 0; fd_index < SYSTEMD_SOCKET_MAX; ++fd_index) {
+		fd = SD_LISTEN_FDS_START + fd_index;
 
-	if (sd_is_socket_unix(fd, type, listening, name, length) > 0)
-		return fd;
+		if (sd_is_socket_unix(fd, type, listening, name, length) > 0)
+			return fd;
+	}
 
 	return -1;
 }
 
-void server::accept_client(void)
+void server::accept_command_channel(void)
 {
 	command_worker *cmd_worker;
-
-	INFO("Client acceptor is started");
+	INFO("Command channel acceptor is started");
 
 	while (true) {
 		csocket client_command_socket;
 
-		if (!m_client_accep_socket.accept(client_command_socket)) {
-			ERR("Failed to accept connection request from a client");
+		if (!m_command_channel_accept_socket.accept(client_command_socket)) {
+			ERR("Failed to accept command channel from a client");
 			continue;
 		}
 
 		DBG("New client (socket_fd : %d) connected", client_command_socket.get_socket_fd());
 
-		cmd_worker = new(std::nothrow) command_worker(client_command_socket);
+		cmd_worker = new (std::nothrow) command_worker(client_command_socket);
 
 		if (!cmd_worker) {
 			ERR("Failed to allocate memory");
 			continue;
 		}
 
-		if(!cmd_worker->start())
+		if (!cmd_worker->start())
 			delete cmd_worker;
+	}
+}
+
+void server::accept_event_channel(void)
+{
+	INFO("Event channel acceptor is started.");
+
+	while (true) {
+		csocket client_event_socket;
+
+		if (!m_event_channel_accept_socket.accept(client_event_socket)) {
+			ERR("Failed to accept event channel from a client");
+			continue;
+		}
+
+		DBG("New client (socket_fd : %d) connected", client_event_socket.get_socket_fd());
+
+		sensor_event_dispatcher::get_instance().accept_event_channel(client_event_socket);
 	}
 }
 
@@ -98,39 +129,18 @@ void server::poll_event(void)
 
 void server::run(void)
 {
-	int sock_fd = -1;
-	const int MAX_PENDING_CONNECTION = 5;
-
 	m_mainloop = g_main_loop_new(NULL, false);
-
-	sock_fd = get_systemd_socket(COMMAND_CHANNEL_PATH);
-
-	if (sock_fd >= 0) {
-		INFO("Succeeded to get systemd socket(%d)", sock_fd);
-		m_client_accep_socket = csocket(sock_fd);
-	} else {
-		ERR("Failed to get systemd socket, create it by myself!");
-		if (!m_client_accep_socket.create(SOCK_STREAM)) {
-			ERR("Failed to create command channel");
-			return;
-		}
-
-		if(!m_client_accep_socket.bind(COMMAND_CHANNEL_PATH)) {
-			ERR("Failed to bind command channel");
-			m_client_accep_socket.close();
-			return;
-		}
-
-		if(!m_client_accep_socket.listen(MAX_PENDING_CONNECTION)) {
-			ERR("Failed to listen command channel");
-			return;
-		}
-	}
 
 	sensor_event_dispatcher::get_instance().run();
 
-	thread client_accepter(&server::accept_client, this);
-	client_accepter.detach();
+	listen_command_channel();
+	listen_event_channel();
+
+	thread event_channel_accepter(&server::accept_event_channel, this);
+	event_channel_accepter.detach();
+
+	thread command_channel_accepter(&server::accept_command_channel, this);
+	command_channel_accepter.detach();
 
 	thread event_poller(&server::poll_event, this);
 	event_poller.detach();
@@ -143,12 +153,81 @@ void server::run(void)
 	return;
 }
 
+bool server::listen_command_channel(void)
+{
+	int sock_fd = -1;
+	const int MAX_PENDING_CONNECTION = 10;
+
+	sock_fd = get_systemd_socket(COMMAND_CHANNEL_PATH);
+
+	if (sock_fd >= 0) {
+		INFO("Succeeded to get systemd socket(%d)", sock_fd);
+		m_command_channel_accept_socket = csocket(sock_fd);
+		return true;
+	}
+
+	INFO("Failed to get systemd socket, create it by myself!");
+	if (!m_command_channel_accept_socket.create(SOCK_STREAM)) {
+		ERR("Failed to create command channel");
+		return false;
+	}
+
+	if (!m_command_channel_accept_socket.bind(COMMAND_CHANNEL_PATH)) {
+		ERR("Failed to bind command channel");
+		m_command_channel_accept_socket.close();
+		return false;
+	}
+
+	if (!m_command_channel_accept_socket.listen(MAX_PENDING_CONNECTION)) {
+		ERR("Failed to listen command channel");
+		return false;
+	}
+
+	return true;
+}
+
+bool server::listen_event_channel(void)
+{
+	int sock_fd = -1;
+	const int MAX_PENDING_CONNECTION = 32;
+
+	sock_fd = get_systemd_socket(EVENT_CHANNEL_PATH);
+
+	if (sock_fd >= 0) {
+		INFO("Succeeded to get systemd socket(%d)", sock_fd);
+		m_event_channel_accept_socket = csocket(sock_fd);
+		return true;
+	}
+
+	INFO("Failed to get systemd socket, create it by myself!");
+
+	if (!m_event_channel_accept_socket.create(SOCK_SEQPACKET)) {
+		ERR("Failed to create event channel");
+		return false;
+	}
+
+	if (!m_event_channel_accept_socket.bind(EVENT_CHANNEL_PATH)) {
+		ERR("Failed to bind event channel");
+		m_event_channel_accept_socket.close();
+		return false;
+	}
+
+	if (!m_event_channel_accept_socket.listen(MAX_PENDING_CONNECTION)) {
+		ERR("Failed to listen event channel");
+		m_event_channel_accept_socket.close();
+		return false;
+	}
+
+	return true;
+}
+
 void server::stop(void)
 {
-	if(m_mainloop)
+	if (m_mainloop)
 		g_main_loop_quit(m_mainloop);
 
-	m_client_accep_socket.close();
+	m_command_channel_accept_socket.close();
+	m_event_channel_accept_socket.close();
 }
 
 server& server::get_instance()

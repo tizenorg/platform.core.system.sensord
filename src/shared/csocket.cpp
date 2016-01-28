@@ -88,22 +88,6 @@ bool csocket::bind (const char *sock_path)
 		return false;
 	}
 
-	if((fsetxattr(m_sock_fd, "security.SMACK64IPOUT", "@", 2, 0)) < 0) {
-		if(errno != EOPNOTSUPP) {
-			close();
-			ERR("security.SMACK64IPOUT error = [%d][%s]\n", errno, strerror(errno) );
-			return false;
-		}
-	}
-
-	if((fsetxattr(m_sock_fd, "security.SMACK64IPIN", "*", 2, 0)) < 0) {
-		if(errno != EOPNOTSUPP)	{
-			close();
-			ERR("security.SMACK64IPIN error  = [%d][%s]\n", errno, strerror(errno) );
-			return false;
-		}
-	}
-
 	if (!access(sock_path, F_OK)) {
 		unlink(sock_path);
 	}

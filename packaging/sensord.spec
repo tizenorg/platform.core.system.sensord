@@ -1,6 +1,6 @@
 Name:       sensord
 Summary:    Sensor daemon
-Version:    2.0.1
+Version:    1.1.18
 Release:    0
 Group:		System/Sensor Framework
 License:    Apache-2.0
@@ -16,9 +16,9 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(vconf)
 BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(capi-system-info)
-BuildRequires:  pkgconfig(cynara-creds-socket)
-BuildRequires:  pkgconfig(cynara-client)
-BuildRequires:  pkgconfig(cynara-session)
+#BuildRequires:  pkgconfig(cynara-creds-socket)
+#BuildRequires:  pkgconfig(cynara-client)
+#BuildRequires:  pkgconfig(cynara-session)
 Requires:   libsensord = %{version}-%{release}
 
 %define auto_rotation_state ON
@@ -84,8 +84,24 @@ rm -rf %{buildroot}
 %install_service multi-user.target.wants sensord.service
 %install_service sockets.target.wants sensord.socket
 
+#mkdir -p %{buildroot}%{_libdir}/systemd/system/sockets.target.wants
+#mkdir -p %{buildroot}%{_libdir}/systemd/system/multi-user.target.wants
+
+#install -m 0644 systemd/sensord.service %{buildroot}%{_libdir}/systemd/system
+#install -m 0644 systemd/sensord.socket %{buildroot}%{_libdir}/systemd/system
+#install -m 0644 systemd/sensord_event.socket %{buildroot}%{_libdir}/systemd/system
+
+#ln -s ../sensord.socket %{buildroot}%{_libdir}/systemd/system/sockets.target.wants/sensord.socket
+#ln -s ../sensord_event.socket %{buildroot}%{_libdir}/systemd/system/sockets.target.wants/sensord_event.socket
+#ln -s ../sensord.service %{buildroot}%{_libdir}/systemd/system/multi-user.target.wants/sensord.service
+
+mkdir -p %{buildroot}/etc/smack/accesses2.d
+
 %post
 systemctl daemon-reload
+mkdir -p %{_sysconfdir}/systemd/default-extra-dependencies/ignore-units.d/
+ln -sf %{_libdir}/systemd/system/sensord.service %{_sysconfdir}/systemd/default-extra-dependencies/ignore-units.d/
+/usr/bin/apply_file_capabilities_mic.sh
 
 %postun
 systemctl daemon-reload
@@ -100,16 +116,18 @@ systemctl daemon-reload
 %{_bindir}/sensord
 %{_unitdir}/sensord.service
 %{_unitdir}/sensord.socket
+%{_unitdir}/sensord_event.socket
 %{_unitdir}/multi-user.target.wants/sensord.service
 %{_unitdir}/sockets.target.wants/sensord.socket
-%license LICENSE.APLv2
+%{_unitdir}/sockets.target.wants/sensord_event.socket
+#%license LICENSE.APLv2
 
 %files -n libsensord
 %defattr(-,root,root,-)
 %manifest libsensord.manifest
 %{_libdir}/libsensor.so.*
 %{_libdir}/libsensord-shared.so
-%license LICENSE.APLv2
+#%license LICENSE.APLv2
 
 %files -n libsensord-devel
 %defattr(-,root,root,-)
@@ -117,7 +135,7 @@ systemctl daemon-reload
 %{_includedir}/sensord-shared/*.h
 %{_libdir}/libsensor.so
 %{_libdir}/pkgconfig/sensor.pc
-%license LICENSE.APLv2
+#%license LICENSE.APLv2
 
 %if %{build_test_suite} == "ON"
 %files -n sensor-test
@@ -127,5 +145,5 @@ systemctl daemon-reload
 %{_bindir}/multi-thread-performance-test
 %{_bindir}/multi-process-performance-test
 %{_bindir}/fusion-data-collection
-%license LICENSE.APLv2
+#%license LICENSE.APLv2
 %endif

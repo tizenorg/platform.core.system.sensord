@@ -17,19 +17,20 @@
  *
  */
 
-#include <cynara-client.h>
-#include <cynara-creds-socket.h>
-#include <cynara-session.h>
+//#include <cynara-client.h>
+//#include <cynara-creds-socket.h>
+//#include <cynara-session.h>
 #include <permission_checker.h>
 #include <sf_common.h>
 #include <sensor_logs.h>
 #include <sensor_loader.h>
 #include <sensor_base.h>
 
-static cynara *cynara_env = NULL;
+//static cynara *cynara_env = NULL;
 
 static bool check_privilege_by_sockfd(int sock_fd, const char *priv)
 {
+	/*
 	retvm_if(cynara_env == NULL, false, "Cynara not initialized");
 
 	int ret;
@@ -57,6 +58,8 @@ static bool check_privilege_by_sockfd(int sock_fd, const char *priv)
 	free(user);
 
 	return (ret == CYNARA_API_ACCESS_ALLOWED);
+	*/
+	return true;
 }
 
 permission_checker::permission_checker()
@@ -89,18 +92,22 @@ void permission_checker::init()
 
 	INFO("Permission Set = %d", m_permission_set);
 
+	/*
 	if (cynara_initialize(&cynara_env, NULL) != CYNARA_API_SUCCESS) {
 		cynara_env = NULL;
 		ERR("Cynara initialization failed");
 	}
+	*/
 }
 
 void permission_checker::deinit()
 {
+	/*
 	if (cynara_env)
 		cynara_finish(cynara_env);
 
 	cynara_env = NULL;
+	*/
 }
 
 int permission_checker::get_permission(int sock_fd)
