@@ -18,12 +18,11 @@
  */
 
 #include <pthread.h>
-#include <cbase_lock.h>
 #include <stdio.h>
-#include <sensor_logs.h>
 #include <errno.h>
 #include <sys/time.h>
-
+#include <cbase_lock.h>
+#include <sensor_logs.h>
 
 cbase_lock::cbase_lock()
 {

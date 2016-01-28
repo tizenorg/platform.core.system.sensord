@@ -166,8 +166,8 @@ void sensor_info::set_wakeup_supported(bool supported)
 
 void sensor_info::get_raw_data(raw_data_t &data)
 {
-	put(data, (int)m_type);
-	put(data, (int) m_id);
+	put(data, (int) m_type);
+	put(data, (int64_t) (m_id));
 	put(data, (int) m_privilege);
 	put(data, m_name);
 	put(data, m_vendor);
@@ -187,7 +187,8 @@ void sensor_info::set_raw_data(const char *data, int data_len)
 
 	auto it_r_data = raw_data.begin();
 
-	int type, id, privilege;
+	int type, privilege;
+	int64_t id;
 
 	it_r_data = get(it_r_data, type);
 	m_type = (sensor_type_t) type;
@@ -210,7 +211,7 @@ void sensor_info::set_raw_data(const char *data, int data_len)
 void sensor_info::show(void)
 {
 	INFO("Type = %d", m_type);
-	INFO("ID = 0x%x", (int)m_id);
+	INFO("ID = 0x%llx", (uint64_t)m_id);
 	INFO("Privilege = %d", (int)m_privilege);
 	INFO("Name = %s", m_name.c_str());
 	INFO("Vendor = %s", m_vendor.c_str());
@@ -264,6 +265,16 @@ void sensor_info::put(raw_data_t &data, unsigned int value)
 	copy(&buffer[0], &buffer[sizeof(buffer)], back_inserter(data));
 }
 
+void sensor_info::put(raw_data_t &data, int64_t value)
+{
+	char buffer[sizeof(value)];
+
+	int64_t *temp = (int64_t *) buffer;
+	*temp = value;
+
+	copy(&buffer[0], &buffer[sizeof(buffer)], back_inserter(data));
+}
+
 void sensor_info::put(raw_data_t &data, float value)
 {
 	char buffer[sizeof(value)];
@@ -299,6 +310,13 @@ raw_data_iterator sensor_info::get(raw_data_iterator it, int &value)
 }
 
 raw_data_iterator sensor_info::get(raw_data_iterator it, unsigned int &value)
+{
+	copy(it, it + sizeof(value), (char*) &value);
+
+	return it + sizeof(value);
+}
+
+raw_data_iterator sensor_info::get(raw_data_iterator it, int64_t &value)
 {
 	copy(it, it + sizeof(value), (char*) &value);
 

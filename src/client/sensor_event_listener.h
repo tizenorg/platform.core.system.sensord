@@ -23,12 +23,9 @@
 #include <glib.h>
 #include <sys/types.h>
 #include <sys/epoll.h>
-#include <sensor_handle_info.h>
-#include <sensor_client_info.h>
 #include <unistd.h>
 #include <csocket.h>
 #include <string.h>
-#include <sf_common.h>
 #include <algorithm>
 #include <sstream>
 #include <unordered_map>
@@ -39,6 +36,11 @@
 #include <condition_variable>
 #include <cmutex.h>
 #include <poller.h>
+
+#include <sf_common.h>
+#include <sensor_handle_info.h>
+#include <sensor_client_info.h>
+#include <command_channel.h>
 
 typedef std::vector<unsigned int> handle_vector;
 typedef std::vector<sensor_id_t> sensor_id_vector;

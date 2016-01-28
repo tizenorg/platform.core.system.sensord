@@ -22,6 +22,7 @@
 #include <physical_sensor.h>
 #include <sensor_event_poller.h>
 #include <sensor_loader.h>
+#include <algorithm>
 
 #define EPOLL_MAX_FD 32
 
@@ -75,6 +76,7 @@ bool sensor_event_poller::add_poll_fd(int fd)
 
 bool sensor_event_poller::poll()
 {
+	std::vector<uint16_t> ids;
 	while (true) {
 		int fd;
 		struct epoll_event poll_event;
@@ -83,17 +85,18 @@ bool sensor_event_poller::poll()
 			continue;
 
 		fd = poll_event.data.fd;
+		ids.clear();
 
-		if (!is_data_ready(fd))
+		if (!read_fd(fd, ids))
 			continue;
 
-		process_event(fd);
+		process_event(fd, ids);
 	}
 
 	return true;
 }
 
-bool sensor_event_poller::is_data_ready(int fd)
+bool sensor_event_poller::read_fd(int fd, std::vector<uint16_t> &ids)
 {
 	fd_sensors_t::iterator it;
 	physical_sensor *sensor;
@@ -106,13 +109,13 @@ bool sensor_event_poller::is_data_ready(int fd)
 		return false;
 	}
 
-	if (!sensor->is_data_ready())
+	if (!sensor->read_fd(ids))
 		return false;
 
 	return true;
 }
 
-bool sensor_event_poller::process_event(int fd)
+bool sensor_event_poller::process_event(int fd, const std::vector<uint16_t> &ids)
 {
 	physical_sensor *sensor;
 	std::pair<fd_sensors_t::iterator, fd_sensors_t::iterator> ret;
@@ -120,23 +123,27 @@ bool sensor_event_poller::process_event(int fd)
 	ret = m_fd_sensors.equal_range(fd);
 
 	for (auto it_sensor = ret.first; it_sensor != ret.second; ++it_sensor) {
-		/*
-		sensor_event_t event;
-		sensor = it_sensor->second;
-
-		event.sensor_id = sensor->get_id();
-		event.event_type = sensor->get_event_type();
-		sensor->get_sensor_data(event.data);
-		*/
 		sensor_event_t *event;
-		int event_length;
+		sensor_data_t *data;
+		int data_length;
+
 		sensor = it_sensor->second;
 
-		event_length = sensor->get_sensor_event(&event);
+		auto result = std::find(std::begin(ids), std::end(ids), (sensor->get_id()) & 0xFFFF);
+
+		if (result == std::end(ids))
+			continue;
+
+		event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
+
+		data_length = sensor->get_data(&data);
+		
 		event->sensor_id = sensor->get_id();
 		event->event_type = sensor->get_event_type();
+		event->data_length = data_length;
+		event->data = data;
 
-		sensor->push(event, event_length);
+		sensor->push(event, sizeof(sensor_event_t));
 	}
 
 	return true;

@@ -34,8 +34,9 @@ void sensor_event_queue::push_internal(void *event, int length)
 	if (m_queue.size() >= QUEUE_FULL_SIZE) {
 		ERR("Queue is full, drop it!");
 		free(event);
-	} else
+	} else {
 		m_queue.push(std::pair<void*, int>(event, length));
+	}
 
 	if (wake)
 		m_cond_var.notify_one();
@@ -54,7 +55,14 @@ void* sensor_event_queue::pop(int *length)
 	return event.first;
 }
 
+/*
 void sensor_event_queue::push(sensor_event_t *event, int event_length)
+{
+	push_internal(event, event_length);
+}
+*/
+
+void sensor_event_queue::push(void *event, int event_length)
 {
 	push_internal(event, event_length);
 }

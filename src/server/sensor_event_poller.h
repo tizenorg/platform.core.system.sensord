@@ -39,8 +39,8 @@ private:
 	void init_fd();
 	void init_sensor_map();
 	bool add_poll_fd(int fd);
-	bool is_data_ready(int fd);
-	bool process_event(int fd);
+	bool read_fd(int fd, std::vector<uint16_t> &ids);
+	bool process_event(int fd, const std::vector<uint16_t> &ids);
 };
 
 #endif /* _SENSOR_EVENT_POLLER_H_ */

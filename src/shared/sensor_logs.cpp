@@ -175,7 +175,7 @@ const char* get_client_name(void)
 
 bool is_sensorhub_event(unsigned int event_type)
 {
-	if ((event_type >> SENSOR_TYPE_SHIFT) == CONTEXT_SENSOR)
+	if ((event_type >> EVENT_TYPE_SHIFT) == CONTEXT_SENSOR)
 		return true;
 
 	return false;

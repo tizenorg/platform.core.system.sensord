@@ -218,6 +218,7 @@ bool command_channel::cmd_hello(sensor_id_t sensor)
 	delete packet;
 
 	m_sensor_id = sensor;
+	ERR("0x%llx", m_sensor_id);
 
 	return true;
 }

@@ -29,12 +29,6 @@
 #endif
 
 #include "stdbool.h"
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include <sys/types.h>
 #include <glib.h>
 
@@ -45,6 +39,12 @@ extern "C"
 
 /*header for each sensor type*/
 #include <sensor_types.h>
+
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 typedef void (*sensor_cb_t)(sensor_t sensor, unsigned int event_type, sensor_data_t *data, void *user_data);
 typedef void (*sensorhub_cb_t)(sensor_t sensor, unsigned int event_type, sensorhub_data_t *data, void *user_data);

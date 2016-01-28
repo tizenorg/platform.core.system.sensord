@@ -44,7 +44,7 @@ private:
 			bool prioritize_e2 = true;
 
 			if (priority_list.empty())
-				return (e2->data.timestamp < e1->data.timestamp);
+				return (e2->data->timestamp < e1->data->timestamp);
 
 			std::set<unsigned int>::iterator iter_e1 = priority_list.find(e1->event_type);
 			std::set<unsigned int>::iterator iter_e2 = priority_list.find(e2->event_type);
@@ -59,7 +59,7 @@ private:
 				if (!prioritize_e1)
 					return true;
 				else {
-					if (e2->data.timestamp <= e1->data.timestamp)
+					if (e2->data->timestamp <= e1->data->timestamp)
 						return true;
 					return false;
 				}
@@ -67,7 +67,7 @@ private:
 			else {
 				if (prioritize_e1)
 					return false;
-				else if (e2->data.timestamp <= e1->data.timestamp)
+				else if (e2->data->timestamp <= e1->data->timestamp)
 					return true;
 				else
 					return false;
@@ -91,7 +91,8 @@ private:
 public:
 	static sensor_event_queue& get_instance();
 
-	void push(sensor_event_t *event, int event_length);
+	//void push(sensor_event_t *event, int event_length);
+	void push(void *event, int event_length);
 	void* pop(int *length);
 };
 

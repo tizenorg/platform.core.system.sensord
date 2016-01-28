@@ -30,7 +30,7 @@ Requires:   libsensord = %{version}-%{release}
 %define gaming_rv_state OFF
 %define tilt_state OFF
 %define gyroscope_uncal_state OFF
-%define build_test_suite ON
+%define build_test_suite OFF
 
 %description
 Sensor daemon
@@ -124,6 +124,7 @@ systemctl daemon-reload
 %defattr(-,root,root,-)
 %{_bindir}/api-test
 %{_bindir}/sensor-test
+%{_bindir}/sensorctl
 %{_bindir}/multi-thread-performance-test
 %{_bindir}/multi-process-performance-test
 %{_bindir}/fusion-data-collection

@@ -41,7 +41,8 @@ extern "C"
 #endif
 
 
-#define SENSOR_TYPE_SHIFT 16
+#define EVENT_TYPE_SHIFT 16
+#define SENSOR_TYPE_SHIFT 32
 
 enum sf_log_type {
 	SF_LOG_PRINT_FILE		= 1,

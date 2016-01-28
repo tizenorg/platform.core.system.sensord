@@ -34,8 +34,6 @@
 
 #define CLIENT_ID_INVALID   -1
 
-#define SENSOR_TYPE_MASK  0xFFFF
-
 enum packet_type_t {
 	CMD_NONE = 0,
 	CMD_GET_ID,
@@ -84,7 +82,7 @@ typedef struct {
 
 typedef struct {
 	int client_id;
-	int sensor;
+	int64_t sensor;
 } cmd_hello_t;
 
 typedef struct {
@@ -161,41 +159,19 @@ typedef struct {
 	int client_id;
 } event_channel_ready_t;
 
-
-typedef struct {
-	std::string name;
-	std::string vendor;
-	float min_range;
-	float max_range;
-	float resolution;
-	int min_interval;
-	int fifo_count;
-	int max_batch_count;
-	bool wakeup_supported;
-} sensor_properties_s;
-
-
-/*
- * When modifying it, check copy_sensor*_data()
- */
 typedef struct sensor_event_t {
 	unsigned int event_type;
 	sensor_id_t sensor_id;
-	sensor_data_t data;
+	unsigned int data_length;
+	sensor_data_t *data;
 } sensor_event_t;
-
 
 typedef struct sensorhub_event_t {
 	unsigned int event_type;
 	sensor_id_t sensor_id;
+	unsigned int data_length;
 	sensorhub_data_t data;
 } sensorhub_event_t;
-
-typedef struct sensor_devices {
-	std::vector<void*> devices;
-} sensor_devices;
-
-typedef sensor_devices* (*create_t)(void);
 
 typedef void *(*cmd_func_t)(void *data, void *cb_data);
 

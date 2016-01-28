@@ -17,24 +17,24 @@
  *
  */
 
+#include <stdint.h>
 #include <sensor_hal.h>
 #include <sensor_base.h>
+#include <sensor_event_queue.h>
 
 #include <algorithm>
 #include <utility>
 
 #include <functional>
-#include <sensor_event_queue.h>
 
 using std::make_pair;
 using std::vector;
 
 sensor_base::sensor_base()
 : m_unique_id(-1)
-, m_privilege(SENSOR_PRIVILEGE_PUBLIC)
 , m_permission(SENSOR_PERMISSION_STANDARD)
-, m_client(0)
 , m_started(false)
+, m_client(0)
 {
 }
 
@@ -42,9 +42,57 @@ sensor_base::~sensor_base()
 {
 }
 
+void sensor_base::set_id(sensor_id_t id)
+{
+	m_unique_id = id;
+}
+
+sensor_id_t sensor_base::get_id(void)
+{
+	if (m_unique_id == -1)
+		return UNKNOWN_SENSOR;
+
+	return m_unique_id;
+}
+
 sensor_type_t sensor_base::get_type(void)
 {
 	return UNKNOWN_SENSOR;
+}
+
+unsigned int sensor_base::get_event_type(void)
+{
+	return -1;
+}
+
+const char* sensor_base::get_name()
+{
+	return NULL;
+}
+
+bool sensor_base::get_sensor_info(sensor_info &info)
+{
+	return false;
+}
+
+bool sensor_base::is_virtual()
+{
+	return false;
+}
+
+int sensor_base::get_data(sensor_data_t **data)
+{
+	return -1;
+}
+
+bool sensor_base::flush(void)
+{
+	return false;
+}
+
+int sensor_base::set_attribute(int32_t cmd, int32_t value)
+{
+	return -1;
 }
 
 bool sensor_base::start()
@@ -87,19 +135,11 @@ bool sensor_base::stop(void)
 	return true;
 }
 
-bool sensor_base::on_start()
+bool sensor_base::is_started(void)
 {
-	return false;
-}
+	AUTOLOCK(m_client_mutex);
 
-bool sensor_base::on_stop()
-{
-	return false;
-}
-
-long sensor_base::set_command(unsigned int cmd, long value)
-{
-	return -1;
+	return m_started;
 }
 
 bool sensor_base::add_interval(int client_id, unsigned int interval, bool is_processor)
@@ -116,7 +156,7 @@ bool sensor_base::add_interval(int client_id, unsigned int interval, bool is_pro
 	cur_min = m_plugin_info_list.get_min_interval();
 
 	if (cur_min != prev_min) {
-		INFO("Min interval for sensor[0x%x] is changed from %dms to %dms"
+		INFO("Min interval for sensor[0x%llx] is changed from %dms to %dms"
 			" by%sclient[%d] adding interval",
 			get_id(), prev_min, cur_min,
 			is_processor ? " processor " : " ", client_id);
@@ -140,14 +180,14 @@ bool sensor_base::delete_interval(int client_id, bool is_processor)
 	cur_min = m_plugin_info_list.get_min_interval();
 
 	if (!cur_min) {
-		INFO("No interval for sensor[0x%x] by%sclient[%d] deleting interval, "
+		INFO("No interval for sensor[0x%llx] by%sclient[%d] deleting interval, "
 			 "so set to default %dms",
 			 get_id(), is_processor ? " processor " : " ",
 			 client_id, POLL_1HZ_MS);
 
 		set_interval(POLL_1HZ_MS);
 	} else if (cur_min != prev_min) {
-		INFO("Min interval for sensor[0x%x] is changed from %dms to %dms"
+		INFO("Min interval for sensor[0x%llx] is changed from %dms to %dms"
 			" by%sclient[%d] deleting interval",
 			get_id(), prev_min, cur_min,
 			is_processor ? " processor " : " ", client_id);
@@ -179,9 +219,9 @@ bool sensor_base::add_batch(int client_id, unsigned int latency)
 	cur_max = m_plugin_info_list.get_max_batch();
 
 	if (cur_max != prev_max) {
-		INFO("Max latency for sensor[0x%x] is changed from %dms to %dms by client[%d] adding latency",
+		INFO("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] adding latency",
 			get_id(), prev_max, cur_max, client_id);
-		set_batch(cur_max);
+		set_batch_latency(cur_max);
 	}
 
 	return true;
@@ -200,15 +240,15 @@ bool sensor_base::delete_batch(int client_id)
 	cur_max = m_plugin_info_list.get_max_batch();
 
 	if (!cur_max) {
-		INFO("No latency for sensor[0x%x] by client[%d] deleting latency, so set to default 0 ms",
+		INFO("No latency for sensor[0x%llx] by client[%d] deleting latency, so set to default 0 ms",
 			 get_id(), client_id);
 
-		set_batch(0);
+		set_batch_latency(0);
 	} else if (cur_max != prev_max) {
-		INFO("Max latency for sensor[0x%x] is changed from %dms to %dms by client[%d] deleting latency",
+		INFO("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] deleting latency",
 			get_id(), prev_max, cur_max, client_id);
 
-		set_batch(cur_max);
+		set_batch_latency(cur_max);
 	}
 
 	return true;
@@ -235,7 +275,7 @@ bool sensor_base::add_wakeup(int client_id, int wakeup)
 	cur_wakeup = m_plugin_info_list.is_wakeup_on();
 
 	if ((cur_wakeup == SENSOR_WAKEUP_ON) && (prev_wakeup < SENSOR_WAKEUP_ON)) {
-		INFO("Wakeup for sensor[0x%x] is changed from %d to %d by client[%d] adding wakeup",
+		INFO("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] adding wakeup",
 			get_id(), prev_wakeup, cur_wakeup, client_id);
 		set_wakeup(SENSOR_WAKEUP_ON);
 	}
@@ -256,7 +296,7 @@ bool sensor_base::delete_wakeup(int client_id)
 	cur_wakeup = m_plugin_info_list.is_wakeup_on();
 
 	if ((cur_wakeup < SENSOR_WAKEUP_ON) && (prev_wakeup == SENSOR_WAKEUP_ON)) {
-		INFO("Wakeup for sensor[0x%x] is changed from %d to %d by client[%d] deleting wakeup",
+		INFO("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] deleting wakeup",
 			get_id(), prev_wakeup, cur_wakeup, client_id);
 		set_wakeup(SENSOR_WAKEUP_OFF);
 	}
@@ -271,47 +311,9 @@ int sensor_base::get_wakeup(int client_id)
 	return m_plugin_info_list.is_wakeup_on();
 }
 
-int sensor_base::get_sensor_data(sensor_data_t &data)
-{
-	return -1;
-}
-
-int sensor_base::get_sensor_event(sensor_event_t **event)
-{
-	return -1;
-}
-
-bool sensor_base::get_properties(sensor_properties_s &properties)
+bool sensor_base::is_wakeup_supported(void)
 {
 	return false;
-}
-
-const char* sensor_base::get_name()
-{
-	return NULL;
-}
-
-void sensor_base::set_id(sensor_id_t id)
-{
-	m_unique_id = id;
-}
-
-sensor_id_t sensor_base::get_id(void)
-{
-	if (m_unique_id == -1)
-		return UNKNOWN_SENSOR;
-
-	return m_unique_id;
-}
-
-unsigned int sensor_base::get_event_type(void)
-{
-	return -1;
-}
-
-sensor_privilege_t sensor_base::get_privilege(void)
-{
-	return m_privilege;
 }
 
 int sensor_base::get_permission(void)
@@ -319,48 +321,28 @@ int sensor_base::get_permission(void)
 	return m_permission;
 }
 
-bool sensor_base::is_started(void)
+void sensor_base::set_permission(int permission)
+{
+	m_permission = permission;
+}
+
+bool sensor_base::push(void *event, int length)
 {
 	AUTOLOCK(m_client_mutex);
 
-	return m_started;
-}
+	if (m_client <= 0)
+		return false;
 
-bool sensor_base::is_virtual()
-{
-	return false;
-}
-
-void sensor_base::get_sensor_info(sensor_info &info)
-{
-	sensor_properties_s properties;
-	properties.wakeup_supported = false;
-
-	get_properties(properties);
-
-	info.set_type(get_type());
-	info.set_id(get_id());
-	info.set_privilege(m_privilege);
-	info.set_name(properties.name.c_str());
-	info.set_vendor(properties.vendor.c_str());
-	info.set_min_range(properties.min_range);
-	info.set_max_range(properties.max_range);
-	info.set_resolution(properties.resolution);
-	info.set_min_interval(properties.min_interval);
-	info.set_fifo_count(properties.fifo_count);
-	info.set_max_batch_count(properties.max_batch_count);
-	info.set_supported_event(get_event_type());
-	info.set_wakeup_supported(properties.wakeup_supported);
-
-	return;
-}
-
-bool sensor_base::is_wakeup_supported(void)
-{
-	return false;
+	sensor_event_queue::get_instance().push(event, length);
+	return true;
 }
 
 bool sensor_base::set_interval(unsigned long interval)
+{
+	return false;
+}
+
+bool sensor_base::set_batch_latency(unsigned long latency)
 {
 	return false;
 }
@@ -370,35 +352,14 @@ bool sensor_base::set_wakeup(int wakeup)
 	return false;
 }
 
-bool sensor_base::set_batch(unsigned long latency)
+bool sensor_base::on_start()
 {
 	return false;
 }
 
-void sensor_base::set_privilege(sensor_privilege_t privilege)
+bool sensor_base::on_stop()
 {
-	m_privilege = privilege;
-}
-
-void sensor_base::set_permission(int permission)
-{
-	m_permission = permission;
-}
-
-int sensor_base::send_sensorhub_data(const char* data, int data_len)
-{
-	return -1;
-}
-
-bool sensor_base::push(sensor_event_t *event, int event_length)
-{
-	AUTOLOCK(m_client_mutex);
-
-	if (m_client <= 0)
-		return false;
-
-	sensor_event_queue::get_instance().push(event, event_length);
-	return true;
+	return false;
 }
 
 unsigned long long sensor_base::get_timestamp(void)

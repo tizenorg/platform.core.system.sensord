@@ -22,7 +22,6 @@
 
 #include <glib.h>
 #include <sys/types.h>
-#include <sensor_handle_info.h>
 #include <unistd.h>
 #include <csocket.h>
 #include <string.h>
@@ -36,7 +35,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <cmutex.h>
-#include <poller.h>
+#include <sensor_handle_info.h>
+#include <command_channel.h>
 
 using std::unordered_map;
 using std::vector;
