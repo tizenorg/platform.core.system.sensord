@@ -20,7 +20,6 @@
 #include <signal.h>
 #include <sensor_logs.h>
 #include <server.h>
-#include <dbus_util.h>
 #include <sensor_loader.h>
 #include <string>
 
