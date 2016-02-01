@@ -17,14 +17,13 @@
  *
  */
 
-#include <sensor_hal.h>
-#include <sensor_base.h>
-
+#include <stdint.h>
 #include <algorithm>
 #include <utility>
-
 #include <functional>
+#include <sensor_hal.h>
 #include <sensor_event_queue.h>
+#include <sensor_base.h>
 
 using std::make_pair;
 using std::vector;

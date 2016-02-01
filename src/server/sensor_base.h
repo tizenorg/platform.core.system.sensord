@@ -20,15 +20,8 @@
 #ifndef _SENSOR_BASE_H_
 #define _SENSOR_BASE_H_
 
-#include <list>
-#include <map>
-#include <unordered_map>
 #include <vector>
-#include <mutex>
-#include <condition_variable>
-#include <string>
-#include <sensor_internal.h>
-
+#include <sensor_types.h>
 #include <plugin_info_list.h>
 #include <cmutex.h>
 
