@@ -78,11 +78,18 @@ int physical_sensor::get_poll_fd()
 bool physical_sensor::read_fd(std::vector<uint16_t> &ids)
 {
 	AUTOLOCK(m_mutex);
+	int size;
+	uint16_t *_ids;
 
 	if (!m_sensor_device)
 		return false;
 
-	return m_sensor_device->read_fd(ids);
+	size = m_sensor_device->read_fd(&_ids);
+
+	for (int i = 0; i < size; ++i)
+		ids.push_back(_ids[i]);
+
+	return true;
 }
 
 int physical_sensor::get_data(sensor_data_t **data)

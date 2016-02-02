@@ -44,10 +44,10 @@ class sensor_loader
 private:
 	sensor_loader();
 
-	bool load_devices(const std::string &path, std::vector<void *> &devices, void* &handle);
+	bool load_devices(const std::string &path, std::vector<sensor_device_t> &devices, void* &handle);
 
 	physical_sensor* create_sensor(sensor_handle_t handle, sensor_device *device);
-	bool load_physical_sensors(std::vector<void *> devices);
+	bool load_physical_sensors(std::vector<sensor_device_t> &devices);
 
 	template <typename _sensor> void load_virtual_sensor(const char *name);
 	void load_virtual_sensors(void);
