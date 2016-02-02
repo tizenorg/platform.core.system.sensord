@@ -150,11 +150,11 @@ typedef struct sensor_data_t {
 #endif /* __cplusplus */
 
 #ifdef __cplusplus
-typedef struct {
-	std::vector<void*> devices;
-} sensor_devices;
-
-typedef sensor_devices* (*create_t)(void);
+/*
+ * Create devices
+ */
+typedef void *sensor_device_t;
+typedef int (*create_t)(sensor_device_t **devices);
 
 /*
  * Sensor device interface
@@ -171,7 +171,7 @@ public:
 	}
 
 	virtual int get_poll_fd(void) = 0;
-	virtual bool get_sensors(std::vector<sensor_handle_t> &sensors) = 0;
+	virtual int get_sensors(const sensor_handle_t **sensors) = 0;
 
 	virtual bool enable(uint16_t id) = 0;
 	virtual bool disable(uint16_t id) = 0;
@@ -180,7 +180,7 @@ public:
 	virtual bool set_batch_latency(uint16_t id, unsigned long val) = 0;
 	virtual bool set_attribute(uint16_t id, int32_t attribute, int32_t value) = 0;
 
-	virtual bool read_fd(std::vector<uint16_t> &ids) = 0;
+	virtual int read_fd(uint16_t **ids) = 0;
 	virtual int get_data(uint16_t id, sensor_data_t **data) = 0;
 
 	virtual bool flush(uint16_t id) = 0;

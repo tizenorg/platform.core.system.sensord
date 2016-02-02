@@ -50,8 +50,11 @@ sensor_loader& sensor_loader::get_instance()
 	return inst;
 }
 
-bool sensor_loader::load_devices(const string &path, vector<void*> &devices, void* &handle)
+bool sensor_loader::load_devices(const string &path, vector<sensor_device_t> &devices, void* &handle)
 {
+	int size;
+	sensor_device_t *_devices = NULL;
+
 	INFO("load device: [%s]", path.c_str());
 
 	void *_handle = dlopen(path.c_str(), RTLD_NOW);
@@ -71,7 +74,7 @@ bool sensor_loader::load_devices(const string &path, vector<void*> &devices, voi
 		return false;
 	}
 
-	sensor_devices *_devices = create_devices();
+	size = create_devices(&_devices);
 
 	if (!_devices) {
 		ERR("Failed to create devices, path is %s\n", path.c_str());
@@ -80,10 +83,13 @@ bool sensor_loader::load_devices(const string &path, vector<void*> &devices, voi
 	}
 
 	devices.clear();
-	devices.swap(_devices->devices);
+
+	for (int i = 0; i < size; ++i)
+		devices.push_back(_devices[i]);
+
+	handle = _handle;
 
 	delete _devices;
-	handle = _handle;
 
 	return true;
 }
@@ -108,19 +114,19 @@ physical_sensor* sensor_loader::create_sensor(sensor_handle_t handle, sensor_dev
 	return sensor;
 }
 
-bool sensor_loader::load_physical_sensors(std::vector<void *> devices)
+bool sensor_loader::load_physical_sensors(std::vector<sensor_device_t> &devices)
 {
+	int size;
 	sensor_device *device;
-	vector<sensor_handle_t> handles;
+	const sensor_handle_t *handles;
 	physical_sensor *sensor;
 
 	for (void *device_ptr : devices) {
 		device = static_cast<sensor_device *>(device_ptr);
 
-		handles.clear();
-		device->get_sensors(handles);
+		size = device->get_sensors(&handles);
 
-		for (unsigned int i = 0; i < handles.size(); ++i) {
+		for (int i = 0; i < size; ++i) {
 			sensor = create_sensor(handles[i], device);
 			if (!sensor)
 				continue;
@@ -157,7 +163,7 @@ bool sensor_loader::load_sensors(void)
 	for_each(unique_device_plugin_paths.begin(), unique_device_plugin_paths.end(),
 		[&](const string &path) {
 			void *handle;
-			std::vector<void *> devices;
+			std::vector<sensor_device_t> devices;
 
 			load_devices(path, devices, handle);
 			load_physical_sensors(devices);
