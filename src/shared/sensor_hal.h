@@ -21,13 +21,19 @@
 #define _SENSOR_HAL_H_
 
 #include <stdint.h>
+
+#ifdef __cplusplus
 #include <string>
 #include <vector>
-#include <sensor_common.h>
-#include <sf_common.h>
+#endif /* __cplusplus */
 
 #define SENSOR_HAL_VERSION(maj,min) \
 			((((maj) & 0xffff) << 24) | ((min) & 0xffff))
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
 
 /*
  * Sensor Types
@@ -98,21 +104,61 @@ typedef enum {
 	SENSOR_DEVICE_ROTATION_VECTOR_RAW,
 } sensor_device_type;
 
+typedef struct sensor_info_t {
+	const char *model_name;
+	const char *vendor;
+	float min_range;
+	float max_range;
+	float resolution;
+	int min_interval;
+	int max_batch_count;
+	bool wakeup_supported;
+} sensor_info_t;
+
 /*
  * A platform sensor handler is generated based on this handle
  * ID can be assigned from HAL developer. so it has to be unique in HAL.
  */
 typedef struct sensor_handle_t {
-	uint32_t id;
-	std::string name;
+	uint16_t id;
+	const char *name;
 	sensor_device_type type;
 	unsigned int event_type; // for Internal API
-	sensor_properties_s properties;
+	sensor_info_t info;
 } sensor_handle_t;
+
+enum sensor_accuracy_t {
+	SENSOR_ACCURACY_UNDEFINED = -1,
+	SENSOR_ACCURACY_BAD = 0,
+	SENSOR_ACCURACY_NORMAL =1,
+	SENSOR_ACCURACY_GOOD = 2,
+	SENSOR_ACCURACY_VERYGOOD = 3
+};
+
+#define SENSOR_DATA_VALUE_SIZE 16
+
+/* sensor_data_t */
+typedef struct sensor_data_t {
+	int accuracy;
+	unsigned long long timestamp;
+	int value_count;
+	float values[SENSOR_DATA_VALUE_SIZE];
+} sensor_data_t;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#ifdef __cplusplus
+typedef struct {
+	std::vector<void*> devices;
+} sensor_devices;
+
+typedef sensor_devices* (*create_t)(void);
 
 /*
  * Sensor device interface
- * 1 HAL must be abstracted from 1 device event node
+ * 1 device must be abstracted from 1 device event node
  */
 class sensor_device
 {
@@ -127,23 +173,18 @@ public:
 	virtual int get_poll_fd(void) = 0;
 	virtual bool get_sensors(std::vector<sensor_handle_t> &sensors) = 0;
 
-	/* enable/disable sensor device */
-	virtual bool enable(uint32_t id) = 0;
-	virtual bool disable(uint32_t id) = 0;
+	virtual bool enable(uint16_t id) = 0;
+	virtual bool disable(uint16_t id) = 0;
 
-	/* set_command or set_option? */
-	virtual bool set_command(uint32_t id, std::string command, std::string value) = 0;
+	virtual bool set_interval(uint16_t id, unsigned long val) = 0;
+	virtual bool set_batch_latency(uint16_t id, unsigned long val) = 0;
+	virtual bool set_attribute(uint16_t id, int32_t attribute, int32_t value) = 0;
 
-	/* the belows can be merged to one */
-	virtual bool set_interval(uint32_t id, unsigned long val) = 0;
-	virtual bool set_batch_latency(uint32_t id, unsigned long val) = 0;
+	virtual bool read_fd(std::vector<uint16_t> &ids) = 0;
+	virtual int get_data(uint16_t id, sensor_data_t **data) = 0;
 
-	/* sensor fw read the data when is_data_ready() is true */
-	virtual bool is_data_ready() = 0;
-	virtual bool get_sensor_data(uint32_t id, sensor_data_t &data) = 0;
-	virtual int get_sensor_event(uint32_t id, sensor_event_t **event) = 0;
-
-	/* TODO: use get_sensors() instead of get_properties() */
-	virtual bool get_properties(uint32_t id, sensor_properties_s &properties) = 0;
+	virtual bool flush(uint16_t id) = 0;
 };
+#endif /* __cplusplus */
+
 #endif /* _SENSOR_HAL_H_ */

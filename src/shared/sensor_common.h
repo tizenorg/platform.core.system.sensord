@@ -20,6 +20,10 @@
 #ifndef __SENSOR_COMMON_H__
 #define __SENSOR_COMMON_H__
 
+#include <sensor_hal.h>
+#include <sensor_types.h>
+#include <stdint.h>
+
 #ifndef DEPRECATED
 #define DEPRECATED __attribute__((deprecated))
 #endif
@@ -29,20 +33,17 @@ extern "C"
 {
 #endif
 
-/**
- * @defgroup SENSOR_FRAMEWORK SensorFW
- * To support the unified API for the various sensors
- */
-
-/**
- * @defgroup SENSOR_FRAMEWORK_COMMON Sensor Framework Common API
- * @ingroup SENSOR_FRAMEWORK
- *
- * These APIs are used to control the sensors.
- * @{
- */
-
-typedef unsigned int sensor_id_t;
+/*
+typedef union {
+	struct {
+		sensor_type_t type;
+		int16_t sensor_id;
+		int16_t device_id;
+	} __attribute__((packed));
+	int64_t id;
+} sensor_id_t;
+*/
+typedef int64_t sensor_id_t;
 
 typedef void *sensor_t;
 
@@ -50,39 +51,6 @@ typedef enum {
 	SENSOR_PRIVILEGE_PUBLIC,
 	SENSOR_PRIVILEGE_INTERNAL,
 } sensor_privilege_t;
-
-
-#define SENSOR_DATA_VALUE_SIZE 16
-
-/*
- *	When modifying it, check copy_sensor_data()
- */
-typedef struct sensor_data_t {
-/*
- * 	Use "accuracy" instead of "data_accuracy"
- * 	which is going to be removed soon
- */
-	union {
-		int accuracy;
-		int data_accuracy; //deprecated
-	};
-
-	union {
-		unsigned long long timestamp;
-		unsigned long long time_stamp; //deprecated
-	};
-
-/*
- * 	Use "value_count" instead of "values_num"
- * 	which is going to be removed soon
- */
-	union {
-		int value_count;
-		int values_num; //deprecated
-	};
-
-	float values[SENSOR_DATA_VALUE_SIZE];
-} sensor_data_t;
 
 #define SENSOR_HUB_DATA_SIZE	4096
 
@@ -95,14 +63,6 @@ typedef struct sensorhub_data_t {
     char hub_data[SENSOR_HUB_DATA_SIZE];
     float data[16];
 } sensorhub_data_t;
-
-enum sensor_accuracy_t {
-	SENSOR_ACCURACY_UNDEFINED = -1,
-	SENSOR_ACCURACY_BAD = 0,
-	SENSOR_ACCURACY_NORMAL =1,
-	SENSOR_ACCURACY_GOOD = 2,
-	SENSOR_ACCURACY_VERYGOOD = 3
-};
 
 /*
  *	To prevent naming confliction as using same enums as sensor CAPI use
@@ -136,7 +96,6 @@ enum sensor_interval_t {
 	SENSOR_INTERVAL_FASTEST = 0,
 	SENSOR_INTERVAL_NORMAL = 200,
 };
-
 
 typedef enum {
 	CONDITION_NO_OP,

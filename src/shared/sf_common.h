@@ -34,8 +34,6 @@
 
 #define CLIENT_ID_INVALID   -1
 
-#define SENSOR_TYPE_MASK  0xFFFF
-
 enum packet_type_t {
 	CMD_NONE = 0,
 	CMD_GET_ID,
@@ -84,7 +82,7 @@ typedef struct {
 
 typedef struct {
 	int client_id;
-	int sensor;
+	sensor_id_t sensor;
 } cmd_hello_t;
 
 typedef struct {
@@ -151,7 +149,7 @@ typedef struct  {
 
 typedef struct  {
 	int data_len;
-	char data[0];
+	int data;
 } cmd_send_sensorhub_data_t;
 
 #define EVENT_CHANNEL_MAGIC 0xCAFECAFE
@@ -161,73 +159,23 @@ typedef struct {
 	int client_id;
 } event_channel_ready_t;
 
-
-typedef struct {
-	std::string name;
-	std::string vendor;
-	float min_range;
-	float max_range;
-	float resolution;
-	int min_interval;
-	int fifo_count;
-	int max_batch_count;
-	bool wakeup_supported;
-} sensor_properties_s;
-
-
-/*
- * When modifying it, check copy_sensor*_data()
- */
 typedef struct sensor_event_t {
 	unsigned int event_type;
 	sensor_id_t sensor_id;
-	sensor_data_t data;
+	unsigned int data_length;
+	sensor_data_t *data;
 } sensor_event_t;
-
 
 typedef struct sensorhub_event_t {
 	unsigned int event_type;
 	sensor_id_t sensor_id;
+	unsigned int data_length;
 	sensorhub_data_t data;
 } sensorhub_event_t;
-
-typedef struct sensor_devices {
-	std::vector<void*> devices;
-} sensor_devices;
-
-typedef sensor_devices* (*create_t)(void);
 
 typedef void *(*cmd_func_t)(void *data, void *cb_data);
 
 typedef std::vector<unsigned int> event_type_vector;
-
-enum sensorhub_enable_bit {
-	SENSORHUB_ACCELEROMETER_ENABLE_BIT = 0,
-	SENSORHUB_GYROSCOPE_ENABLE_BIT,
-	SENSORHUB_GEOMAGNETIC_UNCALIB_ENABLE_BIT,
-	SENSORHUB_GEOMAGNETIC_RAW_ENABLE_BIT,
-	SENSORHUB_GEOMAGNETIC_ENABLE_BIT,
-	SENSORHUB_PRESSURE_ENABLE_BIT,
-	SENSORHUB_GESTURE_ENABLE_BIT,
-	SENSORHUB_PROXIMITY_ENABLE_BIT,
-	SENSORHUB_TEMPERATURE_HUMIDITY_ENABLE_BIT,
-	SENSORHUB_LIGHT_ENABLE_BIT,
-	SENSORHUB_PROXIMITY_RAW_ENABLE_BIT,
-	SENSORHUB_ORIENTATION_ENABLE_BIT,
-	SENSORHUB_STEP_DETECTOR_ENABLE_BIT = 12,
-	SENSORHUB_SIG_MOTION_ENABLE_BIT,
-	SENSORHUB_GYRO_UNCALIB_ENABLE_BIT,
-	SENSORHUB_GAME_ROTATION_VECTOR_ENABLE_BIT = 15,
-	SENSORHUB_ROTATION_VECTOR_ENABLE_BIT,
-	SENSORHUB_STEP_COUNTER_ENABLE_BIT,
-	SENSORHUB_BIO_HRM_RAW_ENABLE_BIT,
-	SENSORHUB_BIO_HRM_RAW_FAC_ENABLE_BIT,
-	SENSORHUB_BIO_HRM_LIB_ENABLE_BIT,
-	SENSORHUB_TILT_MOTION,
-	SENSORHUB_UV_SENSOR,
-	SENSORHUB_PIR_ENABLE_BIT,
-	SENSORHUB_ENABLE_BIT_MAX,
-};
 
 enum sensor_permission_t {
 	SENSOR_PERMISSION_NONE	= 0,

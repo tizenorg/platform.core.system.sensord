@@ -21,7 +21,7 @@ BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
 Requires:   libsensord = %{version}-%{release}
 
-%define auto_rotation_state ON
+%define auto_rotation_state OFF
 %define orientation_state OFF
 %define gravity_state OFF
 %define linear_accel_state OFF
@@ -30,7 +30,7 @@ Requires:   libsensord = %{version}-%{release}
 %define gaming_rv_state OFF
 %define tilt_state OFF
 %define gyroscope_uncal_state OFF
-%define build_test_suite ON
+%define build_test_suite OFF
 
 %description
 Sensor daemon
