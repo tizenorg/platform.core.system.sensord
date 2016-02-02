@@ -74,7 +74,7 @@ public:
 	int get_wakeup(int client_id);
 	bool is_wakeup_supported(void);
 
-	bool push(sensor_event_t *event, int length);
+	bool push(sensor_event_t *event);
 
 	/* permission(privilege) */
 	int get_permission(void);

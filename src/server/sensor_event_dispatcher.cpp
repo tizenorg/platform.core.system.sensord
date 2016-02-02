@@ -137,8 +137,7 @@ void sensor_event_dispatcher::dispatch_event(void)
 
 	while (true) {
 		bool is_hub_event = false;
-		int seed_event_len = 0;
-		void *seed_event = get_event_queue().pop(&seed_event_len);
+		void *seed_event = get_event_queue().pop();
 		unsigned int event_type = *((unsigned int *)(seed_event));
 
 		if (is_sensorhub_event(event_type))
@@ -148,8 +147,8 @@ void sensor_event_dispatcher::dispatch_event(void)
 			sensorhub_event_t *sensorhub_event = (sensorhub_event_t *)seed_event;
 			send_sensorhub_events(sensorhub_event);
 		} else {
-			vector< pair<void*, int> > sensor_events;
-			sensor_events.push_back(pair<void*, int>(seed_event, seed_event_len));
+			vector<void *> sensor_events;
+			sensor_events.push_back(seed_event);
 
 			virtual_sensors v_sensors = get_active_virtual_sensors();
 
@@ -169,7 +168,7 @@ void sensor_event_dispatcher::dispatch_event(void)
 					}
 
 					memcpy(v_event, &v_sensor_events[i], sizeof(sensor_event_t));
-					sensor_events.push_back(pair<void*, int>(v_event, sizeof(sensor_event_t)));
+					sensor_events.push_back(v_event);
 				}
 
 				++it_v_sensor;
@@ -178,8 +177,8 @@ void sensor_event_dispatcher::dispatch_event(void)
 			sort_sensor_events(sensor_events);
 
 			for (unsigned int i = 0; i < sensor_events.size(); ++i) {
-				if (is_record_event(((sensor_event_t*)(sensor_events[i].first))->event_type))
-					put_last_event(((sensor_event_t*)(sensor_events[i].first))->event_type, *((sensor_event_t*)(sensor_events[i].first)));
+				if (is_record_event(((sensor_event_t *)(sensor_events[i]))->event_type))
+					put_last_event(((sensor_event_t *)(sensor_events[i]))->event_type, *((sensor_event_t *)(sensor_events[i])));
 			}
 
 			send_sensor_events(sensor_events);
@@ -188,7 +187,7 @@ void sensor_event_dispatcher::dispatch_event(void)
 }
 
 
-void sensor_event_dispatcher::send_sensor_events(vector< pair<void*, int> > &events)
+void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 {
 	void *event;
 	sensor_event_t *sensor_events = NULL;
@@ -202,7 +201,7 @@ void sensor_event_dispatcher::send_sensor_events(vector< pair<void*, int> > &eve
 		unsigned int event_type;
 		int length;
 
-		sensor_events = (sensor_event_t*)events[i].first;
+		sensor_events = (sensor_event_t*)events[i];
 		length = sizeof(sensor_event_t) + sensor_events->data_length;
 		sensor_id = sensor_events->sensor_id;
 		event_type = sensor_events->event_type;
@@ -328,12 +327,12 @@ virtual_sensors sensor_event_dispatcher::get_active_virtual_sensors(void)
 }
 
 struct sort_comp {
-	bool operator()(const pair<void*, int> &left, const pair<void*, int> &right) {
-		return ((sensor_event_t*)(left.first))->data->timestamp < ((sensor_event_t*)(right.first))->data->timestamp;
+	bool operator()(const void *left, const void *right) {
+		return ((sensor_event_t *)left)->data->timestamp < ((sensor_event_t *)right)->data->timestamp;
 	}
 };
 
-void sensor_event_dispatcher::sort_sensor_events(vector< pair<void*, int> > &events)
+void sensor_event_dispatcher::sort_sensor_events(vector<void *> &events)
 {
 	std::sort(events.begin(), events.end(), sort_comp());
 }

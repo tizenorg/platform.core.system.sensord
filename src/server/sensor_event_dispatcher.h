@@ -53,8 +53,8 @@ private:
 	void accept_event_channel(csocket client_socket);
 
 	void dispatch_event(void);
-	void send_sensor_events(std::vector< std::pair<void*, int> > &events);
-	void send_sensorhub_events(void* events);
+	void send_sensor_events(std::vector<void *> &events);
+	void send_sensorhub_events(void *events);
 	static client_info_manager& get_client_info_manager(void);
 	static sensor_event_queue& get_event_queue(void);
 
@@ -65,7 +65,7 @@ private:
 	bool has_active_virtual_sensor(virtual_sensor *sensor);
 	virtual_sensors get_active_virtual_sensors(void);
 
-	void sort_sensor_events(std::vector< std::pair<void*, int> > &events);
+	void sort_sensor_events(std::vector<void *> &events);
 public:
 	static sensor_event_dispatcher& get_instance();
 	bool run(void);

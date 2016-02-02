@@ -26,7 +26,7 @@ sensor_event_queue& sensor_event_queue::get_instance()
 	return inst;
 }
 
-void sensor_event_queue::push_internal(void *event, int length)
+void sensor_event_queue::push_internal(void *event)
 {
 	lock l(m_mutex);
 	bool wake = m_queue.empty();
@@ -35,26 +35,25 @@ void sensor_event_queue::push_internal(void *event, int length)
 		ERR("Queue is full, drop it!");
 		free(event);
 	} else
-		m_queue.push(std::pair<void*, int>(event, length));
+		m_queue.push(event);
 
 	if (wake)
 		m_cond_var.notify_one();
 }
 
-void* sensor_event_queue::pop(int *length)
+void* sensor_event_queue::pop(void)
 {
 	ulock u(m_mutex);
 	while (m_queue.empty())
 		m_cond_var.wait(u);
 
-	std::pair<void*, int> event = m_queue.top();
+	void *event = m_queue.top();
 	m_queue.pop();
 
-	*length = event.second;
-	return event.first;
+	return event;
 }
 
-void sensor_event_queue::push(sensor_event_t *event, int event_length)
+void sensor_event_queue::push(sensor_event_t *event)
 {
-	push_internal(event, event_length);
+	push_internal(event);
 }

@@ -142,7 +142,7 @@ bool sensor_event_poller::process_event(int fd, const std::vector<uint16_t> &ids
 		event->data_length = data_length;
 		event->data = data;
 
-		sensor->push(event, sizeof(sensor_event_t));
+		sensor->push(event);
 	}
 
 	return true;

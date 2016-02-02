@@ -324,14 +324,14 @@ void sensor_base::set_permission(int permission)
 	m_permission = permission;
 }
 
-bool sensor_base::push(sensor_event_t *event, int length)
+bool sensor_base::push(sensor_event_t *event)
 {
 	AUTOLOCK(m_client_mutex);
 
 	if (m_client <= 0)
 		return false;
 
-	sensor_event_queue::get_instance().push(event, length);
+	sensor_event_queue::get_instance().push(event);
 	return true;
 }
 

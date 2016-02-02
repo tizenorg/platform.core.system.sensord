@@ -37,9 +37,9 @@ private:
 
 	class compare {
 	public:
-		bool operator() (std::pair<void *, int> v1, std::pair<void *, int> v2) {
-			sensor_event_t *e1 = (sensor_event_t *)v1.first;
-			sensor_event_t *e2 = (sensor_event_t *)v2.first;
+		bool operator() (void *&v1, void *&v2) {
+			sensor_event_t *e1 = (sensor_event_t *)v1;
+			sensor_event_t *e2 = (sensor_event_t *)v2;
 			bool prioritize_e1 = true;
 			bool prioritize_e2 = true;
 
@@ -75,7 +75,7 @@ private:
 		}
 	};
 
-	std::priority_queue<std::pair<void*, int>, std::vector<std::pair<void*, int>>, compare> m_queue;
+	std::priority_queue<void *, std::vector<void *>, compare> m_queue;
 
 	std::mutex m_mutex;
 	std::condition_variable m_cond_var;
@@ -87,12 +87,12 @@ private:
 	~sensor_event_queue() {};
 	sensor_event_queue(const sensor_event_queue &) {};
 	sensor_event_queue& operator=(const sensor_event_queue &);
-	void push_internal(void *event, int length);
+	void push_internal(void *event);
 public:
 	static sensor_event_queue& get_instance();
 
-	void push(sensor_event_t *event, int event_length);
-	void* pop(int *length);
+	void push(sensor_event_t *event);
+	void* pop(void);
 };
 
 #endif /* _SENSOR_EVENT_QUEUE_H_*/
