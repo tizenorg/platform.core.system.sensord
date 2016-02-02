@@ -190,6 +190,7 @@ void sensor_event_dispatcher::dispatch_event(void)
 
 void sensor_event_dispatcher::send_sensor_events(vector< pair<void*, int> > &events)
 {
+	void *event;
 	sensor_event_t *sensor_events = NULL;
 	client_info_manager& client_info_manager = get_client_info_manager();
 
@@ -199,10 +200,21 @@ void sensor_event_dispatcher::send_sensor_events(vector< pair<void*, int> > &eve
 	for (unsigned int i = 0; i < events.size(); ++i) {
 		sensor_id_t sensor_id;
 		unsigned int event_type;
+		int length;
+
 		sensor_events = (sensor_event_t*)events[i].first;
-		int length = events[i].second;
+		length = sizeof(sensor_event_t) + sensor_events->data_length;
 		sensor_id = sensor_events->sensor_id;
 		event_type = sensor_events->event_type;
+
+		event = (void *)malloc(length);
+		if (!event) {
+			ERR("Failed to allocate memory");
+			return;
+		}
+
+		memcpy(event, sensor_events, sizeof(sensor_event_t));
+		memcpy(event + sizeof(sensor_event_t), sensor_events->data, sensor_events->data_length);
 
 		id_vec.clear();
 		client_info_manager.get_listener_ids(sensor_id, event_type, id_vec);
@@ -212,7 +224,7 @@ void sensor_event_dispatcher::send_sensor_events(vector< pair<void*, int> > &eve
 		while (it_client_id != id_vec.end()) {
 			csocket client_socket;
 			client_info_manager.get_event_socket(*it_client_id, client_socket);
-			bool ret = (client_socket.send(sensor_events, length) > 0);
+			bool ret = (client_socket.send(event, length) > 0);
 
 			if (ret)
 				DBG("Event[0x%x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
@@ -222,6 +234,7 @@ void sensor_event_dispatcher::send_sensor_events(vector< pair<void*, int> > &eve
 			++it_client_id;
 		}
 
+		free(sensor_events->data);
 		free(sensor_events);
 	}
 }
@@ -316,7 +329,7 @@ virtual_sensors sensor_event_dispatcher::get_active_virtual_sensors(void)
 
 struct sort_comp {
 	bool operator()(const pair<void*, int> &left, const pair<void*, int> &right) {
-		return ((sensor_event_t*)(left.first))->data.timestamp < ((sensor_event_t*)(right.first))->data.timestamp;
+		return ((sensor_event_t*)(left.first))->data->timestamp < ((sensor_event_t*)(right.first))->data->timestamp;
 	}
 };
 
