@@ -30,7 +30,7 @@ Requires:   libsensord = %{version}-%{release}
 %define gaming_rv_state OFF
 %define tilt_state OFF
 %define gyroscope_uncal_state OFF
-%define build_test_suite OFF
+%define build_test_suite ON
 
 %description
 Sensor daemon

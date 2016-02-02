@@ -21,6 +21,7 @@
 #define _SENSOR_HAL_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define SENSOR_HAL_VERSION(maj,min) \
 			((((maj) & 0xffff) << 24) | ((min) & 0xffff))
