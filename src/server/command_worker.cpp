@@ -758,6 +758,7 @@ bool command_worker::cmd_get_data(void *payload)
 	const unsigned int GET_DATA_MIN_INTERVAL = 10;
 	int state = OP_ERROR;
 	bool adjusted = false;
+	int length;
 
 	sensor_data_t *data;
 
@@ -770,7 +771,7 @@ bool command_worker::cmd_get_data(void *payload)
 		goto out;
 	}
 
-	state = m_module->get_data(&data);
+	state = m_module->get_data(&data, &length);
 
 	// In case of not getting sensor data, wait short time and retry again
 	// 1. changing interval to be less than 10ms
@@ -779,7 +780,7 @@ bool command_worker::cmd_get_data(void *payload)
 	// 4. retrying to get data
 	// 5. repeat 2 ~ 4 operations RETRY_CNT times
 	// 6. reverting back to original interval
-	if ((state > 0) && !data->timestamp) {
+	if ((state >= 0) && !data->timestamp) {
 		const int RETRY_CNT	= 5;
 		const unsigned long long INIT_WAIT_TIME = 20000; //20ms
 		const unsigned long WAIT_TIME = 100000;	//100ms
@@ -792,10 +793,10 @@ bool command_worker::cmd_get_data(void *payload)
 			adjusted = true;
 		}
 
-		while ((state > 0) && !data->timestamp && (retry++ < RETRY_CNT)) {
+		while ((state >= 0) && !data->timestamp && (retry++ < RETRY_CNT)) {
 			INFO("Wait sensor[0x%llx] data updated for client [%d] #%d", m_sensor_id, m_client_id, retry);
 			usleep((retry == 1) ? INIT_WAIT_TIME : WAIT_TIME);
-			state = m_module->get_data(&data);
+			state = m_module->get_data(&data, &length);
 		}
 
 		if (adjusted)

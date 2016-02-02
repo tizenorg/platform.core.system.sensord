@@ -78,7 +78,7 @@ bool sensor_base::is_virtual()
 	return false;
 }
 
-int sensor_base::get_data(sensor_data_t **data)
+int sensor_base::get_data(sensor_data_t **data, int *length)
 {
 	return -1;
 }

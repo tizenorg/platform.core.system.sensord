@@ -43,7 +43,7 @@ public:
 	virtual void synthesize(const sensor_event_t& event);
 
 	/* get data */
-	virtual int get_data(sensor_data_t **data);
+	virtual int get_data(sensor_data_t **data, int *length);
 private:
 	sensor_base *m_accel_sensor;
 	auto_rotation_alg *m_alg;

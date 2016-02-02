@@ -126,6 +126,7 @@ bool sensor_event_poller::process_event(int fd, const std::vector<uint16_t> &ids
 		sensor_event_t *event;
 		sensor_data_t *data;
 		int data_length;
+		int remains = 1;
 
 		sensor = it_sensor->second;
 
@@ -134,15 +135,18 @@ bool sensor_event_poller::process_event(int fd, const std::vector<uint16_t> &ids
 		if (result == std::end(ids))
 			continue;
 
-		event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
+		while (remains > 0) {
+			event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
 
-		data_length = sensor->get_data(&data);
-		event->sensor_id = sensor->get_id();
-		event->event_type = sensor->get_event_type();
-		event->data_length = data_length;
-		event->data = data;
+			remains = sensor->get_data(&data, &data_length);
 
-		sensor->push(event);
+			event->sensor_id = sensor->get_id();
+			event->event_type = sensor->get_event_type();
+			event->data_length = data_length;
+			event->data = data;
+
+			sensor->push(event);
+		}
 	}
 
 	return true;

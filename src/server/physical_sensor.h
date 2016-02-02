@@ -42,7 +42,7 @@ public:
 	int get_poll_fd();
 
 	virtual bool read_fd(std::vector<uint16_t> &ids);
-	virtual int get_data(sensor_data_t **data);
+	virtual int get_data(sensor_data_t **data, int *length);
 	virtual bool flush(void);
 private:
 	static cmutex m_mutex;
