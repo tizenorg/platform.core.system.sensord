@@ -50,7 +50,7 @@ public:
 	virtual bool is_virtual(void);
 
 	/* set/get data */
-	virtual int get_data(sensor_data_t **data);
+	virtual int get_data(sensor_data_t **data, int *length);
 
 	virtual bool flush(void);
 	virtual int set_attribute(int32_t attribute, int32_t value);

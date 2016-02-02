@@ -42,7 +42,7 @@ public:
 	virtual void synthesize(const sensor_event_t& event) = 0;
 
 	/* get data */
-	virtual int get_data(sensor_data_t **data) = 0;
+	virtual int get_data(sensor_data_t **data, int *length) = 0;
 
 	bool is_virtual(void);
 

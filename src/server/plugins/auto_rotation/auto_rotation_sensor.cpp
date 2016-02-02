@@ -171,10 +171,14 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event)
 
 	sensor_event_t *rotation_event;
 	sensor_data_t *rotation_data;
-	unsigned int data_length;
+	int data_length;
+	int remains;
 
 	rotation_event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
-	data_length = get_data(&rotation_data);
+	remains = get_data(&rotation_data, &data_length);
+
+	if (remains < 0)
+		return;
 
 	rotation_event->sensor_id = get_id();
 	rotation_event->event_type = AUTO_ROTATION_CHANGE_STATE_EVENT;
@@ -187,8 +191,11 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event)
 	return;
 }
 
-int auto_rotation_sensor::get_data(sensor_data_t **data)
-{
+int auto_rotation_sensor::get_data(sensor_data_t **data, int *length)
+{ 
+	/* if It is batch sensor, remains can be 2+ */
+	int remains = 1;
+
 	sensor_data_t *sensor_data;
 	sensor_data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
 
@@ -198,8 +205,9 @@ int auto_rotation_sensor::get_data(sensor_data_t **data)
 	sensor_data->value_count = 1;
 
 	*data = sensor_data;
+	*length = sizeof(sensor_data_t);
 
-	return sizeof(sensor_data_t);
+	return --remains;
 }
 
 bool auto_rotation_sensor::set_interval(unsigned long interval)

@@ -176,7 +176,7 @@ public:
 	virtual bool set_attribute(uint16_t id, int32_t attribute, int32_t value) = 0;
 
 	virtual int read_fd(uint16_t **ids) = 0;
-	virtual int get_data(uint16_t id, sensor_data_t **data) = 0;
+	virtual int get_data(uint16_t id, sensor_data_t **data, int *length) = 0;
 
 	virtual bool flush(uint16_t id) = 0;
 };

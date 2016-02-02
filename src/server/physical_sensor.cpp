@@ -92,22 +92,22 @@ bool physical_sensor::read_fd(std::vector<uint16_t> &ids)
 	return true;
 }
 
-int physical_sensor::get_data(sensor_data_t **data)
+int physical_sensor::get_data(sensor_data_t **data, int *length)
 {
 	AUTOLOCK(m_mutex);
 
 	if (!m_sensor_device)
-		return false;
+		return -1;
 
-	int length = -1;
-	length = m_sensor_device->get_data(m_handle.id, data);
+	int remains = 0;
+	remains = m_sensor_device->get_data(m_handle.id, data, length);
 
-	if (length < 0) {
+	if (*length < 0) {
 		ERR("Failed to get sensor event");
 		return -1;
 	}
 
-	return length;
+	return remains;
 }
 
 bool physical_sensor::flush(void)
