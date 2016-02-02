@@ -47,7 +47,7 @@ struct log_attr {
 
 struct log_element {
 	log_id id;
-	unsigned int type;
+	int type;
 	struct log_attr log_attr;
 };
 

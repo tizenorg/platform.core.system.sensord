@@ -214,7 +214,7 @@ void sensor_event_dispatcher::send_sensor_events(vector< pair<void*, int> > &eve
 		}
 
 		memcpy(event, sensor_events, sizeof(sensor_event_t));
-		memcpy(event + sizeof(sensor_event_t), sensor_events->data, sensor_events->data_length);
+		memcpy((char *)event + sizeof(sensor_event_t), sensor_events->data, sensor_events->data_length);
 
 		id_vec.clear();
 		client_info_manager.get_listener_ids(sensor_id, event_type, id_vec);

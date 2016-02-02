@@ -183,7 +183,7 @@ void sensor_event_listener::handle_events(void* event)
 	} else {
 		sensor_event_t *sensor_event = (sensor_event_t *)event;
 		sensor_id = sensor_event->sensor_id;
-		sensor_event->data = (sensor_data_t *)((void *)sensor_event + sizeof(sensor_event_t));
+		sensor_event->data = (sensor_data_t *)((char *)sensor_event + sizeof(sensor_event_t));
 		sensor_data = sensor_event->data;
 		cur_time = sensor_event->data->timestamp;
 		accuracy = sensor_event->data->accuracy;
