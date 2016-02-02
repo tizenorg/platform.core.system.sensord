@@ -121,7 +121,7 @@ const char* get_log_element_name(log_id id, unsigned int type)
 
 const char* get_sensor_name(sensor_id_t sensor_id)
 {
-	sensor_type_t sensor_type = (sensor_type_t) (sensor_id & SENSOR_TYPE_MASK);
+	sensor_type_t sensor_type = (sensor_type_t) (sensor_id >> SENSOR_TYPE_SHIFT);
 
 	return get_log_element_name(LOG_ID_SENSOR_TYPE, sensor_type);
 }
@@ -185,7 +185,7 @@ unsigned int get_calibration_event_type(unsigned int event_type)
 {
 	sensor_type_t sensor;
 
-	sensor = (sensor_type_t)(event_type >> SENSOR_TYPE_SHIFT);
+	sensor = (sensor_type_t)(event_type >> EVENT_TYPE_SHIFT);
 
 	switch (sensor) {
 	default:

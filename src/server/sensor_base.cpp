@@ -115,7 +115,7 @@ bool sensor_base::add_interval(int client_id, unsigned int interval, bool is_pro
 	cur_min = m_plugin_info_list.get_min_interval();
 
 	if (cur_min != prev_min) {
-		INFO("Min interval for sensor[0x%x] is changed from %dms to %dms"
+		INFO("Min interval for sensor[0x%llx] is changed from %dms to %dms"
 			" by%sclient[%d] adding interval",
 			get_id(), prev_min, cur_min,
 			is_processor ? " processor " : " ", client_id);
@@ -139,14 +139,14 @@ bool sensor_base::delete_interval(int client_id, bool is_processor)
 	cur_min = m_plugin_info_list.get_min_interval();
 
 	if (!cur_min) {
-		INFO("No interval for sensor[0x%x] by%sclient[%d] deleting interval, "
+		INFO("No interval for sensor[0x%llx] by%sclient[%d] deleting interval, "
 			 "so set to default %dms",
 			 get_id(), is_processor ? " processor " : " ",
 			 client_id, POLL_1HZ_MS);
 
 		set_interval(POLL_1HZ_MS);
 	} else if (cur_min != prev_min) {
-		INFO("Min interval for sensor[0x%x] is changed from %dms to %dms"
+		INFO("Min interval for sensor[0x%llx] is changed from %dms to %dms"
 			" by%sclient[%d] deleting interval",
 			get_id(), prev_min, cur_min,
 			is_processor ? " processor " : " ", client_id);
@@ -178,7 +178,7 @@ bool sensor_base::add_batch(int client_id, unsigned int latency)
 	cur_max = m_plugin_info_list.get_max_batch();
 
 	if (cur_max != prev_max) {
-		INFO("Max latency for sensor[0x%x] is changed from %dms to %dms by client[%d] adding latency",
+		INFO("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] adding latency",
 			get_id(), prev_max, cur_max, client_id);
 		set_batch(cur_max);
 	}
@@ -199,12 +199,12 @@ bool sensor_base::delete_batch(int client_id)
 	cur_max = m_plugin_info_list.get_max_batch();
 
 	if (!cur_max) {
-		INFO("No latency for sensor[0x%x] by client[%d] deleting latency, so set to default 0 ms",
+		INFO("No latency for sensor[0x%llx] by client[%d] deleting latency, so set to default 0 ms",
 			 get_id(), client_id);
 
 		set_batch(0);
 	} else if (cur_max != prev_max) {
-		INFO("Max latency for sensor[0x%x] is changed from %dms to %dms by client[%d] deleting latency",
+		INFO("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] deleting latency",
 			get_id(), prev_max, cur_max, client_id);
 
 		set_batch(cur_max);
@@ -234,7 +234,7 @@ bool sensor_base::add_wakeup(int client_id, int wakeup)
 	cur_wakeup = m_plugin_info_list.is_wakeup_on();
 
 	if ((cur_wakeup == SENSOR_WAKEUP_ON) && (prev_wakeup < SENSOR_WAKEUP_ON)) {
-		INFO("Wakeup for sensor[0x%x] is changed from %d to %d by client[%d] adding wakeup",
+		INFO("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] adding wakeup",
 			get_id(), prev_wakeup, cur_wakeup, client_id);
 		set_wakeup(SENSOR_WAKEUP_ON);
 	}
@@ -255,7 +255,7 @@ bool sensor_base::delete_wakeup(int client_id)
 	cur_wakeup = m_plugin_info_list.is_wakeup_on();
 
 	if ((cur_wakeup < SENSOR_WAKEUP_ON) && (prev_wakeup == SENSOR_WAKEUP_ON)) {
-		INFO("Wakeup for sensor[0x%x] is changed from %d to %d by client[%d] deleting wakeup",
+		INFO("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] deleting wakeup",
 			get_id(), prev_wakeup, cur_wakeup, client_id);
 		set_wakeup(SENSOR_WAKEUP_OFF);
 	}
