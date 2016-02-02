@@ -26,11 +26,6 @@
 
 #include "stdbool.h"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include <sys/types.h>
 
 /*header for common sensor type*/
@@ -40,6 +35,12 @@ extern "C"
 #include <sensor_types.h>
 
 #include <sensor_deprecated.h>
+
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #define MAX_KEY_LEN 30
 
