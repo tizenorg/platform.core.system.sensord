@@ -17,6 +17,7 @@
  *
  */
 
+#include <stdlib.h>
 #include <command_channel.h>
 #include <client_common.h>
 #include <sf_common.h>
@@ -697,8 +698,7 @@ bool command_channel::cmd_send_sensorhub_data(const char* buffer, int data_len)
 
 	cmd_send_sensorhub_data = (cmd_send_sensorhub_data_t*)packet->data();
 	cmd_send_sensorhub_data->data_len = data_len;
-	memcpy(cmd_send_sensorhub_data->data, buffer, data_len);
-
+	cmd_send_sensorhub_data->data = atoi(buffer);
 
 	INFO("%s send cmd_send_sensorhub_data(client_id=%d, data_len = %d, buffer = 0x%x)",
 		get_client_name(), m_client_id, data_len, buffer);

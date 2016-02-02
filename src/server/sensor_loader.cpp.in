@@ -97,7 +97,7 @@ physical_sensor* sensor_loader::create_sensor(sensor_handle_t handle, sensor_dev
 
 	sensor = new(std::nothrow) physical_sensor();
 	if (!sensor) {
-		ERR("Memory allocation failed[%s]", handle.name.c_str());
+		ERR("Memory allocation failed[%s]", handle.name);
 		return NULL;
 	}
 

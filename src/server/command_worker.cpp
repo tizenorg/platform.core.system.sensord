@@ -305,7 +305,6 @@ bool command_worker::send_cmd_get_id_done(int client_id)
 
 bool command_worker::send_cmd_get_data_done(int state, sensor_data_t *data)
 {
-
 	cpacket* ret_packet;
 	cmd_get_data_done_t *cmd_get_data_done;
 
@@ -745,7 +744,7 @@ bool command_worker::cmd_set_command(void *payload)
 		goto out;
 	}
 
-	ret_value = m_module->set_command(cmd->cmd, cmd->value);
+	ret_value = m_module->set_attribute(cmd->cmd, cmd->value);
 
 out:
 	if (!send_cmd_done(ret_value))
@@ -760,7 +759,7 @@ bool command_worker::cmd_get_data(void *payload)
 	int state = OP_ERROR;
 	bool adjusted = false;
 
-	sensor_data_t data;
+	sensor_data_t *data;
 
 	DBG("CMD_GET_VALUE Handler invoked\n");
 
@@ -771,7 +770,7 @@ bool command_worker::cmd_get_data(void *payload)
 		goto out;
 	}
 
-	state = m_module->get_sensor_data(data);
+	state = m_module->get_data(&data);
 
 	// In case of not getting sensor data, wait short time and retry again
 	// 1. changing interval to be less than 10ms
@@ -780,7 +779,7 @@ bool command_worker::cmd_get_data(void *payload)
 	// 4. retrying to get data
 	// 5. repeat 2 ~ 4 operations RETRY_CNT times
 	// 6. reverting back to original interval
-	if (!state && !data.timestamp) {
+	if ((state > 0) && !data->timestamp) {
 		const int RETRY_CNT	= 5;
 		const unsigned long long INIT_WAIT_TIME = 20000; //20ms
 		const unsigned long WAIT_TIME = 100000;	//100ms
@@ -793,26 +792,26 @@ bool command_worker::cmd_get_data(void *payload)
 			adjusted = true;
 		}
 
-		while (!state && !data.timestamp && (retry++ < RETRY_CNT)) {
+		while ((state > 0) && !data->timestamp && (retry++ < RETRY_CNT)) {
 			INFO("Wait sensor[0x%llx] data updated for client [%d] #%d", m_sensor_id, m_client_id, retry);
 			usleep((retry == 1) ? INIT_WAIT_TIME : WAIT_TIME);
-			state = m_module->get_sensor_data(data);
+			state = m_module->get_data(&data);
 		}
 
 		if (adjusted)
 			m_module->add_interval(m_client_id, interval, false);
 	}
 
-	if (!data.timestamp)
+	if (!data->timestamp)
 		state = OP_ERROR;
 
-	if (state) {
+	if (state <= 0) {
 		ERR("Failed to get data for client [%d], for sensor [0x%llx]",
 			m_client_id, m_sensor_id);
 	}
 
 out:
-	send_cmd_get_data_done(state, &data);
+	send_cmd_get_data_done(state, data);
 
 	return true;
 }
@@ -833,7 +832,7 @@ bool command_worker::cmd_send_sensorhub_data(void *payload)
 		goto out;
 	}
 
-	ret_value = m_module->send_sensorhub_data(cmd->data, cmd->data_len);
+	ret_value = m_module->set_attribute(cmd->data, cmd->data_len);
 
 out:
 	if (!send_cmd_done(ret_value))

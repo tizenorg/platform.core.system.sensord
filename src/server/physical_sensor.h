@@ -41,11 +41,9 @@ public:
 
 	int get_poll_fd();
 
-	/* get data */
-	bool is_data_ready(void);
-	virtual int get_sensor_data(sensor_data_t &data);
-	virtual int get_sensor_event(sensor_event_t **event);
-
+	virtual bool read_fd(std::vector<uint16_t> &ids);
+	virtual int get_data(sensor_data_t **data);
+	virtual bool flush(void);
 private:
 	static cmutex m_mutex;
 
@@ -53,12 +51,12 @@ private:
 	sensor_device *m_sensor_device;
 
 	virtual bool set_interval(unsigned long interval);
+	virtual bool set_batch_latency(unsigned long latency);
+	virtual int set_attribute(int32_t attribute, int32_t value);
 	virtual bool set_wakeup(int wakeup);
-	virtual bool set_batch(unsigned long latency);
 	virtual bool on_start(void);
 	virtual bool on_stop(void);
-	virtual long set_command(unsigned int cmd, long value);
-	virtual bool get_properties(sensor_properties_s &properties);
+	virtual bool get_sensor_info(sensor_info &info);
 };
 
 #endif /* _PHYSICAL_SENSOR_H_ */

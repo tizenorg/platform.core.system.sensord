@@ -27,12 +27,24 @@ cmutex physical_sensor::m_mutex;
 physical_sensor::physical_sensor()
 : m_sensor_device(NULL)
 {
-
 }
 
 physical_sensor::~physical_sensor()
 {
+}
 
+void physical_sensor::set_sensor_handle(sensor_handle_t handle)
+{
+	m_handle.id = handle.id;
+	m_handle.name = handle.name;
+	m_handle.type = handle.type;
+	m_handle.event_type = handle.event_type;
+	m_handle.info = handle.info;
+}
+
+void physical_sensor::set_sensor_device(sensor_device *device)
+{
+	m_sensor_device = device;
 }
 
 sensor_type_t physical_sensor::get_type(void)
@@ -47,24 +59,10 @@ unsigned int physical_sensor::get_event_type(void)
 
 const char* physical_sensor::get_name(void)
 {
-	if (m_handle.name.empty())
+	if (!m_handle.name)
 		return UNKNOWN_NAME;
 
-	return m_handle.name.c_str();
-}
-
-void physical_sensor::set_sensor_handle(sensor_handle_t handle)
-{
-	m_handle.id = handle.id;
-	m_handle.name = handle.name;
-	m_handle.type = handle.type;
-	m_handle.event_type = handle.event_type;
-	m_handle.properties = handle.properties;
-}
-
-void physical_sensor::set_sensor_device(sensor_device *device)
-{
-	m_sensor_device = device;
+	return m_handle.name;
 }
 
 int physical_sensor::get_poll_fd()
@@ -77,9 +75,89 @@ int physical_sensor::get_poll_fd()
 	return m_sensor_device->get_poll_fd();
 }
 
+bool physical_sensor::read_fd(std::vector<uint16_t> &ids)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	return m_sensor_device->read_fd(ids);
+}
+
+int physical_sensor::get_data(sensor_data_t **data)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	int length = -1;
+	length = m_sensor_device->get_data(m_handle.id, data);
+
+	if (length < 0) {
+		ERR("Failed to get sensor event");
+		return -1;
+	}
+
+	return length;
+}
+
+bool physical_sensor::flush(void)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	return m_sensor_device->flush(m_handle.id);
+}
+
+bool physical_sensor::set_interval(unsigned long interval)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	INFO("Polling interval is set to %dms", interval);
+
+	return m_sensor_device->set_interval(m_handle.id, interval);
+}
+
+bool physical_sensor::set_batch_latency(unsigned long latency)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	INFO("Polling interval is set to %dms", latency);
+
+	return m_sensor_device->set_batch_latency(m_handle.id, latency);
+}
+
+int physical_sensor::set_attribute(int32_t attribute, int32_t value)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	return m_sensor_device->set_attribute(m_handle.id, attribute, value);
+}
+
+bool physical_sensor::set_wakeup(int wakeup)
+{
+	return false;
+}
+
 bool physical_sensor::on_start()
 {
 	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
 
 	return m_sensor_device->enable(m_handle.id);
 }
@@ -88,75 +166,28 @@ bool physical_sensor::on_stop()
 {
 	AUTOLOCK(m_mutex);
 
+	if (!m_sensor_device)
+		return false;
+
 	return m_sensor_device->disable(m_handle.id);
 }
 
-long physical_sensor::set_command(unsigned int cmd, long value)
+bool physical_sensor::get_sensor_info(sensor_info &info)
 {
-	AUTOLOCK(m_mutex);
+	info.set_type(get_type());
+	info.set_id(get_id());
+	info.set_privilege(SENSOR_PRIVILEGE_PUBLIC); // FIXME
+	info.set_name(m_handle.info.model_name);
+	info.set_vendor(m_handle.info.vendor);
+	info.set_min_range(m_handle.info.min_range);
+	info.set_max_range(m_handle.info.max_range);
+	info.set_resolution(m_handle.info.resolution);
+	info.set_min_interval(m_handle.info.min_interval);
+	info.set_fifo_count(0); // FIXME
+	info.set_max_batch_count(m_handle.info.max_batch_count);
+	info.set_supported_event(get_event_type());
+	info.set_wakeup_supported(m_handle.info.wakeup_supported);
 
-	return m_sensor_device->set_command(m_handle.id, std::to_string(cmd), std::to_string(value));
-}
-
-bool physical_sensor::set_interval(unsigned long interval)
-{
-	AUTOLOCK(m_mutex);
-
-	INFO("Polling interval is set to %dms", interval);
-
-	return m_sensor_device->set_interval(m_handle.id, interval);
-}
-
-bool physical_sensor::set_batch(unsigned long latency)
-{
-	AUTOLOCK(m_mutex);
-
-	INFO("Polling interval is set to %dms", latency);
-
-	return m_sensor_device->set_batch_latency(m_handle.id, latency);
-}
-
-bool physical_sensor::set_wakeup(int wakeup)
-{
-	return false;
-}
-
-bool physical_sensor::is_data_ready(void)
-{
-	AUTOLOCK(m_mutex);
-
-	return m_sensor_device->is_data_ready();
-}
-
-int physical_sensor::get_sensor_data(sensor_data_t &data)
-{
-	AUTOLOCK(m_mutex);
-
-	if (!m_sensor_device->get_sensor_data(m_handle.id, data)) {
-		ERR("Failed to get sensor data");
-		return -1;
-	}
-
-	return 0;
-}
-
-int physical_sensor::get_sensor_event(sensor_event_t **event)
-{
-	AUTOLOCK(m_mutex);
-
-	int event_length = -1;
-	event_length = m_sensor_device->get_sensor_event(m_handle.id, event);
-
-	if (event_length < 0) {
-		ERR("Failed to get sensor event");
-		return -1;
-	}
-
-	return event_length;
-}
-
-bool physical_sensor::get_properties(sensor_properties_s &properties)
-{
-	return m_sensor_device->get_properties(m_handle.id, properties);
+	return true;
 }
 
