@@ -31,8 +31,7 @@
 #include <sensor_info.h>
 #include <sensor_hal.h>
 
-class sensor_base
-{
+class sensor_base {
 public:
 	sensor_base();
 	virtual ~sensor_base();

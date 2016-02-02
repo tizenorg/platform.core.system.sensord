@@ -22,8 +22,7 @@
 
 #include "cbase_lock.h"
 
-class cmutex : public cbase_lock
-{
+class cmutex : public cbase_lock {
 public:
 	cmutex();
 	virtual ~cmutex();

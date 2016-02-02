@@ -30,8 +30,7 @@
 
 extern std::set<unsigned int> priority_list;
 
-class sensor_event_queue
-{
+class sensor_event_queue {
 private:
 	static const unsigned int QUEUE_FULL_SIZE = 1000;
 

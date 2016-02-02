@@ -57,8 +57,7 @@ typedef std::unordered_map<std::string,virtual_sensor_configs> virtual_sensor_de
 *
 */
 
-class virtual_sensor_config : public device_config
-{
+class virtual_sensor_config : public device_config {
 private:
 	virtual_sensor_config();
 	virtual_sensor_config(virtual_sensor_config const&) {};

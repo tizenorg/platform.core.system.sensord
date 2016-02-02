@@ -52,8 +52,7 @@ typedef vector<sensor_id_t> sensor_id_vector;
 typedef unordered_map<int,sensor_handle_info> sensor_handle_info_map;
 typedef unordered_map<sensor_id_t, command_channel*> sensor_command_channel_map;
 
-typedef struct sensor_rep
-{
+typedef struct sensor_rep {
 	bool active;
 	int option;
 	unsigned int interval;

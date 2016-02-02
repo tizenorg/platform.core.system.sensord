@@ -23,8 +23,7 @@
 #include <glib.h>
 #include <csocket.h>
 
-class server
-{
+class server {
 private:
 	GMainLoop *m_mainloop;
 	csocket m_client_accep_socket;

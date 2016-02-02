@@ -24,8 +24,7 @@
 #include <unordered_map>
 #include <sensor_logs.h>
 
-class device_config
-{
+class device_config {
 protected:
 	virtual bool load_config(const std::string& config_path) = 0;
 

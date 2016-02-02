@@ -39,8 +39,7 @@ class sensor_base;
 
 typedef std::multimap<sensor_type_t, std::shared_ptr<sensor_base>> sensor_map_t;
 
-class sensor_loader
-{
+class sensor_loader {
 private:
 	sensor_loader();
 

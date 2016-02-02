@@ -156,8 +156,7 @@ typedef int (*create_t)(sensor_device_t **devices);
  * Sensor device interface
  * 1 device must be abstracted from 1 device event node
  */
-class sensor_device
-{
+class sensor_device {
 public:
 	virtual ~sensor_device() {}
 

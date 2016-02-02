@@ -22,8 +22,7 @@
 
 #include <sensor_base.h>
 
-class virtual_sensor : public sensor_base
-{
+class virtual_sensor : public sensor_base {
 public:
 	virtual_sensor();
 	virtual ~virtual_sensor();

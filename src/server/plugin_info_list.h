@@ -22,8 +22,7 @@
 
 #include <list>
 
-class cinterval_info
-{
+class cinterval_info {
 public:
 	cinterval_info(int client_id, bool is_processor, unsigned int interval);
 	int client_id;
@@ -33,8 +32,7 @@ public:
 
 typedef std::list<cinterval_info>::iterator cinterval_info_iterator;
 
-class cbatch_info
-{
+class cbatch_info {
 public:
 	cbatch_info(int client_id, unsigned int latency);
 	int client_id;
@@ -43,8 +41,7 @@ public:
 
 typedef std::list<cbatch_info>::iterator cbatch_info_iterator;
 
-class cwakeup_info
-{
+class cwakeup_info {
 public:
 	cwakeup_info(int client_id, int wakeup);
 	int client_id;
@@ -53,8 +50,7 @@ public:
 
 typedef std::list<cwakeup_info>::iterator cwakeup_info_iterator;
 
-class plugin_info_list
-{
+class plugin_info_list {
 private:
 	static bool comp_interval_info(cinterval_info a, cinterval_info b);
 	cinterval_info_iterator find_if_interval_info(int client_id, bool is_processor);

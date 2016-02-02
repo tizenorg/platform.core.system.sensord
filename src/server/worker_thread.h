@@ -24,8 +24,7 @@
 #include <mutex>
 #include <condition_variable>
 
-class worker_thread
-{
+class worker_thread {
 public:
 	enum worker_state_t {
 		WORKER_STATE_INITIAL,

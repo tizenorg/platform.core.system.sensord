@@ -26,8 +26,7 @@ typedef struct packet_header {
 	char data[];
 } packet_header;
 
-class cpacket
-{
+class cpacket {
 public:
 	cpacket();
 	explicit cpacket(size_t size);

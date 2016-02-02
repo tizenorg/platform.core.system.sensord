@@ -20,8 +20,7 @@
 #ifndef _AUTO_ROTATION_ALG_H_
 #define _AUTO_ROTATION_ALG_H_
 
-class auto_rotation_alg
-{
+class auto_rotation_alg {
 public:
 	auto_rotation_alg();
 	virtual ~auto_rotation_alg();

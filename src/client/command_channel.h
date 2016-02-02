@@ -25,8 +25,7 @@
 #include <cpacket.h>
 #include <csocket.h>
 
-class command_channel
-{
+class command_channel {
 public:
 
 	command_channel();

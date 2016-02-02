@@ -24,8 +24,7 @@
 #include <sf_common.h>
 #include <worker_thread.h>
 
-class physical_sensor : public sensor_base
-{
+class physical_sensor : public sensor_base {
 public:
 	physical_sensor();
 	virtual ~physical_sensor();

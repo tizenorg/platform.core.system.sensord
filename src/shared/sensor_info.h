@@ -30,8 +30,7 @@
 typedef std::vector<char> raw_data_t;
 typedef raw_data_t::iterator raw_data_iterator;
 
-class sensor_info
-{
+class sensor_info {
 public:
 	sensor_type_t get_type(void);
 	sensor_id_t get_id(void);

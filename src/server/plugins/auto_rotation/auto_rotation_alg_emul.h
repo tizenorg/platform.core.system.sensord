@@ -22,8 +22,7 @@
 
 #include <auto_rotation_alg.h>
 
-class auto_rotation_alg_emul : public auto_rotation_alg
-{
+class auto_rotation_alg_emul : public auto_rotation_alg {
 public:
 	auto_rotation_alg_emul();
 	virtual ~auto_rotation_alg_emul();
