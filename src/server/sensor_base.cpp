@@ -93,6 +93,11 @@ int sensor_base::set_attribute(int32_t cmd, int32_t value)
 	return -1;
 }
 
+int sensor_base::set_attribute(char *attribute, char *value, int value_size)
+{
+	return -1;
+}
+
 bool sensor_base::start()
 {
 	AUTOLOCK(m_client_mutex);

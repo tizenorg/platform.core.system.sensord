@@ -39,7 +39,14 @@ void physical_sensor::set_sensor_handle(sensor_handle_t handle)
 	m_handle.name = handle.name;
 	m_handle.type = handle.type;
 	m_handle.event_type = handle.event_type;
-	m_handle.info = handle.info;
+	m_handle.model_name = handle.model_name;
+	m_handle.vendor = handle.vendor;
+	m_handle.min_range = handle.min_range;
+	m_handle.max_range = handle.max_range;
+	m_handle.resolution = handle.resolution;
+	m_handle.min_interval = handle.min_interval;
+	m_handle.max_batch_count = handle.max_batch_count;
+	m_handle.wakeup_supported = handle.wakeup_supported;
 }
 
 void physical_sensor::set_sensor_device(sensor_device *device)
@@ -154,6 +161,16 @@ int physical_sensor::set_attribute(int32_t attribute, int32_t value)
 	return m_sensor_device->set_attribute(m_handle.id, attribute, value);
 }
 
+int physical_sensor::set_attribute(char *attribute, char *value, int value_len)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	return m_sensor_device->set_attribute_str(m_handle.id, attribute, value, value_len);
+}
+
 bool physical_sensor::set_wakeup(int wakeup)
 {
 	return false;
@@ -184,16 +201,16 @@ bool physical_sensor::get_sensor_info(sensor_info &info)
 	info.set_type(get_type());
 	info.set_id(get_id());
 	info.set_privilege(SENSOR_PRIVILEGE_PUBLIC); // FIXME
-	info.set_name(m_handle.info.model_name);
-	info.set_vendor(m_handle.info.vendor);
-	info.set_min_range(m_handle.info.min_range);
-	info.set_max_range(m_handle.info.max_range);
-	info.set_resolution(m_handle.info.resolution);
-	info.set_min_interval(m_handle.info.min_interval);
+	info.set_name(m_handle.model_name);
+	info.set_vendor(m_handle.vendor);
+	info.set_min_range(m_handle.min_range);
+	info.set_max_range(m_handle.max_range);
+	info.set_resolution(m_handle.resolution);
+	info.set_min_interval(m_handle.min_interval);
 	info.set_fifo_count(0); // FIXME
-	info.set_max_batch_count(m_handle.info.max_batch_count);
+	info.set_max_batch_count(m_handle.max_batch_count);
 	info.set_supported_event(get_event_type());
-	info.set_wakeup_supported(m_handle.info.wakeup_supported);
+	info.set_wakeup_supported(m_handle.wakeup_supported);
 
 	return true;
 }

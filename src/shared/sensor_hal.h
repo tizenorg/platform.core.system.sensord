@@ -1,7 +1,5 @@
 /*
- * libsensord-share
- *
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,17 +98,6 @@ typedef enum {
 	SENSOR_DEVICE_ROTATION_VECTOR_RAW,
 } sensor_device_type;
 
-typedef struct sensor_info_t {
-	const char *model_name;
-	const char *vendor;
-	float min_range;
-	float max_range;
-	float resolution;
-	int min_interval;
-	int max_batch_count;
-	bool wakeup_supported;
-} sensor_info_t;
-
 /*
  * A platform sensor handler is generated based on this handle
  * ID can be assigned from HAL developer. so it has to be unique in HAL.
@@ -120,7 +107,14 @@ typedef struct sensor_handle_t {
 	const char *name;
 	sensor_device_type type;
 	unsigned int event_type; // for Internal API
-	sensor_info_t info;
+	const char *model_name;
+	const char *vendor;
+	float min_range;
+	float max_range;
+	float resolution;
+	int min_interval;
+	int max_batch_count;
+	bool wakeup_supported;
 } sensor_handle_t;
 
 enum sensor_accuracy_t {
@@ -141,17 +135,29 @@ typedef struct sensor_data_t {
 	float values[SENSOR_DATA_VALUE_SIZE];
 } sensor_data_t;
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+#define SENSORHUB_DATA_VALUE_SIZE 4096
 
-#ifdef __cplusplus
+#if 0
+/* sensorhub_data_t */
+typedef struct sensorhub_data_t {
+	int accuracy;
+	unsigned long long timestamp;
+	int value_count;
+	char values[SENSORHUB_DATA_VALUE_SIZE];
+} sensorhub_data_t;
+#endif
+
 /*
  * Create devices
  */
 typedef void *sensor_device_t;
 typedef int (*create_t)(sensor_device_t **devices);
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#ifdef __cplusplus
 /*
  * Sensor device interface
  * 1 device must be abstracted from 1 device event node
@@ -174,6 +180,7 @@ public:
 	virtual bool set_interval(uint16_t id, unsigned long val) = 0;
 	virtual bool set_batch_latency(uint16_t id, unsigned long val) = 0;
 	virtual bool set_attribute(uint16_t id, int32_t attribute, int32_t value) = 0;
+	virtual bool set_attribute_str(uint16_t id, char *attribute, char *value, int value_len) = 0;
 
 	virtual int read_fd(uint16_t **ids) = 0;
 	virtual int get_data(uint16_t id, sensor_data_t **data, int *length) = 0;
