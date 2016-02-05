@@ -37,6 +37,7 @@ private:
 	int m_epfd;
 	std::queue<struct epoll_event> m_event_queue;
 
+	void init_poll_fd(void);
 	bool fill_event_queue(void);
 };
 

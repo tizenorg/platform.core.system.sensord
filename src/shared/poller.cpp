@@ -24,12 +24,12 @@
 
 poller::poller()
 {
-	m_epfd = epoll_create(EPOLL_MAX);
+	init_poll_fd();
 }
 
 poller::poller(int fd)
-: poller()
 {
+	init_poll_fd();
 	add_fd(fd);
 }
 
@@ -37,6 +37,11 @@ poller::~poller()
 {
 	if (m_epfd)
 		close(m_epfd);
+}
+
+void poller::init_poll_fd(void)
+{
+	m_epfd = epoll_create(EPOLL_MAX);
 }
 
 bool poller::add_fd(int fd)
@@ -94,7 +99,7 @@ bool poller::poll(struct epoll_event &event)
 			m_event_queue.pop();
 
 			if (event.events & EPOLLERR) {
-				ERR("Poll error!");
+				DBG("Poll error!");
 				return false;
 			}
 
