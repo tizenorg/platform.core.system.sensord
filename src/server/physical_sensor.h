@@ -52,6 +52,7 @@ private:
 	virtual bool set_interval(unsigned long interval);
 	virtual bool set_batch_latency(unsigned long latency);
 	virtual int set_attribute(int32_t attribute, int32_t value);
+	virtual int set_attribute(char *attribute, char *value, int value_len);
 	virtual bool set_wakeup(int wakeup);
 	virtual bool on_start(void);
 	virtual bool on_stop(void);

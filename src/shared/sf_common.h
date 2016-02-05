@@ -149,7 +149,7 @@ typedef struct  {
 
 typedef struct  {
 	int data_len;
-	int data;
+	char data[0];
 } cmd_send_sensorhub_data_t;
 
 #define EVENT_CHANNEL_MAGIC 0xCAFECAFE

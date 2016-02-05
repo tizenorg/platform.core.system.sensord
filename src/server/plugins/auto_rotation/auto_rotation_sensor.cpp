@@ -255,6 +255,9 @@ bool auto_rotation_sensor::check_lib(void)
 
 auto_rotation_alg *auto_rotation_sensor::get_alg()
 {
-	return new auto_rotation_alg_emul();
+	auto_rotation_alg *alg = new(std::nothrow) auto_rotation_alg_emul();
+	retvm_if(!alg, NULL, "Failed to allocate memory");
+
+	return alg;
 }
 

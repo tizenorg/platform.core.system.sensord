@@ -31,5 +31,6 @@ add_subdirectory(src)
 
 IF("${TEST_SUITE}" STREQUAL "ON")
 add_subdirectory(test)
+add_subdirectory(sensorctl)
 ENDIF()
 

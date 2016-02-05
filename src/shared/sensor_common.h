@@ -55,13 +55,16 @@ typedef enum {
 #define SENSOR_HUB_DATA_SIZE	4096
 
 typedef struct sensorhub_data_t {
-    int version;
-    int sensorhub;
-    int type;
-    int hub_data_size;
-    unsigned long long timestamp;
-    char hub_data[SENSOR_HUB_DATA_SIZE];
-    float data[16];
+	int accuracy;
+	unsigned long long timestamp;
+	int value_count;
+	char values[SENSOR_HUB_DATA_SIZE];
+	char hub_data[SENSOR_HUB_DATA_SIZE];
+	int version;
+	int sensorhub;
+	int type;
+	int hub_data_size;
+	float data[16];
 } sensorhub_data_t;
 
 /*

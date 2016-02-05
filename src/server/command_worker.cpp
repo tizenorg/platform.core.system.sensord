@@ -833,7 +833,7 @@ bool command_worker::cmd_send_sensorhub_data(void *payload)
 		goto out;
 	}
 
-	ret_value = m_module->set_attribute(cmd->data, cmd->data_len);
+	ret_value = m_module->set_attribute("key", cmd->data, cmd->data_len);
 
 out:
 	if (!send_cmd_done(ret_value))

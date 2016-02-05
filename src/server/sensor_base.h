@@ -53,6 +53,7 @@ public:
 
 	virtual bool flush(void);
 	virtual int set_attribute(int32_t attribute, int32_t value);
+	virtual int set_attribute(char *attribute, char *value, int value_size);
 
 	/* start/stop */
 	bool start(void);
