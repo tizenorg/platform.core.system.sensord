@@ -53,7 +53,6 @@ private:
 
 	void dispatch_event(void);
 	void send_sensor_events(std::vector<void *> &events);
-	void send_sensorhub_events(void *events);
 	static client_info_manager& get_client_info_manager(void);
 	static sensor_event_queue& get_event_queue(void);
 

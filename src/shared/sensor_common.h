@@ -51,23 +51,6 @@ typedef enum {
 	SENSOR_PRIVILEGE_INTERNAL,
 } sensor_privilege_t;
 
-#define SENSOR_HUB_DATA_SIZE	4096
-
-typedef struct sensorhub_data_t {
-	int accuracy;
-	unsigned long long timestamp;
-	int value_count;
-	char values[SENSOR_HUB_DATA_SIZE];
-
-	/* deprecated */
-	char hub_data[SENSOR_HUB_DATA_SIZE];
-	int version;
-	int sensorhub;
-	int type;
-	int hub_data_size;
-	float data[16];
-} sensorhub_data_t;
-
 /*
  *	To prevent naming confliction as using same enums as sensor CAPI use
  */
