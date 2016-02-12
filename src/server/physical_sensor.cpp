@@ -163,10 +163,10 @@ int physical_sensor::set_attribute(int32_t attribute, int32_t value)
 	if (!m_sensor_device)
 		return false;
 
-	return m_sensor_device->set_attribute(m_handle.id, attribute, value);
+	return m_sensor_device->set_attribute_int(m_handle.id, attribute, value);
 }
 
-int physical_sensor::set_attribute(char *attribute, char *value, int value_len)
+int physical_sensor::set_attribute(int32_t attribute, char *value, int value_len)
 {
 	AUTOLOCK(m_mutex);
 

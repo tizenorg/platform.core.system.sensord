@@ -93,7 +93,7 @@ int sensor_base::set_attribute(int32_t cmd, int32_t value)
 	return -1;
 }
 
-int sensor_base::set_attribute(char *attribute, char *value, int value_size)
+int sensor_base::set_attribute(int32_t attribute, char *value, int value_size)
 {
 	return -1;
 }
