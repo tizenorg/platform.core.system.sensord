@@ -136,53 +136,44 @@ void sensor_event_dispatcher::dispatch_event(void)
 	INFO("Event Dispatcher started");
 
 	while (true) {
-		bool is_hub_event = false;
 		void *seed_event = get_event_queue().pop();
 		unsigned int event_type = *((unsigned int *)(seed_event));
 
-		if (is_sensorhub_event(event_type))
-			is_hub_event = true;
+		vector<void *> sensor_events;
+		sensor_events.push_back(seed_event);
 
-		if (is_hub_event) {
-			sensorhub_event_t *sensorhub_event = (sensorhub_event_t *)seed_event;
-			send_sensorhub_events(sensorhub_event);
-		} else {
-			vector<void *> sensor_events;
-			sensor_events.push_back(seed_event);
+		virtual_sensors v_sensors = get_active_virtual_sensors();
 
-			virtual_sensors v_sensors = get_active_virtual_sensors();
+		auto it_v_sensor = v_sensors.begin();
 
-			auto it_v_sensor = v_sensors.begin();
+		while (it_v_sensor != v_sensors.end()) {
+			int synthesized_cnt;
+			v_sensor_events.clear();
+			(*it_v_sensor)->synthesize(*((sensor_event_t *)seed_event));
+			synthesized_cnt = v_sensor_events.size();
 
-			while (it_v_sensor != v_sensors.end()) {
-				int synthesized_cnt;
-				v_sensor_events.clear();
-				(*it_v_sensor)->synthesize(*((sensor_event_t *)seed_event));
-				synthesized_cnt = v_sensor_events.size();
-
-				for (int i = 0; i < synthesized_cnt; ++i) {
-					sensor_event_t *v_event = (sensor_event_t*)malloc(sizeof(sensor_event_t));
-					if (!v_event) {
-						ERR("Failed to allocate memory");
-						continue;
-					}
-
-					memcpy(v_event, &v_sensor_events[i], sizeof(sensor_event_t));
-					sensor_events.push_back(v_event);
+			for (int i = 0; i < synthesized_cnt; ++i) {
+				sensor_event_t *v_event = (sensor_event_t*)malloc(sizeof(sensor_event_t));
+				if (!v_event) {
+					ERR("Failed to allocate memory");
+					continue;
 				}
 
-				++it_v_sensor;
+				memcpy(v_event, &v_sensor_events[i], sizeof(sensor_event_t));
+				sensor_events.push_back(v_event);
 			}
 
-			sort_sensor_events(sensor_events);
-
-			for (unsigned int i = 0; i < sensor_events.size(); ++i) {
-				if (is_record_event(((sensor_event_t *)(sensor_events[i]))->event_type))
-					put_last_event(((sensor_event_t *)(sensor_events[i]))->event_type, *((sensor_event_t *)(sensor_events[i])));
-			}
-
-			send_sensor_events(sensor_events);
+			++it_v_sensor;
 		}
+
+		sort_sensor_events(sensor_events);
+
+		for (unsigned int i = 0; i < sensor_events.size(); ++i) {
+			if (is_record_event(((sensor_event_t *)(sensor_events[i]))->event_type))
+				put_last_event(((sensor_event_t *)(sensor_events[i]))->event_type, *((sensor_event_t *)(sensor_events[i])));
+		}
+
+		send_sensor_events(sensor_events);
 	}
 }
 
@@ -236,43 +227,6 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 		free(sensor_events->data);
 		free(sensor_events);
 	}
-}
-
-void sensor_event_dispatcher::send_sensorhub_events(void* events)
-{
-	sensorhub_event_t *sensor_hub_events;
-	client_info_manager& client_info_manager = get_client_info_manager();
-
-	const int RESERVED_CLIENT_CNT = 20;
-	static client_id_vec id_vec(RESERVED_CLIENT_CNT);
-
-	sensor_hub_events = (sensorhub_event_t *)events;
-
-	sensor_id_t sensor_id;
-	unsigned int event_type;
-
-	sensor_id = sensor_hub_events->sensor_id;
-	event_type = sensor_hub_events->event_type;
-
-	id_vec.clear();
-	client_info_manager.get_listener_ids(sensor_id, event_type, id_vec);
-
-	auto it_client_id = id_vec.begin();
-
-	while (it_client_id != id_vec.end()) {
-		csocket client_socket;
-		client_info_manager.get_event_socket(*it_client_id, client_socket);
-		bool ret = (client_socket.send(sensor_hub_events, sizeof(sensorhub_event_t)) > 0);
-
-		if (ret)
-			DBG("Event[0x%x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
-		else
-			ERR("Failed to send event[0x%x] to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
-
-		++it_client_id;
-	}
-
-	free(sensor_hub_events);
 }
 
 client_info_manager& sensor_event_dispatcher::get_client_info_manager(void)

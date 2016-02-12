@@ -166,13 +166,6 @@ typedef struct sensor_event_t {
 	sensor_data_t *data;
 } sensor_event_t;
 
-typedef struct sensorhub_event_t {
-	unsigned int event_type;
-	sensor_id_t sensor_id;
-	unsigned int data_length;
-	sensorhub_data_t data;
-} sensorhub_event_t;
-
 typedef void *(*cmd_func_t)(void *data, void *cb_data);
 
 typedef std::vector<unsigned int> event_type_vector;
