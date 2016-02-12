@@ -30,7 +30,7 @@
 #define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
 /* TODO: this macro should be adjusted */
-#define EVENT_BUFFER_SIZE sizeof(sensorhub_event_t)
+#define EVENT_BUFFER_SIZE 4224
 
 using std::thread;
 using std::pair;
@@ -167,40 +167,29 @@ void sensor_event_listener::handle_events(void* event)
 	int accuracy = SENSOR_ACCURACY_GOOD;
 
 	unsigned int event_type = *((unsigned int *)(event));
-	bool is_hub_event = is_sensorhub_event(event_type);
 
 	client_callback_info* callback_info = NULL;
 	vector<client_callback_info *> client_callback_infos;
 
-	if (is_hub_event) {
-		sensorhub_event_t *sensor_hub_event = (sensorhub_event_t *)event;
-		sensor_id = sensor_hub_event->sensor_id;
-		sensor_data = &(sensor_hub_event->data);
-		cur_time = sensor_hub_event->data.timestamp;
+	sensor_event_t *sensor_event = (sensor_event_t *)event;
+	sensor_id = sensor_event->sensor_id;
+	sensor_event->data = (sensor_data_t *)((char *)sensor_event + sizeof(sensor_event_t));
+	sensor_data = sensor_event->data;
+	cur_time = sensor_event->data->timestamp;
+	accuracy = sensor_event->data->accuracy;
 
-		event_data.event_data = &(sensor_hub_event->data);
-		event_data.event_data_size = sizeof(sensor_hub_event->data);
+	if (is_single_state_event(event_type)) {
+		single_state_event_data = (int) sensor_event->data->values[0];
+		event_data.event_data = (void *)&(single_state_event_data);
+		event_data.event_data_size = sizeof(single_state_event_data);
+	} else if (is_panning_event(event_type)) {
+		panning_data.x = (int)sensor_event->data->values[0];
+		panning_data.y = (int)sensor_event->data->values[1];
+		event_data.event_data = (void *)&panning_data;
+		event_data.event_data_size = sizeof(panning_data);
 	} else {
-		sensor_event_t *sensor_event = (sensor_event_t *)event;
-		sensor_id = sensor_event->sensor_id;
-		sensor_event->data = (sensor_data_t *)((char *)sensor_event + sizeof(sensor_event_t));
-		sensor_data = sensor_event->data;
-		cur_time = sensor_event->data->timestamp;
-		accuracy = sensor_event->data->accuracy;
-
-		if (is_single_state_event(event_type)) {
-			single_state_event_data = (int) sensor_event->data->values[0];
-			event_data.event_data = (void *)&(single_state_event_data);
-			event_data.event_data_size = sizeof(single_state_event_data);
-		} else if (is_panning_event(event_type)) {
-			panning_data.x = (int)sensor_event->data->values[0];
-			panning_data.y = (int)sensor_event->data->values[1];
-			event_data.event_data = (void *)&panning_data;
-			event_data.event_data_size = sizeof(panning_data);
-		} else {
-			event_data.event_data = &(sensor_event->data);
-			event_data.event_data_size = sizeof(sensor_event->data);
-		}
+		event_data.event_data = &(sensor_event->data);
+		event_data.event_data_size = sizeof(sensor_event->data);
 	}
 
 	{	/* scope for the lock */
@@ -283,56 +272,6 @@ client_callback_info* sensor_event_listener::get_callback_info(sensor_id_t senso
 	callback_info->maincontext = event_info->m_maincontext;
 	callback_info->sensor_data = sensor_data;
 	callback_info->buffer = buffer;
-
-	/*
-	if (event_info->m_cb_type == SENSOR_EVENT_CB) {
-		callback_info->sensor_data = new(std::nothrow) char[sizeof(sensor_data_t)];
-
-		if (!callback_info->sensor_data) {
-			ERR("Failed to allocate memory");
-			delete callback_info;
-			return NULL;
-		}
-
-		copy_sensor_data((sensor_data_t*) callback_info->sensor_data, (sensor_data_t*) sensor_data);
-	} else if (event_info->m_cb_type == SENSORHUB_EVENT_CB) {
-		callback_info->sensor_data = new(std::nothrow) char[sizeof(sensorhub_data_t)];
-
-		if (!callback_info->sensor_data) {
-			ERR("Failed to allocate memory");
-			delete callback_info;
-			return NULL;
-		}
-
-		copy_sensorhub_data((sensorhub_data_t*) callback_info->sensor_data, (sensorhub_data_t*) sensor_data);
-	} else if(event_info->m_cb_type == SENSOR_LEGACY_CB) {
-		sensor_event_data_t *dest_sensor_data;
-		sensor_event_data_t *src_sensor_data = (sensor_event_data_t *)sensor_data;
-		callback_info->sensor_data = new(std::nothrow) char[sizeof(sensor_event_data_t)];
-
-		if (!callback_info->sensor_data) {
-			ERR("Failed to allocate memory");
-			delete callback_info;
-			return NULL;
-		}
-
-		dest_sensor_data = (sensor_event_data_t *) callback_info->sensor_data;
-		dest_sensor_data->event_data_size = src_sensor_data->event_data_size;
-		dest_sensor_data->event_data = new(std::nothrow) char[src_sensor_data->event_data_size];
-
-		if (!dest_sensor_data->event_data) {
-			ERR("Failed to allocate memory");
-			delete[] (char *)(callback_info->sensor_data);
-			delete callback_info;
-			return NULL;
-		}
-
-		if (is_sensorhub_event(event_info->type))
-			copy_sensorhub_data((sensorhub_data_t*)dest_sensor_data->event_data, (sensorhub_data_t*)src_sensor_data->event_data);
-		else
-			memcpy(dest_sensor_data->event_data, src_sensor_data->event_data, src_sensor_data->event_data_size);
-	}
-	*/
 
 	return callback_info;
 }

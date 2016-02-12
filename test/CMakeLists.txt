@@ -14,6 +14,7 @@ add_definitions(-DPREFIX="${CMAKE_INSTALL_PREFIX}")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src/client)
 include_directories(${CMAKE_SOURCE_DIR}/src/shared)
+include_directories(${CMAKE_SOURCE_DIR}/src/hal)
 
 FOREACH(flag ${pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")

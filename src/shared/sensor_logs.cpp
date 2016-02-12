@@ -24,12 +24,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
-#include "sensor_logs.h"
 #include <dlog.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <sf_common.h>
-#include <sensor_types.h>
+#include "sensor_logs.h"
 
 #ifndef EXTAPI
 #define EXTAPI __attribute__((visibility("default")))
@@ -170,26 +168,4 @@ const char* get_client_name(void)
 	}
 
 	return client_name;
-}
-
-
-bool is_sensorhub_event(unsigned int event_type)
-{
-	if ((event_type >> EVENT_TYPE_SHIFT) == CONTEXT_SENSOR)
-		return true;
-
-	return false;
-}
-
-void copy_sensor_data(sensor_data_t *dest, sensor_data_t *src)
-{
-	memcpy(dest, src, offsetof(sensor_data_t, values));
-	memcpy(dest->values, src->values, src->value_count * sizeof(src->values[0]));
-}
-
-void copy_sensorhub_data(sensorhub_data_t *dest, sensorhub_data_t *src)
-{
-	memcpy(dest, src, offsetof(sensorhub_data_t, hub_data));
-	memcpy(dest->hub_data, src->hub_data, src->hub_data_size);
-	memcpy(dest->data, src->data, sizeof(src->data));
 }
