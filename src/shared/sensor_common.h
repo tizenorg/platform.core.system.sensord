@@ -37,8 +37,7 @@ extern "C"
 typedef union {
 	struct {
 		sensor_type_t type;
-		int16_t sensor_id;
-		int16_t device_id;
+		int32_t id;
 	} __attribute__((packed));
 	int64_t id;
 } sensor_id_t;

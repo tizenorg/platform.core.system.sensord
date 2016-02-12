@@ -37,10 +37,11 @@ public:
 	virtual sensor_type_t get_type(void);
 	virtual unsigned int get_event_type(void);
 	virtual const char* get_name(void);
+	virtual uint32_t get_hal_id(void);
 
 	int get_poll_fd();
 
-	virtual bool read_fd(std::vector<uint16_t> &ids);
+	virtual bool read_fd(std::vector<uint32_t> &ids);
 	virtual int get_data(sensor_data_t **data, int *length);
 	virtual bool flush(void);
 private:
@@ -48,6 +49,7 @@ private:
 
 	sensor_handle_t m_handle;
 	sensor_device *m_sensor_device;
+	uint32_t hal_id;
 
 	virtual bool set_interval(unsigned long interval);
 	virtual bool set_batch_latency(unsigned long latency);

@@ -103,7 +103,7 @@ typedef enum {
  * ID can be assigned from HAL developer. so it has to be unique in HAL.
  */
 typedef struct sensor_handle_t {
-	uint16_t id;
+	uint32_t id;
 	const char *name;
 	sensor_device_type type;
 	unsigned int event_type; // for Internal API
@@ -174,18 +174,18 @@ public:
 	virtual int get_poll_fd(void) = 0;
 	virtual int get_sensors(const sensor_handle_t **sensors) = 0;
 
-	virtual bool enable(uint16_t id) = 0;
-	virtual bool disable(uint16_t id) = 0;
+	virtual bool enable(uint32_t id) = 0;
+	virtual bool disable(uint32_t id) = 0;
 
-	virtual bool set_interval(uint16_t id, unsigned long val) = 0;
-	virtual bool set_batch_latency(uint16_t id, unsigned long val) = 0;
-	virtual bool set_attribute(uint16_t id, int32_t attribute, int32_t value) = 0;
-	virtual bool set_attribute_str(uint16_t id, char *attribute, char *value, int value_len) = 0;
+	virtual bool set_interval(uint32_t id, unsigned long val) = 0;
+	virtual bool set_batch_latency(uint32_t id, unsigned long val) = 0;
+	virtual bool set_attribute(uint32_t id, int32_t attribute, int32_t value) = 0;
+	virtual bool set_attribute_str(uint32_t id, char *attribute, char *value, int value_len) = 0;
 
-	virtual int read_fd(uint16_t **ids) = 0;
-	virtual int get_data(uint16_t id, sensor_data_t **data, int *length) = 0;
+	virtual int read_fd(uint32_t **ids) = 0;
+	virtual int get_data(uint32_t id, sensor_data_t **data, int *length) = 0;
 
-	virtual bool flush(uint16_t id) = 0;
+	virtual bool flush(uint32_t id) = 0;
 };
 #endif /* __cplusplus */
 

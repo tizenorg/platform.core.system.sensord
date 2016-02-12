@@ -38,7 +38,7 @@ using std::string;
 
 #define DEVICE_PLUGINS_DIR_PATH "/usr/lib/sensor"
 #define SENSOR_TYPE_SHIFT 32
-#define SENSOR_INDEX_SHIFT 16
+#define SENSOR_INDEX_MASK 0xFFFFFFFF
 
 sensor_loader::sensor_loader()
 {
@@ -96,10 +96,10 @@ bool sensor_loader::load_devices(const string &path, vector<sensor_device_t> &de
 
 physical_sensor* sensor_loader::create_sensor(sensor_handle_t handle, sensor_device *device)
 {
-	int16_t index;
+	int32_t index;
 	physical_sensor *sensor;
 
-	index = (int16_t) (m_sensors.count((sensor_type_t)handle.type));
+	index = (int32_t) (m_sensors.count((sensor_type_t)handle.type));
 
 	sensor = new(std::nothrow) physical_sensor();
 	if (!sensor) {
@@ -107,7 +107,7 @@ physical_sensor* sensor_loader::create_sensor(sensor_handle_t handle, sensor_dev
 		return NULL;
 	}
 
-	sensor->set_id((int64_t)handle.type << SENSOR_TYPE_SHIFT | index << SENSOR_INDEX_SHIFT | handle.id);
+	sensor->set_id((int64_t)handle.type << SENSOR_TYPE_SHIFT | index);
 	sensor->set_sensor_handle(handle);
 	sensor->set_sensor_device(device);
 
@@ -273,11 +273,11 @@ sensor_base* sensor_loader::get_sensor(sensor_id_t id)
 	vector<sensor_base *> sensors;
 
 	sensor_type_t type = static_cast<sensor_type_t> (id >> SENSOR_TYPE_SHIFT);
-	unsigned int index = (id >> SENSOR_INDEX_SHIFT) & 0xFFFF;
+	unsigned int index = (id & SENSOR_INDEX_MASK);
 
 	sensors = get_sensors(type);
 
-	if (sensors.size() <= index)
+	if (index >= sensors.size())
 		return NULL;
 
 	return sensors[index];

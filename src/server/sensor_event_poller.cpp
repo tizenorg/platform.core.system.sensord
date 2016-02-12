@@ -76,7 +76,7 @@ bool sensor_event_poller::add_poll_fd(int fd)
 
 bool sensor_event_poller::poll()
 {
-	std::vector<uint16_t> ids;
+	std::vector<uint32_t> ids;
 	while (true) {
 		int fd;
 		struct epoll_event poll_event;
@@ -96,7 +96,7 @@ bool sensor_event_poller::poll()
 	return true;
 }
 
-bool sensor_event_poller::read_fd(int fd, std::vector<uint16_t> &ids)
+bool sensor_event_poller::read_fd(int fd, std::vector<uint32_t> &ids)
 {
 	fd_sensors_t::iterator it;
 	physical_sensor *sensor;
@@ -115,7 +115,7 @@ bool sensor_event_poller::read_fd(int fd, std::vector<uint16_t> &ids)
 	return true;
 }
 
-bool sensor_event_poller::process_event(int fd, const std::vector<uint16_t> &ids)
+bool sensor_event_poller::process_event(int fd, const std::vector<uint32_t> &ids)
 {
 	physical_sensor *sensor;
 	std::pair<fd_sensors_t::iterator, fd_sensors_t::iterator> ret;
@@ -130,7 +130,7 @@ bool sensor_event_poller::process_event(int fd, const std::vector<uint16_t> &ids
 
 		sensor = it_sensor->second;
 
-		auto result = std::find(std::begin(ids), std::end(ids), (sensor->get_id()) & 0xFFFF);
+		auto result = std::find(std::begin(ids), std::end(ids), sensor->get_hal_id());
 
 		if (result == std::end(ids))
 			continue;

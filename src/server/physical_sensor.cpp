@@ -72,6 +72,11 @@ const char* physical_sensor::get_name(void)
 	return m_handle.name;
 }
 
+uint32_t physical_sensor::get_hal_id(void)
+{
+	return m_handle.id;
+}
+
 int physical_sensor::get_poll_fd()
 {
 	AUTOLOCK(m_mutex);
@@ -82,11 +87,11 @@ int physical_sensor::get_poll_fd()
 	return m_sensor_device->get_poll_fd();
 }
 
-bool physical_sensor::read_fd(std::vector<uint16_t> &ids)
+bool physical_sensor::read_fd(std::vector<uint32_t> &ids)
 {
 	AUTOLOCK(m_mutex);
 	int size;
-	uint16_t *_ids;
+	uint32_t *_ids;
 
 	if (!m_sensor_device)
 		return false;
