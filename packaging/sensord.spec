@@ -66,13 +66,14 @@ Sensor functional testing
 cp %{SOURCE1} .
 cp %{SOURCE2} .
 
-cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
+
+cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DMAJORVER=${MAJORVER} -DFULLVER=%{version} \
 	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
 	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
 	-DGYROSCOPE_UNCAL=%{gyroscope_uncal_state} -DAUTO_ROTATION=%{auto_rotation_state} \
-	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite} \
-	-DLIBDIR=%{_libdir} -DINCLUDEDIR=%{_includedir}
+	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite}
 
 %build
 make %{?jobs:-j%jobs}
@@ -114,7 +115,6 @@ systemctl daemon-reload
 %files -n libsensord-devel
 %defattr(-,root,root,-)
 %{_includedir}/sensor/*.h
-%{_includedir}/sensord-shared/*.h
 %{_libdir}/libsensor.so
 %{_libdir}/pkgconfig/sensor.pc
 %license LICENSE.APLv2

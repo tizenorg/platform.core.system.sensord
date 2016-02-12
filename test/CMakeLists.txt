@@ -37,9 +37,9 @@ SET_TARGET_PROPERTIES(multi-thread-performance-test PROPERTIES LINKER_LANGUAGE C
 
 target_link_libraries(api-test glib-2.0 dlog sensor)
 target_link_libraries(sensor-test glib-2.0 dlog sensor)
-target_link_libraries(multi-process-performance-test glib-2.0 dlog sensor)
+target_link_libraries(multi-process-performance-test glib-2.0 dlog sensor pthread)
 target_link_libraries(fusion-data-collection glib-2.0 dlog sensor)
-target_link_libraries(multi-thread-performance-test glib-2.0 dlog sensor)
+target_link_libraries(multi-thread-performance-test glib-2.0 dlog sensor pthread)
 
 INSTALL(TARGETS api-test DESTINATION /usr/bin/)
 INSTALL(TARGETS sensor-test DESTINATION /usr/bin/)

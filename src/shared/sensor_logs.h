@@ -44,6 +44,8 @@ extern "C"
 #define EVENT_TYPE_SHIFT 16
 #define SENSOR_TYPE_SHIFT 32
 
+#define USE_DLOG_LOG
+
 enum sf_log_type {
 	SF_LOG_PRINT_FILE		= 1,
 	SF_LOG_SYSLOG			= 2,
