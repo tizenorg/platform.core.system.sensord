@@ -137,7 +137,6 @@ typedef struct sensor_data_t {
 
 #define SENSORHUB_DATA_VALUE_SIZE 4096
 
-#if 0
 /* sensorhub_data_t */
 typedef struct sensorhub_data_t {
 	int accuracy;
@@ -145,7 +144,6 @@ typedef struct sensorhub_data_t {
 	int value_count;
 	char values[SENSORHUB_DATA_VALUE_SIZE];
 } sensorhub_data_t;
-#endif
 
 /*
  * Create devices

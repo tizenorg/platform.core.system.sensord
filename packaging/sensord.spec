@@ -51,6 +51,13 @@ Requires:   libsensord = %{version}-%{release}
 %description -n libsensord-devel
 Sensord shared library
 
+%package -n sensor-hal-devel
+Summary:    Sensord HAL interface
+Group:      System/Development
+
+%description -n sensor-hal-devel
+Sensord HAL interface
+
 %if %{build_test_suite} == "ON"
 %package -n sensor-test
 Summary:    Sensord library
@@ -117,6 +124,11 @@ systemctl daemon-reload
 %{_includedir}/sensor/*.h
 %{_libdir}/libsensor.so
 %{_libdir}/pkgconfig/sensor.pc
+%license LICENSE.APLv2
+
+%files -n sensor-hal-devel
+%defattr(-,root,root,-)
+%{_includedir}/sensor/sensor_hal.h
 %license LICENSE.APLv2
 
 %if %{build_test_suite} == "ON"
