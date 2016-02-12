@@ -15,9 +15,6 @@ ENDFOREACH(flag)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src/server)
-include_directories(${CMAKE_SOURCE_DIR}/src/shared)
-
 
 IF("${AUTO_ROTATION}" STREQUAL "ON")
 list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/auto_rotation")
@@ -122,3 +119,5 @@ set(PLUGIN_SRCS ${PLUGIN_SRCS} PARENT_SCOPE)
 set(DIR_INCLUDE ${DIR_INCLUDE} PARENT_SCOPE)
 set(PLUGIN_DEFS ${PLUGIN_DEFS} PARENT_SCOPE)
 
+# Installing files
+INSTALL(FILES virtual_sensors.xml virtual_sensors.xml DESTINATION etc)
