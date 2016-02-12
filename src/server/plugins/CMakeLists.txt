@@ -20,6 +20,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/shared)
 
 
 IF("${AUTO_ROTATION}" STREQUAL "ON")
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/plugins/auto_rotation)
 list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/auto_rotation")
 list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/auto_rotation/auto_rotation_alg.cpp")
 list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/auto_rotation/auto_rotation_alg_emul.cpp")
@@ -122,3 +123,5 @@ set(PLUGIN_SRCS ${PLUGIN_SRCS} PARENT_SCOPE)
 set(DIR_INCLUDE ${DIR_INCLUDE} PARENT_SCOPE)
 set(PLUGIN_DEFS ${PLUGIN_DEFS} PARENT_SCOPE)
 
+# Installing files
+INSTALL(FILES virtual_sensors.xml virtual_sensors.xml DESTINATION etc)

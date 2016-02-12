@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 2.6)
-project(sensord_src CXX)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(sensord_src CXX)
 
-include_directories(${CMAKE_SOURCE_DIR}/src/shared)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/client)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/shared)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-add_subdirectory(server)
-add_subdirectory(client)
-add_subdirectory(shared)
+ADD_SUBDIRECTORY(server)
+ADD_SUBDIRECTORY(client)
+ADD_SUBDIRECTORY(shared)
