@@ -20,137 +20,32 @@
 #ifndef _SENSOR_LOGS_H_
 #define _SENSOR_LOGS_H_
 
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif /* !__cplusplus */
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
+#include <dlog.h>
 #include <sys/types.h>
-#include <unistd.h>
-
-#if !defined(PATH_MAX)
-#define PATH_MAX 256
-#endif
-
-#if !defined(NAME_MAX)
-#define NAME_MAX 256
-#endif
-
 
 #define EVENT_TYPE_SHIFT 16
 #define SENSOR_TYPE_SHIFT 32
 
-#define USE_DLOG_LOG
-
-enum sf_log_type {
-	SF_LOG_PRINT_FILE		= 1,
-	SF_LOG_SYSLOG			= 2,
-	SF_LOG_DLOG			= 3,
-};
-
-enum sf_priority_type {
-	SF_LOG_ERR			= 1,
-	SF_LOG_DBG			= 2,
-	SF_LOG_INFO			= 3,
-	SF_LOG_WARN			= 4,
-};
-
-void sf_log(int type , int priority , const char *tag , const char *fmt , ...);
-
 #define MICROSECONDS(tv)        ((tv.tv_sec * 1000000ll) + tv.tv_usec)
 
-#ifndef __MODULE__
-#include <string.h>
-#define __MODULE__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-#endif
-
-//for new log system - dlog
 #ifdef LOG_TAG
 	#undef LOG_TAG
 #endif
 #define LOG_TAG	"SENSOR"
 
-#if defined(_DEBUG) || defined(USE_FILE_DEBUG)
-
-#define DbgPrint(fmt, arg...)   do { sf_log(SF_LOG_PRINT_FILE, 0, LOG_TAG , " [SF_MSG_PRT][%s:%d] " fmt"\n",__MODULE__, __LINE__, ##arg); } while(0)
-
-#endif
-
-#if defined(USE_SYSLOG_DEBUG)
-
-#define ERR(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_ERR, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define WARN(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_WARN, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define INFO(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_INFO, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define DBG(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_DBG, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-
-#define _E(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_ERR, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _W(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_WARN, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _I(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_INFO, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _D(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_DBG, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _T(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_DBG, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-
-
-#elif defined(_DEBUG) || defined(USE_DLOG_DEBUG)
-
-#define ERR(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_ERR, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define WARN(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_WARN, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define INFO(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_INFO, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define DBG(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_DBG, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-
-#define _E(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_ERR, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _W(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_WARN, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _I(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_INFO, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _D(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_DBG, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _T(fmt, arg...) do { sf_log(SF_LOG_SYSLOG, SF_LOG_DBG, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-
-#elif defined(USE_FILE_DEBUG)
-
-#define ERR(fmt, arg...)	do { sf_log(SF_LOG_PRINT_FILE, 0, LOG_TAG, "[SF_MSG_ERR][%s:%d] " fmt"\n",__MODULE__, __LINE__, ##arg); } while(0)
-#define WARN(fmt, arg...)	do { sf_log(SF_LOG_PRINT_FILE, 0, LOG_TAG, "[SF_MSG_WARN][%s:%d] " fmt"\n",__MODULE__, __LINE__, ##arg); } while(0)
-#define DBG(fmt, arg...)	do { sf_log(SF_LOG_PRINT_FILE, 0, LOG_TAG, "[SF_MSG_DBG][%s:%d] " fmt"\n",__MODULE__, __LINE__, ##arg); } while(0)
-#define INFO(fmt, arg...)	do { sf_log(SF_LOG_PRINT_FILE, 0, LOG_TAG, "[SF_MSG_INFO][%s:%d] " fmt"\n",__MODULE__, __LINE__, ##arg); } while(0)
-
-#define _E(fmt, arg...)	do { sf_log(SF_LOG_PRINT_FILE, 0, LOG_TAG ,"[SF_MSG_ERR][%s:%d] " fmt"\n",__MODULE__, __LINE__, ##arg); } while(0)
-#define _W(fmt, arg...)	do { sf_log(SF_LOG_PRINT_FILE, 0, LOG_TAG ,"[SF_MSG_WARN][%s:%d] " fmt"\n",__MODULE__, __LINE__, ##arg); } while(0)
-#define _I(fmt, arg...)	do { sf_log(SF_LOG_PRINT_FILE, 0, LOG_TAG ,"[SF_MSG_INFO][%s:%d] " fmt"\n",__MODULE__, __LINE__, ##arg); } while(0)
-#define _D(fmt, arg...)	do { sf_log(SF_LOG_PRINT_FILE, 0, LOG_TAG ,"[SF_MSG_DBG][%s:%d] " fmt"\n",__MODULE__, __LINE__, ##arg); } while(0)
-#define _T(fmt, arg...)	do { sf_log(SF_LOG_PRINT_FILE, 0, LOG_TAG ,"[SF_MSG_TEMP][%s:%d] " fmt"\n",__MODULE__, __LINE__, ##arg); } while(0)
-
-#elif defined(USE_DLOG_LOG)
-
-#define ERR(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_ERR, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define WARN(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_WARN, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define INFO(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_INFO, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-
-#define DBG(...) do{} while(0)
-#define DbgPrint(...) do{} while(0)
-
-
-#define _E(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_ERR, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _W(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_WARN, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _I(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_INFO, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _D(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_DBG, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _T(...)
-
+#ifdef _DEBUG
+#define DBG SLOGD
 #else
-#define ERR(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_ERR, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define WARN(...) do{} while(0)
-#define DbgPrint(...) do{} while(0)
 #define DBG(...) do{} while(0)
-#define INFO(...) do{} while(0)
-
-#define _E(fmt, arg...) do { sf_log(SF_LOG_DLOG, SF_LOG_ERR, LOG_TAG, "%s:%s(%d)> " fmt, __MODULE__, __func__, __LINE__, ##arg); } while(0)
-#define _W(...) do{} while(0)
-#define _I(...) do{} while(0)
-#define _D(...) do{} while(0)
-#define _T(...) do{} while(0)
-
 #endif
 
+#define ERR SLOGE
+#define WARN SLOGW
+#define INFO SLOGI
+#define _E ERR
+#define _W WARN
+#define _I INFO
+#define _D DBG
 
 #if defined(_DEBUG)
 #  define warn_if(expr, fmt, arg...) do { \
@@ -214,6 +109,11 @@ void sf_log(int type , int priority , const char *tag , const char *fmt , ...);
 		} \
 	} while (0)
 
+#endif
+
+#ifdef __cplusplus
+extern "C"
+{
 #endif
 
 const char* get_client_name(void);

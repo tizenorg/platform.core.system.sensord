@@ -16,9 +16,10 @@
  * limitations under the License.
  *
  */
+#include <errno.h>
+#include <string.h>
 #include <sensor_logs.h>
 #include <poller.h>
-#include <sf_common.h>
 
 #define EPOLL_MAX 32
 

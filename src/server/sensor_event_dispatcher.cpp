@@ -17,9 +17,9 @@
  *
  */
 
+#include <command_common.h>
 #include <sensor_event_dispatcher.h>
 #include <sensor_logs.h>
-#include <sf_common.h>
 #include <thread>
 
 using std::thread;
@@ -137,7 +137,6 @@ void sensor_event_dispatcher::dispatch_event(void)
 
 	while (true) {
 		void *seed_event = get_event_queue().pop();
-		unsigned int event_type = *((unsigned int *)(seed_event));
 
 		vector<void *> sensor_events;
 		sensor_events.push_back(seed_event);

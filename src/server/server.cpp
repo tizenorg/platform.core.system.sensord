@@ -20,6 +20,7 @@
 #include <systemd/sd-daemon.h>
 #include <server.h>
 #include <sensor_loader.h>
+#include <command_common.h>
 #include <command_worker.h>
 #include <thread>
 #include <sys/epoll.h>

@@ -21,7 +21,6 @@
 #define _PHYSICAL_SENSOR_H_
 
 #include <sensor_base.h>
-#include <sf_common.h>
 #include <worker_thread.h>
 
 class physical_sensor : public sensor_base {

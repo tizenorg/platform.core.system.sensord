@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <command_channel.h>
 #include <client_common.h>
-#include <sf_common.h>
+#include <command_common.h>
 #include <sensor_info.h>
 #include <sensor_info_manager.h>
 

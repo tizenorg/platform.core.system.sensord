@@ -37,7 +37,6 @@
 #include <cmutex.h>
 #include <poller.h>
 
-#include <sf_common.h>
 #include <sensor_handle_info.h>
 #include <sensor_client_info.h>
 #include <command_channel.h>

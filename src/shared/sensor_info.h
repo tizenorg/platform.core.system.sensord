@@ -21,7 +21,6 @@
 #define _SENSOR_INFO_H_
 
 #include <stdint.h>
-#include <sf_common.h>
 #include <sensor_common.h>
 #include <sensor_types.h>
 #include <string>

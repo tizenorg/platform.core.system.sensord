@@ -25,6 +25,7 @@
 #include <string.h>
 #include <unordered_map>
 #include <glib.h>
+#include <sensor_internal.h>
 
 typedef std::unordered_map<unsigned int,reg_event_info> event_info_map;
 

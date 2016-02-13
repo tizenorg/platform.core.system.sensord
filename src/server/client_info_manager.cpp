@@ -17,6 +17,7 @@
  *
  */
 
+#include <command_common.h>
 #include <client_info_manager.h>
 #include <sensor_logs.h>
 #include <csocket.h>

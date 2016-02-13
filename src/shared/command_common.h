@@ -17,22 +17,16 @@
  *
  */
 
-#ifndef _SF_COMMON_H_
-#define _SF_COMMON_H_
+#ifndef _COMMAND_COMMON_H_
+#define _COMMAND_COMMON_H_
 
-#include <unistd.h>
 #include <sensor_common.h>
-#include <string>
-#include <vector>
-#include <sensor_logs.h>
 
 #define COMMAND_CHANNEL_PATH			"/tmp/sensord_command_socket"
 #define EVENT_CHANNEL_PATH				"/tmp/sensord_event_socket"
 
 #define MAX_HANDLE			256
 #define MAX_HANDLE_REACHED	-2
-
-#define CLIENT_ID_INVALID   -1
 
 enum packet_type_t {
 	CMD_NONE = 0,
@@ -53,24 +47,6 @@ enum packet_type_t {
 	CMD_SET_ATTRIBUTE_INT,
 	CMD_SET_ATTRIBUTE_STR,
 	CMD_CNT,
-};
-
-enum sensor_state_t {
-	SENSOR_STATE_UNKNOWN = -1,
-	SENSOR_STATE_STOPPED = 0,
-	SENSOR_STATE_STARTED = 1,
-	SENSOR_STATE_PAUSED = 2
-};
-
-enum poll_interval_t {
-	POLL_100HZ_MS	= 10,
-	POLL_50HZ_MS	= 20,
-	POLL_25HZ_MS	= 40,
-	POLL_20HZ_MS	= 50,
-	POLL_10HZ_MS	= 100,
-	POLL_5HZ_MS		= 200,
-	POLL_1HZ_MS		= 1000,
-	POLL_MAX_HZ_MS  = POLL_1HZ_MS,
 };
 
 typedef struct {
@@ -160,24 +136,6 @@ typedef struct {
 	int client_id;
 } event_channel_ready_t;
 
-typedef struct sensor_event_t {
-	unsigned int event_type;
-	sensor_id_t sensor_id;
-	unsigned int data_length;
-	sensor_data_t *data;
-} sensor_event_t;
-
 typedef void *(*cmd_func_t)(void *data, void *cb_data);
 
-typedef std::vector<unsigned int> event_type_vector;
-
-enum sensor_permission_t {
-	SENSOR_PERMISSION_NONE	= 0,
-	SENSOR_PERMISSION_STANDARD = (1 << 0),
-	SENSOR_PERMISSION_BIO	=  (1 << 1),
-};
-
-#define BIO_SENSOR_PRIVELEGE_NAME "sensord::bio"
-#define BIO_SENSOR_ACCESS_RIGHT "rw"
-
-#endif /* _SF_COMMON_H_ */
+#endif /* _COMMAND_COMMON_H_ */

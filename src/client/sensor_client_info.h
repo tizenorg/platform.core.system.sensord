@@ -25,7 +25,6 @@
 #include <unistd.h>
 #include <csocket.h>
 #include <string.h>
-#include <sf_common.h>
 #include <algorithm>
 #include <sstream>
 #include <unordered_map>
