@@ -20,7 +20,6 @@
 #ifndef _SENSOR_USAGE_H_
 #define _SENSOR_USAGE_H_
 
-#include <sf_common.h>
 #include <algorithm>
 #include <vector>
 

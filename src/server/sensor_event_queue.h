@@ -20,13 +20,13 @@
 #ifndef _SENSOR_EVENT_QUEUE_H_
 #define _SENSOR_EVENT_QUEUE_H_
 
-#include <sf_common.h>
 #include <cstring>
 #include <utility>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
 #include <set>
+#include <sensor_common.h>
 
 extern std::set<unsigned int> priority_list;
 

@@ -24,8 +24,10 @@
 #include <sensor_types.h>
 #include <stdint.h>
 
-#ifndef DEPRECATED
-#define DEPRECATED __attribute__((deprecated))
+#define CLIENT_ID_INVALID   -1
+
+#ifndef NAME_MAX
+#define NAME_MAX 256
 #endif
 
 #ifdef __cplusplus
@@ -46,11 +48,6 @@ typedef int64_t sensor_id_t;
 
 typedef void *sensor_t;
 
-typedef enum {
-	SENSOR_PRIVILEGE_PUBLIC,
-	SENSOR_PRIVILEGE_INTERNAL,
-} sensor_privilege_t;
-
 /*
  *	To prevent naming confliction as using same enums as sensor CAPI use
  */
@@ -66,22 +63,26 @@ enum sensor_option_t {
 typedef enum sensor_option_t sensor_option_e;
 #endif
 
-/*
- *	To prevent naming confliction as using same enums as sensor CAPI use
- */
-#ifndef __SENSOR_H__
 enum sensor_wakeup_t {
 	SENSOR_WAKEUP_UNKNOWN = -1,
 	SENSOR_WAKEUP_OFF = 0,
 	SENSOR_WAKEUP_ON = 1,
 };
 
-typedef enum sensor_wakeup_t sensor_wakeup_e;
-#endif
+enum poll_interval_t {
+	POLL_100HZ_MS	= 10,
+	POLL_50HZ_MS	= 20,
+	POLL_25HZ_MS	= 40,
+	POLL_20HZ_MS	= 50,
+	POLL_10HZ_MS	= 100,
+	POLL_5HZ_MS		= 200,
+	POLL_1HZ_MS		= 1000,
+	POLL_MAX_HZ_MS  = POLL_1HZ_MS,
+};
 
 enum sensor_interval_t {
-	SENSOR_INTERVAL_FASTEST = 0,
-	SENSOR_INTERVAL_NORMAL = 200,
+	SENSOR_INTERVAL_FASTEST = POLL_100HZ_MS,
+	SENSOR_INTERVAL_NORMAL = POLL_5HZ_MS,
 };
 
 typedef enum {
@@ -91,9 +92,39 @@ typedef enum {
 	CONDITION_LESS_THAN,
 } condition_op_t;
 
+enum sensor_state_t {
+	SENSOR_STATE_UNKNOWN = -1,
+	SENSOR_STATE_STOPPED = 0,
+	SENSOR_STATE_STARTED = 1,
+	SENSOR_STATE_PAUSED = 2
+};
+
+typedef enum {
+	SENSOR_PRIVILEGE_PUBLIC,
+	SENSOR_PRIVILEGE_INTERNAL,
+} sensor_privilege_t;
+
+enum sensor_permission_t {
+	SENSOR_PERMISSION_NONE = 0,
+	SENSOR_PERMISSION_STANDARD = (1 << 0),
+	SENSOR_PERMISSION_BIO = (1 << 1)
+};
+
+typedef struct sensor_event_t {
+	unsigned int event_type;
+	sensor_id_t sensor_id;
+	unsigned int data_length;
+	sensor_data_t *data;
+} sensor_event_t;
+
 #ifdef __cplusplus
 }
 #endif
 
+#ifdef __cplusplus
+#include <vector>
+
+typedef std::vector<unsigned int> event_type_vector;
+#endif
 
 #endif /* __SENSOR_COMMON_H__ */

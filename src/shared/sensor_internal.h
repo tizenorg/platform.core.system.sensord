@@ -20,10 +20,6 @@
 #ifndef __SENSOR_INTERNAL_H__
 #define __SENSOR_INTERNAL_H__
 
-#ifndef DEPRECATED
-#define DEPRECATED __attribute__((deprecated))
-#endif
-
 #ifndef API
 #define API __attribute__((visibility("default")))
 #endif

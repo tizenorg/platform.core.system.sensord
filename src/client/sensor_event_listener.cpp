@@ -19,7 +19,6 @@
 
 #include <sensor_event_listener.h>
 #include <client_common.h>
-#include <sf_common.h>
 #include <sensor_info_manager.h>
 
 #include <thread>
@@ -472,12 +471,12 @@ void sensor_event_listener::stop_event_listener(void)
 	if (m_thread_state != THREAD_STATE_TERMINATE) {
 		m_thread_state = THREAD_STATE_STOP;
 
-		_D("%s is waiting listener thread[state: %d] to be terminated", get_client_name(), m_thread_state);
+		DBG("%s is waiting listener thread[state: %d] to be terminated", get_client_name(), m_thread_state);
 		if (m_thread_cond.wait_for(u, std::chrono::seconds(THREAD_TERMINATING_TIMEOUT))
 			== std::cv_status::timeout)
-			_E("Fail to stop listener thread after waiting %d seconds", THREAD_TERMINATING_TIMEOUT);
+			ERR("Fail to stop listener thread after waiting %d seconds", THREAD_TERMINATING_TIMEOUT);
 		else
-			_D("Listener thread for %s is terminated", get_client_name());
+			DBG("Listener thread for %s is terminated", get_client_name());
 	}
 }
 

@@ -19,7 +19,6 @@
 
 #include <sensor_event_listener.h>
 #include <client_common.h>
-#include <sf_common.h>
 #include <sensor_info_manager.h>
 
 #include <thread>

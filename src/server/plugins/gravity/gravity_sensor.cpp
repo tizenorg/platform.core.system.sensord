@@ -26,7 +26,6 @@
 #include <sys/types.h>
 #include <dlfcn.h>
 #include <sensor_logs.h>
-#include <sf_common.h>
 #include <gravity_sensor.h>
 #include <sensor_loader.h>
 #include <virtual_sensor_config.h>

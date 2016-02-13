@@ -20,7 +20,6 @@
 #ifndef _SENSOR_EVENT_DISPATCHER_H_
 #define _SENSOR_EVENT_DISPATCHER_H_
 
-#include <sf_common.h>
 #include <sensor_event_queue.h>
 #include <client_info_manager.h>
 #include <csocket.h>

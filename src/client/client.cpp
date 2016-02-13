@@ -17,7 +17,6 @@
  *
  */
 
-#include <sf_common.h>
 #include <sensor_internal_deprecated.h>
 #include <sensor_internal.h>
 #include <sensor_event_listener.h>
@@ -63,7 +62,7 @@ void init_client(void)
 
 static void good_bye(void)
 {
-	_D("Good bye! %s\n", get_client_name());
+	DBG("Good bye! %s\n", get_client_name());
 	clean_up();
 }
 
@@ -72,14 +71,14 @@ static int g_power_save_state_cb_cnt = 0;
 static void set_power_save_state_cb(void)
 {
 	if (g_power_save_state_cb_cnt < 0)
-		_E("g_power_save_state_cb_cnt(%d) is wrong", g_power_save_state_cb_cnt);
+		ERR("g_power_save_state_cb_cnt(%d) is wrong", g_power_save_state_cb_cnt);
 
 	++g_power_save_state_cb_cnt;
 
 	if (g_power_save_state_cb_cnt == 1) {
-		_D("Power save callback is registered");
+		DBG("Power save callback is registered");
 		g_power_save_state = get_power_save_state();
-		_D("power_save_state = [%d]", g_power_save_state);
+		DBG("power_save_state = [%d]", g_power_save_state);
 		vconf_notify_key_changed(VCONFKEY_PM_STATE, power_save_state_cb, NULL);
 	}
 }
@@ -89,10 +88,10 @@ static void unset_power_save_state_cb(void)
 	--g_power_save_state_cb_cnt;
 
 	if (g_power_save_state_cb_cnt < 0)
-		_E("g_power_save_state_cb_cnt(%d) is wrong", g_power_save_state_cb_cnt);
+		ERR("g_power_save_state_cb_cnt(%d) is wrong", g_power_save_state_cb_cnt);
 
 	if (g_power_save_state_cb_cnt == 0) {
-		_D("Power save callback is unregistered");
+		DBG("Power save callback is unregistered");
 		vconf_ignore_key_changed(VCONFKEY_PM_STATE, power_save_state_cb);
 	}
 }
@@ -106,7 +105,7 @@ static void clean_up(void)
 	auto it_handle = handles.begin();
 
 	while (it_handle != handles.end()) {
-		sf_disconnect(*it_handle);
+		sensord_disconnect(*it_handle);
 		++it_handle;
 	}
 }
@@ -136,12 +135,12 @@ static void power_save_state_cb(keynode_t *node, void *data)
 	cur_power_save_state = get_power_save_state();
 
 	if (cur_power_save_state == g_power_save_state) {
-		_T("g_power_save_state NOT changed : [%d]", cur_power_save_state);
+		DBG("g_power_save_state NOT changed : [%d]", cur_power_save_state);
 		return;
 	}
 
 	g_power_save_state = cur_power_save_state;
-	_D("power_save_state: %d noti to %s", g_power_save_state, get_client_name());
+	DBG("power_save_state: %d noti to %s", g_power_save_state, get_client_name());
 
 	client_info.get_listening_sensors(sensors);
 
@@ -162,7 +161,7 @@ static void restore_session(void)
 {
 	AUTOLOCK(lock);
 
-	_I("Trying to restore session for %s", get_client_name());
+	INFO("Trying to restore session for %s", get_client_name());
 
 	command_channel *cmd_channel;
 	int client_id;
@@ -183,7 +182,7 @@ static void restore_session(void)
 		retm_if (!cmd_channel, "Failed to allocate memory");
 
 		if (!cmd_channel->create_channel()) {
-			_E("%s failed to create command channel for %s", get_client_name(), get_sensor_name(*it_sensor));
+			ERR("%s failed to create command channel for %s", get_client_name(), get_sensor_name(*it_sensor));
 			delete cmd_channel;
 			goto FAILED;
 		}
@@ -193,7 +192,7 @@ static void restore_session(void)
 		if (first_connection) {
 			first_connection = false;
 			if (!cmd_channel->cmd_get_id(client_id)) {
-				_E("Failed to get client id");
+				ERR("Failed to get client id");
 				goto FAILED;
 			}
 
@@ -204,7 +203,7 @@ static void restore_session(void)
 		cmd_channel->set_client_id(client_id);
 
 		if (!cmd_channel->cmd_hello(*it_sensor)) {
-			_E("Sending cmd_hello(%s, %d) failed for %s", get_sensor_name(*it_sensor), client_id, get_client_name());
+			ERR("Sending cmd_hello(%s, %d) failed for %s", get_sensor_name(*it_sensor), client_id, get_client_name());
 			goto FAILED;
 		}
 
@@ -215,20 +214,20 @@ static void restore_session(void)
 
 		client_info.get_sensor_rep(*it_sensor, cur_rep);
 		if (!change_sensor_rep(*it_sensor, prev_rep, cur_rep)) {
-			_E("Failed to change rep(%s) for %s", get_sensor_name(*it_sensor), get_client_name());
+			ERR("Failed to change rep(%s) for %s", get_sensor_name(*it_sensor), get_client_name());
 			goto FAILED;
 		}
 
 		++it_sensor;
 	}
 
-	_I("Succeeded to restore session for %s", get_client_name());
+	INFO("Succeeded to restore session for %s", get_client_name());
 
 	return;
 
 FAILED:
 	event_listener.clear();
-	_E("Failed to restore session for %s", get_client_name());
+	ERR("Failed to restore session for %s", get_client_name());
 }
 
 static bool get_events_diff(event_type_vector &a_vec, event_type_vector &b_vec, event_type_vector &add_vec, event_type_vector &del_vec)

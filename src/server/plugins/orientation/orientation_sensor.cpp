@@ -26,7 +26,6 @@
 #include <sys/types.h>
 #include <dlfcn.h>
 #include <sensor_logs.h>
-#include <sf_common.h>
 #include <orientation_sensor.h>
 #include <sensor_loader.h>
 #include <orientation_filter.h>

@@ -21,7 +21,6 @@
 #define _CLIENT_SENSOR_RECORD_H_
 
 #include <sensor_internal.h>
-#include <sf_common.h>
 #include <sensor_usage.h>
 #include <csocket.h>
 #include <unordered_map>

@@ -20,8 +20,8 @@
 #ifndef _REG_EVENT_INFO_H_
 #define _REG_EVENT_INFO_H_
 
-#include <sensor_internal.h>
-#include <sf_common.h>
+#include <glib.h>
+#include <sensor_common.h>
 
 typedef enum {
 	SENSOR_EVENT_CB,

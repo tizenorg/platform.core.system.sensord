@@ -20,6 +20,7 @@
 #ifndef _COMMAND_WORKER_H_
 #define _COMMAND_WORKER_H_
 
+#include <command_common.h>
 #include <worker_thread.h>
 #include <client_info_manager.h>
 #include <sensor_event_dispatcher.h>

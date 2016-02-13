@@ -17,7 +17,7 @@
  *
  */
 
-#include <command_worker.h>
+#include <command_common.h>
 #include <sensor_loader.h>
 #include <sensor_info.h>
 #include <sensor_types.h>
@@ -25,8 +25,9 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include <permission_checker.h>
 #include <set>
+#include <permission_checker.h>
+#include <command_worker.h>
 
 using std::string;
 using std::vector;
