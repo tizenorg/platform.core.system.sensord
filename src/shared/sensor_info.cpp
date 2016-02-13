@@ -167,7 +167,7 @@ void sensor_info::set_wakeup_supported(bool supported)
 void sensor_info::get_raw_data(raw_data_t &data)
 {
 	put(data, (int) m_type);
-	put(data, (int64_t) (m_id));
+	put(data, m_id);
 	put(data, (int) m_privilege);
 	put(data, m_name);
 	put(data, m_vendor);
@@ -211,7 +211,7 @@ void sensor_info::set_raw_data(const char *data, int data_len)
 void sensor_info::show(void)
 {
 	INFO("Type = %d", m_type);
-	INFO("ID = 0x%llx", (uint64_t)m_id);
+	INFO("ID = 0x%llx", (int64_t)m_id);
 	INFO("Privilege = %d", (int)m_privilege);
 	INFO("Name = %s", m_name.c_str());
 	INFO("Vendor = %s", m_vendor.c_str());
