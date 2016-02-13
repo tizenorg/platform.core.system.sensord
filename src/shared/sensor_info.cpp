@@ -211,7 +211,7 @@ void sensor_info::set_raw_data(const char *data, int data_len)
 void sensor_info::show(void)
 {
 	INFO("Type = %d", m_type);
-	INFO("ID = 0x%llx", (uint64_t)m_id);
+	INFO("ID = 0x%llx", (int64_t)m_id);
 	INFO("Privilege = %d", (int)m_privilege);
 	INFO("Name = %s", m_name.c_str());
 	INFO("Vendor = %s", m_vendor.c_str());
