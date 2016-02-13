@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
 	signal_init();
 
-	sensor_loader::get_instance().load_sensors();
+	sensor_loader::get_instance().load();
 
 	server::get_instance().run();
 
