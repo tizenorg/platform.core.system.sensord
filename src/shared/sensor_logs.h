@@ -36,7 +36,7 @@
 #ifdef _DEBUG
 #define DBG SLOGD
 #else
-#define _D(...) do{} while(0)
+#define DBG(...) do{} while(0)
 #endif
 
 #define ERR SLOGE

@@ -38,14 +38,20 @@
 class sensor_base;
 
 typedef std::multimap<sensor_type_t, std::shared_ptr<sensor_base>> sensor_map_t;
+typedef std::map<sensor_type_t, sensor_base*> pre_sensor_map_t;
 
 class sensor_loader {
 private:
 	sensor_loader();
 
+	void init_pre_sensors(void);
+
 	bool load_devices(const std::string &path, std::vector<sensor_device_t> &devices, void* &handle);
 
-	physical_sensor* create_sensor(sensor_handle_t handle, sensor_device *device);
+	template <typename _sensor> sensor_base* create_sensor(const char *name);
+
+	physical_sensor* get_physical_sensor(sensor_type_t type);
+	void load_physical_sensor(sensor_handle_t handle, sensor_device *device);
 	bool load_physical_sensors(std::vector<sensor_device_t> &devices);
 
 	template <typename _sensor> void load_virtual_sensor(const char *name);
@@ -55,6 +61,7 @@ private:
 	bool get_paths_from_dir(const std::string &dir_path, std::vector<std::string> &plugin_paths);
 
 	sensor_map_t m_sensors;
+	pre_sensor_map_t m_pre_sensors;
 public:
 	static sensor_loader& get_instance();
 	bool load_sensors(void);
