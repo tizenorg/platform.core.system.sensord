@@ -330,6 +330,27 @@ bool sensord_set_option(int handle, int option);
 bool sensord_set_wakeup(int handle, int wakeup);
 
 /**
+ * @brief Set the attribute to a connected sensor 
+ *
+ * @param[in] handle a handle represensting a connected sensor.
+ * @param[in] attribute an attribute to change
+ * @param[in] value an attribute value
+ * @return true on success, otherwise false.
+ */
+bool sensord_set_attribute_int(int handle, int attribute, int value);
+
+/**
+ * @brief Set the attribute to a connected sensor 
+ *
+ * @param[in] handle a handle represensting a connected sensor.
+ * @param[in] attribute an attribute to change
+ * @param[in] value an attribute value
+ * @param[in] value_len the length of value
+ * @return true on success, otherwise false.
+ */
+bool sensord_set_attribute_str(int handle, int attribute, const char *value, int value_len);
+
+/**
  * @brief Send data to sensorhub
  *
  * @param[in] handle a handle represensting a connected context sensor.

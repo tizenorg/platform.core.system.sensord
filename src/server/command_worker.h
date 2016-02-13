@@ -74,9 +74,9 @@ private:
 	bool cmd_unset_batch(void *payload);
 	bool cmd_set_option(void *payload);
 	bool cmd_set_wakeup(void *payload);
-	bool cmd_set_command(void *payload);
 	bool cmd_get_data(void *payload);
-	bool cmd_send_sensorhub_data(void *payload);
+	bool cmd_set_attribute_int(void *payload);
+	bool cmd_set_attribute_str(void *payload);
 
 	void get_info(std::string &info);
 

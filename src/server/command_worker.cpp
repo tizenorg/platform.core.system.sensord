@@ -84,9 +84,9 @@ void command_worker::init_cmd_handlers(void)
 	m_cmd_handlers[CMD_SET_WAKEUP]			= &command_worker::cmd_set_wakeup;
 	m_cmd_handlers[CMD_SET_BATCH]			= &command_worker::cmd_set_batch;
 	m_cmd_handlers[CMD_UNSET_BATCH]			= &command_worker::cmd_unset_batch;
-	m_cmd_handlers[CMD_SET_COMMAND]			= &command_worker::cmd_set_command;
 	m_cmd_handlers[CMD_GET_DATA]			= &command_worker::cmd_get_data;
-	m_cmd_handlers[CMD_SEND_SENSORHUB_DATA]	= &command_worker::cmd_send_sensorhub_data;
+	m_cmd_handlers[CMD_SET_ATTRIBUTE_INT]	= &command_worker::cmd_set_attribute_int;
+	m_cmd_handlers[CMD_SET_ATTRIBUTE_STR]	= &command_worker::cmd_set_attribute_str;
 }
 
 void command_worker::get_sensor_list(int permissions, cpacket &sensor_list)
@@ -728,31 +728,6 @@ out:
 	return true;
 }
 
-bool command_worker::cmd_set_command(void *payload)
-{
-	cmd_set_command_t *cmd;
-	long ret_value = OP_ERROR;
-
-	DBG("CMD_SET_COMMAND  Handler invoked\n");
-
-	cmd = (cmd_set_command_t*)payload;
-
-	if (!is_permission_allowed()) {
-		ERR("Permission denied to set command for client [%d], for sensor [0x%llx] with cmd [%d]",
-			m_client_id, m_sensor_id, cmd->cmd);
-		ret_value = OP_ERROR;
-		goto out;
-	}
-
-	ret_value = m_module->set_attribute(cmd->cmd, cmd->value);
-
-out:
-	if (!send_cmd_done(ret_value))
-		ERR("Failed to send cmd_done to a client");
-
-	return true;
-}
-
 bool command_worker::cmd_get_data(void *payload)
 {
 	const unsigned int GET_DATA_MIN_INTERVAL = 10;
@@ -817,14 +792,39 @@ out:
 	return true;
 }
 
-bool command_worker::cmd_send_sensorhub_data(void *payload)
+bool command_worker::cmd_set_attribute_int(void *payload)
 {
-	cmd_send_sensorhub_data_t *cmd;
+	cmd_set_attribute_int_t *cmd;
+	long ret_value = OP_ERROR;
+
+	DBG("CMD_SET_COMMAND Handler invoked\n");
+
+	cmd = (cmd_set_attribute_int_t*)payload;
+
+	if (!is_permission_allowed()) {
+		ERR("Permission denied to set command for client [%d], for sensor [0x%llx] with attribute [%d]",
+			m_client_id, m_sensor_id, cmd->attribute);
+		ret_value = OP_ERROR;
+		goto out;
+	}
+
+	ret_value = m_module->set_attribute(cmd->attribute, cmd->value);
+
+out:
+	if (!send_cmd_done(ret_value))
+		ERR("Failed to send cmd_done to a client");
+
+	return true;
+}
+
+bool command_worker::cmd_set_attribute_str(void *payload)
+{
+	cmd_set_attribute_str_t *cmd;
 	long ret_value = OP_ERROR;
 
 	DBG("CMD_SEND_SENSORHUB_DATA Handler invoked");
 
-	cmd = (cmd_send_sensorhub_data_t*)payload;
+	cmd = (cmd_set_attribute_str_t*)payload;
 
 	if (!is_permission_allowed()) {
 		ERR("Permission denied to send sensorhub_data for client [%d], for sensor [0x%llx]",
@@ -833,7 +833,7 @@ bool command_worker::cmd_send_sensorhub_data(void *payload)
 		goto out;
 	}
 
-	ret_value = m_module->set_attribute(0, cmd->data, cmd->data_len);
+	ret_value = m_module->set_attribute(cmd->attribute, cmd->value, cmd->value_len);
 
 out:
 	if (!send_cmd_done(ret_value))

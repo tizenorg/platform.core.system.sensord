@@ -49,9 +49,9 @@ enum packet_type_t {
 	CMD_SET_WAKEUP,
 	CMD_SET_BATCH,
 	CMD_UNSET_BATCH,
-	CMD_SET_COMMAND,
 	CMD_GET_DATA,
-	CMD_SEND_SENSORHUB_DATA,
+	CMD_SET_ATTRIBUTE_INT,
+	CMD_SET_ATTRIBUTE_STR,
 	CMD_CNT,
 };
 
@@ -143,14 +143,15 @@ typedef struct {
 } cmd_set_wakeup_t;
 
 typedef struct  {
-	unsigned int cmd;
-	long value;
-} cmd_set_command_t;
+	int attribute;
+	int value;
+} cmd_set_attribute_int_t;
 
 typedef struct  {
-	int data_len;
-	char data[0];
-} cmd_send_sensorhub_data_t;
+	int attribute;
+	int value_len;
+	char value[0];
+} cmd_set_attribute_str_t;
 
 #define EVENT_CHANNEL_MAGIC 0xCAFECAFE
 
