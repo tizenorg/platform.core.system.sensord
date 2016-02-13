@@ -312,96 +312,6 @@ static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, senso
 	return true;
 }
 
-API int sf_connect(sensor_type_t sensor_type)
-{
-	sensor_t sensor;
-
-	sensor = sensord_get_sensor(sensor_type);
-
-	return sensord_connect(sensor);
-}
-
-API int sf_disconnect(int handle)
-{
-	return sensord_disconnect(handle) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_start(int handle, int option)
-{
-	return sensord_start(handle, option) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_stop(int handle)
-{
-	return sensord_stop(handle) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_register_event(int handle, unsigned int event_type, event_condition_t *event_condition, sensor_callback_func_t cb, void *user_data)
-{
-	unsigned int interval = BASE_GATHERING_INTERVAL;
-
-	if (event_condition != NULL) {
-		if ((event_condition->cond_op == CONDITION_EQUAL) && (event_condition->cond_value1 > 0))
-			interval = event_condition->cond_value1;
-	}
-
-	return register_event(handle, event_type, interval, 0, SENSOR_LEGACY_CB, (void*) cb, user_data) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_unregister_event(int handle, unsigned int event_type)
-{
-	return sensord_unregister_event(handle, event_type) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_change_event_condition(int handle, unsigned int event_type, event_condition_t *event_condition)
-{
-	unsigned int interval = BASE_GATHERING_INTERVAL;
-
-	if (event_condition != NULL) {
-		if ((event_condition->cond_op == CONDITION_EQUAL) && (event_condition->cond_value1 > 0))
-			interval = event_condition->cond_value1;
-	}
-
-	return sensord_change_event_interval(handle, event_type, interval) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_change_sensor_option(int handle, int option)
-{
-	return sensord_set_option(handle, option) ? OP_SUCCESS : OP_ERROR;
-}
-
-
-API int sf_send_sensorhub_data(int handle, const char* data, int data_len)
-{
-	return sensord_send_sensorhub_data(handle, data, data_len) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data)
-{
-	return sensord_get_data(handle, data_id, sensor_data) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_check_rotation(unsigned long *rotation)
-{
-	rotation = 0;
-	return 0;
-}
-
-int sf_is_sensor_event_available(sensor_type_t sensor_type, unsigned int event_type)
-{
-	return 0;
-}
-
-int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties)
-{
-	return 0;
-}
-
-int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties)
-{
-	return 0;
-}
-
 static bool get_sensor_list(void)
 {
 	static cmutex l;
@@ -1118,7 +1028,7 @@ API bool sensord_set_wakeup(int handle, int wakeup)
 	return true;
 }
 
-API bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
+API bool sensord_set_attribute_int(int handle, int attribute, int value)
 {
 	sensor_id_t sensor_id;
 	command_channel *cmd_channel;
@@ -1131,31 +1041,65 @@ API bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
 		return false;
 	}
 
-	retvm_if (sensor_id != CONTEXT_SENSOR, false, "%s use this API wrongly, only for CONTEXT_SENSOR not for %s",
-		get_client_name(), get_sensor_name(sensor_id));
-
 	if (!client_info.get_command_channel(sensor_id, &cmd_channel)) {
 		ERR("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
 		return false;
 	}
 
-	retvm_if((data_len < 0) || (data == NULL), false, "Invalid data_len: %d, data: 0x%x, handle: %d, %s, %s",
-		data_len, data, handle, get_sensor_name(sensor_id), get_client_name());
-
 	client_id = client_info.get_client_id();
-	retvm_if ((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
+	retvm_if ((client_id < 0), false,
+			"Invalid client id : %d, handle: %d, %s, %s",
+			client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
-	retvm_if (!client_info.is_sensor_active(sensor_id), false, "%s with client_id:%d is not active state for %s with handle: %d",
-		get_sensor_name(sensor_id), client_id, get_client_name(), handle);
-
-	if (!cmd_channel->cmd_send_sensorhub_data(data, data_len)) {
-		ERR("Sending cmd_send_sensorhub_data(%d, %d, 0x%x) failed for %s",
-			client_id, data_len, data, get_client_name);
+	if (!cmd_channel->cmd_set_attribute_int(attribute, value)) {
+		ERR("Sending cmd_set_attribute_int(%d, %d) failed for %s",
+			client_id, value, get_client_name);
 		return false;
 	}
 
 	return true;
+}
 
+API bool sensord_set_attribute_str(int handle, int attribute, const char *value, int value_len)
+{
+	sensor_id_t sensor_id;
+	command_channel *cmd_channel;
+	int client_id;
+
+	AUTOLOCK(lock);
+
+	if (!client_info.get_sensor_id(handle, sensor_id)) {
+		ERR("client %s failed to get handle information", get_client_name());
+		return false;
+	}
+
+	if (!client_info.get_command_channel(sensor_id, &cmd_channel)) {
+		ERR("client %s failed to get command channel for %s",
+			get_client_name(), get_sensor_name(sensor_id));
+		return false;
+	}
+
+	retvm_if((value_len < 0) || (value == NULL), false,
+			"Invalid value_len: %d, value: 0x%x, handle: %d, %s, %s",
+			value_len, value, handle, get_sensor_name(sensor_id), get_client_name());
+
+	client_id = client_info.get_client_id();
+	retvm_if ((client_id < 0), false,
+			"Invalid client id : %d, handle: %d, %s, %s",
+			client_id, handle, get_sensor_name(sensor_id), get_client_name());
+
+	if (!cmd_channel->cmd_set_attribute_str(attribute, value, value_len)) {
+		ERR("Sending cmd_set_attribute_str(%d, %d, 0x%x) failed for %s",
+			client_id, value_len, value, get_client_name);
+		return false;
+	}
+
+	return true;
+}
+
+API bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
+{
+	return sensord_set_attribute_str(handle, 0, data, data_len);
 }
 
 API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data)
@@ -1196,3 +1140,94 @@ API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* senso
 	return true;
 
 }
+
+/* deprecated APIs */
+API int sf_connect(sensor_type_t sensor_type)
+{
+	sensor_t sensor;
+
+	sensor = sensord_get_sensor(sensor_type);
+
+	return sensord_connect(sensor);
+}
+
+API int sf_disconnect(int handle)
+{
+	return sensord_disconnect(handle) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_start(int handle, int option)
+{
+	return sensord_start(handle, option) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_stop(int handle)
+{
+	return sensord_stop(handle) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_register_event(int handle, unsigned int event_type, event_condition_t *event_condition, sensor_callback_func_t cb, void *user_data)
+{
+	unsigned int interval = BASE_GATHERING_INTERVAL;
+
+	if (event_condition != NULL) {
+		if ((event_condition->cond_op == CONDITION_EQUAL) && (event_condition->cond_value1 > 0))
+			interval = event_condition->cond_value1;
+	}
+
+	return register_event(handle, event_type, interval, 0, SENSOR_LEGACY_CB, (void*) cb, user_data) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_unregister_event(int handle, unsigned int event_type)
+{
+	return sensord_unregister_event(handle, event_type) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_change_event_condition(int handle, unsigned int event_type, event_condition_t *event_condition)
+{
+	unsigned int interval = BASE_GATHERING_INTERVAL;
+
+	if (event_condition != NULL) {
+		if ((event_condition->cond_op == CONDITION_EQUAL) && (event_condition->cond_value1 > 0))
+			interval = event_condition->cond_value1;
+	}
+
+	return sensord_change_event_interval(handle, event_type, interval) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_change_sensor_option(int handle, int option)
+{
+	return sensord_set_option(handle, option) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_send_sensorhub_data(int handle, const char* data, int data_len)
+{
+	return sensord_send_sensorhub_data(handle, data, data_len) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data)
+{
+	return sensord_get_data(handle, data_id, sensor_data) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_check_rotation(unsigned long *rotation)
+{
+	rotation = 0;
+	return 0;
+}
+
+API int sf_is_sensor_event_available(sensor_type_t sensor_type, unsigned int event_type)
+{
+	return 0;
+}
+
+API int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties)
+{
+	return 0;
+}
+
+API int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties)
+{
+	return 0;
+}
+
