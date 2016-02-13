@@ -71,6 +71,9 @@ void sensor_event_poller::init_fd()
 
 bool sensor_event_poller::add_poll_fd(int fd)
 {
+	if (fd < 0)
+		return false;
+
 	return m_poller.add_fd(fd);
 }
 
