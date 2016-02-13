@@ -48,9 +48,9 @@ public:
 	bool cmd_unregister_events(event_type_vector &event_vec);
 	bool cmd_set_batch(unsigned int interval, unsigned int latency);
 	bool cmd_unset_batch(void);
-	bool cmd_set_command(unsigned int cmd, long value);
 	bool cmd_get_data(unsigned int type, sensor_data_t* values);
-	bool cmd_send_sensorhub_data(const char* buffer, int data_len);
+	bool cmd_set_attribute_int(int attribute, int value);
+	bool cmd_set_attribute_str(int attribute, const char* buffer, int data_len);
 private:
 	csocket m_command_socket;
 	int m_client_id;
