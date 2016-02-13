@@ -113,7 +113,7 @@ const char* get_log_element_name(log_id id, unsigned int type)
 	auto iter = g_log_maps[id].find(type);
 
 	if (iter == g_log_maps[id].end()) {
-		INFO("Unknown type value: 0x%x", type);
+		_I("Unknown type value: 0x%x", type);
 		return p_unknown;
 	}
 
@@ -218,11 +218,11 @@ void print_event_occurrence_log(sensor_handle_info &sensor_handle_info, const re
 		return;
 	}
 
-	INFO("%s receives %s with %s[%d][state: %d, option: %d count: %d]", get_client_name(), log_attr->name,
+	_I("%s receives %s with %s[%d][state: %d, option: %d count: %d]", get_client_name(), log_attr->name,
 			get_sensor_name(sensor_handle_info.m_sensor_id), sensor_handle_info.m_handle, sensor_handle_info.m_sensor_state,
 			sensor_handle_info.m_sensor_option, log_attr->cnt);
 
-	INFO("0x%x(cb_event_type = %s, &user_data, client_data = 0x%x)\n", event_info->m_cb,
+	_I("0x%x(cb_event_type = %s, &user_data, client_data = 0x%x)\n", event_info->m_cb,
 			log_attr->name, event_info->m_user_data);
 }
 

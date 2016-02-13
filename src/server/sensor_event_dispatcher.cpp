@@ -45,21 +45,21 @@ sensor_event_dispatcher& sensor_event_dispatcher::get_instance()
 
 bool sensor_event_dispatcher::run(void)
 {
-	INFO("Starting Event Dispatcher\n");
+	_I("Starting Event Dispatcher\n");
 
 	if (!m_accept_socket.create(SOCK_SEQPACKET)) {
-		ERR("Listener Socket Creation failed in Server \n");
+		_E("Listener Socket Creation failed in Server \n");
 		return false;
 	}
 
 	if(!m_accept_socket.bind(EVENT_CHANNEL_PATH)) {
-		ERR("Listener Socket Binding failed in Server \n");
+		_E("Listener Socket Binding failed in Server \n");
 		m_accept_socket.close();
 		return false;
 	}
 
 	if(!m_accept_socket.listen(MAX_PENDING_CONNECTION)) {
-		ERR("Socket Listen failed in Server \n");
+		_E("Socket Listen failed in Server \n");
 		return false;
 	}
 
@@ -81,7 +81,7 @@ void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 	client_socket.set_connection_mode();
 
 	if (client_socket.recv(&client_id, sizeof(client_id)) <= 0) {
-		ERR("Failed to receive client id on socket fd[%d]", client_socket.get_socket_fd());
+		_E("Failed to receive client id on socket fd[%d]", client_socket.get_socket_fd());
 		return;
 	}
 
@@ -90,7 +90,7 @@ void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 	AUTOLOCK(m_mutex);
 
 	if(!get_client_info_manager().set_event_socket(client_id, client_socket)) {
-		ERR("Failed to store event socket[%d] for %s", client_socket.get_socket_fd(),
+		_E("Failed to store event socket[%d] for %s", client_socket.get_socket_fd(),
 			client_info_manager.get_client_info(client_id));
 		return;
 	}
@@ -98,11 +98,11 @@ void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 	event_channel_ready.magic = EVENT_CHANNEL_MAGIC;
 	event_channel_ready.client_id = client_id;
 
-	INFO("Event channel is accepted for %s on socket[%d]",
+	_I("Event channel is accepted for %s on socket[%d]",
 		client_info_manager.get_client_info(client_id), client_socket.get_socket_fd());
 
 	if (client_socket.send(&event_channel_ready, sizeof(event_channel_ready)) <= 0) {
-		ERR("Failed to send event_channel_ready packet to %s on socket fd[%d]",
+		_E("Failed to send event_channel_ready packet to %s on socket fd[%d]",
 			client_info_manager.get_client_info(client_id), client_socket.get_socket_fd());
 		return;
 	}
@@ -110,17 +110,17 @@ void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 
 void sensor_event_dispatcher::accept_connections(void)
 {
-	INFO("Event channel acceptor is started.\n");
+	_I("Event channel acceptor is started.\n");
 
 	while (true) {
 		csocket client_socket;
 
 		if (!m_accept_socket.accept(client_socket)) {
-			ERR("Accepting socket failed in Server \n");
+			_E("Accepting socket failed in Server \n");
 			continue;
 		}
 
-		INFO("New client connected (socket_fd : %d)\n", client_socket.get_socket_fd());
+		_I("New client connected (socket_fd : %d)\n", client_socket.get_socket_fd());
 
 		thread event_channel_creator(&sensor_event_dispatcher::accept_event_channel, this, client_socket);
 		event_channel_creator.detach();
@@ -133,7 +133,7 @@ void sensor_event_dispatcher::dispatch_event(void)
 
 	vector<sensor_event_t> v_sensor_events(MAX_SYNTH_PER_SENSOR);
 
-	INFO("Event Dispatcher started");
+	_I("Event Dispatcher started");
 
 	while (true) {
 		void *seed_event = get_event_queue().pop();
@@ -154,7 +154,7 @@ void sensor_event_dispatcher::dispatch_event(void)
 			for (int i = 0; i < synthesized_cnt; ++i) {
 				sensor_event_t *v_event = (sensor_event_t*)malloc(sizeof(sensor_event_t));
 				if (!v_event) {
-					ERR("Failed to allocate memory");
+					_E("Failed to allocate memory");
 					continue;
 				}
 
@@ -198,7 +198,7 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 
 		event = (void *)malloc(length);
 		if (!event) {
-			ERR("Failed to allocate memory");
+			_E("Failed to allocate memory");
 			return;
 		}
 
@@ -216,9 +216,9 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 			bool ret = (client_socket.send(event, length) > 0);
 
 			if (ret)
-				DBG("Event[0x%x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
+				_D("Event[0x%x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
 			else
-				ERR("Failed to send event[0x%x] to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
+				_E("Failed to send event[0x%x] to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
 
 			++it_client_id;
 		}
@@ -298,7 +298,7 @@ void sensor_event_dispatcher::request_last_event(int client_id, sensor_id_t sens
 
 	if (client_info_manager.get_registered_events(client_id, sensor_id, event_vec)) {
 		if (!client_info_manager.get_event_socket(client_id, client_socket)) {
-			ERR("Failed to get event socket from %s",
+			_E("Failed to get event socket from %s",
 					client_info_manager.get_client_info(client_id));
 			return;
 		}
@@ -308,10 +308,10 @@ void sensor_event_dispatcher::request_last_event(int client_id, sensor_id_t sens
 			sensor_event_t event;
 			if (is_record_event(*it_event) && get_last_event(*it_event, event)) {
 				if (client_socket.send(&event, sizeof(event)) > 0)
-					INFO("Send the last event[0x%x] to %s on socket[%d]", event.event_type,
+					_I("Send the last event[0x%x] to %s on socket[%d]", event.event_type,
 						client_info_manager.get_client_info(client_id), client_socket.get_socket_fd());
 				else
-					ERR("Failed to send event[0x%x] to %s on socket[%d]", event.event_type,
+					_E("Failed to send event[0x%x] to %s on socket[%d]", event.event_type,
 						client_info_manager.get_client_info(client_id), client_socket.get_socket_fd());
 			}
 			++it_event;
@@ -325,7 +325,7 @@ bool sensor_event_dispatcher::add_active_virtual_sensor(virtual_sensor * sensor)
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 
 	if (has_active_virtual_sensor(sensor)) {
-		ERR("[%s] sensor is already added on active virtual sensors", sensor->get_name());
+		_E("[%s] sensor is already added on active virtual sensors", sensor->get_name());
 		return false;
 	}
 
@@ -341,7 +341,7 @@ bool sensor_event_dispatcher::delete_active_virtual_sensor(virtual_sensor * sens
 	auto it_v_sensor = find(m_active_virtual_sensors.begin(), m_active_virtual_sensors.end(), sensor);
 
 	if (it_v_sensor == m_active_virtual_sensors.end()) {
-		ERR("Fail to delete non-existent [%s] sensor on active virtual sensors", sensor->get_name());
+		_E("Fail to delete non-existent [%s] sensor on active virtual sensors", sensor->get_name());
 		return false;
 	}
 

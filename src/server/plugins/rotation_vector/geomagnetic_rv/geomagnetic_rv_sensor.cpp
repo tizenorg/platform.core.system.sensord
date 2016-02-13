@@ -62,25 +62,25 @@ geomagnetic_rv_sensor::geomagnetic_rv_sensor()
 	register_supported_event(GEOMAGNETIC_RV_RAW_DATA_EVENT);
 
 	if (!config.get(SENSOR_TYPE_GEOMAGNETIC_RV, ELEMENT_VENDOR, m_vendor)) {
-		ERR("[VENDOR] is empty\n");
+		_E("[VENDOR] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_vendor = %s", m_vendor.c_str());
+	_I("m_vendor = %s", m_vendor.c_str());
 
 	if (!config.get(SENSOR_TYPE_GEOMAGNETIC_RV, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
-		ERR("[DEFAULT_SAMPLING_TIME] is empty\n");
+		_E("[DEFAULT_SAMPLING_TIME] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_default_sampling_time = %d", m_default_sampling_time);
+	_I("m_default_sampling_time = %d", m_default_sampling_time);
 
 	m_interval = m_default_sampling_time * MS_TO_US;
 }
 
 geomagnetic_rv_sensor::~geomagnetic_rv_sensor()
 {
-	INFO("geomagnetic_rv_sensor is destroyed!\n");
+	_I("geomagnetic_rv_sensor is destroyed!\n");
 }
 
 bool geomagnetic_rv_sensor::init()
@@ -91,12 +91,12 @@ bool geomagnetic_rv_sensor::init()
 	m_fusion_sensor = sensor_loader::get_instance().get_sensor(FUSION_SENSOR);
 
 	if (!m_accel_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
-		ERR("Failed to load sensors,  accel: 0x%x, mag: 0x%x, fusion: 0x%x",
+		_E("Failed to load sensors,  accel: 0x%x, mag: 0x%x, fusion: 0x%x",
 			m_accel_sensor, m_magnetic_sensor, m_fusion_sensor);
 		return false;
 	}
 
-	INFO("%s is created!\n", sensor_base::get_name());
+	_I("%s is created!\n", sensor_base::get_name());
 
 	return true;
 }

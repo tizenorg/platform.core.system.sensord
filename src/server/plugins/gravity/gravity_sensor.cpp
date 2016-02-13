@@ -78,67 +78,67 @@ gravity_sensor::gravity_sensor()
 	register_supported_event(GRAVITY_RAW_DATA_EVENT);
 
 	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_VENDOR, m_vendor)) {
-		ERR("[VENDOR] is empty\n");
+		_E("[VENDOR] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_vendor = %s", m_vendor.c_str());
+	_I("m_vendor = %s", m_vendor.c_str());
 
 	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_ORIENTATION_DATA_UNIT, m_orientation_data_unit)) {
-		ERR("[ORIENTATION_DATA_UNIT] is empty\n");
+		_E("[ORIENTATION_DATA_UNIT] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_orientation_data_unit = %s", m_orientation_data_unit.c_str());
+	_I("m_orientation_data_unit = %s", m_orientation_data_unit.c_str());
 
 	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
-		ERR("[RAW_DATA_UNIT] is empty\n");
+		_E("[RAW_DATA_UNIT] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_raw_data_unit = %s", m_raw_data_unit.c_str());
+	_I("m_raw_data_unit = %s", m_raw_data_unit.c_str());
 
 	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
-		ERR("[DEFAULT_SAMPLING_TIME] is empty\n");
+		_E("[DEFAULT_SAMPLING_TIME] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_default_sampling_time = %d", m_default_sampling_time);
+	_I("m_default_sampling_time = %d", m_default_sampling_time);
 
 	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_GRAVITY_SIGN_COMPENSATION, m_gravity_sign_compensation, 3)) {
-		ERR("[GRAVITY_SIGN_COMPENSATION] is empty\n");
+		_E("[GRAVITY_SIGN_COMPENSATION] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_gravity_sign_compensation = (%d, %d, %d)", m_gravity_sign_compensation[0], m_gravity_sign_compensation[1], m_gravity_sign_compensation[2]);
+	_I("m_gravity_sign_compensation = (%d, %d, %d)", m_gravity_sign_compensation[0], m_gravity_sign_compensation[1], m_gravity_sign_compensation[2]);
 
 	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_AZIMUTH_ROTATION_COMPENSATION, &m_azimuth_rotation_compensation)) {
-		ERR("[AZIMUTH_ROTATION_COMPENSATION] is empty\n");
+		_E("[AZIMUTH_ROTATION_COMPENSATION] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_azimuth_rotation_compensation = %d", m_azimuth_rotation_compensation);
+	_I("m_azimuth_rotation_compensation = %d", m_azimuth_rotation_compensation);
 
 	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_PITCH_ROTATION_COMPENSATION, &m_pitch_rotation_compensation)) {
-		ERR("[PITCH_ROTATION_COMPENSATION] is empty\n");
+		_E("[PITCH_ROTATION_COMPENSATION] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_pitch_rotation_compensation = %d", m_pitch_rotation_compensation);
+	_I("m_pitch_rotation_compensation = %d", m_pitch_rotation_compensation);
 
 	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_ROLL_ROTATION_COMPENSATION, &m_roll_rotation_compensation)) {
-		ERR("[ROLL_ROTATION_COMPENSATION] is empty\n");
+		_E("[ROLL_ROTATION_COMPENSATION] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_roll_rotation_compensation = %d", m_roll_rotation_compensation);
+	_I("m_roll_rotation_compensation = %d", m_roll_rotation_compensation);
 
 	m_interval = m_default_sampling_time * MS_TO_US;
 }
 
 gravity_sensor::~gravity_sensor()
 {
-	INFO("gravity_sensor is destroyed!\n");
+	_I("gravity_sensor is destroyed!\n");
 }
 
 bool gravity_sensor::init()
@@ -150,12 +150,12 @@ bool gravity_sensor::init()
 	m_fusion_sensor = sensor_loader::get_instance().get_sensor(FUSION_SENSOR);
 
 	if (!m_accel_sensor || !m_gyro_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
-		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, mag: 0x%x, fusion: 0x%x",
+		_E("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, mag: 0x%x, fusion: 0x%x",
 			m_accel_sensor, m_gyro_sensor, m_magnetic_sensor, m_fusion_sensor);
 		return false;
 	}
 
-	INFO("%s is created!", sensor_base::get_name());
+	_I("%s is created!", sensor_base::get_name());
 	return true;
 }
 

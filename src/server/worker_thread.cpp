@@ -41,7 +41,7 @@ bool worker_thread::transition_function(trans_func_index index)
 {
 	if (m_trans_func[index] != NULL) {
 		if(!m_trans_func[index](m_context)) {
-			ERR("Transition[%d] function returning false", index);
+			_E("Transition[%d] function returning false", index);
 			return false;
 		}
 	}
@@ -61,7 +61,7 @@ bool worker_thread::start(void)
 	lock l(m_mutex);
 
 	if (m_state == WORKER_STATE_WORKING) {
-		INFO("Worker thread is already working");
+		_I("Worker thread is already working");
 		return true;
 	}
 
@@ -79,7 +79,7 @@ bool worker_thread::start(void)
 		return true;
 	}
 
-	ERR("Failed to start, because current state(%d) is not for START", m_state);
+	_E("Failed to start, because current state(%d) is not for START", m_state);
 
 	return false;
 }
@@ -89,7 +89,7 @@ bool worker_thread::stop(void)
 	lock l(m_mutex);
 
 	if (m_state == WORKER_STATE_STOPPED) {
-		INFO("Worker thread is already stopped");
+		_I("Worker thread is already stopped");
 		return true;
 	}
 
@@ -102,7 +102,7 @@ bool worker_thread::stop(void)
 		return true;
 	}
 
-	ERR("Failed to stop, because current state(%d) is not for STOP", m_state);
+	_E("Failed to stop, because current state(%d) is not for STOP", m_state);
 	return false;
 }
 
@@ -111,7 +111,7 @@ bool worker_thread::pause(void)
 	lock l(m_mutex);
 
 	if (m_state == WORKER_STATE_PAUSED) {
-		INFO("Worker thread is already paused");
+		_I("Worker thread is already paused");
 		return true;
 	}
 
@@ -120,7 +120,7 @@ bool worker_thread::pause(void)
 		return true;
 	}
 
-	ERR("Failed to pause, because current state(%d) is not for PAUSE", m_state);
+	_E("Failed to pause, because current state(%d) is not for PAUSE", m_state);
 
 	return false;
 
@@ -131,7 +131,7 @@ bool worker_thread::resume(void)
 	lock l(m_mutex);
 
 	if (m_state == WORKER_STATE_WORKING) {
-		INFO("Worker thread is already working");
+		_I("Worker thread is already working");
 		return true;
 	}
 
@@ -141,7 +141,7 @@ bool worker_thread::resume(void)
 		return true;
 	}
 
-	ERR("Failed to resume, because current state(%d) is not for RESUME", m_state);
+	_E("Failed to resume, because current state(%d) is not for RESUME", m_state);
 	return false;
 }
 
@@ -153,7 +153,7 @@ bool worker_thread::resume(void)
 
 void worker_thread::main(void)
 {
-	DBG("Worker thread(0x%x) is created", std::this_thread::get_id());
+	_D("Worker thread(0x%x) is created", std::this_thread::get_id());
 
 	transition_function(STARTED);
 
@@ -164,7 +164,7 @@ void worker_thread::main(void)
 		if (state == WORKER_STATE_WORKING) {
 			if (!transition_function(WORKING)) {
 				m_state = WORKER_STATE_STOPPED;
-				DBG("Worker thread(0x%x) exits from working state", std::this_thread::get_id());
+				_D("Worker thread(0x%x) exits from working state", std::this_thread::get_id());
 				m_thread_created = false;
 				transition_function(STOPPED);
 				break;
@@ -177,12 +177,12 @@ void worker_thread::main(void)
 		if (m_state == WORKER_STATE_PAUSED) {
 			transition_function(PAUSED);
 
-			DBG("Worker thread(0x%x) is paused", std::this_thread::get_id());
+			_D("Worker thread(0x%x) is paused", std::this_thread::get_id());
 			m_cond_working.wait(u);
 
 			if (m_state == WORKER_STATE_WORKING) {
 				transition_function(RESUMED);
-				DBG("Worker thread(0x%x) is resumed", std::this_thread::get_id());
+				_D("Worker thread(0x%x) is resumed", std::this_thread::get_id());
 			} else if (m_state == WORKER_STATE_STOPPED) {
 				m_thread_created = false;
 				transition_function(STOPPED);
@@ -194,7 +194,7 @@ void worker_thread::main(void)
 			break;
 		}
 	}
-	INFO("Worker thread(0x%x)'s main is terminated", std::this_thread::get_id());
+	_I("Worker thread(0x%x)'s main is terminated", std::this_thread::get_id());
 }
 
 void worker_thread::set_started(trans_func_t func)

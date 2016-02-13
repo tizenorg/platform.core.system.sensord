@@ -63,25 +63,25 @@ auto_rotation_sensor::auto_rotation_sensor()
 	virtual_sensor_config &config = virtual_sensor_config::get_instance();
 
 	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_VENDOR, m_vendor)) {
-		ERR("[VENDOR] is empty\n");
+		_E("[VENDOR] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_vendor = %s", m_vendor.c_str());
+	_I("m_vendor = %s", m_vendor.c_str());
 
 	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
-		ERR("[RAW_DATA_UNIT] is empty\n");
+		_E("[RAW_DATA_UNIT] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_raw_data_unit = %s", m_raw_data_unit.c_str());
+	_I("m_raw_data_unit = %s", m_raw_data_unit.c_str());
 
 	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
-		ERR("[DEFAULT_SAMPLING_TIME] is empty\n");
+		_E("[DEFAULT_SAMPLING_TIME] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_default_sampling_time = %d", m_default_sampling_time);
+	_I("m_default_sampling_time = %d", m_default_sampling_time);
 
 	m_interval = m_default_sampling_time * MS_TO_US;
 }
@@ -90,7 +90,7 @@ auto_rotation_sensor::~auto_rotation_sensor()
 {
 	delete m_alg;
 
-	INFO("auto_rotation_sensor is destroyed!\n");
+	_I("auto_rotation_sensor is destroyed!\n");
 }
 
 bool auto_rotation_sensor::init(void)
@@ -98,21 +98,21 @@ bool auto_rotation_sensor::init(void)
 	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
 
 	if (!m_accel_sensor) {
-		ERR("cannot load accel sensor_hal from %s", get_name());
+		_E("cannot load accel sensor_hal from %s", get_name());
 		return false;
 	}
 
 	m_alg = get_alg();
 
 	if (!m_alg) {
-		ERR("Not supported AUTO ROTATION sensor");
+		_E("Not supported AUTO ROTATION sensor");
 		return false;
 	}
 
 	if (!m_alg->open())
 		return false;
 
-	INFO("%s is created!\n", get_name());
+	_I("%s is created!\n", get_name());
 
 	return true;
 }
@@ -186,7 +186,7 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event)
 
 	push(rotation_event);
 
-	DBG("Rotation: %d, ACC[0]: %f, ACC[1]: %f, ACC[2]: %f", rotation, event.data.values[0], event.data.values[1], event.data.values[2]);
+	_D("Rotation: %d, ACC[0]: %f, ACC[1]: %f, ACC[2]: %f", rotation, event.data.values[0], event.data.values[1], event.data.values[2]);
 	return;
 }
 

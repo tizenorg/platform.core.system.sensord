@@ -31,7 +31,7 @@ static void sig_term_handler(int signo, siginfo_t *info, void *data)
 
 	get_proc_name(info->si_pid, proc_name);
 
-	ERR("Received SIGTERM(%d) from %s(%d)\n", signo, proc_name, info->si_pid);
+	_E("Received SIGTERM(%d) from %s(%d)\n", signo, proc_name, info->si_pid);
 	exit(EXIT_SUCCESS);
 }
 
@@ -52,7 +52,7 @@ static void signal_init(void)
 
 int main(int argc, char *argv[])
 {
-	INFO("Sensord started");
+	_I("Sensord started");
 
 	signal_init();
 
@@ -62,6 +62,6 @@ int main(int argc, char *argv[])
 
 	server::get_instance().stop();
 
-	INFO("Sensord terminated");
+	_I("Sensord terminated");
 	return 0;
 }

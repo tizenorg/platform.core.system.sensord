@@ -106,14 +106,14 @@ bool sensor_base::start()
 
 	if (m_client == 1) {
 		if (!on_start()) {
-			ERR("[%s] sensor failed to start", get_name());
+			_E("[%s] sensor failed to start", get_name());
 			return false;
 		}
 
 		m_started = true;
 	}
 
-	INFO("[%s] sensor started, #client = %d", get_name(), m_client);
+	_I("[%s] sensor started, #client = %d", get_name(), m_client);
 
 	return true;
 }
@@ -126,14 +126,14 @@ bool sensor_base::stop(void)
 
 	if (m_client == 0) {
 		if (!on_stop()) {
-			ERR("[%s] sensor faild to stop", get_name());
+			_E("[%s] sensor faild to stop", get_name());
 			return false;
 		}
 
 		m_started = false;
 	}
 
-	INFO("[%s] sensor stopped, #client = %d", get_name(), m_client);
+	_I("[%s] sensor stopped, #client = %d", get_name(), m_client);
 
 	return true;
 }
@@ -159,7 +159,7 @@ bool sensor_base::add_interval(int client_id, unsigned int interval, bool is_pro
 	cur_min = m_plugin_info_list.get_min_interval();
 
 	if (cur_min != prev_min) {
-		INFO("Min interval for sensor[0x%llx] is changed from %dms to %dms"
+		_I("Min interval for sensor[0x%llx] is changed from %dms to %dms"
 			" by%sclient[%d] adding interval",
 			get_id(), prev_min, cur_min,
 			is_processor ? " processor " : " ", client_id);
@@ -183,14 +183,14 @@ bool sensor_base::delete_interval(int client_id, bool is_processor)
 	cur_min = m_plugin_info_list.get_min_interval();
 
 	if (!cur_min) {
-		INFO("No interval for sensor[0x%llx] by%sclient[%d] deleting interval, "
+		_I("No interval for sensor[0x%llx] by%sclient[%d] deleting interval, "
 			 "so set to default %dms",
 			 get_id(), is_processor ? " processor " : " ",
 			 client_id, POLL_1HZ_MS);
 
 		set_interval(POLL_1HZ_MS);
 	} else if (cur_min != prev_min) {
-		INFO("Min interval for sensor[0x%llx] is changed from %dms to %dms"
+		_I("Min interval for sensor[0x%llx] is changed from %dms to %dms"
 			" by%sclient[%d] deleting interval",
 			get_id(), prev_min, cur_min,
 			is_processor ? " processor " : " ", client_id);
@@ -222,7 +222,7 @@ bool sensor_base::add_batch(int client_id, unsigned int latency)
 	cur_max = m_plugin_info_list.get_max_batch();
 
 	if (cur_max != prev_max) {
-		INFO("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] adding latency",
+		_I("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] adding latency",
 			get_id(), prev_max, cur_max, client_id);
 		set_batch_latency(cur_max);
 	}
@@ -243,12 +243,12 @@ bool sensor_base::delete_batch(int client_id)
 	cur_max = m_plugin_info_list.get_max_batch();
 
 	if (!cur_max) {
-		INFO("No latency for sensor[0x%llx] by client[%d] deleting latency, so set to default 0 ms",
+		_I("No latency for sensor[0x%llx] by client[%d] deleting latency, so set to default 0 ms",
 			 get_id(), client_id);
 
 		set_batch_latency(0);
 	} else if (cur_max != prev_max) {
-		INFO("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] deleting latency",
+		_I("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] deleting latency",
 			get_id(), prev_max, cur_max, client_id);
 
 		set_batch_latency(cur_max);
@@ -278,7 +278,7 @@ bool sensor_base::add_wakeup(int client_id, int wakeup)
 	cur_wakeup = m_plugin_info_list.is_wakeup_on();
 
 	if ((cur_wakeup == SENSOR_WAKEUP_ON) && (prev_wakeup < SENSOR_WAKEUP_ON)) {
-		INFO("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] adding wakeup",
+		_I("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] adding wakeup",
 			get_id(), prev_wakeup, cur_wakeup, client_id);
 		set_wakeup(SENSOR_WAKEUP_ON);
 	}
@@ -299,7 +299,7 @@ bool sensor_base::delete_wakeup(int client_id)
 	cur_wakeup = m_plugin_info_list.is_wakeup_on();
 
 	if ((cur_wakeup < SENSOR_WAKEUP_ON) && (prev_wakeup == SENSOR_WAKEUP_ON)) {
-		INFO("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] deleting wakeup",
+		_I("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] deleting wakeup",
 			get_id(), prev_wakeup, cur_wakeup, client_id);
 		set_wakeup(SENSOR_WAKEUP_OFF);
 	}
@@ -375,7 +375,7 @@ unsigned long long sensor_base::get_timestamp(void)
 unsigned long long sensor_base::get_timestamp(timeval *t)
 {
 	if (!t) {
-		ERR("t is NULL");
+		_E("t is NULL");
 		return 0;
 	}
 

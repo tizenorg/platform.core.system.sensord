@@ -55,12 +55,12 @@ bool sensor_loader::load_devices(const string &path, vector<sensor_device_t> &de
 	int size;
 	sensor_device_t *_devices = NULL;
 
-	INFO("load device: [%s]", path.c_str());
+	_I("load device: [%s]", path.c_str());
 
 	void *_handle = dlopen(path.c_str(), RTLD_NOW);
 
 	if (!_handle) {
-		ERR("Failed to dlopen(%s), dlerror : %s", path.c_str(), dlerror());
+		_E("Failed to dlopen(%s), dlerror : %s", path.c_str(), dlerror());
 		return false;
 	}
 
@@ -69,7 +69,7 @@ bool sensor_loader::load_devices(const string &path, vector<sensor_device_t> &de
 	create_t create_devices = (create_t) dlsym(_handle, "create");
 
 	if (!create_devices) {
-		ERR("Failed to find symbols in %s", path.c_str());
+		_E("Failed to find symbols in %s", path.c_str());
 		dlclose(_handle);
 		return false;
 	}
@@ -77,7 +77,7 @@ bool sensor_loader::load_devices(const string &path, vector<sensor_device_t> &de
 	size = create_devices(&_devices);
 
 	if (!_devices) {
-		ERR("Failed to create devices, path is %s\n", path.c_str());
+		_E("Failed to create devices, path is %s\n", path.c_str());
 		dlclose(_handle);
 		return false;
 	}
@@ -103,7 +103,7 @@ physical_sensor* sensor_loader::create_sensor(sensor_handle_t handle, sensor_dev
 
 	sensor = new(std::nothrow) physical_sensor();
 	if (!sensor) {
-		ERR("Memory allocation failed[%s]", handle.name);
+		_E("Memory allocation failed[%s]", handle.name);
 		return NULL;
 	}
 
@@ -134,7 +134,7 @@ bool sensor_loader::load_physical_sensors(std::vector<sensor_device_t> &devices)
 			std::shared_ptr<sensor_base> sensor_ptr(sensor);
 			m_sensors.insert(std::make_pair((sensor_type_t)(handles[i].type), sensor_ptr));
 
-			INFO("inserted [%s] sensor", sensor->get_name());
+			_I("inserted [%s] sensor", sensor->get_name());
 		}
 	}
 
@@ -186,15 +186,15 @@ void sensor_loader::load_virtual_sensor(const char *name)
 	try {
 		instance = new _sensor;
 	} catch (std::exception &e) {
-		ERR("Failed to create %s sensor, exception: %s", name, e.what());
+		_E("Failed to create %s sensor, exception: %s", name, e.what());
 		return;
 	} catch (int err) {
-		ERR("Failed to create %s sensor err: %d, cause: %s", name, err, strerror(err));
+		_E("Failed to create %s sensor err: %d, cause: %s", name, err, strerror(err));
 		return;
 	}
 
 	if (!instance->init()) {
-		ERR("Failed to init %s", name);
+		_E("Failed to init %s", name);
 		delete instance;
 		return;
 	}
@@ -216,7 +216,7 @@ void sensor_loader::load_virtual_sensors(void)
 
 void sensor_loader::show_sensor_info(void)
 {
-	INFO("========== Loaded sensor information ==========\n");
+	_I("========== Loaded sensor information ==========\n");
 
 	int index = 0;
 
@@ -227,12 +227,12 @@ void sensor_loader::show_sensor_info(void)
 
 		sensor_info info;
 		sensor->get_sensor_info(info);
-		INFO("No:%d [%s]\n", ++index, sensor->get_name());
+		_I("No:%d [%s]\n", ++index, sensor->get_name());
 		info.show();
 		it++;
 	}
 
-	INFO("===============================================\n");
+	_I("===============================================\n");
 }
 
 bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &plugin_paths)
@@ -243,7 +243,7 @@ bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &p
 	dir = opendir(dir_path.c_str());
 
 	if (!dir) {
-		ERR("Failed to open dir: %s", dir_path.c_str());
+		_E("Failed to open dir: %s", dir_path.c_str());
 		return false;
 	}
 

@@ -87,13 +87,13 @@ void sensor_event_listener::operate_sensor(sensor_id_t sensor, int power_save_st
 				!(it_handle->second.m_sensor_option & power_save_state)) {
 
 				m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_PAUSED);
-				INFO("%s's %s[%d] is paused", get_client_name(), get_sensor_name(sensor), it_handle->first);
+				_I("%s's %s[%d] is paused", get_client_name(), get_sensor_name(sensor), it_handle->first);
 
 			} else if ((it_handle->second.m_sensor_state == SENSOR_STATE_PAUSED) &&
 				(!power_save_state || (it_handle->second.m_sensor_option & power_save_state))) {
 
 				m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_STARTED);
-				INFO("%s's %s[%d] is resumed", get_client_name(), get_sensor_name(sensor), it_handle->first);
+				_I("%s's %s[%d] is resumed", get_client_name(), get_sensor_name(sensor), it_handle->first);
 			}
 		}
 
@@ -220,7 +220,7 @@ void sensor_event_listener::handle_events(void* event)
 				callback_info = get_callback_info(sensor_id, event_info, sensor_data, event);
 
 			if (!callback_info) {
-				ERR("Failed to get callback_info");
+				_E("Failed to get callback_info");
 				continue;
 			}
 
@@ -307,7 +307,7 @@ gboolean sensor_event_listener::callback_dispatcher(gpointer data)
 		else if (cb_info->cb_type == SENSOR_LEGACY_CB)
 			((sensor_legacy_cb_t) cb_info->cb)(cb_info->event_type, (sensor_event_data_t *) cb_info->sensor_data, cb_info->user_data);
 	} else {
-		WARN("Discard invalid callback cb(0x%x)(%s, 0x%x, 0x%x) with id: %llu",
+		_W("Discard invalid callback cb(0x%x)(%s, 0x%x, 0x%x) with id: %llu",
 		cb_info->cb, get_event_name(cb_info->event_type), cb_info->sensor_data,
 		cb_info->user_data, cb_info->event_id);
 	}
@@ -340,13 +340,13 @@ ssize_t sensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, s
 		len = m_event_socket.recv(buffer, buffer_len);
 
 		if (!len) {
-			INFO("%s failed to read after poll!", get_client_name());
+			_I("%s failed to read after poll!", get_client_name());
 			return -1;
 		}
 	}
 
 	if (len < 0) {
-		INFO("%s failed to recv event from event socket", get_client_name());
+		_I("%s failed to recv event from event socket", get_client_name());
 		return -1;
 	}
 
@@ -366,20 +366,20 @@ void sensor_event_listener::listen_events(void)
 			void *buffer = malloc(EVENT_BUFFER_SIZE);
 
 			if (!buffer) {
-				ERR("Failed to allocate memory");
+				_E("Failed to allocate memory");
 				break;
 			}
 
 			len = sensor_event_poll(buffer, EVENT_BUFFER_SIZE, event);
 			if (len <= 0) {
-				INFO("sensor_event_poll failed");
+				_I("sensor_event_poll failed");
 				free(buffer);
 				break;
 			}
 
 			void *buffer_shrinked = realloc(buffer, len);
 			if (!buffer_shrinked) {
-				ERR("Failed to allocate memory");
+				_E("Failed to allocate memory");
 				free(buffer);
 				break;
 			}
@@ -403,7 +403,7 @@ void sensor_event_listener::listen_events(void)
 		m_thread_cond.notify_one();
 	}
 
-	INFO("Event listener thread is terminated.");
+	_I("Event listener thread is terminated.");
 
 	if (m_client_info.has_client_id() && (event.events & EPOLLHUP)) {
 		if (m_hup_observer)
@@ -421,35 +421,35 @@ bool sensor_event_listener::create_event_channel(void)
 		return false;
 
 	if (!m_event_socket.connect(EVENT_CHANNEL_PATH)) {
-		ERR("Failed to connect event channel for client %s, event socket fd[%d]", get_client_name(), m_event_socket.get_socket_fd());
+		_E("Failed to connect event channel for client %s, event socket fd[%d]", get_client_name(), m_event_socket.get_socket_fd());
 		return false;
 	}
 
 	if (!m_event_socket.set_connection_mode()) {
-		ERR("Failed to set connection mode for client %s", get_client_name());
+		_E("Failed to set connection mode for client %s", get_client_name());
 		return false;
 	}
 
 	client_id = m_client_info.get_client_id();
 
 	if (m_event_socket.send(&client_id, sizeof(client_id)) <= 0) {
-		ERR("Failed to send client id for client %s on event socket[%d]", get_client_name(), m_event_socket.get_socket_fd());
+		_E("Failed to send client id for client %s on event socket[%d]", get_client_name(), m_event_socket.get_socket_fd());
 		return false;
 	}
 
 	if (m_event_socket.recv(&event_channel_ready, sizeof(event_channel_ready)) <= 0) {
-		ERR("%s failed to recv event_channel_ready packet on event socket[%d] with client id [%d]",
+		_E("%s failed to recv event_channel_ready packet on event socket[%d] with client id [%d]",
 			get_client_name(), m_event_socket.get_socket_fd(), client_id);
 		return false;
 	}
 
 	if ((event_channel_ready.magic != EVENT_CHANNEL_MAGIC) || (event_channel_ready.client_id != client_id)) {
-		ERR("Event_channel_ready packet is wrong, magic = 0x%x, client id = %d",
+		_E("Event_channel_ready packet is wrong, magic = 0x%x, client id = %d",
 			event_channel_ready.magic, event_channel_ready.client_id);
 		return false;
 	}
 
-	INFO("Event channel is established for client %s on socket[%d] with client id : %d",
+	_I("Event channel is established for client %s on socket[%d] with client id : %d",
 		get_client_name(), m_event_socket.get_socket_fd(), client_id);
 
 	return true;
@@ -471,12 +471,12 @@ void sensor_event_listener::stop_event_listener(void)
 	if (m_thread_state != THREAD_STATE_TERMINATE) {
 		m_thread_state = THREAD_STATE_STOP;
 
-		DBG("%s is waiting listener thread[state: %d] to be terminated", get_client_name(), m_thread_state);
+		_D("%s is waiting listener thread[state: %d] to be terminated", get_client_name(), m_thread_state);
 		if (m_thread_cond.wait_for(u, std::chrono::seconds(THREAD_TERMINATING_TIMEOUT))
 			== std::cv_status::timeout)
-			ERR("Fail to stop listener thread after waiting %d seconds", THREAD_TERMINATING_TIMEOUT);
+			_E("Fail to stop listener thread after waiting %d seconds", THREAD_TERMINATING_TIMEOUT);
 		else
-			DBG("Listener thread for %s is terminated", get_client_name());
+			_D("Listener thread for %s is terminated", get_client_name());
 	}
 }
 
@@ -504,7 +504,7 @@ void sensor_event_listener::set_hup_observer(hup_observer_t observer)
 bool sensor_event_listener::start_event_listener(void)
 {
 	if (!create_event_channel()) {
-		ERR("Event channel is not established for %s", get_client_name());
+		_E("Event channel is not established for %s", get_client_name());
 		return false;
 	}
 

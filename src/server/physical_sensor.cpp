@@ -115,7 +115,7 @@ int physical_sensor::get_data(sensor_data_t **data, int *length)
 	remains = m_sensor_device->get_data(m_handle.id, data, length);
 
 	if (*length < 0) {
-		ERR("Failed to get sensor event");
+		_E("Failed to get sensor event");
 		return -1;
 	}
 
@@ -139,7 +139,7 @@ bool physical_sensor::set_interval(unsigned long interval)
 	if (!m_sensor_device)
 		return false;
 
-	INFO("Polling interval is set to %dms", interval);
+	_I("Polling interval is set to %dms", interval);
 
 	return m_sensor_device->set_interval(m_handle.id, interval);
 }
@@ -151,7 +151,7 @@ bool physical_sensor::set_batch_latency(unsigned long latency)
 	if (!m_sensor_device)
 		return false;
 
-	INFO("Polling interval is set to %dms", latency);
+	_I("Polling interval is set to %dms", latency);
 
 	return m_sensor_device->set_batch_latency(m_handle.id, latency);
 }

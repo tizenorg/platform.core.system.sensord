@@ -49,7 +49,7 @@ bool client_sensor_record::register_event(sensor_id_t sensor_id, unsigned int ev
 	}
 
 	if (!it_usage->second.register_event(event_type)) {
-		ERR("Event[0x%x] is already registered", event_type);
+		_E("Event[0x%x] is already registered", event_type);
 		return false;
 	}
 
@@ -61,12 +61,12 @@ bool client_sensor_record::unregister_event(sensor_id_t sensor_id, unsigned int 
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage == m_sensor_usages.end()) {
-		ERR("Sensor[0x%x] is not registered", sensor_id);
+		_E("Sensor[0x%x] is not registered", sensor_id);
 		return false;
 	}
 
 	if (!it_usage->second.unregister_event(event_type)) {
-		ERR("Event[0x%x] is already registered", event_type);
+		_E("Event[0x%x] is already registered", event_type);
 		return false;
 	}
 
@@ -150,7 +150,7 @@ bool client_sensor_record::get_batch(sensor_id_t sensor_id, unsigned int &interv
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage == m_sensor_usages.end()) {
-		ERR("Sensor[0x%x] is not found", sensor_id);
+		_E("Sensor[0x%x] is not found", sensor_id);
 		return false;
 	}
 
@@ -178,7 +178,7 @@ bool client_sensor_record::add_sensor_usage(sensor_id_t sensor_id)
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage != m_sensor_usages.end()) {
-		ERR("Sensor[0x%x] is already registered", sensor_id);
+		_E("Sensor[0x%x] is already registered", sensor_id);
 		return false;
 	}
 
@@ -192,7 +192,7 @@ bool client_sensor_record::remove_sensor_usage(sensor_id_t sensor_id)
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage == m_sensor_usages.end()) {
-		ERR("Sensor[0x%x] is not found", sensor_id);
+		_E("Sensor[0x%x] is not found", sensor_id);
 		return false;
 	}
 	m_sensor_usages.erase(it_usage);
@@ -213,7 +213,7 @@ bool client_sensor_record::has_sensor_usage(sensor_id_t sensor_id)
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage == m_sensor_usages.end()) {
-		DBG("Sensor[0x%x] is not found", sensor_id);
+		_D("Sensor[0x%x] is not found", sensor_id);
 		return false;
 	}
 
@@ -226,7 +226,7 @@ bool client_sensor_record::get_registered_events(sensor_id_t sensor_id, event_ty
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage == m_sensor_usages.end()) {
-		DBG("Sensor[0x%x] is not found", sensor_id);
+		_D("Sensor[0x%x] is not found", sensor_id);
 		return false;
 	}
 

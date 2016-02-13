@@ -46,7 +46,7 @@ bool client_info_manager::get_registered_events(int client_id, sensor_id_t senso
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -64,7 +64,7 @@ bool client_info_manager::register_event(int client_id, sensor_id_t sensor_id, u
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -81,7 +81,7 @@ bool client_info_manager::unregister_event(int client_id, sensor_id_t sensor_id,
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -98,7 +98,7 @@ bool client_info_manager::set_batch(int client_id, sensor_id_t sensor_id, unsign
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -112,7 +112,7 @@ bool client_info_manager::get_batch(int client_id, sensor_id_t sensor_id, unsign
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -126,7 +126,7 @@ bool client_info_manager::set_option(int client_id, sensor_id_t sensor_id, int o
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -143,7 +143,7 @@ bool client_info_manager::set_wakeup(int client_id, sensor_id_t sensor_id, int w
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -160,7 +160,7 @@ bool client_info_manager::set_start(int client_id, sensor_id_t sensor_id, bool s
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -178,7 +178,7 @@ bool client_info_manager::is_started(int client_id, sensor_id_t sensor_id)
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -197,7 +197,7 @@ int client_info_manager::create_client_record(void)
 		client_id++;
 
 	if (client_id == MAX_HANDLE) {
-		ERR("Sensor records of clients are full");
+		_E("Sensor records of clients are full");
 		return MAX_HANDLE_REACHED;
 	}
 
@@ -216,13 +216,13 @@ bool client_info_manager::remove_client_record(int client_id)
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
 	m_clients.erase(it_record);
 
-	INFO("Client record for client[%d] is removed from client info manager", client_id);
+	_I("Client record for client[%d] is removed from client info manager", client_id);
 
 	return true;
 }
@@ -245,7 +245,7 @@ void client_info_manager::set_client_info(int client_id, pid_t pid, const string
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return;
 	}
 
@@ -261,7 +261,7 @@ const char* client_info_manager::get_client_info(int client_id)
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		DBG("Client[%d] is not found", client_id);
+		_D("Client[%d] is not found", client_id);
 		return NULL;
 	}
 
@@ -275,7 +275,7 @@ bool client_info_manager::set_permission(int client_id, int permission)
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		DBG("Client[%d] is not found", client_id);
+		_D("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -290,7 +290,7 @@ bool client_info_manager::get_permission(int client_id, int &permission)
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		DBG("Client[%d] is not found", client_id);
+		_D("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -305,7 +305,7 @@ bool client_info_manager::create_sensor_record(int client_id, sensor_id_t sensor
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client record[%d] is not registered", client_id);
+		_E("Client record[%d] is not registered", client_id);
 		return false;
 	}
 
@@ -321,7 +321,7 @@ bool client_info_manager::remove_sensor_record(int client_id, sensor_id_t sensor
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -342,7 +342,7 @@ bool client_info_manager::has_sensor_record(int client_id, sensor_id_t sensor_id
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		DBG("Client[%d] is not found", client_id);
+		_D("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -359,7 +359,7 @@ bool client_info_manager::has_sensor_record(int client_id)
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		DBG("Client[%d] is not found", client_id);
+		_D("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -392,7 +392,7 @@ bool client_info_manager::get_event_socket(int client_id, csocket &socket)
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 
@@ -409,7 +409,7 @@ bool client_info_manager::set_event_socket(int client_id, const csocket &socket)
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
-		ERR("Client[%d] is not found", client_id);
+		_E("Client[%d] is not found", client_id);
 		return false;
 	}
 

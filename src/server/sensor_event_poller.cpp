@@ -105,7 +105,7 @@ bool sensor_event_poller::read_fd(int fd, std::vector<uint32_t> &ids)
 	sensor = dynamic_cast<physical_sensor *>(it->second);
 
 	if (!sensor) {
-		ERR("Failed to get sensor");
+		_E("Failed to get sensor");
 		return false;
 	}
 

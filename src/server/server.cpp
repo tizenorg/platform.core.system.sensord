@@ -61,22 +61,22 @@ void server::accept_client(void)
 {
 	command_worker *cmd_worker;
 
-	INFO("Client acceptor is started");
+	_I("Client acceptor is started");
 
 	while (true) {
 		csocket client_command_socket;
 
 		if (!m_client_accep_socket.accept(client_command_socket)) {
-			ERR("Failed to accept connection request from a client");
+			_E("Failed to accept connection request from a client");
 			continue;
 		}
 
-		DBG("New client (socket_fd : %d) connected", client_command_socket.get_socket_fd());
+		_D("New client (socket_fd : %d) connected", client_command_socket.get_socket_fd());
 
 		cmd_worker = new(std::nothrow) command_worker(client_command_socket);
 
 		if (!cmd_worker) {
-			ERR("Failed to allocate memory");
+			_E("Failed to allocate memory");
 			continue;
 		}
 
@@ -87,12 +87,12 @@ void server::accept_client(void)
 
 void server::poll_event(void)
 {
-	INFO("Event poller is started");
+	_I("Event poller is started");
 
 	sensor_event_poller poller;
 
 	if (!poller.poll()) {
-		ERR("Failed to poll event");
+		_E("Failed to poll event");
 		return;
 	}
 }
@@ -107,23 +107,23 @@ void server::run(void)
 	sock_fd = get_systemd_socket(COMMAND_CHANNEL_PATH);
 
 	if (sock_fd >= 0) {
-		INFO("Succeeded to get systemd socket(%d)", sock_fd);
+		_I("Succeeded to get systemd socket(%d)", sock_fd);
 		m_client_accep_socket = csocket(sock_fd);
 	} else {
-		ERR("Failed to get systemd socket, create it by myself!");
+		_E("Failed to get systemd socket, create it by myself!");
 		if (!m_client_accep_socket.create(SOCK_STREAM)) {
-			ERR("Failed to create command channel");
+			_E("Failed to create command channel");
 			return;
 		}
 
 		if(!m_client_accep_socket.bind(COMMAND_CHANNEL_PATH)) {
-			ERR("Failed to bind command channel");
+			_E("Failed to bind command channel");
 			m_client_accep_socket.close();
 			return;
 		}
 
 		if(!m_client_accep_socket.listen(MAX_PENDING_CONNECTION)) {
-			ERR("Failed to listen command channel");
+			_E("Failed to listen command channel");
 			return;
 		}
 	}

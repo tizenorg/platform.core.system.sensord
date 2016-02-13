@@ -58,7 +58,7 @@ int sensor_client_info::create_handle(sensor_id_t sensor)
 		handle++;
 
 	if (handle == MAX_HANDLE) {
-		ERR("Handles of client %s are full", get_client_name());
+		_E("Handles of client %s are full", get_client_name());
 		return MAX_HANDLE_REACHED;
 	}
 
@@ -82,7 +82,7 @@ bool sensor_client_info::delete_handle(int handle)
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -106,7 +106,7 @@ bool sensor_client_info::register_event(int handle, unsigned int event_type,
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -123,7 +123,7 @@ bool sensor_client_info::unregister_event(int handle, unsigned int event_type)
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -140,7 +140,7 @@ bool sensor_client_info::register_accuracy_cb(int handle, sensor_accuracy_change
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -158,7 +158,7 @@ bool sensor_client_info::unregister_accuracy_cb(int handle)
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -176,7 +176,7 @@ bool sensor_client_info::set_sensor_params(int handle, int sensor_state, int sen
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -193,7 +193,7 @@ bool sensor_client_info::get_sensor_params(int handle, int &sensor_state, int &s
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -210,7 +210,7 @@ bool sensor_client_info::set_sensor_state(int handle, int sensor_state)
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -226,7 +226,7 @@ bool sensor_client_info::set_sensor_option(int handle, int sensor_option)
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -242,7 +242,7 @@ bool sensor_client_info::set_event_batch(int handle, unsigned int event_type, un
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -259,7 +259,7 @@ bool sensor_client_info::set_event_maincontext(int handle, unsigned int event_ty
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -276,7 +276,7 @@ bool sensor_client_info::set_accuracy(int handle, int accuracy)
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -292,7 +292,7 @@ bool sensor_client_info::set_bad_accuracy(int handle, int bad_accuracy)
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -308,7 +308,7 @@ bool sensor_client_info::get_event_info(int handle, unsigned int event_type, uns
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -363,7 +363,7 @@ bool sensor_client_info::add_command_channel(sensor_id_t sensor, command_channel
 	auto it_channel = m_command_channels.find(sensor);
 
 	if (it_channel != m_command_channels.end()) {
-		ERR("%s alreay has command_channel for %s", get_client_name(), get_sensor_name(sensor));
+		_E("%s alreay has command_channel for %s", get_client_name(), get_sensor_name(sensor));
 		return false;
 	}
 
@@ -377,7 +377,7 @@ bool sensor_client_info::get_command_channel(sensor_id_t sensor, command_channel
 	auto it_channel = m_command_channels.find(sensor);
 
 	if (it_channel == m_command_channels.end()) {
-		ERR("%s doesn't have command_channel for %s", get_client_name(), get_sensor_name(sensor));
+		_E("%s doesn't have command_channel for %s", get_client_name(), get_sensor_name(sensor));
 		return false;
 	}
 
@@ -406,7 +406,7 @@ bool sensor_client_info::close_command_channel(sensor_id_t sensor_id)
 	auto it_channel = m_command_channels.find(sensor_id);
 
 	if (it_channel == m_command_channels.end()) {
-		ERR("%s doesn't have command_channel for %s", get_client_name(), get_sensor_name(sensor_id));
+		_E("%s doesn't have command_channel for %s", get_client_name(), get_sensor_name(sensor_id));
 		return false;
 	}
 
@@ -459,7 +459,7 @@ bool sensor_client_info::get_active_batch(sensor_id_t sensor, unsigned int &inte
 	}
 
 	if (!active_sensor_found) {
-		DBG("Active sensor[0x%llx] is not found for client %s", sensor, get_client_name());
+		_D("Active sensor[0x%llx] is not found for client %s", sensor, get_client_name());
 		return false;
 	}
 
@@ -491,7 +491,7 @@ unsigned int sensor_client_info::get_active_option(sensor_id_t sensor)
 	}
 
 	if (!active_sensor_found)
-		DBG("Active sensor[0x%llx] is not found for client %s", sensor, get_client_name());
+		_D("Active sensor[0x%llx] is not found for client %s", sensor, get_client_name());
 
 	return active_option;
 }
@@ -503,7 +503,7 @@ bool sensor_client_info::get_sensor_id(int handle, sensor_id_t &sensor)
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -519,7 +519,7 @@ bool sensor_client_info::get_sensor_state(int handle, int &sensor_state)
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -535,7 +535,7 @@ bool sensor_client_info::get_sensor_wakeup(int handle, int &sensor_wakeup)
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 
@@ -551,7 +551,7 @@ bool sensor_client_info::set_sensor_wakeup(int handle, int sensor_wakeup)
 	auto it_handle = m_sensor_handle_infos.find(handle);
 
 	if (it_handle == m_sensor_handle_infos.end()) {
-		ERR("Handle[%d] is not found for client %s", handle, get_client_name());
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
 		return false;
 	}
 

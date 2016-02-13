@@ -49,7 +49,7 @@ reg_event_info* sensor_handle_info::get_reg_event_info(unsigned int event_type)
 	auto it_event = m_reg_event_infos.find(event_type);
 
 	if (it_event == m_reg_event_infos.end()) {
-		DBG("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
+		_D("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
 		return NULL;
 	}
 
@@ -73,7 +73,7 @@ bool sensor_handle_info::add_reg_event_info(unsigned int event_type, unsigned in
 	auto it_event = m_reg_event_infos.find(event_type);
 
 	if (it_event != m_reg_event_infos.end()) {
-		ERR("Event %s[0x%x] is already registered for client %s", get_event_name(event_type), event_type, get_client_name());
+		_E("Event %s[0x%x] is already registered for client %s", get_event_name(event_type), event_type, get_client_name());
 		return false;
 	}
 
@@ -96,7 +96,7 @@ bool sensor_handle_info::delete_reg_event_info(unsigned int event_type)
 	auto it_event = m_reg_event_infos.find(event_type);
 
 	if (it_event == m_reg_event_infos.end()) {
-		ERR("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
+		_E("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
 		return false;
 	}
 
@@ -121,7 +121,7 @@ bool sensor_handle_info::change_reg_event_batch(unsigned int event_type, unsigne
 	auto it_event = m_reg_event_infos.find(event_type);
 
 	if (it_event == m_reg_event_infos.end()) {
-		ERR("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
+		_E("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
 		return false;
 	}
 
@@ -137,7 +137,7 @@ bool sensor_handle_info::change_reg_event_maincontext(unsigned int event_type, G
 	auto it_event = m_reg_event_infos.find(event_type);
 
 	if (it_event == m_reg_event_infos.end()) {
-		ERR("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
+		_E("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
 		return false;
 	}
 
@@ -149,7 +149,7 @@ bool sensor_handle_info::change_reg_event_maincontext(unsigned int event_type, G
 void sensor_handle_info::get_batch(unsigned int &interval, unsigned int &latency)
 {
 	if (m_reg_event_infos.empty()) {
-		DBG("No events are registered for client %s", get_client_name());
+		_D("No events are registered for client %s", get_client_name());
 		interval = POLL_MAX_HZ_MS;
 		latency = 0;
 		return;

@@ -36,7 +36,7 @@
 #ifdef _DEBUG
 #define DBG SLOGD
 #else
-#define DBG(...) do{} while(0)
+#define _D(...) do{} while(0)
 #endif
 
 #define ERR SLOGE
@@ -50,32 +50,32 @@
 #if defined(_DEBUG)
 #  define warn_if(expr, fmt, arg...) do { \
 		if(expr) { \
-			DBG("(%s) -> " fmt, #expr, ##arg); \
+			_D("(%s) -> " fmt, #expr, ##arg); \
 		} \
 	} while (0)
 #  define ret_if(expr) do { \
 		if(expr) { \
-			DBG("(%s) -> %s() return", #expr, __FUNCTION__); \
+			_D("(%s) -> %s() return", #expr, __FUNCTION__); \
 			return; \
 		} \
 	} while (0)
 #  define retv_if(expr, val) do { \
 		if(expr) { \
-			DBG("(%s) -> %s() return", #expr, __FUNCTION__); \
+			_D("(%s) -> %s() return", #expr, __FUNCTION__); \
 			return (val); \
 		} \
 	} while (0)
 #  define retm_if(expr, fmt, arg...) do { \
 		if(expr) { \
-			ERR(fmt, ##arg); \
-			DBG("(%s) -> %s() return", #expr, __FUNCTION__); \
+			_E(fmt, ##arg); \
+			_D("(%s) -> %s() return", #expr, __FUNCTION__); \
 			return; \
 		} \
 	} while (0)
 #  define retvm_if(expr, val, fmt, arg...) do { \
 		if(expr) { \
-			ERR(fmt, ##arg); \
-			DBG("(%s) -> %s() return", #expr, __FUNCTION__); \
+			_E(fmt, ##arg); \
+			_D("(%s) -> %s() return", #expr, __FUNCTION__); \
 			return (val); \
 		} \
 	} while (0)
@@ -83,7 +83,7 @@
 #else
 #  define warn_if(expr, fmt, arg...) do { \
 		if(expr) { \
-			ERR(fmt, ##arg); \
+			_E(fmt, ##arg); \
 		} \
 	} while (0)
 #  define ret_if(expr) do { \
@@ -98,13 +98,13 @@
 	} while (0)
 #  define retm_if(expr, fmt, arg...) do { \
 		if(expr) { \
-			ERR(fmt, ##arg); \
+			_E(fmt, ##arg); \
 			return; \
 		} \
 	} while (0)
 #  define retvm_if(expr, val, fmt, arg...) do { \
 		if(expr) { \
-			ERR(fmt, ##arg); \
+			_E(fmt, ##arg); \
 			return (val); \
 		} \
 	} while (0)

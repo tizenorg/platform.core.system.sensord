@@ -53,7 +53,7 @@ bool poller::add_fd(int fd)
 	event.events = EPOLLIN | EPOLLERR | EPOLLHUP;
 
 	if (epoll_ctl(m_epfd, EPOLL_CTL_ADD, fd, &event)) {
-		ERR("errno : %d , errstr : %s", errno, strerror(errno));
+		_E("errno : %d , errstr : %s", errno, strerror(errno));
 		return false;
 	}
 
@@ -71,12 +71,12 @@ bool poller::fill_event_queue(void)
 		if (errno == EINTR)
 			return true;
 
-		ERR("Epoll failed errrno : %d , errstr : %s", errno, strerror(errno));
+		_E("Epoll failed errrno : %d , errstr : %s", errno, strerror(errno));
 		return false;
 	}
 
 	if (nr_events == 0) {
-		ERR("Epoll timeout!");
+		_E("Epoll timeout!");
 		return false;
 	}
 
@@ -100,12 +100,12 @@ bool poller::poll(struct epoll_event &event)
 			m_event_queue.pop();
 
 			if (event.events & EPOLLERR) {
-				DBG("Poll error!");
+				_D("Poll error!");
 				return false;
 			}
 
 			if (event.events & EPOLLHUP) {
-				INFO("Poll: Connetion is closed from the other side");
+				_I("Poll: Connetion is closed from the other side");
 				return false;
 			}
 

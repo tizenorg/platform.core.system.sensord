@@ -42,7 +42,7 @@ static bool check_privilege_by_sockfd(int sock_fd, const char *priv)
 	if (cynara_creds_socket_get_client(sock_fd, CLIENT_METHOD_DEFAULT, &client) != CYNARA_API_SUCCESS ||
 			cynara_creds_socket_get_user(sock_fd, USER_METHOD_DEFAULT, &user) != CYNARA_API_SUCCESS ||
 			(session = cynara_session_from_pid(pid)) == NULL) {
-		ERR("Getting client info failed");
+		_E("Getting client info failed");
 		free(client);
 		free(user);
 		free(session);
@@ -86,11 +86,11 @@ void permission_checker::init()
 	for (unsigned int i = 0; i < sensors.size(); ++i)
 		m_permission_set |= sensors[i]->get_permission();
 
-	INFO("Permission Set = %d", m_permission_set);
+	_I("Permission Set = %d", m_permission_set);
 
 	if (cynara_initialize(&cynara_env, NULL) != CYNARA_API_SUCCESS) {
 		cynara_env = NULL;
-		ERR("Cynara initialization failed");
+		_E("Cynara initialization failed");
 	}
 }
 

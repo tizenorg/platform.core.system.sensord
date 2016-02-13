@@ -50,9 +50,9 @@ virtual_sensor_config& virtual_sensor_config::get_instance(void)
 		inst.load_config(VIRTUAL_SENSOR_CONFIG_FILE_PATH);
 		inst.get_device_id();
 		if (!inst.m_device_id.empty())
-			INFO("Device ID = %s", inst.m_device_id.c_str());
+			_I("Device ID = %s", inst.m_device_id.c_str());
 		else
-			ERR("Failed to get Device ID");
+			_E("Failed to get Device ID");
 		load_done = true;
 	}
 
@@ -64,24 +64,24 @@ bool virtual_sensor_config::load_config(const string& config_path)
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 
-	DBG("virtual_sensor_config::load_config(\"%s\") is called!\n",config_path.c_str());
+	_D("virtual_sensor_config::load_config(\"%s\") is called!\n",config_path.c_str());
 
 	doc = xmlParseFile(config_path.c_str());
 
 	if (doc == NULL) {
-		ERR("There is no %s\n",config_path.c_str());
+		_E("There is no %s\n",config_path.c_str());
 		return false;
 	}
 
 	cur = xmlDocGetRootElement(doc);
 	if(cur == NULL) {
-		ERR("There is no root element in %s\n",config_path.c_str());
+		_E("There is no root element in %s\n",config_path.c_str());
 		xmlFreeDoc(doc);
 		return false;
 	}
 
 	if(xmlStrcmp(cur->name, (const xmlChar *)ROOT_ELEMENT)) {
-		ERR("Wrong type document: there is no [%s] root element in %s\n",ROOT_ELEMENT,config_path.c_str());
+		_E("Wrong type document: there is no [%s] root element in %s\n",ROOT_ELEMENT,config_path.c_str());
 		xmlFreeDoc(doc);
 		return false;
 	}
@@ -108,7 +108,7 @@ bool virtual_sensor_config::load_config(const string& config_path)
 
 		//insert device to device_list
 		m_virtual_sensor_configs[device_type];
-		DBG("<type=\"%s\">\n",device_type.c_str());
+		_D("<type=\"%s\">\n",device_type.c_str());
 
 		virtual_sensor_node_ptr = device_node_ptr->xmlChildrenNode;
 
@@ -120,7 +120,7 @@ bool virtual_sensor_config::load_config(const string& config_path)
 			}
 
 			m_virtual_sensor_configs[device_type][(const char*)virtual_sensor_node_ptr->name];
-			DBG("<type=\"%s\"><%s>\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name);
+			_D("<type=\"%s\"><%s>\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name);
 
 			element_node_ptr = virtual_sensor_node_ptr->xmlChildrenNode;
 			while (element_node_ptr != NULL) {
@@ -132,7 +132,7 @@ bool virtual_sensor_config::load_config(const string& config_path)
 
 				//insert Element to Model
 				m_virtual_sensor_configs[device_type][(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name];
-				DBG("<type=\"%s\"><%s><%s>\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name);
+				_D("<type=\"%s\"><%s><%s>\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name);
 
 				attr_ptr = element_node_ptr->properties;
 				while (attr_ptr != NULL) {
@@ -145,14 +145,14 @@ bool virtual_sensor_config::load_config(const string& config_path)
 
 					//insert attribute to Element
 					m_virtual_sensor_configs[device_type][(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name][key]=value;
-					DBG("<type=\"%s\"><%s><%s \"%s\"=\"%s\">\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name,key.c_str(),value.c_str());
+					_D("<type=\"%s\"><%s><%s \"%s\"=\"%s\">\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name,key.c_str(),value.c_str());
 					attr_ptr = attr_ptr->next;
 				}
 
 				element_node_ptr = element_node_ptr->next;
 			}
 
-			DBG("\n");
+			_D("\n");
 			virtual_sensor_node_ptr = virtual_sensor_node_ptr->next;
 		}
 
@@ -168,37 +168,37 @@ bool virtual_sensor_config::get(const string& sensor_type, const string& element
 	auto it_device_list = m_virtual_sensor_configs.find(m_device_id);
 
 	if (it_device_list == m_virtual_sensor_configs.end())	{
-		ERR("There is no <%s> device\n",m_device_id.c_str());
+		_E("There is no <%s> device\n",m_device_id.c_str());
 
 		m_device_id = DEFAULT_DEVICE;
 		it_device_list = m_virtual_sensor_configs.find(m_device_id);
 
 		if (it_device_list == m_virtual_sensor_configs.end()) {
-			ERR("There is no Default device\n");
+			_E("There is no Default device\n");
 			return false;
 		}
 
-		INFO("m_device_id is set to Default\n");
+		_I("m_device_id is set to Default\n");
 	}
 
 	auto it_virtual_sensor_list = it_device_list->second.find(sensor_type);
 
 	if (it_virtual_sensor_list == it_device_list->second.end())	{
-		ERR("There is no <%s> sensor\n",sensor_type.c_str());
+		_E("There is no <%s> sensor\n",sensor_type.c_str());
 		return false;
 	}
 
 	auto it_element = it_virtual_sensor_list->second.find(element);
 
 	if (it_element == it_virtual_sensor_list->second.end()) {
-		ERR("There is no <%s><%s> element\n",sensor_type.c_str(),element.c_str());
+		_E("There is no <%s><%s> element\n",sensor_type.c_str(),element.c_str());
 		return false;
 	}
 
 	auto it_attr = it_element->second.find(attr);
 
 	if (it_attr == it_element->second.end()) {
-		DBG("There is no <%s><%s \"%s\">\n",sensor_type.c_str(),element.c_str(),attr.c_str());
+		_D("There is no <%s><%s \"%s\">\n",sensor_type.c_str(),element.c_str(),attr.c_str());
 		return false;
 	}
 
@@ -269,7 +269,7 @@ bool virtual_sensor_config::get(const string& sensor_type, const string& element
 	}
 	else
 	{
-		DBG("Count value not supported.\n");
+		_D("Count value not supported.\n");
 	}
 
 	return false;
@@ -301,7 +301,7 @@ bool virtual_sensor_config::get(const string& sensor_type, const string& element
 	}
 	else
 	{
-		DBG("Count value not supported.\n");
+		_D("Count value not supported.\n");
 	}
 
 	return false;

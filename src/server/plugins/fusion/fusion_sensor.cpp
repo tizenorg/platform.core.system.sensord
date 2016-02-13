@@ -83,74 +83,74 @@ fusion_sensor::fusion_sensor()
 	m_enable_fusion = 0;
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_VENDOR, m_vendor)) {
-		ERR("[VENDOR] is empty\n");
+		_E("[VENDOR] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_vendor = %s", m_vendor.c_str());
+	_I("m_vendor = %s", m_vendor.c_str());
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
-		ERR("[RAW_DATA_UNIT] is empty\n");
+		_E("[RAW_DATA_UNIT] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_raw_data_unit = %s", m_raw_data_unit.c_str());
+	_I("m_raw_data_unit = %s", m_raw_data_unit.c_str());
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
-		ERR("[DEFAULT_SAMPLING_TIME] is empty\n");
+		_E("[DEFAULT_SAMPLING_TIME] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_default_sampling_time = %d", m_default_sampling_time);
+	_I("m_default_sampling_time = %d", m_default_sampling_time);
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_ACCEL_STATIC_BIAS, m_accel_static_bias, 3)) {
-		ERR("[ACCEL_STATIC_BIAS] is empty\n");
+		_E("[ACCEL_STATIC_BIAS] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_accel_static_bias = (%f, %f, %f)", m_accel_static_bias[0], m_accel_static_bias[1], m_accel_static_bias[2]);
+	_I("m_accel_static_bias = (%f, %f, %f)", m_accel_static_bias[0], m_accel_static_bias[1], m_accel_static_bias[2]);
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_GYRO_STATIC_BIAS, m_gyro_static_bias,3)) {
-		ERR("[GYRO_STATIC_BIAS] is empty\n");
+		_E("[GYRO_STATIC_BIAS] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_gyro_static_bias = (%f, %f, %f)", m_gyro_static_bias[0], m_gyro_static_bias[1], m_gyro_static_bias[2]);
+	_I("m_gyro_static_bias = (%f, %f, %f)", m_gyro_static_bias[0], m_gyro_static_bias[1], m_gyro_static_bias[2]);
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_GEOMAGNETIC_STATIC_BIAS, m_geomagnetic_static_bias, 3)) {
-		ERR("[GEOMAGNETIC_STATIC_BIAS] is empty\n");
+		_E("[GEOMAGNETIC_STATIC_BIAS] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_geomagnetic_static_bias = (%f, %f, %f)", m_geomagnetic_static_bias[0], m_geomagnetic_static_bias[1], m_geomagnetic_static_bias[2]);
+	_I("m_geomagnetic_static_bias = (%f, %f, %f)", m_geomagnetic_static_bias[0], m_geomagnetic_static_bias[1], m_geomagnetic_static_bias[2]);
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_ACCEL_ROTATION_DIRECTION_COMPENSATION, m_accel_rotation_direction_compensation, 3)) {
-		ERR("[ACCEL_ROTATION_DIRECTION_COMPENSATION] is empty\n");
+		_E("[ACCEL_ROTATION_DIRECTION_COMPENSATION] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_accel_rotation_direction_compensation = (%d, %d, %d)", m_accel_rotation_direction_compensation[0], m_accel_rotation_direction_compensation[1], m_accel_rotation_direction_compensation[2]);
+	_I("m_accel_rotation_direction_compensation = (%d, %d, %d)", m_accel_rotation_direction_compensation[0], m_accel_rotation_direction_compensation[1], m_accel_rotation_direction_compensation[2]);
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_GYRO_ROTATION_DIRECTION_COMPENSATION, m_gyro_rotation_direction_compensation, 3)) {
-		ERR("[GYRO_ROTATION_DIRECTION_COMPENSATION] is empty\n");
+		_E("[GYRO_ROTATION_DIRECTION_COMPENSATION] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_gyro_rotation_direction_compensation = (%d, %d, %d)", m_gyro_rotation_direction_compensation[0], m_gyro_rotation_direction_compensation[1], m_gyro_rotation_direction_compensation[2]);
+	_I("m_gyro_rotation_direction_compensation = (%d, %d, %d)", m_gyro_rotation_direction_compensation[0], m_gyro_rotation_direction_compensation[1], m_gyro_rotation_direction_compensation[2]);
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION, m_geomagnetic_rotation_direction_compensation, 3)) {
-		ERR("[GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION] is empty\n");
+		_E("[GEOMAGNETIC_ROTATION_DIRECTION_COMPENSATION] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_geomagnetic_rotation_direction_compensation = (%d, %d, %d)", m_geomagnetic_rotation_direction_compensation[0], m_geomagnetic_rotation_direction_compensation[1], m_geomagnetic_rotation_direction_compensation[2]);
+	_I("m_geomagnetic_rotation_direction_compensation = (%d, %d, %d)", m_geomagnetic_rotation_direction_compensation[0], m_geomagnetic_rotation_direction_compensation[1], m_geomagnetic_rotation_direction_compensation[2]);
 
 	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_MAGNETIC_ALIGNMENT_FACTOR, &m_magnetic_alignment_factor)) {
-		ERR("[MAGNETIC_ALIGNMENT_FACTOR] is empty\n");
+		_E("[MAGNETIC_ALIGNMENT_FACTOR] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_magnetic_alignment_factor = %d", m_magnetic_alignment_factor);
+	_I("m_magnetic_alignment_factor = %d", m_magnetic_alignment_factor);
 
 	m_interval = m_default_sampling_time * MS_TO_US;
 
@@ -159,7 +159,7 @@ fusion_sensor::fusion_sensor()
 
 fusion_sensor::~fusion_sensor()
 {
-	INFO("fusion_sensor is destroyed!\n");
+	_I("fusion_sensor is destroyed!\n");
 }
 
 bool fusion_sensor::init(void)
@@ -169,17 +169,17 @@ bool fusion_sensor::init(void)
 	m_magnetic_sensor = sensor_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
 
 	if (!m_accel_sensor) {
-		ERR("Failed to load accel sensor: 0x%x", m_accel_sensor);
+		_E("Failed to load accel sensor: 0x%x", m_accel_sensor);
 		return false;
 	}
 
 	if (!m_gyro_sensor)
-		INFO("Failed to load gyro sensor: 0x%x", m_gyro_sensor);
+		_I("Failed to load gyro sensor: 0x%x", m_gyro_sensor);
 
 	if (!m_magnetic_sensor)
-		INFO("Failed to load geomagnetic sensor: 0x%x", m_magnetic_sensor);
+		_I("Failed to load geomagnetic sensor: 0x%x", m_magnetic_sensor);
 
-	INFO("%s is created!", sensor_base::get_name());
+	_I("%s is created!", sensor_base::get_name());
 	return true;
 }
 
