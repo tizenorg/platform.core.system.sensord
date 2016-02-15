@@ -163,14 +163,15 @@ void sensor_loader::create_physical_sensors(sensor_type_t type)
 			return;
 		}
 
-		index = (int32_t) (m_sensors.count(type));
+		sensor_type_t _type = (sensor_type_t)handle->type;
+		index = (int32_t)m_sensors.count(_type);
 
-		sensor->set_id(((int64_t)handle->type << SENSOR_TYPE_SHIFT) | index);
+		sensor->set_id(((int64_t)_type << SENSOR_TYPE_SHIFT) | index);
 		sensor->set_sensor_handle(handle);
 		sensor->set_sensor_device(device);
 
 		std::shared_ptr<sensor_base> sensor_ptr(sensor);
-		m_sensors.insert(std::make_pair(type, sensor_ptr));
+		m_sensors.insert(std::make_pair(_type, sensor_ptr));
 
 		_I("created [%s] sensor", sensor->get_name());
 
@@ -264,6 +265,10 @@ bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &p
 
 	while ((dir_entry = readdir(dir))) {
 		name = string(dir_entry->d_name);
+
+		if (name == "." || name == "..")
+			continue;
+
 		plugin_paths.push_back(dir_path + "/" + name);
 	}
 
