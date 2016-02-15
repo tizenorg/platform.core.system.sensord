@@ -102,7 +102,7 @@ typedef enum {
  * A platform sensor handler is generated based on this handle
  * ID can be assigned from HAL developer. so it has to be unique in HAL.
  */
-typedef struct sensor_handle_t {
+typedef struct sensor_info_t {
 	uint32_t id;
 	const char *name;
 	sensor_device_type type;
@@ -115,7 +115,7 @@ typedef struct sensor_handle_t {
 	int min_interval;
 	int max_batch_count;
 	bool wakeup_supported;
-} sensor_handle_t;
+} sensor_info_t;
 
 enum sensor_accuracy_t {
 	SENSOR_ACCURACY_UNDEFINED = -1,
@@ -170,7 +170,7 @@ public:
 	}
 
 	virtual int get_poll_fd(void) = 0;
-	virtual int get_sensors(const sensor_handle_t **sensors) = 0;
+	virtual int get_sensors(const sensor_info_t **sensors) = 0;
 
 	virtual bool enable(uint32_t id) = 0;
 	virtual bool disable(uint32_t id) = 0;

@@ -29,7 +29,7 @@ public:
 	virtual ~physical_sensor();
 
 	/* setting module */
-	void set_sensor_handle(const sensor_handle_t *handle);
+	void set_sensor_info(const sensor_info_t *info);
 	void set_sensor_device(sensor_device *device);
 
 	/* module info */
@@ -46,7 +46,7 @@ public:
 private:
 	static cmutex m_mutex;
 
-	const sensor_handle_t *m_handle;
+	const sensor_info_t *m_info;
 	sensor_device *m_sensor_device;
 	uint32_t hal_id;
 
