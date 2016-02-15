@@ -243,7 +243,8 @@ void *check_sensor(void *arg)
 	struct pthread_arguments * argu = (struct pthread_arguments *) arg;
 
 	GMainLoop *mainloop;
-	int handle, result, start_handle, stop_handle;
+	int handle;
+	bool result, start_handle, stop_handle;
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 
@@ -252,14 +253,14 @@ void *check_sensor(void *arg)
 
 	result = sensord_register_event(handle, argu->event, argu->interval, 0, callback, NULL);
 
-	if (result < 0) {
+	if (!result) {
 		printf("Can't register sensor\n");
 		return NULL;
 	}
 
 	start_handle = sensord_start(handle, 0);
 
-	if (start_handle < 0) {
+	if (!start_handle) {
 		printf("Error\n\n\n\n");
 		sensord_unregister_event(handle, argu->event);
 		sensord_disconnect(handle);
@@ -271,14 +272,14 @@ void *check_sensor(void *arg)
 
 	result = sensord_unregister_event(handle, argu->event);
 
-	if (result < 0) {
+	if (!result) {
 		printf("Error\n\n");
 		return NULL;
 	}
 
 	stop_handle = sensord_stop(handle);
 
-	if (stop_handle < 0) {
+	if (!stop_handle) {
 		printf("Error\n\n");
 		return NULL;
 	}
@@ -289,7 +290,9 @@ void *check_sensor(void *arg)
 
 int polling_sensor(sensor_type_t sensor_type, unsigned int event)
 {
-	int result, handle;
+	bool result;
+	int handle;
+
 	printf("Polling based\n");
 	sensor_t sensor;
 	sensor = sensord_get_sensor(sensor_type);

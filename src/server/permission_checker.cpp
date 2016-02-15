@@ -21,9 +21,8 @@
 #include <cynara-creds-socket.h>
 #include <cynara-session.h>
 #include <permission_checker.h>
-#include <sf_common.h>
 #include <sensor_logs.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 #include <sensor_base.h>
 
 static cynara *cynara_env = NULL;
@@ -43,7 +42,7 @@ static bool check_privilege_by_sockfd(int sock_fd, const char *priv)
 	if (cynara_creds_socket_get_client(sock_fd, CLIENT_METHOD_DEFAULT, &client) != CYNARA_API_SUCCESS ||
 			cynara_creds_socket_get_user(sock_fd, USER_METHOD_DEFAULT, &user) != CYNARA_API_SUCCESS ||
 			(session = cynara_session_from_pid(pid)) == NULL) {
-		ERR("Getting client info failed");
+		_E("Getting client info failed");
 		free(client);
 		free(user);
 		free(session);
@@ -82,16 +81,16 @@ void permission_checker::init()
 	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_BIO, true, "http://tizen.org/privilege/healthinfo"));
 
 	std::vector<sensor_base *> sensors;
-	sensors = sensor_plugin_loader::get_instance().get_sensors(ALL_SENSOR);
+	sensors = sensor_loader::get_instance().get_sensors(ALL_SENSOR);
 
 	for (unsigned int i = 0; i < sensors.size(); ++i)
 		m_permission_set |= sensors[i]->get_permission();
 
-	INFO("Permission Set = %d", m_permission_set);
+	_I("Permission Set = %d", m_permission_set);
 
 	if (cynara_initialize(&cynara_env, NULL) != CYNARA_API_SUCCESS) {
 		cynara_env = NULL;
-		ERR("Cynara initialization failed");
+		_E("Cynara initialization failed");
 	}
 }
 

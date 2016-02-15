@@ -18,12 +18,11 @@
  */
 
 #include <pthread.h>
-#include <cbase_lock.h>
 #include <stdio.h>
-#include <sensor_logs.h>
 #include <errno.h>
 #include <sys/time.h>
-
+#include <cbase_lock.h>
+#include <sensor_logs.h>
 
 cbase_lock::cbase_lock()
 {
@@ -65,7 +64,7 @@ void cbase_lock::lock(lock_type type, const char* expr, const char *module, cons
 	lock_waiting_start_time = MICROSECONDS(sv);
 
 	pthread_mutex_lock(&m_history_mutex);
-	INFO("%s is waiting for getting %s(0x%x) owned in %s",
+	_I("%s is waiting for getting %s(0x%x) owned in %s",
 		m_curent_info, expr, this, m_owner_info);
 	pthread_mutex_unlock(&m_history_mutex);
 
@@ -83,7 +82,7 @@ void cbase_lock::lock(lock_type type, const char* expr, const char *module, cons
 	waiting_time = lock_acquired_time - lock_waiting_start_time;
 
 	pthread_mutex_lock(&m_history_mutex);
-	INFO("%s acquires lock after waiting %lluus, %s(0x%x) was previously owned in %s",
+	_I("%s acquires lock after waiting %lluus, %s(0x%x) was previously owned in %s",
 		m_curent_info, waiting_time, expr, this, m_owner_info);
 	snprintf(m_owner_info, OWNER_INFO_LEN, "%s", m_curent_info);
 	pthread_mutex_unlock(&m_history_mutex);

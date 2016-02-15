@@ -24,8 +24,7 @@
 #include <mutex>
 #include <condition_variable>
 
-class worker_thread
-{
+class worker_thread {
 public:
 	enum worker_state_t {
 		WORKER_STATE_INITIAL,
@@ -78,4 +77,4 @@ public:
 	void set_context(void *ctx);
 };
 
-#endif
+#endif /* _WORKER_THREAD_H_ */

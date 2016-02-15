@@ -26,11 +26,10 @@
 #include <sys/types.h>
 #include <dlfcn.h>
 #include <sensor_logs.h>
-#include <sf_common.h>
 #include <geomagnetic_rv_sensor.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 #include <orientation_filter.h>
-#include <cvirtual_sensor_config.h>
+#include <virtual_sensor_config.h>
 
 using std::string;
 using std::vector;
@@ -51,9 +50,9 @@ geomagnetic_rv_sensor::geomagnetic_rv_sensor()
 , m_fusion_sensor(NULL)
 , m_time(0)
 {
-	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
+	virtual_sensor_config &config = virtual_sensor_config::get_instance();
 
-	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
+	sensor_hal *fusion_sensor_hal = sensor_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
 	if (!fusion_sensor_hal)
 		m_hardware_fusion = false;
 	else
@@ -63,41 +62,41 @@ geomagnetic_rv_sensor::geomagnetic_rv_sensor()
 	register_supported_event(GEOMAGNETIC_RV_RAW_DATA_EVENT);
 
 	if (!config.get(SENSOR_TYPE_GEOMAGNETIC_RV, ELEMENT_VENDOR, m_vendor)) {
-		ERR("[VENDOR] is empty\n");
+		_E("[VENDOR] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_vendor = %s", m_vendor.c_str());
+	_I("m_vendor = %s", m_vendor.c_str());
 
 	if (!config.get(SENSOR_TYPE_GEOMAGNETIC_RV, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
-		ERR("[DEFAULT_SAMPLING_TIME] is empty\n");
+		_E("[DEFAULT_SAMPLING_TIME] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_default_sampling_time = %d", m_default_sampling_time);
+	_I("m_default_sampling_time = %d", m_default_sampling_time);
 
 	m_interval = m_default_sampling_time * MS_TO_US;
 }
 
 geomagnetic_rv_sensor::~geomagnetic_rv_sensor()
 {
-	INFO("geomagnetic_rv_sensor is destroyed!\n");
+	_I("geomagnetic_rv_sensor is destroyed!\n");
 }
 
 bool geomagnetic_rv_sensor::init()
 {
-	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
-	m_magnetic_sensor = sensor_plugin_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
+	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
+	m_magnetic_sensor = sensor_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
 
-	m_fusion_sensor = sensor_plugin_loader::get_instance().get_sensor(FUSION_SENSOR);
+	m_fusion_sensor = sensor_loader::get_instance().get_sensor(FUSION_SENSOR);
 
 	if (!m_accel_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
-		ERR("Failed to load sensors,  accel: 0x%x, mag: 0x%x, fusion: 0x%x",
+		_E("Failed to load sensors,  accel: 0x%x, mag: 0x%x, fusion: 0x%x",
 			m_accel_sensor, m_magnetic_sensor, m_fusion_sensor);
 		return false;
 	}
 
-	INFO("%s is created!\n", sensor_base::get_name());
+	_I("%s is created!\n", sensor_base::get_name());
 
 	return true;
 }

@@ -68,7 +68,7 @@ bool csocket::create(int sock_type)
 	m_sock_fd = socket(AF_UNIX, sock_type, 0);
 
 	if (!is_valid()) {
-		ERR("Failed to create socket for %s, errno : %d , errstr : %s ",
+		_E("Failed to create socket for %s, errno : %d , errstr : %s ",
 			get_client_name(), errno, strerror(errno));
 		return false;
 	}
@@ -84,14 +84,14 @@ bool csocket::bind (const char *sock_path)
 	mode_t socket_mode;
 
 	if (!is_valid()) {
-		ERR("%s's socket is invalid", get_client_name());
+		_E("%s's socket is invalid", get_client_name());
 		return false;
 	}
 
 	if((fsetxattr(m_sock_fd, "security.SMACK64IPOUT", "@", 2, 0)) < 0) {
 		if(errno != EOPNOTSUPP) {
 			close();
-			ERR("security.SMACK64IPOUT error = [%d][%s]\n", errno, strerror(errno) );
+			_E("security.SMACK64IPOUT error = [%d][%s]\n", errno, strerror(errno) );
 			return false;
 		}
 	}
@@ -99,7 +99,7 @@ bool csocket::bind (const char *sock_path)
 	if((fsetxattr(m_sock_fd, "security.SMACK64IPIN", "*", 2, 0)) < 0) {
 		if(errno != EOPNOTSUPP)	{
 			close();
-			ERR("security.SMACK64IPIN error  = [%d][%s]\n", errno, strerror(errno) );
+			_E("security.SMACK64IPIN error  = [%d][%s]\n", errno, strerror(errno) );
 			return false;
 		}
 	}
@@ -116,14 +116,14 @@ bool csocket::bind (const char *sock_path)
 	length = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 
 	if (::bind(m_sock_fd, (struct sockaddr *)&m_addr, length) < 0) {
-		ERR("Binding failed for socket(%d), errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
+		_E("Binding failed for socket(%d), errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
 		close();
 		return false;
 	}
 
 	socket_mode = ( S_IRWXU | S_IRWXG | S_IRWXO );
 	if (chmod(sock_path, socket_mode) < 0) {
-		ERR("chmod failed for socket(%d), errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
+		_E("chmod failed for socket(%d), errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
 		close();
 		return false;
 	}
@@ -134,12 +134,12 @@ bool csocket::bind (const char *sock_path)
 bool csocket::listen(const int max_connections)
 {
 	if (!is_valid()) {
-		ERR("Socket(%d) is invalid", m_sock_fd);
+		_E("Socket(%d) is invalid", m_sock_fd);
 		return false;
 	}
 
 	if (::listen(m_sock_fd, max_connections) < 0) {
-		ERR("Listening failed for socket(%d), errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
+		_E("Listening failed for socket(%d), errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
 		close();
 		return false;
 	}
@@ -161,7 +161,7 @@ bool csocket::accept(csocket& client_socket) const
 	} while (err == EINTR);
 
 	if (!client_socket.is_valid()) {
-		ERR("Accept failed for socket(%d), errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
+		_E("Accept failed for socket(%d), errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
 		return false;
 	}
 
@@ -178,7 +178,7 @@ ssize_t csocket::send_for_seqpacket(const void *buffer, size_t size) const
 	} while (err == EINTR);
 
 	if (err) {
-		ERR("send(%d, 0x%x, %d, 0x%x) = %d cause = %s(%d)",
+		_E("send(%d, 0x%x, %d, 0x%x) = %d cause = %s(%d)",
 			m_sock_fd, buffer, size, m_send_flags, len, strerror(errno), errno);
 	}
 
@@ -195,7 +195,7 @@ ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
 		if (len > 0) {
 			err = 0;
 		} else if (len == 0) {
-			ERR("recv(%d, 0x%p , %d) = %d, because the peer performed shutdown!",
+			_E("recv(%d, 0x%p , %d) = %d, because the peer performed shutdown!",
 				m_sock_fd, buffer, size, len);
 			err = 1;
 		} else {
@@ -204,13 +204,13 @@ ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
     } while (err == EINTR);
 
 	if ((err == EAGAIN) || (err == EWOULDBLOCK)) {
-		DBG("recv(%d, 0x%x, %d, 0x%x) = %d cause = %s(%d)",
+		_D("recv(%d, 0x%x, %d, 0x%x) = %d cause = %s(%d)",
 			m_sock_fd, buffer, size, m_recv_flags, len, strerror(errno), errno);
 		return 0;
 	}
 
 	if (err) {
-		ERR("recv(%d, 0x%x, %d, 0x%x) = %d cause = %s(%d)",
+		_E("recv(%d, 0x%x, %d, 0x%x) = %d cause = %s(%d)",
 			m_sock_fd, buffer, size, m_recv_flags, len, strerror(errno), errno);
 	}
 
@@ -231,7 +231,7 @@ ssize_t csocket::send_for_stream(const void *buffer, size_t size) const
 			total_sent_size += len;
 			err = 0;
 		} else {
-			ERR("send(%d, 0x%p + %d, %d - %d) = %d, error: %s(%d) for %s",
+			_E("send(%d, 0x%p + %d, %d - %d) = %d, error: %s(%d) for %s",
 				m_sock_fd, buffer, total_sent_size, size, total_sent_size,
 				len, strerror(errno), errno, get_client_name());
 
@@ -257,12 +257,12 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 		if (len > 0) {
 			total_recv_size += len;
 		} else if (len == 0) {
-			ERR("recv(%d, 0x%p + %d, %d - %d) = %d, because the peer of %s performed shutdown!",
+			_E("recv(%d, 0x%p + %d, %d - %d) = %d, because the peer of %s performed shutdown!",
 				m_sock_fd, buffer, total_recv_size, size, total_recv_size, len, get_client_name());
 			err = 1;
 			break;
 		} else {
-			ERR("recv(%d, 0x%p + %d, %d - %d) = %d, error: %s(%d) for %s",
+			_E("recv(%d, 0x%p + %d, %d - %d) = %d, error: %s(%d) for %s",
 				m_sock_fd, buffer, total_recv_size, size, total_recv_size,
 				len, strerror(errno), errno, get_client_name());
 
@@ -302,7 +302,7 @@ bool csocket::connect(const char *sock_path)
 	bool prev_blocking_mode;
 
 	if (!is_valid()) {
-		ERR("%s's socket is invalid", get_client_name());
+		_E("%s's socket is invalid", get_client_name());
 		return false;
 	}
 
@@ -318,7 +318,7 @@ bool csocket::connect(const char *sock_path)
 	addr_len = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 
 	if (::connect(m_sock_fd,(sockaddr *) &m_addr, addr_len) < 0) {
-		ERR("connect error: %s sock_fd: %d\n for %s", strerror(errno), m_sock_fd, get_client_name());
+		_E("connect error: %s sock_fd: %d\n for %s", strerror(errno), m_sock_fd, get_client_name());
 		return false;
 	}
 
@@ -332,17 +332,17 @@ bool csocket::connect(const char *sock_path)
 	ret = select(m_sock_fd + 1, NULL, &write_fds, NULL, &tv);
 
 	if (ret == -1) {
-		ERR("select error: %s sock_fd: %d\n for %s", strerror(errno), m_sock_fd, get_client_name());
+		_E("select error: %s sock_fd: %d\n for %s", strerror(errno), m_sock_fd, get_client_name());
 		close();
 		return false;
 	} else if (!ret) {
-		ERR("select timeout: %d seconds elapsed for %s", tv.tv_sec, get_client_name());
+		_E("select timeout: %d seconds elapsed for %s", tv.tv_sec, get_client_name());
 		close();
 		return false;
 	}
 
 	if (!FD_ISSET(m_sock_fd, &write_fds)) {
-		ERR("select failed for %s, nothing to write, m_sock_fd : %d", get_client_name(), m_sock_fd);
+		_E("select failed for %s, nothing to write, m_sock_fd : %d", get_client_name(), m_sock_fd);
 		close();
 		return false;
 	}
@@ -351,14 +351,14 @@ bool csocket::connect(const char *sock_path)
 	socklen_t len = sizeof(so_error);
 
 	if (getsockopt(m_sock_fd, SOL_SOCKET, SO_ERROR, &so_error, &len) == -1) {
-		ERR("getsockopt failed for %s, m_sock_fd : %d, errno : %d , errstr : %s",
+		_E("getsockopt failed for %s, m_sock_fd : %d, errno : %d , errstr : %s",
 			get_client_name(), m_sock_fd, errno, strerror(errno));
 		close();
 		return false;
 	}
 
 	if (so_error) {
-		ERR("SO_ERROR occurred for %s, m_sock_fd : %d, so_error : %d",
+		_E("SO_ERROR occurred for %s, m_sock_fd : %d, so_error : %d",
 			get_client_name(), m_sock_fd, so_error);
 		close();
 		return false;
@@ -377,7 +377,7 @@ bool csocket::set_blocking_mode(bool blocking)
 	flags = fcntl(m_sock_fd, F_GETFL);
 
 	if (flags == -1) {
-		ERR("fcntl(F_GETFL) failed for %s, m_sock_fd: %d, errno : %d , errstr : %s", get_client_name(), m_sock_fd, errno, strerror(errno));
+		_E("fcntl(F_GETFL) failed for %s, m_sock_fd: %d, errno : %d , errstr : %s", get_client_name(), m_sock_fd, errno, strerror(errno));
 		return false;
 	}
 
@@ -386,7 +386,7 @@ bool csocket::set_blocking_mode(bool blocking)
 	flags = fcntl(m_sock_fd, F_SETFL, flags);
 
 	if (flags == -1) {
-		ERR("fcntl(F_SETFL) failed for %s, m_sock_fd: %d, errno : %d , errstr : %s", get_client_name(), m_sock_fd, errno, strerror(errno));
+		_E("fcntl(F_SETFL) failed for %s, m_sock_fd: %d, errno : %d , errstr : %s", get_client_name(), m_sock_fd, errno, strerror(errno));
 		return false;
 	}
 
@@ -402,7 +402,7 @@ bool csocket::set_sock_type(void)
 	opt_len = sizeof(sock_type);
 
 	if (getsockopt(m_sock_fd, SOL_SOCKET, SO_TYPE, &sock_type, &opt_len) < 0) {
-	   ERR("getsockopt(SOL_SOCKET, SO_TYPE) failed for %s, m_sock_fd: %d, errno : %d , errstr : %s", get_client_name(), m_sock_fd, errno, strerror(errno));
+	   _E("getsockopt(SOL_SOCKET, SO_TYPE) failed for %s, m_sock_fd: %d, errno : %d , errstr : %s", get_client_name(), m_sock_fd, errno, strerror(errno));
 	   return false;
 	}
 
@@ -421,7 +421,7 @@ bool csocket::set_connection_mode(void)
 	tv.tv_usec = 0;
 
 	if(setsockopt(m_sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
-		ERR("Set SO_RCVTIMEO failed for %s, m_sock_fd : %d, errno : %d , errstr : %s",
+		_E("Set SO_RCVTIMEO failed for %s, m_sock_fd : %d, errno : %d , errstr : %s",
 			get_client_name(), m_sock_fd, errno, strerror(errno));
 		close();
 		return false;
@@ -451,7 +451,7 @@ bool csocket::is_blocking_mode(void)
 	flags = fcntl(m_sock_fd, F_GETFL);
 
 	if (flags == -1) {
-		ERR("fcntl(F_GETFL) failed for %s, m_sock_fd: %d, errno : %d , errstr : %s", get_client_name(), m_sock_fd, errno, strerror(errno));
+		_E("fcntl(F_GETFL) failed for %s, m_sock_fd: %d, errno : %d , errstr : %s", get_client_name(), m_sock_fd, errno, strerror(errno));
 		return false;
 	}
 
@@ -473,7 +473,7 @@ bool csocket::close(void)
 {
 	if (m_sock_fd >= 0) {
 		if (::close(m_sock_fd) < 0) {
-			ERR("Socket(%d) close failed, errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
+			_E("Socket(%d) close failed, errno : %d , errstr : %s", m_sock_fd, errno, strerror(errno));
 			return false;
 		}
 		m_sock_fd = -1;

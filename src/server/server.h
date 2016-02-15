@@ -17,14 +17,13 @@
  *
  */
 
-#ifndef SERVER_H_
-#define SERVER_H_
+#ifndef _SERVER_H_
+#define _SERVER_H_
 
 #include <glib.h>
 #include <csocket.h>
 
-class server
-{
+class server {
 private:
 	GMainLoop *m_mainloop;
 	csocket m_client_accep_socket;
@@ -32,6 +31,7 @@ private:
 	server();
 	~server();
 
+	void poll_event(void);
 	void accept_client(void);
 	int get_systemd_socket(const char *name);
 public:
@@ -40,4 +40,4 @@ public:
 	static server& get_instance();
 };
 
-#endif
+#endif /* _SERVER_H_ */

@@ -17,13 +17,12 @@
  *
  */
 
-#if !defined(_CMUTEX_CLASS_H_)
-#define _CMUTEX_CLASS_H_
+#ifndef _CMUTEX_H_
+#define _CMUTEX_H_
 
 #include "cbase_lock.h"
 
-class cmutex : public cbase_lock
-{
+class cmutex : public cbase_lock {
 public:
 	cmutex();
 	virtual ~cmutex();
@@ -39,5 +38,4 @@ private:
 	pthread_mutex_t m_mutex;
 };
 
-#endif
-// End of a file
+#endif /* _CMUTEX_H_ */

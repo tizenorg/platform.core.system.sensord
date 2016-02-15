@@ -26,11 +26,6 @@
 
 #include "stdbool.h"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include <sys/types.h>
 
 /*header for common sensor type*/
@@ -40,6 +35,12 @@ extern "C"
 #include <sensor_types.h>
 
 #include <sensor_deprecated.h>
+
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #define MAX_KEY_LEN 30
 
@@ -78,13 +79,13 @@ typedef struct {
 	float sensor_resolution;
 } sensor_data_properties_t;
 
-int sf_is_sensor_event_available(sensor_type_t sensor_type , unsigned int event_type);
+DEPRECATED int sf_is_sensor_event_available(sensor_type_t sensor_type , unsigned int event_type);
 
-int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties);
+DEPRECATED int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties);
 
-int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties);
+DEPRECATED int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties);
 
-int sf_check_rotation(unsigned long *rotation);
+DEPRECATED int sf_check_rotation(unsigned long *rotation);
 
 /**
  * @fn int sf_connect(sensor_type_t sensor)
@@ -92,7 +93,7 @@ int sf_check_rotation(unsigned long *rotation);
  * @param[in] sensor_type your desired sensor type
  * @return if it succeed, it return handle value( >=0 ) , otherwise negative value return
  */
-int sf_connect(sensor_type_t sensor_type);
+DEPRECATED int sf_connect(sensor_type_t sensor_type);
 
 /**
  * @fn int sf_disconnect(int handle)
@@ -100,7 +101,7 @@ int sf_connect(sensor_type_t sensor_type);
  * @param[in] handle received handle value by sf_connect()
  * @return if it succeed, it return zero value , otherwise negative value return
  */
-int sf_disconnect(int handle);
+DEPRECATED int sf_disconnect(int handle);
 
 /**
  * @fn int sf_start(int handle , int option)
@@ -109,7 +110,7 @@ int sf_disconnect(int handle);
  * @param[in] option With SENSOR_OPTION_DEFAULT, it stops to sense when LCD is off, and with SENSOR_OPTION_ALWAYS_ON, it continues to sense even when LCD is off
  * @return if it succeed, it return zero value , otherwise negative value return
  */
-int sf_start(int handle , int option);
+DEPRECATED int sf_start(int handle , int option);
 
 /**
  * @fn int sf_stop(int handle)
@@ -117,7 +118,7 @@ int sf_start(int handle , int option);
  * @param[in] handle received handle value by sf_connect()
  * @return if it succeed, it return zero value , otherwise negative value return
  */
-int sf_stop(int handle);
+DEPRECATED int sf_stop(int handle);
 
 /**
  * @fn int sf_register_event(int handle , unsigned int event_type , event_conditon_t *event_condition , sensor_callback_func_t cb , void *user_data )
@@ -129,7 +130,7 @@ int sf_stop(int handle);
  * @param[in] user_data	your option data that will be send when your define callback function called. if you don't have any option data, just use a NULL value
  * @return if it succeed, it return zero value , otherwise negative value return
  */
-int sf_register_event(int handle , unsigned int event_type , event_condition_t *event_condition , sensor_callback_func_t cb , void *user_data );
+DEPRECATED int sf_register_event(int handle , unsigned int event_type , event_condition_t *event_condition , sensor_callback_func_t cb , void *user_data );
 
 /**
  * @fn int sf_unregister_event(int handle, unsigned int event_type)
@@ -138,7 +139,7 @@ int sf_register_event(int handle , unsigned int event_type , event_condition_t *
  * @param[in] event_type your desired event_type that you want to unregister event
  * @return if it succeed, it return zero value , otherwise negative value return
  */
-int sf_unregister_event(int handle, unsigned int event_type);
+DEPRECATED int sf_unregister_event(int handle, unsigned int event_type);
 
 /**
  * @fn int sf_get_data(int handle , unsigned int data_id , sensor_data_t* values)
@@ -148,7 +149,7 @@ int sf_unregister_event(int handle, unsigned int event_type);
  * @param[out] values return values
  * @return if it succeed, it return zero value , otherwise negative value return
  */
-int sf_get_data(int handle , unsigned int data_id , sensor_data_t* values);
+DEPRECATED int sf_get_data(int handle , unsigned int data_id , sensor_data_t* values);
 
 /**
  * @fn int sf_change_event_condition(int handle, unsigned int event_type, event_condition_t *event_condition)
@@ -158,7 +159,7 @@ int sf_get_data(int handle , unsigned int data_id , sensor_data_t* values);
  * @param[in] event_condition your desired event condition that you want to change event
  * @return if it succeed, it return zero value , otherwise negative value return
  */
-int sf_change_event_condition(int handle, unsigned int event_type, event_condition_t *event_condition);
+DEPRECATED int sf_change_event_condition(int handle, unsigned int event_type, event_condition_t *event_condition);
 
 /**
  * @fn int sf_change_sensor_option(int handle, int option)
@@ -168,7 +169,7 @@ int sf_change_event_condition(int handle, unsigned int event_type, event_conditi
  * @return if it succeed, it return zero value , otherwise negative value return
  */
 
-int sf_change_sensor_option(int handle, int option);
+DEPRECATED int sf_change_sensor_option(int handle, int option);
 
 /**
  * @fn int sf_send_sensorhub_data(int handle, const char* buffer, int data_len)
@@ -178,7 +179,7 @@ int sf_change_sensor_option(int handle, int option);
  * @param[in] data_len the length of data
  * @return if it succeed, it returns zero, otherwise negative value
  */
-int sf_send_sensorhub_data(int handle, const char* data, int data_len);
+DEPRECATED int sf_send_sensorhub_data(int handle, const char* data, int data_len);
 
 
 #ifdef __cplusplus

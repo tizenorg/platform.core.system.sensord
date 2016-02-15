@@ -1,36 +1,26 @@
-cmake_minimum_required(VERSION 2.6)
-project(sensord CXX)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(sensord CXX)
+
+SET(DEPENDENTS "glib-2.0 gio-2.0 dlog libsystemd-daemon libxml-2.0 cynara-client cynara-creds-socket cynara-session")
 
 INCLUDE(FindPkgConfig)
-PKG_CHECK_MODULES(server_pkgs REQUIRED glib-2.0 gio-2.0 dlog libsystemd-daemon libxml-2.0 cynara-client cynara-creds-socket cynara-session)
+PKG_CHECK_MODULES(SERVER_PKGS REQUIRED ${DEPENDENTS})
 
-add_subdirectory(plugins)
+ADD_SUBDIRECTORY(plugins)
+ADD_DEFINITIONS(${PLUGIN_DEFS})
 
-add_definitions(${PLUGIN_DEFS})
-
-configure_file(sensor_plugin_loader.cpp.in sensor_plugin_loader.cpp)
-
-INCLUDE_DIRECTORIES(include)
-FILE(GLOB SERVER_SRCS *.c *.cpp)
-
-FOREACH(flag ${server_pkgs_LDFLAGS})
+FOREACH(flag ${SERVER_PKGS_CFLAGS})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
 ENDFOREACH(flag)
-
-FOREACH(flag ${server_pkgs_CFLAGS})
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
-ENDFOREACH(flag)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src/client)
-include_directories(${CMAKE_SOURCE_DIR}/src/shared)
-include_directories(${DIR_INCLUDE})
-
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrt -ldl -pthread -fPIE")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ldl -fPIE")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie")
 
-add_executable(${PROJECT_NAME} ${SERVER_SRCS} ${PLUGIN_SRCS})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${DIR_INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} ${lib_pkgs_LDFLAGS} "sensord-shared")
+FILE(GLOB SERVER_SRCS *.cpp)
+ADD_EXECUTABLE(${PROJECT_NAME} ${SERVER_SRCS} ${PLUGIN_SRCS})
 
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${SERVER_PKGS_LDFLAGS} "sensord-shared")
+
+INSTALL(TARGETS ${PROJECT_NAME} DESTINATION bin)

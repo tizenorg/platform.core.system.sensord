@@ -18,57 +18,194 @@
  */
 
 #include <physical_sensor.h>
-#include <csensor_event_queue.h>
+#include <sensor_event_queue.h>
 
+#define UNKNOWN_NAME "UNKNOWN_SENSOR"
+
+cmutex physical_sensor::m_mutex;
 
 physical_sensor::physical_sensor()
+: m_sensor_device(NULL)
 {
-
 }
 
 physical_sensor::~physical_sensor()
 {
-
 }
 
-bool physical_sensor::push(const sensor_event_t &event)
+void physical_sensor::set_sensor_info(const sensor_info_t *info)
 {
-	csensor_event_queue::get_instance().push(event);
+	m_info = info;
+}
+
+void physical_sensor::set_sensor_device(sensor_device *device)
+{
+	m_sensor_device = device;
+}
+
+sensor_type_t physical_sensor::get_type(void)
+{
+	return static_cast<sensor_type_t>(m_info->type);
+}
+
+unsigned int physical_sensor::get_event_type(void)
+{
+	return m_info->event_type;
+}
+
+const char* physical_sensor::get_name(void)
+{
+	if (!m_info->name)
+		return UNKNOWN_NAME;
+
+	return m_info->name;
+}
+
+uint32_t physical_sensor::get_hal_id(void)
+{
+	return m_info->id;
+}
+
+int physical_sensor::get_poll_fd()
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return -1;
+
+	return m_sensor_device->get_poll_fd();
+}
+
+bool physical_sensor::read_fd(std::vector<uint32_t> &ids)
+{
+	AUTOLOCK(m_mutex);
+	int size;
+	uint32_t *_ids;
+
+	if (!m_sensor_device)
+		return false;
+
+	size = m_sensor_device->read_fd(&_ids);
+
+	for (int i = 0; i < size; ++i)
+		ids.push_back(_ids[i]);
+
 	return true;
 }
 
-bool physical_sensor::push(sensor_event_t *event)
+int physical_sensor::get_data(sensor_data_t **data, int *length)
 {
-	csensor_event_queue::get_instance().push(event);
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return -1;
+
+	int remains = 0;
+	remains = m_sensor_device->get_data(m_info->id, data, length);
+
+	if (*length < 0) {
+		_E("Failed to get sensor event");
+		return -1;
+	}
+
+	return remains;
+}
+
+bool physical_sensor::flush(void)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	return m_sensor_device->flush(m_info->id);
+}
+
+bool physical_sensor::set_interval(unsigned long interval)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	_I("Polling interval is set to %dms", interval);
+
+	return m_sensor_device->set_interval(m_info->id, interval);
+}
+
+bool physical_sensor::set_batch_latency(unsigned long latency)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	_I("Polling interval is set to %dms", latency);
+
+	return m_sensor_device->set_batch_latency(m_info->id, latency);
+}
+
+int physical_sensor::set_attribute(int32_t attribute, int32_t value)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	return m_sensor_device->set_attribute_int(m_info->id, attribute, value);
+}
+
+int physical_sensor::set_attribute(int32_t attribute, char *value, int value_len)
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	return m_sensor_device->set_attribute_str(m_info->id, attribute, value, value_len);
+}
+
+bool physical_sensor::set_wakeup(int wakeup)
+{
+	return false;
+}
+
+bool physical_sensor::on_start()
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	return m_sensor_device->enable(m_info->id);
+}
+
+bool physical_sensor::on_stop()
+{
+	AUTOLOCK(m_mutex);
+
+	if (!m_sensor_device)
+		return false;
+
+	return m_sensor_device->disable(m_info->id);
+}
+
+bool physical_sensor::get_sensor_info(sensor_info &info)
+{
+	info.set_type(get_type());
+	info.set_id(get_id());
+	info.set_privilege(SENSOR_PRIVILEGE_PUBLIC); // FIXME
+	info.set_name(m_info->model_name);
+	info.set_vendor(m_info->vendor);
+	info.set_min_range(m_info->min_range);
+	info.set_max_range(m_info->max_range);
+	info.set_resolution(m_info->resolution);
+	info.set_min_interval(m_info->min_interval);
+	info.set_fifo_count(0); // FIXME
+	info.set_max_batch_count(m_info->max_batch_count);
+	info.set_supported_event(get_event_type());
+	info.set_wakeup_supported(m_info->wakeup_supported);
+
 	return true;
 }
 
-bool physical_sensor::push(const sensorhub_event_t &event)
-{
-	csensor_event_queue::get_instance().push(event);
-	return true;
-}
-
-bool physical_sensor::push(sensorhub_event_t *event)
-{
-	csensor_event_queue::get_instance().push(event);
-	return true;
-}
-
-void physical_sensor::set_poller(working_func_t func, void *arg)
-{
-	m_sensor_data_poller.set_context(arg);
-	m_sensor_data_poller.set_working(func);
-}
-
-
-bool physical_sensor::start_poll(void)
-{
-	return m_sensor_data_poller.start();
-
-}
-
-bool physical_sensor::stop_poll(void)
-{
-	return m_sensor_data_poller.pause();
-}

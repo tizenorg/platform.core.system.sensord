@@ -23,7 +23,7 @@
 #include <new>
 #include <sensor_logs.h>
 #include <cpacket.h>
-#include <sf_common.h>
+#include <command_common.h>
 
 cpacket::cpacket()
 {

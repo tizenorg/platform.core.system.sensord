@@ -17,10 +17,9 @@
  *
  */
 
-#include <sf_common.h>
 #include <sensor_internal_deprecated.h>
 #include <sensor_internal.h>
-#include <csensor_event_listener.h>
+#include <sensor_event_listener.h>
 #include <client_common.h>
 #include <vconf.h>
 #include <cmutex.h>
@@ -36,13 +35,13 @@ using std::vector;
 #define API __attribute__((visibility("default")))
 #endif
 
-#define MIN_INTERVAL 10
+#define DEFAULT_INTERVAL POLL_10HZ_MS
 
 static const int OP_SUCCESS = 0;
 static const int OP_ERROR =  -1;
 
-static csensor_event_listener &event_listener = csensor_event_listener::get_instance();
-static csensor_client_info &client_info = csensor_client_info::get_instance();
+static sensor_event_listener &event_listener = sensor_event_listener::get_instance();
+static sensor_client_info &client_info = sensor_client_info::get_instance();
 static cmutex lock;
 
 static int g_power_save_state = 0;
@@ -106,7 +105,7 @@ static void clean_up(void)
 	auto it_handle = handles.begin();
 
 	while (it_handle != handles.end()) {
-		sf_disconnect(*it_handle);
+		sensord_disconnect(*it_handle);
 		++it_handle;
 	}
 }
@@ -136,7 +135,7 @@ static void power_save_state_cb(keynode_t *node, void *data)
 	cur_power_save_state = get_power_save_state();
 
 	if (cur_power_save_state == g_power_save_state) {
-		_T("g_power_save_state NOT changed : [%d]", cur_power_save_state);
+		_D("g_power_save_state NOT changed : [%d]", cur_power_save_state);
 		return;
 	}
 
@@ -250,7 +249,7 @@ static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, senso
 	event_type_vector add_event_types, del_event_types;
 
 	if (!client_info.get_command_channel(sensor_id, &cmd_channel)) {
-		ERR("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
+		_E("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
 		return false;
 	}
 
@@ -262,21 +261,21 @@ static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, senso
 	if (cur_rep.active) {
 		if (prev_rep.option != cur_rep.option) {
 			if (!cmd_channel->cmd_set_option(cur_rep.option)) {
-				ERR("Sending cmd_set_option(%d, %s, %d) failed for %s", client_id, get_sensor_name(sensor_id), cur_rep.option, get_client_name());
+				_E("Sending cmd_set_option(%d, %s, %d) failed for %s", client_id, get_sensor_name(sensor_id), cur_rep.option, get_client_name());
 				return false;
 			}
 		}
 
 		if ( (prev_rep.interval != cur_rep.interval) || (prev_rep.latency != cur_rep.latency)) {
 			if (!cmd_channel->cmd_set_batch(cur_rep.interval, cur_rep.latency)) {
-				ERR("Sending cmd_set_batch(%d, %s, %d, %d) failed for %s", client_id, get_sensor_name(sensor_id), cur_rep.interval, cur_rep.latency, get_client_name());
+				_E("Sending cmd_set_batch(%d, %s, %d, %d) failed for %s", client_id, get_sensor_name(sensor_id), cur_rep.interval, cur_rep.latency, get_client_name());
 				return false;
 			}
 		}
 
 		if (!add_event_types.empty()) {
 			if (!cmd_channel->cmd_register_events(add_event_types)) {
-				ERR("Sending cmd_register_events(%d, add_event_types) failed for %s", client_id, get_client_name());
+				_E("Sending cmd_register_events(%d, add_event_types) failed for %s", client_id, get_client_name());
 				return false;
 			}
 		}
@@ -285,7 +284,7 @@ static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, senso
 
 	if (prev_rep.active && !del_event_types.empty()) {
 		if (!cmd_channel->cmd_unregister_events(del_event_types)) {
-			ERR("Sending cmd_unregister_events(%d, del_event_types) failed for %s", client_id, get_client_name());
+			_E("Sending cmd_unregister_events(%d, del_event_types) failed for %s", client_id, get_client_name());
 			return false;
 		}
 	}
@@ -293,113 +292,23 @@ static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, senso
 	if (prev_rep.active != cur_rep.active) {
 		if (cur_rep.active) {
 			if (!cmd_channel->cmd_start()) {
-				ERR("Sending cmd_start(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
+				_E("Sending cmd_start(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
 				return false;
 			}
 		} else {
 			if (!cmd_channel->cmd_unset_batch()) {
-				ERR("Sending cmd_unset_interval(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
+				_E("Sending cmd_unset_interval(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
 				return false;
 			}
 
 			if (!cmd_channel->cmd_stop()) {
-				ERR("Sending cmd_stop(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
+				_E("Sending cmd_stop(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
 				return false;
 			}
 		}
 	}
 
 	return true;
-}
-
-API int sf_connect(sensor_type_t sensor_type)
-{
-	sensor_t sensor;
-
-	sensor = sensord_get_sensor(sensor_type);
-
-	return sensord_connect(sensor);
-}
-
-API int sf_disconnect(int handle)
-{
-	return sensord_disconnect(handle) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_start(int handle, int option)
-{
-	return sensord_start(handle, option) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_stop(int handle)
-{
-	return sensord_stop(handle) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_register_event(int handle, unsigned int event_type, event_condition_t *event_condition, sensor_callback_func_t cb, void *user_data)
-{
-	unsigned int interval = BASE_GATHERING_INTERVAL;
-
-	if (event_condition != NULL) {
-		if ((event_condition->cond_op == CONDITION_EQUAL) && (event_condition->cond_value1 > 0))
-			interval = event_condition->cond_value1;
-	}
-
-	return register_event(handle, event_type, interval, 0, SENSOR_LEGACY_CB, (void*) cb, user_data) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_unregister_event(int handle, unsigned int event_type)
-{
-	return sensord_unregister_event(handle, event_type) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_change_event_condition(int handle, unsigned int event_type, event_condition_t *event_condition)
-{
-	unsigned int interval = BASE_GATHERING_INTERVAL;
-
-	if (event_condition != NULL) {
-		if ((event_condition->cond_op == CONDITION_EQUAL) && (event_condition->cond_value1 > 0))
-			interval = event_condition->cond_value1;
-	}
-
-	return sensord_change_event_interval(handle, event_type, interval) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_change_sensor_option(int handle, int option)
-{
-	return sensord_set_option(handle, option) ? OP_SUCCESS : OP_ERROR;
-}
-
-
-API int sf_send_sensorhub_data(int handle, const char* data, int data_len)
-{
-	return sensord_send_sensorhub_data(handle, data, data_len) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data)
-{
-	return sensord_get_data(handle, data_id, sensor_data) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_check_rotation(unsigned long *rotation)
-{
-	rotation = 0;
-	return 0;
-}
-
-int sf_is_sensor_event_available(sensor_type_t sensor_type, unsigned int event_type)
-{
-	return 0;
-}
-
-int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties)
-{
-	return 0;
-}
-
-int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties)
-{
-	return 0;
 }
 
 static bool get_sensor_list(void)
@@ -413,7 +322,7 @@ static bool get_sensor_list(void)
 		command_channel cmd_channel;
 
 		if (!cmd_channel.create_channel()) {
-			ERR("%s failed to create command channel", get_client_name());
+			_E("%s failed to create command channel", get_client_name());
 			return false;
 		}
 
@@ -579,14 +488,13 @@ API bool sensord_get_supported_event_types(sensor_t sensor, unsigned int **event
 	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !event_types || !count,
 		false, "Invalid param: sensor (%p), event_types(%p), count(%)", sensor, event_types, count);
 
-	vector<unsigned int> event_vec;
-
-	info->get_supported_events(event_vec);
-	*event_types = (unsigned int *) malloc(sizeof(unsigned int) * event_vec.size());
+	unsigned int event_type;
+	event_type = info->get_supported_event();
+	*event_types = (unsigned int *) malloc(sizeof(unsigned int));
 	retvm_if(!*event_types, false, "Failed to allocate memory");
 
-	copy(event_vec.begin(), event_vec.end(), *event_types);
-	*count = event_vec.size();
+	(*event_types)[0] = event_type;
+	*count = 1;
 
 	return true;
 }
@@ -634,7 +542,7 @@ API int sensord_connect(sensor_t sensor)
 
 	handle = client_info.create_handle(sensor_id);
 	if (handle == MAX_HANDLE_REACHED) {
-		ERR("Maximum number of handles reached, sensor: %s in client %s", get_sensor_name(sensor_id), get_client_name());
+		_E("Maximum number of handles reached, sensor: %s in client %s", get_sensor_name(sensor_id), get_client_name());
 		return OP_ERROR;
 	}
 
@@ -643,7 +551,7 @@ API int sensord_connect(sensor_t sensor)
 		retvm_if (!cmd_channel, OP_ERROR, "Failed to allocate memory");
 
 		if (!cmd_channel->create_channel()) {
-			ERR("%s failed to create command channel for %s", get_client_name(), get_sensor_name(sensor_id));
+			_E("%s failed to create command channel for %s", get_client_name(), get_sensor_name(sensor_id));
 			client_info.delete_handle(handle);
 			delete cmd_channel;
 			return OP_ERROR;
@@ -653,7 +561,7 @@ API int sensord_connect(sensor_t sensor)
 	}
 
 	if (!client_info.get_command_channel(sensor_id, &cmd_channel)) {
-		ERR("%s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
+		_E("%s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
 		client_info.delete_handle(handle);
 		return OP_ERROR;
 	}
@@ -661,28 +569,28 @@ API int sensord_connect(sensor_t sensor)
 	if (!client_info.has_client_id()) {
 		first_connection = true;
 		if(!cmd_channel->cmd_get_id(client_id)) {
-			ERR("Sending cmd_get_id() failed for %s", get_sensor_name(sensor_id));
+			_E("Sending cmd_get_id() failed for %s", get_sensor_name(sensor_id));
 			client_info.close_command_channel(sensor_id);
 			client_info.delete_handle(handle);
 			return OP_ERROR;
 		}
 
 		client_info.set_client_id(client_id);
-		INFO("%s gets client_id [%d]", get_client_name(), client_id);
+		_I("%s gets client_id [%d]", get_client_name(), client_id);
 		event_listener.start_event_listener();
-		INFO("%s starts listening events with client_id [%d]", get_client_name(), client_id);
+		_I("%s starts listening events with client_id [%d]", get_client_name(), client_id);
 	}
 
 	client_id = client_info.get_client_id();
 	cmd_channel->set_client_id(client_id);
 
-	INFO("%s[%d] connects with %s[%d]", get_client_name(), client_id, get_sensor_name(sensor_id), handle);
+	_I("%s[%d] connects with %s[%d]", get_client_name(), client_id, get_sensor_name(sensor_id), handle);
 
 	client_info.set_sensor_params(handle, SENSOR_STATE_STOPPED, SENSOR_OPTION_DEFAULT);
 
 	if (!sensor_registered) {
 		if(!cmd_channel->cmd_hello(sensor_id)) {
-			ERR("Sending cmd_hello(%s, %d) failed for %s", get_sensor_name(sensor_id), client_id, get_client_name());
+			_E("Sending cmd_hello(%s, %d) failed for %s", get_sensor_name(sensor_id), client_id, get_client_name());
 			client_info.close_command_channel(sensor_id);
 			client_info.delete_handle(handle);
 			if (first_connection) {
@@ -708,22 +616,22 @@ API bool sensord_disconnect(int handle)
 
 	if (!client_info.get_sensor_state(handle, sensor_state)||
 		!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
 	if (!client_info.get_command_channel(sensor_id, &cmd_channel)) {
-		ERR("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
+		_E("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
 		return false;
 	}
 
 	client_id = client_info.get_client_id();
 	retvm_if ((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
-	INFO("%s disconnects with %s[%d]", get_client_name(), get_sensor_name(sensor_id), handle);
+	_I("%s disconnects with %s[%d]", get_client_name(), get_sensor_name(sensor_id), handle);
 
 	if (sensor_state != SENSOR_STATE_STOPPED) {
-		WARN("%s[%d] for %s is not stopped before disconnecting.",
+		_W("%s[%d] for %s is not stopped before disconnecting.",
 			get_sensor_name(sensor_id), handle, get_client_name());
 		sensord_stop(handle);
 	}
@@ -736,14 +644,14 @@ API bool sensord_disconnect(int handle)
 
 	if (!client_info.is_sensor_registered(sensor_id)) {
 		if(!cmd_channel->cmd_byebye()) {
-			ERR("Sending cmd_byebye(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
+			_E("Sending cmd_byebye(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
 			return false;
 		}
 		client_info.close_command_channel(sensor_id);
 	}
 
 	if (!client_info.is_active()) {
-		INFO("Stop listening events for client %s with client id [%d]", get_client_name(), client_info.get_client_id());
+		_I("Stop listening events for client %s with client id [%d]", get_client_name(), client_info.get_client_id());
 		event_listener.stop_event_listener();
 	}
 
@@ -764,14 +672,14 @@ static bool register_event(int handle, unsigned int event_type, unsigned int int
 	AUTOLOCK(lock);
 
 	if (!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
-	if (interval < MIN_INTERVAL)
-		interval = MIN_INTERVAL;
+	if (interval == 0)
+		interval = DEFAULT_INTERVAL;
 
-	INFO("%s registers event %s[0x%x] for sensor %s[%d] with interval: %d, latency: %d,  cb: 0x%x, user_data: 0x%x",
+	_I("%s registers event %s[0x%x] for sensor %s[%d] with interval: %d, latency: %d,  cb: 0x%x, user_data: 0x%x",
 		get_client_name(), get_event_name(event_type), event_type, get_sensor_name(sensor_id),
 		handle, interval, max_batch_latency, cb, user_data);
 
@@ -810,18 +718,18 @@ API bool sensord_unregister_event(int handle, unsigned int event_type)
 	AUTOLOCK(lock);
 
 	if (!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
-	INFO("%s unregisters event %s[0x%x] for sensor %s[%d]", get_client_name(), get_event_name(event_type),
+	_I("%s unregisters event %s[0x%x] for sensor %s[%d]", get_client_name(), get_event_name(event_type),
 		event_type, get_sensor_name(sensor_id), handle);
 
 	client_info.get_sensor_rep(sensor_id, prev_rep);
 	client_info.get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb_type, prev_cb, prev_user_data);
 
 	if (!client_info.unregister_event(handle, event_type)) {
-		ERR("%s try to unregister non registered event %s[0x%x] for sensor %s[%d]",
+		_E("%s try to unregister non registered event %s[0x%x] for sensor %s[%d]",
 			get_client_name(),get_event_name(event_type), event_type, get_sensor_name(sensor_id), handle);
 		return false;
 	}
@@ -846,12 +754,12 @@ API bool sensord_register_accuracy_cb(int handle, sensor_accuracy_changed_cb_t c
 	AUTOLOCK(lock);
 
 	if (!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
 
-	INFO("%s registers accuracy_changed_cb for sensor %s[%d] with cb: 0x%x, user_data: 0x%x",
+	_I("%s registers accuracy_changed_cb for sensor %s[%d] with cb: 0x%x, user_data: 0x%x",
 		get_client_name(), get_sensor_name(sensor_id), handle, cb, user_data);
 
 	client_info.register_accuracy_cb(handle, cb , user_data);
@@ -867,12 +775,12 @@ API bool sensord_unregister_accuracy_cb(int handle)
 	AUTOLOCK(lock);
 
 	if (!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
 
-	INFO("%s unregisters accuracy_changed_cb for sensor %s[%d]",
+	_I("%s unregisters accuracy_changed_cb for sensor %s[%d]",
 		get_client_name(), get_sensor_name(sensor_id), handle);
 
 	client_info.unregister_accuracy_cb(handle);
@@ -891,14 +799,14 @@ API bool sensord_start(int handle, int option)
 	AUTOLOCK(lock);
 
 	if (!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
 	retvm_if ((option < 0) || (option >= SENSOR_OPTION_END), false, "Invalid option value : %d, handle: %d, %s, %s",
 		option, handle, get_sensor_name(sensor_id), get_client_name());
 
-	INFO("%s starts %s[%d], with option: %d, power save state: %d", get_client_name(), get_sensor_name(sensor_id),
+	_I("%s starts %s[%d], with option: %d, power save state: %d", get_client_name(), get_sensor_name(sensor_id),
 		handle, option, g_power_save_state);
 
 	if (g_power_save_state && !(g_power_save_state & option)) {
@@ -932,7 +840,7 @@ API bool sensord_stop(int handle)
 
 	if (!client_info.get_sensor_state(handle, sensor_state)||
 		!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
@@ -940,7 +848,7 @@ API bool sensord_stop(int handle)
 		get_client_name(), get_sensor_name(sensor_id), handle);
 
 
-	INFO("%s stops sensor %s[%d]", get_client_name(), get_sensor_name(sensor_id), handle);
+	_I("%s stops sensor %s[%d]", get_client_name(), get_sensor_name(sensor_id), handle);
 
 	client_info.get_sensor_rep(sensor_id, prev_rep);
 	client_info.get_sensor_params(handle, prev_state, prev_option);
@@ -969,22 +877,19 @@ static bool change_event_batch(int handle, unsigned int event_type, unsigned int
 	AUTOLOCK(lock);
 
 	if (!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
-	if (interval == 0)
-		interval = 1;
-
-	INFO("%s changes batch of event %s[0x%x] for %s[%d] to (%d, %d)", get_client_name(), get_event_name(event_type),
+	_I("%s changes batch of event %s[0x%x] for %s[%d] to (%d, %d)", get_client_name(), get_event_name(event_type),
 			event_type, get_sensor_name(sensor_id), handle, interval, latency);
 
 	client_info.get_sensor_rep(sensor_id, prev_rep);
 
 	client_info.get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb_type, prev_cb, prev_user_data);
 
-	if (interval < MIN_INTERVAL)
-		interval = MIN_INTERVAL;
+	if (interval == 0)
+		interval = DEFAULT_INTERVAL;
 
 	if (!client_info.set_event_batch(handle, event_type, interval, latency))
 		return false;
@@ -1009,11 +914,11 @@ API bool sensord_change_event_interval(int handle, unsigned int event_type, unsi
 	AUTOLOCK(lock);
 
 	if (!client_info.get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb_type, prev_cb, prev_user_data)) {
-		ERR("Failed to get event info with handle = %d, event_type = 0x%x", handle, event_type);
+		_E("Failed to get event info with handle = %d, event_type = 0x%x", handle, event_type);
 		return false;
 	}
 
-	INFO("handle = %d, event_type = 0x%x, interval = %d, prev_latency = %d", handle, event_type, interval, prev_latency);
+	_I("handle = %d, event_type = 0x%x, interval = %d, prev_latency = %d", handle, event_type, interval, prev_latency);
 	return change_event_batch(handle, event_type, interval, prev_latency);
 }
 
@@ -1027,7 +932,7 @@ API bool sensord_change_event_max_batch_latency(int handle, unsigned int event_t
 	AUTOLOCK(lock);
 
 	if (!client_info.get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb_type, prev_cb, prev_user_data)) {
-		ERR("Failed to get event info with handle = %d, event_type = 0x%x", handle, event_type);
+		_E("Failed to get event info with handle = %d, event_type = 0x%x", handle, event_type);
 		return false;
 	}
 
@@ -1039,11 +944,11 @@ API bool sensord_change_event_maincontext(int handle, unsigned int event_type, G
 	AUTOLOCK(lock);
 
 	if (!client_info.set_event_maincontext(handle, event_type, maincontext)) {
-		ERR("Failed to get event info with handle = %d, event_type = 0x%x, maincontext = 0x%x", handle, event_type, maincontext);
+		_E("Failed to get event info with handle = %d, event_type = 0x%x, maincontext = 0x%x", handle, event_type, maincontext);
 		return false;
 	}
 
-	INFO("handle = %d, event_type = 0x%x, maincontext = 0x%x", handle, event_type, maincontext);
+	_I("handle = %d, event_type = 0x%x, maincontext = 0x%x", handle, event_type, maincontext);
 	return true;
 }
 
@@ -1059,7 +964,7 @@ API bool sensord_set_option(int handle, int option)
 
 	if (!client_info.get_sensor_state(handle, sensor_state)||
 		!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
@@ -1097,7 +1002,7 @@ API bool sensord_set_wakeup(int handle, int wakeup)
 	AUTOLOCK(lock);
 
 	if (!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
@@ -1107,7 +1012,7 @@ API bool sensord_set_wakeup(int handle, int wakeup)
 	client_info.set_sensor_wakeup(handle, wakeup);
 
 	if (!client_info.get_command_channel(sensor_id, &cmd_channel)) {
-		ERR("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
+		_E("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
 		return false;
 	}
 
@@ -1115,14 +1020,14 @@ API bool sensord_set_wakeup(int handle, int wakeup)
 	retvm_if ((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
 	if (!cmd_channel->cmd_set_wakeup(wakeup)) {
-		ERR("Sending cmd_set_wakeup(%d, %s, %d) failed for %s", client_id, get_sensor_name(sensor_id), wakeup, get_client_name());
+		_E("Sending cmd_set_wakeup(%d, %s, %d) failed for %s", client_id, get_sensor_name(sensor_id), wakeup, get_client_name());
 		return false;
 	}
 
 	return true;
 }
 
-API bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
+API bool sensord_set_attribute_int(int handle, int attribute, int value)
 {
 	sensor_id_t sensor_id;
 	command_channel *cmd_channel;
@@ -1131,35 +1036,69 @@ API bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
 	AUTOLOCK(lock);
 
 	if (!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
-
-	retvm_if (sensor_id != CONTEXT_SENSOR, false, "%s use this API wrongly, only for CONTEXT_SENSOR not for %s",
-		get_client_name(), get_sensor_name(sensor_id));
 
 	if (!client_info.get_command_channel(sensor_id, &cmd_channel)) {
-		ERR("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
+		_E("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
 		return false;
 	}
 
-	retvm_if((data_len < 0) || (data == NULL), false, "Invalid data_len: %d, data: 0x%x, handle: %d, %s, %s",
-		data_len, data, handle, get_sensor_name(sensor_id), get_client_name());
-
 	client_id = client_info.get_client_id();
-	retvm_if ((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
+	retvm_if ((client_id < 0), false,
+			"Invalid client id : %d, handle: %d, %s, %s",
+			client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
-	retvm_if (!client_info.is_sensor_active(sensor_id), false, "%s with client_id:%d is not active state for %s with handle: %d",
-		get_sensor_name(sensor_id), client_id, get_client_name(), handle);
-
-	if (!cmd_channel->cmd_send_sensorhub_data(data, data_len)) {
-		ERR("Sending cmd_send_sensorhub_data(%d, %d, 0x%x) failed for %s",
-			client_id, data_len, data, get_client_name);
+	if (!cmd_channel->cmd_set_attribute_int(attribute, value)) {
+		_E("Sending cmd_set_attribute_int(%d, %d) failed for %s",
+			client_id, value, get_client_name);
 		return false;
 	}
 
 	return true;
+}
 
+API bool sensord_set_attribute_str(int handle, int attribute, const char *value, int value_len)
+{
+	sensor_id_t sensor_id;
+	command_channel *cmd_channel;
+	int client_id;
+
+	AUTOLOCK(lock);
+
+	if (!client_info.get_sensor_id(handle, sensor_id)) {
+		_E("client %s failed to get handle information", get_client_name());
+		return false;
+	}
+
+	if (!client_info.get_command_channel(sensor_id, &cmd_channel)) {
+		_E("client %s failed to get command channel for %s",
+			get_client_name(), get_sensor_name(sensor_id));
+		return false;
+	}
+
+	retvm_if((value_len < 0) || (value == NULL), false,
+			"Invalid value_len: %d, value: 0x%x, handle: %d, %s, %s",
+			value_len, value, handle, get_sensor_name(sensor_id), get_client_name());
+
+	client_id = client_info.get_client_id();
+	retvm_if ((client_id < 0), false,
+			"Invalid client id : %d, handle: %d, %s, %s",
+			client_id, handle, get_sensor_name(sensor_id), get_client_name());
+
+	if (!cmd_channel->cmd_set_attribute_str(attribute, value, value_len)) {
+		_E("Sending cmd_set_attribute_str(%d, %d, 0x%x) failed for %s",
+			client_id, value_len, value, get_client_name);
+		return false;
+	}
+
+	return true;
+}
+
+API bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
+{
+	return sensord_set_attribute_str(handle, 0, data, data_len);
 }
 
 API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data)
@@ -1175,12 +1114,12 @@ API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* senso
 
 	if (!client_info.get_sensor_state(handle, sensor_state)||
 		!client_info.get_sensor_id(handle, sensor_id)) {
-		ERR("client %s failed to get handle information", get_client_name());
+		_E("client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
 	if (!client_info.get_command_channel(sensor_id, &cmd_channel)) {
-		ERR("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
+		_E("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
 		return false;
 	}
 
@@ -1188,15 +1127,106 @@ API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* senso
 	retvm_if ((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
 	if (sensor_state != SENSOR_STATE_STARTED) {
-		ERR("Sensor %s is not started for client %s with handle: %d, sensor_state: %d", get_sensor_name(sensor_id), get_client_name(), handle, sensor_state);
+		_E("Sensor %s is not started for client %s with handle: %d, sensor_state: %d", get_sensor_name(sensor_id), get_client_name(), handle, sensor_state);
 		return false;
 	}
 
 	if(!cmd_channel->cmd_get_data(data_id, sensor_data)) {
-		ERR("cmd_get_data(%d, %d, 0x%x) failed for %s", client_id, data_id, sensor_data, get_client_name());
+		_E("cmd_get_data(%d, %d, 0x%x) failed for %s", client_id, data_id, sensor_data, get_client_name());
 		return false;
 	}
 
 	return true;
 
 }
+
+/* deprecated APIs */
+API int sf_connect(sensor_type_t sensor_type)
+{
+	sensor_t sensor;
+
+	sensor = sensord_get_sensor(sensor_type);
+
+	return sensord_connect(sensor);
+}
+
+API int sf_disconnect(int handle)
+{
+	return sensord_disconnect(handle) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_start(int handle, int option)
+{
+	return sensord_start(handle, option) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_stop(int handle)
+{
+	return sensord_stop(handle) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_register_event(int handle, unsigned int event_type, event_condition_t *event_condition, sensor_callback_func_t cb, void *user_data)
+{
+	unsigned int interval = BASE_GATHERING_INTERVAL;
+
+	if (event_condition != NULL) {
+		if ((event_condition->cond_op == CONDITION_EQUAL) && (event_condition->cond_value1 > 0))
+			interval = event_condition->cond_value1;
+	}
+
+	return register_event(handle, event_type, interval, 0, SENSOR_LEGACY_CB, (void*) cb, user_data) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_unregister_event(int handle, unsigned int event_type)
+{
+	return sensord_unregister_event(handle, event_type) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_change_event_condition(int handle, unsigned int event_type, event_condition_t *event_condition)
+{
+	unsigned int interval = BASE_GATHERING_INTERVAL;
+
+	if (event_condition != NULL) {
+		if ((event_condition->cond_op == CONDITION_EQUAL) && (event_condition->cond_value1 > 0))
+			interval = event_condition->cond_value1;
+	}
+
+	return sensord_change_event_interval(handle, event_type, interval) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_change_sensor_option(int handle, int option)
+{
+	return sensord_set_option(handle, option) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_send_sensorhub_data(int handle, const char* data, int data_len)
+{
+	return sensord_send_sensorhub_data(handle, data, data_len) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data)
+{
+	return sensord_get_data(handle, data_id, sensor_data) ? OP_SUCCESS : OP_ERROR;
+}
+
+API int sf_check_rotation(unsigned long *rotation)
+{
+	rotation = 0;
+	return 0;
+}
+
+API int sf_is_sensor_event_available(sensor_type_t sensor_type, unsigned int event_type)
+{
+	return 0;
+}
+
+API int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties)
+{
+	return 0;
+}
+
+API int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties)
+{
+	return 0;
+}
+

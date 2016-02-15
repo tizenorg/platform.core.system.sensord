@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 	int i;
 
 	int handle[MAXSIZE];
-	int result[MAXSIZE], start_handle[MAXSIZE];
+	bool result[MAXSIZE], start_handle[MAXSIZE];
 	unsigned int event[MAXSIZE];
 	int sensors[MAXSIZE];
 
@@ -102,13 +102,13 @@ int main(int argc, char **argv)
 		event[i] = (sensors[i] << 16) | 0x0001;
 		result[i] = sensord_register_event(handle[i], event[i], interval, 0, callback, NULL);
 
-		if (result[i] < 0) {
+		if (!result[i]) {
 			printf("error: unable to register sensor\n");
 			return -1;
 		}
 		start_handle[i] = sensord_start(handle[i], 1);
 
-		if (start_handle[i] < 0) {
+		if (!start_handle[i]) {
 			printf("error: unable to start handle\n");
 			sensord_unregister_event(handle[i], event[i]);
 			sensord_disconnect(handle[i]);
