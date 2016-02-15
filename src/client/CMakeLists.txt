@@ -24,8 +24,16 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-FILE(GLOB_RECURSE SRCS *.cpp)
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS})
+#FILE(GLOB_RECURSE SRCS *.cpp)
+ADD_LIBRARY(${PROJECT_NAME} SHARED
+	client.cpp
+	sensor_client_info.cpp
+	sensor_event_listener.cpp
+	sensor_info_manager.cpp
+	sensor_handle_info.cpp
+	client_common.cpp
+	command_channel.cpp
+)
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PKGS_LDFLAGS} "sensord-shared")
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES SOVERSION ${MAJORVER})
