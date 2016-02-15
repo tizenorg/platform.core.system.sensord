@@ -87,7 +87,7 @@ bool sensor_loader::load_sensor_devices(const string &path, void* &handle)
 {
 	sensor_device_t *_devices = NULL;
 	sensor_device *device;
-	const sensor_handle_t *handles;
+	const sensor_info_t *infos;
 
 	_I("load device: [%s]", path.c_str());
 
@@ -116,9 +116,9 @@ bool sensor_loader::load_sensor_devices(const string &path, void* &handle)
 	for (int i = 0; i < device_size; ++i) {
 		device = static_cast<sensor_device *>(_devices[i]);
 
-		int handle_size = device->get_sensors(&handles);
-		for (int j = 0; j < handle_size; ++j)
-			m_devices[&handles[j]] = device;
+		int info_size = device->get_sensors(&infos);
+		for (int j = 0; j < info_size; ++j)
+			m_devices[&infos[j]] = device;
 	}
 
 	handle = _handle;
@@ -139,35 +139,35 @@ template<typename _sensor>
 void sensor_loader::create_physical_sensors(sensor_type_t type)
 {
 	int32_t index;
-	const sensor_handle_t *handle;
+	const sensor_info_t *info;
 	physical_sensor *sensor;
 	sensor_device *device;
 
 	sensor_device_map_t::iterator it = m_devices.begin();
 
 	for (sensor_device_map_t::iterator it = m_devices.begin(); it != m_devices.end(); ++it) {
-		handle = it->first;
+		info = it->first;
 		device = it->second;
-		if (m_devices[handle] == NULL)
+		if (m_devices[info] == NULL)
 			continue;
 
 		if (type != UNKNOWN_SENSOR) {
-			if (type != (sensor_type_t)(handle->type))
+			if (type != (sensor_type_t)(info->type))
 				continue;
 		}
 
 		sensor = reinterpret_cast<physical_sensor *>(create_sensor<_sensor>());
 
 		if (!sensor) {
-			_E("Memory allocation failed[%s]", handle->name);
+			_E("Memory allocation failed[%s]", info->name);
 			return;
 		}
 
-		sensor_type_t _type = (sensor_type_t)handle->type;
+		sensor_type_t _type = (sensor_type_t)info->type;
 		index = (int32_t)m_sensors.count(_type);
 
 		sensor->set_id(((int64_t)_type << SENSOR_TYPE_SHIFT) | index);
-		sensor->set_sensor_handle(handle);
+		sensor->set_sensor_info(info);
 		sensor->set_sensor_device(device);
 
 		std::shared_ptr<sensor_base> sensor_ptr(sensor);
@@ -175,7 +175,7 @@ void sensor_loader::create_physical_sensors(sensor_type_t type)
 
 		_I("created [%s] sensor", sensor->get_name());
 
-		m_devices[handle] = NULL;
+		m_devices[info] = NULL;
 	}
 	return;
 }
