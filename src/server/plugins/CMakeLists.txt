@@ -15,24 +15,9 @@ ENDFOREACH(flag)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src/server)
-include_directories(${CMAKE_SOURCE_DIR}/src/shared)
 
-
-list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/accel")
+SET(DIR_INCLUDE "${DIR_INCLUDE} ${CMAKE_CURRENT_SOURCE_DIR}/accel")
 list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/accel/accel_sensor.cpp")
-
-list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/gyro")
-list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/gyro/gyro_sensor.cpp")
-
-list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/proxi")
-list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/proxi/proxi_sensor.cpp")
-
-list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/light")
-list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/light/light_sensor.cpp")
-
-list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/geo")
-list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/geo/geo_sensor.cpp")
 
 IF("${AUTO_ROTATION}" STREQUAL "ON")
 list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/auto_rotation")
@@ -41,18 +26,6 @@ list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/auto_rotation/auto_rotatio
 list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/auto_rotation/auto_rotation_sensor.cpp")
 list (APPEND PLUGIN_DEFS "-DENABLE_AUTO_ROTATION")
 ENDIF()
-
-list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/pressure")
-list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/pressure/pressure_sensor.cpp")
-
-list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/temperature")
-list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/temperature/temperature_sensor.cpp")
-
-list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/ultraviolet")
-list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/ultraviolet/ultraviolet_sensor.cpp")
-
-list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/bio_led_red")
-list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/bio_led_red/bio_led_red_sensor.cpp")
 
 IF("${ORIENTATION}" STREQUAL "ON")
 set(SENSOR_FUSION_ENABLE "1")
@@ -145,11 +118,9 @@ list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/rotation_vector/gaming_rv/
 list (APPEND PLUGIN_DEFS "-DENABLE_GAMING_RV")
 ENDIF()
 
-list (APPEND DIR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/rotation_vector/rv_raw")
-list (APPEND PLUGIN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/rotation_vector/rv_raw/rv_raw_sensor.cpp")
-
-
 set(PLUGIN_SRCS ${PLUGIN_SRCS} PARENT_SCOPE)
 set(DIR_INCLUDE ${DIR_INCLUDE} PARENT_SCOPE)
 set(PLUGIN_DEFS ${PLUGIN_DEFS} PARENT_SCOPE)
 
+# Installing files
+INSTALL(FILES virtual_sensors.xml virtual_sensors.xml DESTINATION etc)

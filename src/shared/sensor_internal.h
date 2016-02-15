@@ -20,31 +20,26 @@
 #ifndef __SENSOR_INTERNAL_H__
 #define __SENSOR_INTERNAL_H__
 
-#ifndef DEPRECATED
-#define DEPRECATED __attribute__((deprecated))
-#endif
-
 #ifndef API
 #define API __attribute__((visibility("default")))
 #endif
 
 #include "stdbool.h"
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include <sys/types.h>
 #include <glib.h>
-
-#include <sensor_internal_deprecated.h>
 
 /*header for common sensor type*/
 #include <sensor_common.h>
 
 /*header for each sensor type*/
 #include <sensor_types.h>
+
+#include <sensor_internal_deprecated.h>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 typedef void (*sensor_cb_t)(sensor_t sensor, unsigned int event_type, sensor_data_t *data, void *user_data);
 typedef void (*sensorhub_cb_t)(sensor_t sensor, unsigned int event_type, sensorhub_data_t *data, void *user_data);
@@ -329,6 +324,27 @@ bool sensord_set_option(int handle, int option);
  * @return true on success, otherwise false.
  */
 bool sensord_set_wakeup(int handle, int wakeup);
+
+/**
+ * @brief Set the attribute to a connected sensor
+ *
+ * @param[in] handle a handle represensting a connected sensor.
+ * @param[in] attribute an attribute to change
+ * @param[in] value an attribute value
+ * @return true on success, otherwise false.
+ */
+bool sensord_set_attribute_int(int handle, int attribute, int value);
+
+/**
+ * @brief Set the attribute to a connected sensor
+ *
+ * @param[in] handle a handle represensting a connected sensor.
+ * @param[in] attribute an attribute to change
+ * @param[in] value an attribute value
+ * @param[in] value_len the length of value
+ * @return true on success, otherwise false.
+ */
+bool sensord_set_attribute_str(int handle, int attribute, const char *value, int value_len);
 
 /**
  * @brief Send data to sensorhub

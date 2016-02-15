@@ -1,7 +1,7 @@
 /*
  * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,36 +20,15 @@
 #ifndef _ACCEL_SENSOR_H_
 #define _ACCEL_SENSOR_H_
 
-#include <sensor_common.h>
-
 #include <physical_sensor.h>
-#include <sensor_hal.h>
 
 class accel_sensor : public physical_sensor {
 public:
 	accel_sensor();
-	virtual ~accel_sensor();
+	~accel_sensor();
 
-	bool init();
-	virtual void get_types(std::vector<sensor_type_t> &types);
-
-	static bool working(void *inst);
-	virtual bool set_interval(unsigned long interval);
-	virtual int get_sensor_data(unsigned int type, sensor_data_t &data);
-	virtual bool get_properties(sensor_type_t sensor_type, sensor_properties_s &properties);
-
-private:
-	sensor_hal *m_sensor_hal;
-	cmutex m_value_mutex;
-
-	float m_raw_data_unit;
-
-	unsigned long m_interval;
-
-	virtual bool on_start(void);
-	virtual bool on_stop(void);
-	void raw_to_base(sensor_data_t &data);
-	bool process_event(void);
+	sensor_type_t get_type(void);
 };
 
-#endif
+#endif /* _ACCEL_SENSOR_H_ */
+

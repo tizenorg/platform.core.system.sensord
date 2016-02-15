@@ -48,6 +48,7 @@ log_element g_log_elements[] = {
 	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, GYROSCOPE_UNCAL_SENSOR, 0, 1),
 	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, ULTRAVIOLET_SENSOR, 0, 1),
 	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, BIO_LED_RED_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, GESTURE_WRIST_UP_SENSOR, 0, 1),
 
 	FILL_LOG_ELEMENT(LOG_ID_EVENT, PROXIMITY_CHANGE_STATE_EVENT, 0,1),
 	FILL_LOG_ELEMENT(LOG_ID_EVENT, LIGHT_CHANGE_LEVEL_EVENT, 0, 1),
@@ -112,7 +113,7 @@ const char* get_log_element_name(log_id id, unsigned int type)
 	auto iter = g_log_maps[id].find(type);
 
 	if (iter == g_log_maps[id].end()) {
-		INFO("Unknown type value: 0x%x", type);
+		_I("Unknown type value: 0x%x", type);
 		return p_unknown;
 	}
 
@@ -121,7 +122,7 @@ const char* get_log_element_name(log_id id, unsigned int type)
 
 const char* get_sensor_name(sensor_id_t sensor_id)
 {
-	sensor_type_t sensor_type = (sensor_type_t) (sensor_id & SENSOR_TYPE_MASK);
+	sensor_type_t sensor_type = (sensor_type_t) (sensor_id >> SENSOR_TYPE_SHIFT);
 
 	return get_log_element_name(LOG_ID_SENSOR_TYPE, sensor_type);
 }
@@ -185,7 +186,7 @@ unsigned int get_calibration_event_type(unsigned int event_type)
 {
 	sensor_type_t sensor;
 
-	sensor = (sensor_type_t)(event_type >> SENSOR_TYPE_SHIFT);
+	sensor = (sensor_type_t)(event_type >> EVENT_TYPE_SHIFT);
 
 	switch (sensor) {
 	default:
@@ -200,7 +201,7 @@ unsigned long long get_timestamp(void)
 	return ((unsigned long long)(t.tv_sec)*1000000000LL + t.tv_nsec) / 1000;
 }
 
-void print_event_occurrence_log(csensor_handle_info &sensor_handle_info, const creg_event_info *event_info)
+void print_event_occurrence_log(sensor_handle_info &sensor_handle_info, const reg_event_info *event_info)
 {
 	log_attr *log_attr;
 
@@ -217,11 +218,11 @@ void print_event_occurrence_log(csensor_handle_info &sensor_handle_info, const c
 		return;
 	}
 
-	INFO("%s receives %s with %s[%d][state: %d, option: %d count: %d]", get_client_name(), log_attr->name,
+	_I("%s receives %s with %s[%d][state: %d, option: %d count: %d]", get_client_name(), log_attr->name,
 			get_sensor_name(sensor_handle_info.m_sensor_id), sensor_handle_info.m_handle, sensor_handle_info.m_sensor_state,
 			sensor_handle_info.m_sensor_option, log_attr->cnt);
 
-	INFO("0x%x(cb_event_type = %s, &user_data, client_data = 0x%x)\n", event_info->m_cb,
+	_I("0x%x(cb_event_type = %s, &user_data, client_data = 0x%x)\n", event_info->m_cb,
 			log_attr->name, event_info->m_user_data);
 }
 

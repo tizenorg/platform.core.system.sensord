@@ -2,12 +2,12 @@
 
 prefix=@PREFIX@
 exec_prefix=@EXEC_PREFIX@
-libdir=@LIBDIR@
-includedir=@INCLUDEDIR@/sensor
+libdir=@PC_LIBDIR@
+includedir=@PC_INCLUDEDIR@
 
 Name: @PC_NAME@
 Description: @PC_DESCRIPTION@
-Version: @PC_VERSION@
-Requires: @PC_DEPENDENTS@
+Version: @VERSION@
+Requires: @PC_REQUIRES@
 Libs: -L${libdir} @PC_LDFLAGS@
 Cflags: -I${includedir} @PC_CFLAGS@

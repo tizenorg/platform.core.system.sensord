@@ -17,13 +17,13 @@
  *
  */
 
-#ifndef CLIENT_COMMON_H_
-#define CLIENT_COMMON_H_
+#ifndef _CLIENT_COMMON_H_
+#define _CLIENT_COMMON_H_
 
 /*header for each sensor type*/
 #include <sensor_internal.h>
-#include <csensor_handle_info.h>
-#include <creg_event_info.h>
+#include <sensor_handle_info.h>
+#include <reg_event_info.h>
 #include <sensor_logs.h>
 
 #define BASE_GATHERING_INTERVAL	100
@@ -47,7 +47,7 @@ struct log_attr {
 
 struct log_element {
 	log_id id;
-	unsigned int type;
+	int type;
 	struct log_attr log_attr;
 };
 
@@ -59,7 +59,7 @@ typedef struct {
 	int sensor_state;
 	int sensor_option;
 	sensor_type_t sensor;
-	creg_event_info event_info;
+	reg_event_info event_info;
 } log_info;
 
 bool is_one_shot_event(unsigned int event_type);
@@ -73,10 +73,10 @@ const char* get_log_element_name(log_id id, unsigned int type);
 const char* get_sensor_name(sensor_id_t sensor_id);
 const char* get_event_name(unsigned int event_type);
 const char* get_data_name(unsigned int data_id);
-void print_event_occurrence_log(csensor_handle_info &sensor_handle_info, const creg_event_info *event_info);
+void print_event_occurrence_log(sensor_handle_info &sensor_handle_info, const reg_event_info *event_info);
 
 class sensor_info;
 sensor_info *sensor_to_sensor_info(sensor_t sensor);
 sensor_t sensor_info_to_sensor(const sensor_info *info);
 
-#endif /* CLIENT_COMMON_H_ */
+#endif /* _CLIENT_COMMON_H_ */

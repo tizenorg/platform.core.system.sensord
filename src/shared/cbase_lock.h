@@ -17,8 +17,8 @@
  *
  */
 
-#if !defined(_CBASE_LOCK_CLASS_H_)
-#define _CBASE_LOCK_CLASS_H_
+#ifndef _CBASE_LOCK_H_
+#define _CBASE_LOCK_H_
 
 #include <pthread.h>
 
@@ -47,8 +47,7 @@ enum lock_type {
 #endif
 
 
-class cbase_lock
-{
+class cbase_lock {
 public:
 	cbase_lock();
 	virtual ~cbase_lock();
@@ -73,8 +72,7 @@ private:
 	char m_owner_info[OWNER_INFO_LEN];
 };
 
-class Autolock
-{
+class Autolock {
 private:
 	cbase_lock& m_lock;
 public:
@@ -83,5 +81,4 @@ public:
 	~Autolock();
 };
 
-#endif
-// End of a file
+#endif /* _CBASE_LOCK_H_ */

@@ -21,29 +21,43 @@
 #define _PHYSICAL_SENSOR_H_
 
 #include <sensor_base.h>
-#include <sf_common.h>
 #include <worker_thread.h>
 
-class physical_sensor : public sensor_base
-{
+class physical_sensor : public sensor_base {
 public:
-	typedef worker_thread::trans_func_t working_func_t;
-
-private:
-	worker_thread m_sensor_data_poller;
-
-protected:
 	physical_sensor();
 	virtual ~physical_sensor();
 
-	bool push(const sensor_event_t  &event);
-	bool push(sensor_event_t *event);
-	bool push(const sensorhub_event_t &event);
-	bool push(sensorhub_event_t *event);
+	/* setting module */
+	void set_sensor_info(const sensor_info_t *info);
+	void set_sensor_device(sensor_device *device);
 
-	void set_poller(working_func_t func, void *arg);
-	bool start_poll(void);
-	bool stop_poll(void);
+	/* module info */
+	virtual sensor_type_t get_type(void);
+	virtual unsigned int get_event_type(void);
+	virtual const char* get_name(void);
+	virtual uint32_t get_hal_id(void);
+
+	int get_poll_fd();
+
+	virtual bool read_fd(std::vector<uint32_t> &ids);
+	virtual int get_data(sensor_data_t **data, int *length);
+	virtual bool flush(void);
+private:
+	static cmutex m_mutex;
+
+	const sensor_info_t *m_info;
+	sensor_device *m_sensor_device;
+	uint32_t hal_id;
+
+	virtual bool set_interval(unsigned long interval);
+	virtual bool set_batch_latency(unsigned long latency);
+	virtual int set_attribute(int32_t attribute, int32_t value);
+	virtual int set_attribute(int32_t attribute, char *value, int value_len);
+	virtual bool set_wakeup(int wakeup);
+	virtual bool on_start(void);
+	virtual bool on_stop(void);
+	virtual bool get_sensor_info(sensor_info &info);
 };
 
-#endif
+#endif /* _PHYSICAL_SENSOR_H_ */

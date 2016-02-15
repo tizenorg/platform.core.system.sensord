@@ -1,45 +1,26 @@
 cmake_minimum_required(VERSION 2.6)
 project(sensord-shared CXX)
 
+SET(DEPENDENTS "dlog")
+
 INCLUDE(FindPkgConfig)
-PKG_CHECK_MODULES(shared_pkgs REQUIRED dlog libxml-2.0)
+PKG_CHECK_MODULES(SHARED_PKGS REQUIRED ${DEPENDENTS})
 
-FOREACH(flag ${shared_pkgs_LDFLAGS})
+FOREACH(flag ${SHARED_PKGS_CFLAGS})
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
 ENDFOREACH(flag)
-
-FOREACH(flag ${shared_pkgs_CFLAGS})
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
-ENDFOREACH(flag)
-
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/src/client)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/client)
 
-add_library(${PROJECT_NAME} SHARED
-	cbase_lock.cpp
-	cmutex.cpp
-	cpacket.cpp
-	csocket.cpp
-	sensor_logs.cpp
-	sensor_info.cpp
+FILE(GLOB_RECURSE SRCS *.cpp)
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS})
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${SHARED_PKGS_LDFLAGS})
+
+INSTALL(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+INSTALL(
+	DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor
+	FILES_MATCHING PATTERN "*.h"
 )
-
-target_link_libraries(${PROJECT_NAME} ${shared_pkgs_LDFLAGS} "-lrt -ldl -pthread")
-
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-install(FILES
-	cpacket.h
-	csocket.h
-	cbase_lock.h
-	sensor_info.h
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
-)
-
-install(FILES sensor_deprecated.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
-install(FILES sensor_types.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
-install(FILES sensor_internal_deprecated.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
-install(FILES sensor_internal.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)
-install(FILES sensor_common.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sensor/)

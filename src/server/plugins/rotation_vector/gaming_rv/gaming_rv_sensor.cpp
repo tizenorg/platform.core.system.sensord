@@ -26,11 +26,10 @@
 #include <sys/types.h>
 #include <dlfcn.h>
 #include <sensor_logs.h>
-#include <sf_common.h>
 #include <gaming_rv_sensor.h>
-#include <sensor_plugin_loader.h>
+#include <sensor_loader.h>
 #include <orientation_filter.h>
-#include <cvirtual_sensor_config.h>
+#include <virtual_sensor_config.h>
 
 using std::string;
 using std::vector;
@@ -63,82 +62,82 @@ gaming_rv_sensor::gaming_rv_sensor()
 , m_accuracy(-1)
 , m_time(0)
 {
-	cvirtual_sensor_config &config = cvirtual_sensor_config::get_instance();
+	virtual_sensor_config &config = virtual_sensor_config::get_instance();
 
-	sensor_hal *fusion_sensor_hal = sensor_plugin_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
+	sensor_hal *fusion_sensor_hal = sensor_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
 	if (!fusion_sensor_hal)
 		m_hardware_fusion = false;
 	else
 		m_hardware_fusion = true;
 
-	INFO("m_hardware_fusion = %d", m_hardware_fusion);
+	_I("m_hardware_fusion = %d", m_hardware_fusion);
 
 	m_name = string(SENSOR_NAME);
 	register_supported_event(GAMING_RV_RAW_DATA_EVENT);
 	m_enable_gaming_rv = 0;
 
 	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_VENDOR, m_vendor)) {
-		ERR("[VENDOR] is empty\n");
+		_E("[VENDOR] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_vendor = %s", m_vendor.c_str());
+	_I("m_vendor = %s", m_vendor.c_str());
 
 	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
-		ERR("[DEFAULT_SAMPLING_TIME] is empty\n");
+		_E("[DEFAULT_SAMPLING_TIME] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_default_sampling_time = %d", m_default_sampling_time);
+	_I("m_default_sampling_time = %d", m_default_sampling_time);
 
 	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_ACCEL_STATIC_BIAS, m_accel_static_bias, 3)) {
-		ERR("[ACCEL_STATIC_BIAS] is empty\n");
+		_E("[ACCEL_STATIC_BIAS] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_accel_static_bias = (%f, %f, %f)", m_accel_static_bias[0], m_accel_static_bias[1], m_accel_static_bias[2]);
+	_I("m_accel_static_bias = (%f, %f, %f)", m_accel_static_bias[0], m_accel_static_bias[1], m_accel_static_bias[2]);
 
 	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_GYRO_STATIC_BIAS, m_gyro_static_bias,3)) {
-		ERR("[GYRO_STATIC_BIAS] is empty\n");
+		_E("[GYRO_STATIC_BIAS] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_gyro_static_bias = (%f, %f, %f)", m_gyro_static_bias[0], m_gyro_static_bias[1], m_gyro_static_bias[2]);
+	_I("m_gyro_static_bias = (%f, %f, %f)", m_gyro_static_bias[0], m_gyro_static_bias[1], m_gyro_static_bias[2]);
 
 	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_ACCEL_ROTATION_DIRECTION_COMPENSATION, m_accel_rotation_direction_compensation, 3)) {
-		ERR("[ACCEL_ROTATION_DIRECTION_COMPENSATION] is empty\n");
+		_E("[ACCEL_ROTATION_DIRECTION_COMPENSATION] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_accel_rotation_direction_compensation = (%d, %d, %d)", m_accel_rotation_direction_compensation[0], m_accel_rotation_direction_compensation[1], m_accel_rotation_direction_compensation[2]);
+	_I("m_accel_rotation_direction_compensation = (%d, %d, %d)", m_accel_rotation_direction_compensation[0], m_accel_rotation_direction_compensation[1], m_accel_rotation_direction_compensation[2]);
 
 	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_GYRO_ROTATION_DIRECTION_COMPENSATION, m_gyro_rotation_direction_compensation, 3)) {
-		ERR("[GYRO_ROTATION_DIRECTION_COMPENSATION] is empty\n");
+		_E("[GYRO_ROTATION_DIRECTION_COMPENSATION] is empty\n");
 		throw ENXIO;
 	}
 
-	INFO("m_gyro_rotation_direction_compensation = (%d, %d, %d)", m_gyro_rotation_direction_compensation[0], m_gyro_rotation_direction_compensation[1], m_gyro_rotation_direction_compensation[2]);
+	_I("m_gyro_rotation_direction_compensation = (%d, %d, %d)", m_gyro_rotation_direction_compensation[0], m_gyro_rotation_direction_compensation[1], m_gyro_rotation_direction_compensation[2]);
 
 	m_interval = m_default_sampling_time * MS_TO_US;
 }
 
 gaming_rv_sensor::~gaming_rv_sensor()
 {
-	INFO("gaming_rv_sensor is destroyed!\n");
+	_I("gaming_rv_sensor is destroyed!\n");
 }
 
 bool gaming_rv_sensor::init()
 {
-	m_accel_sensor = sensor_plugin_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
-	m_gyro_sensor = sensor_plugin_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
+	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
+	m_gyro_sensor = sensor_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
 
 	if (!m_accel_sensor || !m_gyro_sensor) {
-		ERR("Failed to load sensors,  accel: 0x%x, gyro: 0x%x",
+		_E("Failed to load sensors,  accel: 0x%x, gyro: 0x%x",
 			m_accel_sensor, m_gyro_sensor);
 		return false;
 	}
 
-	INFO("%s is created!\n", sensor_base::get_name());
+	_I("%s is created!\n", sensor_base::get_name());
 
 	return true;
 }

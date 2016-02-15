@@ -22,23 +22,42 @@
 
 #include <sensor_base.h>
 
-class virtual_sensor : public sensor_base
-{
+class virtual_sensor : public sensor_base {
 public:
 	virtual_sensor();
 	virtual ~virtual_sensor();
 
-	virtual void synthesize(const sensor_event_t& event, std::vector<sensor_event_t> &outs) = 0;
-	virtual int get_sensor_data(const unsigned int event_type, sensor_data_t &data) = 0;
+	/* initialize sensor */
+	virtual bool init();
+
+	/* module info */
+	virtual sensor_type_t get_type() = 0;
+	virtual unsigned int get_event_type(void) = 0;
+	virtual const char* get_name(void) = 0;
+
+	virtual bool get_sensor_info(sensor_info &info) = 0;
+
+	/* synthesize event */
+	virtual void synthesize(const sensor_event_t& event) = 0;
+
+	/* get data */
+	virtual int get_data(sensor_data_t **data, int *length) = 0;
+
 	bool is_virtual(void);
-	bool m_hardware_fusion;
 
 protected:
-
 	bool activate(void);
 	bool deactivate(void);
 
-	bool push(sensor_event_t const &event);
+private:
+	bool m_hardware_fusion;
+
+	virtual bool set_interval(unsigned long interval) = 0;
+	virtual bool set_batch_latency(unsigned long latency) = 0;
+	virtual bool set_wakeup(int wakeup) = 0;
+
+	virtual bool on_start(void) = 0;
+	virtual bool on_stop(void) = 0;
 };
 
-#endif
+#endif /* _VIRTUAL_SENSOR_H_ */

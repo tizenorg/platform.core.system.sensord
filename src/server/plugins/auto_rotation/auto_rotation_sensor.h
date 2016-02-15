@@ -29,32 +29,42 @@ public:
 	auto_rotation_sensor();
 	virtual ~auto_rotation_sensor();
 
-	bool init();
-	virtual void get_types(std::vector<sensor_type_t> &types);
+	/* initialize sensor */
+	bool init(void);
 
-	static bool working(void *inst);
+	/* sensor info */
+	virtual sensor_type_t get_type(void);
+	virtual unsigned int get_event_type(void);
+	virtual const char* get_name(void);
 
-	void synthesize(const sensor_event_t& event, std::vector<sensor_event_t> &outs);
+	virtual bool get_sensor_info(sensor_info &info);
 
-	int get_sensor_data(const unsigned int event_type, sensor_data_t &data);
-	virtual bool get_properties(sensor_type_t sensor_type, sensor_properties_s &properties);
+	/* synthesize event */
+	virtual void synthesize(const sensor_event_t& event);
+
+	/* get data */
+	virtual int get_data(sensor_data_t **data, int *length);
 private:
 	sensor_base *m_accel_sensor;
-	cmutex m_value_mutex;
+	auto_rotation_alg *m_alg;
 
 	int m_rotation;
 	unsigned int m_interval;
 	unsigned long long m_rotation_time;
-	auto_rotation_alg *m_alg;
 
 	std::string m_vendor;
 	std::string m_raw_data_unit;
 	int m_default_sampling_time;
 
-	auto_rotation_alg *get_alg();
+	virtual bool set_interval(unsigned long interval);
+	virtual bool set_batch_latency(unsigned long latency);
+	virtual bool set_wakeup(int wakeup);
+
 	virtual bool on_start(void);
 	virtual bool on_stop(void);
+
 	bool check_lib(void);
+	auto_rotation_alg *get_alg();
 };
 
 #endif

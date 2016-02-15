@@ -59,8 +59,6 @@
 #include <rv_raw_sensor.h>
 #endif
 
-#include <sf_common.h>
-
 extern "C" sensor_module* create(void)
 {
 	sensor_module *module = new(std::nothrow) sensor_module;
