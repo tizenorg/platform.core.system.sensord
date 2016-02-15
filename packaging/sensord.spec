@@ -94,9 +94,11 @@ rm -rf %{buildroot}
 
 %post
 systemctl daemon-reload
+ln -s %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 
 %postun
 systemctl daemon-reload
+rm %{_libdir}/libsensor.so.1
 
 %post -n libsensord -p /sbin/ldconfig
 
