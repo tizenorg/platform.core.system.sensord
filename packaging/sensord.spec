@@ -98,9 +98,12 @@ systemctl daemon-reload
 %postun
 systemctl daemon-reload
 
-%post -n libsensord -p /sbin/ldconfig
+%post -n libsensord
+ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
+/sbin/ldconfig
 
-%postun -n libsensord -p /sbin/ldconfig
+%postun -n libsensord
+/sbin/ldconfig
 
 %files
 %attr(0644,root,root)/usr/etc/virtual_sensors.xml
