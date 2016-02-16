@@ -77,23 +77,21 @@ log_element g_log_elements[] = {
 };
 
 typedef unordered_map<unsigned int, log_attr* > log_map;
-log_map g_log_maps[LOG_ID_END];
+static log_map g_log_maps[LOG_ID_END];
 
-extern void init_client(void);
 static void init_log_maps(void);
 
-
-class initiator
-{
+class initiator {
 public:
 	initiator()
 	{
 		init_log_maps();
-		init_client();
 	}
-} g_initiatior;
+};
 
-static void init_log_maps(void)
+static initiator g_initiator;
+
+void init_log_maps(void)
 {
 	int cnt;
 
@@ -104,7 +102,6 @@ static void init_log_maps(void)
 	}
 
 }
-
 
 const char* get_log_element_name(log_id id, unsigned int type)
 {
