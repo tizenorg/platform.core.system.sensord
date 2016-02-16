@@ -18,7 +18,7 @@
  */
 
 #include <client_sensor_record.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 
 using std::pair;
 using std::string;

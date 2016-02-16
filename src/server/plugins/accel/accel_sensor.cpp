@@ -18,7 +18,7 @@
  */
 
 #include <sensor_common.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <accel_sensor.h>
 
 accel_sensor::accel_sensor()

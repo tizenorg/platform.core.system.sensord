@@ -22,7 +22,7 @@
 
 #include <string>
 #include <unordered_map>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 
 class device_config {
 protected:

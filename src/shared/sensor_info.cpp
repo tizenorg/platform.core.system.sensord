@@ -18,7 +18,7 @@
  */
 
 #include <sensor_info.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <algorithm>
 #include <vector>
 #include <string>

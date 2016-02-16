@@ -17,7 +17,7 @@
  *
  */
 
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <worker_thread.h>
 #include <thread>
 

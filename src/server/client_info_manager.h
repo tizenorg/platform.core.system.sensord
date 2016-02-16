@@ -22,7 +22,7 @@
 
 #include <client_sensor_record.h>
 #include <unordered_map>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <cmutex.h>
 #include <vector>
 

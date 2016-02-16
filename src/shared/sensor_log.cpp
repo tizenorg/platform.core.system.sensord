@@ -25,7 +25,7 @@
 #include <string.h>
 #include <dlog.h>
 #include <sensor_common.h>
-#include "sensor_logs.h"
+#include "sensor_log.h"
 
 #define PATH_MAX 256
 

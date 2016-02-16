@@ -22,7 +22,7 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <cbase_lock.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 
 cbase_lock::cbase_lock()
 {

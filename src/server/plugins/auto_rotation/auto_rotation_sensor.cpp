@@ -26,7 +26,7 @@
 #include <sys/types.h>
 #include <dlfcn.h>
 
-#include <sensor_logs.h>
+#include <sensor_log.h>
 
 #include <virtual_sensor.h>
 #include <auto_rotation_sensor.h>

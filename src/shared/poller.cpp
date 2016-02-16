@@ -18,7 +18,7 @@
  */
 #include <errno.h>
 #include <string.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <poller.h>
 
 #define EPOLL_MAX 32

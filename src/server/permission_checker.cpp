@@ -21,7 +21,7 @@
 #include <cynara-creds-socket.h>
 #include <cynara-session.h>
 #include <permission_checker.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <sensor_loader.h>
 #include <sensor_base.h>
 

@@ -19,7 +19,7 @@
 
 #include <command_common.h>
 #include <sensor_event_dispatcher.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <thread>
 
 using std::thread;

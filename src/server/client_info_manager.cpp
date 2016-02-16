@@ -19,7 +19,7 @@
 
 #include <command_common.h>
 #include <client_info_manager.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <csocket.h>
 
 using std::pair;
