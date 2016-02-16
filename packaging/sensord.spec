@@ -103,7 +103,6 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 /sbin/ldconfig
 
 %postun -n libsensord
-rm %{_libdir}/libsensor.so.1
 /sbin/ldconfig
 
 %files
