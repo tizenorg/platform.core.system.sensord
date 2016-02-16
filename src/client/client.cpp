@@ -17,7 +17,6 @@
  *
  */
 
-#include <sensor_internal_deprecated.h>
 #include <sensor_internal.h>
 #include <sensor_event_listener.h>
 #include <client_common.h>
@@ -1139,94 +1138,3 @@ API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* senso
 	return true;
 
 }
-
-/* deprecated APIs */
-API int sf_connect(sensor_type_t sensor_type)
-{
-	sensor_t sensor;
-
-	sensor = sensord_get_sensor(sensor_type);
-
-	return sensord_connect(sensor);
-}
-
-API int sf_disconnect(int handle)
-{
-	return sensord_disconnect(handle) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_start(int handle, int option)
-{
-	return sensord_start(handle, option) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_stop(int handle)
-{
-	return sensord_stop(handle) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_register_event(int handle, unsigned int event_type, event_condition_t *event_condition, sensor_callback_func_t cb, void *user_data)
-{
-	unsigned int interval = BASE_GATHERING_INTERVAL;
-
-	if (event_condition != NULL) {
-		if ((event_condition->cond_op == CONDITION_EQUAL) && (event_condition->cond_value1 > 0))
-			interval = event_condition->cond_value1;
-	}
-
-	return register_event(handle, event_type, interval, 0, SENSOR_LEGACY_CB, (void*) cb, user_data) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_unregister_event(int handle, unsigned int event_type)
-{
-	return sensord_unregister_event(handle, event_type) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_change_event_condition(int handle, unsigned int event_type, event_condition_t *event_condition)
-{
-	unsigned int interval = BASE_GATHERING_INTERVAL;
-
-	if (event_condition != NULL) {
-		if ((event_condition->cond_op == CONDITION_EQUAL) && (event_condition->cond_value1 > 0))
-			interval = event_condition->cond_value1;
-	}
-
-	return sensord_change_event_interval(handle, event_type, interval) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_change_sensor_option(int handle, int option)
-{
-	return sensord_set_option(handle, option) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_send_sensorhub_data(int handle, const char* data, int data_len)
-{
-	return sensord_send_sensorhub_data(handle, data, data_len) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data)
-{
-	return sensord_get_data(handle, data_id, sensor_data) ? OP_SUCCESS : OP_ERROR;
-}
-
-API int sf_check_rotation(unsigned long *rotation)
-{
-	rotation = 0;
-	return 0;
-}
-
-API int sf_is_sensor_event_available(sensor_type_t sensor_type, unsigned int event_type)
-{
-	return 0;
-}
-
-API int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties)
-{
-	return 0;
-}
-
-API int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties)
-{
-	return 0;
-}
-
