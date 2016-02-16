@@ -40,8 +40,10 @@ using std::vector;
 static const int OP_SUCCESS = 0;
 static const int OP_ERROR =  -1;
 
-static sensor_event_listener &event_listener = sensor_event_listener::get_instance();
-static sensor_client_info &client_info = sensor_client_info::get_instance();
+#define event_listener sensor_event_listener::get_instance()
+#define client_info sensor_client_info::get_instance()
+//static sensor_event_listener &event_listener = sensor_event_listener::get_instance();
+//static sensor_client_info &client_info = sensor_client_info::get_instance();
 static cmutex lock;
 
 static int g_power_save_state = 0;
@@ -49,13 +51,13 @@ static int g_power_save_state = 0;
 static int get_power_save_state(void);
 static void power_save_state_cb(keynode_t *node, void *data);
 static void clean_up(void);
-static void good_bye(void);
+//static void good_bye(void);
 static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, sensor_rep &cur_rep);
 static void restore_session(void);
 static bool register_event(int handle, unsigned int event_type, unsigned int interval, int max_batch_latency, int cb_type, void* cb, void *user_data);
 
-void init_client(void)
-{
+/*
+void init_client(void) {
 	event_listener.set_hup_observer(restore_session);
 	atexit(good_bye);
 }
@@ -65,6 +67,23 @@ static void good_bye(void)
 	_D("Good bye! %s\n", get_client_name());
 	clean_up();
 }
+*/
+
+class initiator {
+public:
+	initiator()
+	{
+		event_listener.set_hup_observer(restore_session);
+	}
+
+	~initiator()
+	{
+		_D("Good bye! %s\n", get_client_name());
+		clean_up();
+	}
+};
+
+static initiator g_initiator;
 
 static int g_power_save_state_cb_cnt = 0;
 
@@ -96,7 +115,7 @@ static void unset_power_save_state_cb(void)
 	}
 }
 
-static void clean_up(void)
+void clean_up(void)
 {
 	handle_vector handles;
 
@@ -109,7 +128,6 @@ static void clean_up(void)
 		++it_handle;
 	}
 }
-
 
 static int get_power_save_state (void)
 {
@@ -157,7 +175,7 @@ static void power_save_state_cb(keynode_t *node, void *data)
 }
 
 
-static void restore_session(void)
+void restore_session(void)
 {
 	AUTOLOCK(lock);
 
