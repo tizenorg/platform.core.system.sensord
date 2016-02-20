@@ -1,5 +1,30 @@
 <manifest>
-    <request>
-        <domain name="_"/>
-    </request>
+	<define>
+		<domain name="sensord" />
+		<provide>
+			<label name="sensord::server" />
+			<label name="sensord::bio" />
+		</provide>
+		<request>
+			<smack request="_" type="rw"/>
+			<smack request="device::input" type="rw"/>
+			<smack request="device::sensor" type="rwx"/>
+			<smack request="device::sys_logging" type="rw"/>
+			<smack request="device::app_logging" type="rw"/>
+			<smack request="deviced::display" type="rw"/>
+			<smack request="deviced::lcd" type="rw"/>
+			<smack request="tizen::vconf::public::r" type="rl"/>
+			<smack request="tizen::vconf::public::r::platform::rw" type="rw"/>
+			<smack request="tizen::vconf::setting::admin" type="rw"/>
+			<smack request="csa::dir" type="rx"/>
+			<smack request="sspay-service" type="rw"/>
+			<smack request="system::sys_logging" type="rwxat"/>
+		</request>
+	</define>
+	<request>
+		<domain name="sensord" />
+	</request>
+	<assign>
+		<filesystem path="/etc/rc.d/init.d/sfsvc" label="_" exec_label="none" />
+	</assign>
 </manifest>

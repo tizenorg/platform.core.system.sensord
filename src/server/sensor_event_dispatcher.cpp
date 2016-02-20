@@ -42,30 +42,8 @@ sensor_event_dispatcher& sensor_event_dispatcher::get_instance()
 	return inst;
 }
 
-
 bool sensor_event_dispatcher::run(void)
 {
-	_I("Starting Event Dispatcher\n");
-
-	if (!m_accept_socket.create(SOCK_SEQPACKET)) {
-		_E("Listener Socket Creation failed in Server \n");
-		return false;
-	}
-
-	if(!m_accept_socket.bind(EVENT_CHANNEL_PATH)) {
-		_E("Listener Socket Binding failed in Server \n");
-		m_accept_socket.close();
-		return false;
-	}
-
-	if(!m_accept_socket.listen(MAX_PENDING_CONNECTION)) {
-		_E("Socket Listen failed in Server \n");
-		return false;
-	}
-
-	thread accepter(&sensor_event_dispatcher::accept_connections, this);
-	accepter.detach();
-
 	thread dispatcher(&sensor_event_dispatcher::dispatch_event, this);
 	dispatcher.detach();
 
@@ -87,8 +65,6 @@ void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 
 	client_socket.set_transfer_mode();
 
-	AUTOLOCK(m_mutex);
-
 	if(!get_client_info_manager().set_event_socket(client_id, client_socket)) {
 		_E("Failed to store event socket[%d] for %s", client_socket.get_socket_fd(),
 			client_info_manager.get_client_info(client_id));
@@ -108,23 +84,10 @@ void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 	}
 }
 
-void sensor_event_dispatcher::accept_connections(void)
+void sensor_event_dispatcher::accept_event_connections(csocket client_socket)
 {
-	_I("Event channel acceptor is started.\n");
-
-	while (true) {
-		csocket client_socket;
-
-		if (!m_accept_socket.accept(client_socket)) {
-			_E("Accepting socket failed in Server \n");
-			continue;
-		}
-
-		_I("New client connected (socket_fd : %d)\n", client_socket.get_socket_fd());
-
-		thread event_channel_creator(&sensor_event_dispatcher::accept_event_channel, this, client_socket);
-		event_channel_creator.detach();
-	}
+	thread event_channel_creator(&sensor_event_dispatcher::accept_event_channel, this, client_socket);
+	event_channel_creator.detach();
 }
 
 void sensor_event_dispatcher::dispatch_event(void)
