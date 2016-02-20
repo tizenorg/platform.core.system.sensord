@@ -22,6 +22,9 @@
 
 #define UNKNOWN_NAME "UNKNOWN_SENSOR"
 
+#define OP_SUCCESS 0
+#define OP_ERROR -1
+
 cmutex physical_sensor::m_mutex;
 
 physical_sensor::physical_sensor()
@@ -152,7 +155,10 @@ int physical_sensor::set_attribute(int32_t attribute, int32_t value)
 	if (!m_sensor_device)
 		return false;
 
-	return m_sensor_device->set_attribute_int(m_info->id, attribute, value);
+	if (!m_sensor_device->set_attribute_int(m_info->id, attribute, value))
+		return OP_ERROR;
+
+	return OP_SUCCESS;
 }
 
 int physical_sensor::set_attribute(int32_t attribute, char *value, int value_len)
@@ -162,7 +168,10 @@ int physical_sensor::set_attribute(int32_t attribute, char *value, int value_len
 	if (!m_sensor_device)
 		return false;
 
-	return m_sensor_device->set_attribute_str(m_info->id, attribute, value, value_len);
+	if (!m_sensor_device->set_attribute_str(m_info->id, attribute, value, value_len))
+		return OP_ERROR;
+
+	return OP_SUCCESS;
 }
 
 bool physical_sensor::set_wakeup(int wakeup)
