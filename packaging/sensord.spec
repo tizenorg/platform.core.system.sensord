@@ -90,7 +90,8 @@ rm -rf %{buildroot}
 %make_install
 
 %install_service multi-user.target.wants sensord.service
-%install_service sockets.target.wants sensord.socket
+%install_service sockets.target.wants sensord_event.socket
+%install_service sockets.target.wants sensord_command.socket
 
 %post
 systemctl daemon-reload
@@ -110,9 +111,11 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 %manifest sensord.manifest
 %{_bindir}/sensord
 %{_unitdir}/sensord.service
-%{_unitdir}/sensord.socket
+%{_unitdir}/sensord_command.socket
+%{_unitdir}/sensord_event.socket
 %{_unitdir}/multi-user.target.wants/sensord.service
-%{_unitdir}/sockets.target.wants/sensord.socket
+%{_unitdir}/sockets.target.wants/sensord_command.socket
+%{_unitdir}/sockets.target.wants/sensord_event.socket
 %license LICENSE.APLv2
 
 %files -n libsensord

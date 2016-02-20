@@ -1,5 +1,5 @@
 [Unit]
-Description=Sensor daemon socket
+Description=Sensor command socket
 
 [Socket]
 ListenStream=/tmp/sensord_command_socket
