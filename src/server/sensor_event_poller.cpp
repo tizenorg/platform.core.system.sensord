@@ -82,7 +82,7 @@ bool sensor_event_poller::poll()
 		struct epoll_event poll_event;
 
 		if (!m_poller.poll(poll_event))
-			continue;
+			return false;
 
 		fd = poll_event.data.fd;
 		ids.clear();
