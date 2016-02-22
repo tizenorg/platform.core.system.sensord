@@ -47,7 +47,6 @@ private:
 	sensor_event_dispatcher(sensor_event_dispatcher const&) {};
 	sensor_event_dispatcher& operator=(sensor_event_dispatcher const&);
 
-	void accept_connections(void);
 	void accept_event_channel(csocket client_socket);
 
 	void dispatch_event(void);
@@ -65,7 +64,10 @@ private:
 	void sort_sensor_events(std::vector<void *> &events);
 public:
 	static sensor_event_dispatcher& get_instance();
+
 	bool run(void);
+	void accept_event_connections(csocket client_socket);
+
 	void request_last_event(int client_id, sensor_id_t sensor_id);
 
 	bool add_active_virtual_sensor(virtual_sensor *sensor);

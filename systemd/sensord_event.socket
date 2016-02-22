@@ -1,0 +1,11 @@
+[Unit]
+Description=Sensor event socket
+
+[Socket]
+ListenSequentialPacket=/tmp/sensord_event_socket
+SocketMode=0777
+PassCredentials=yes
+Accept=false
+SmackLabelIPIn=*
+SmackLabelIPOut=@
+Service=sensord.service
