@@ -2,9 +2,12 @@
 Description=Sensor command socket
 
 [Socket]
+SocketUser=system
+SocketGroup=system
 ListenStream=/tmp/sensord_command_socket
 SocketMode=0777
 PassCredentials=yes
 Accept=false
 SmackLabelIPIn=*
 SmackLabelIPOut=@
+Service=sensord.service
