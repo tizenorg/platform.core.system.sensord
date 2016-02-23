@@ -30,6 +30,7 @@ Requires:   libsensord = %{version}-%{release}
 %define gaming_rv_state OFF
 %define tilt_state OFF
 %define gyroscope_uncal_state OFF
+%define gesture_movement_state ON
 %define build_test_suite ON
 
 %description
@@ -80,7 +81,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DMAJORVER=${MAJORVER} -DFULLVER=%{ver
 	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
 	-DGYROSCOPE_UNCAL=%{gyroscope_uncal_state} -DAUTO_ROTATION=%{auto_rotation_state} \
-	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite}
+	-DTILT=%{tilt_state} -DGESTURE_MOVEMENT=%{gesture_movement_state} -DTEST_SUITE=%{build_test_suite}
 
 %build
 make %{?jobs:-j%jobs}

@@ -33,6 +33,9 @@
 #ifdef ENABLE_AUTO_ROTATION
 #include <auto_rotation_sensor.h>
 #endif
+#ifdef ENABLE_GESTURE_MOVEMENT
+#include <gesture_movement_sensor.h>
+#endif
 
 using std::vector;
 using std::string;
@@ -133,6 +136,7 @@ void sensor_loader::create_sensors(void)
 	create_physical_sensors<physical_sensor>(UNKNOWN_SENSOR);
 
 	create_virtual_sensors<auto_rotation_sensor>("Auto Rotation");
+	create_virtual_sensors<gesture_movement_sensor>("Gesture Movement");
 }
 
 template<typename _sensor>

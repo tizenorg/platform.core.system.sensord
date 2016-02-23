@@ -58,6 +58,9 @@
 #ifdef ENABLE_RV_RAW
 #include <rv_raw_sensor.h>
 #endif
+#ifdef ENABLE_GESTURE_MOVEMENT
+#include <gesture_movement_sensor.h>
+#endif
 
 extern "C" sensor_module* create(void)
 {
@@ -283,6 +286,17 @@ extern "C" sensor_module* create(void)
 	}
 	if (rv_raw_sensor_ptr != NULL)
 		module->sensors.push_back(rv_raw_sensor_ptr);
+#endif
+
+#ifdef ENABLE_AUTO_ROTATION
+	gesture_movement_sensor *gesture_movement_sensor_ptr = NULL;
+	try {
+		gesture_movement_sensor_ptr = new(std::nothrow) gesture_movement_sensor;
+	} catch (int err) {
+		ERR("Failed to create gesture_movement_sensor module, err: %d, cause: %s", err, strerror(err));
+	}
+	if (gesture_movement_sensor_ptr != NULL)
+		module->sensors.push_back(gesture_movement_sensor_ptr);
 #endif
 
 	return module;

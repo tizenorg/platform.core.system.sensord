@@ -7,6 +7,13 @@
 			<RAW_DATA_UNIT value="DEGREES" />
 			<DEFAULT_SAMPLING_TIME value="200" />
 		</AUTO_ROTATION>
+
+		<GESTURE_MOVEMENT>
+			<NAME value="GESTURE_MOVEMENT_SENSOR" />
+			<VENDOR value="SAMSUNG" />
+			<RAW_DATA_UNIT value="EVENT" />
+			<DEFAULT_SAMPLING_TIME value="200" />
+		</GESTURE_MOVEMENT>
 	</DEVICE>
 
 	<DEVICE type="Mobile-Emulator">

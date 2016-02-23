@@ -34,6 +34,7 @@ void usage()
 	printf("Sensor_type: ");
 	printf("[accelerometer] ");
 	printf("[auto_rotation]\n");
+	printf("[gesture_movement]\n");
 	printf("[gyroscope] ");
 	printf("[pressure] ");
 	printf("[temperature] ");
@@ -83,6 +84,10 @@ int main(int argc, char **argv)
 	else if (strcmp(argv[1], "auto_rotation") == 0) {
 		 sensor_type = AUTO_ROTATION_SENSOR;
 		 event = AUTO_ROTATION_CHANGE_STATE_EVENT;
+	}
+	else if (strcmp(argv[1], "gesture_movement") == 0) {
+		 sensor_type = GESTURE_MOVEMENT_SENSOR;
+		 event = GESTURE_MOVEMENT_CHANGE_STATE_EVENT;
 	}
 	else if (strcmp(argv[1], "gyroscope") == 0) {
 		 sensor_type = GYROSCOPE_SENSOR;
