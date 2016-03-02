@@ -24,11 +24,13 @@
 #define EPOLL_MAX 32
 
 poller::poller()
+: m_epfd(-1)
 {
 	init_poll_fd();
 }
 
 poller::poller(int fd)
+: m_epfd(-1)
 {
 	init_poll_fd();
 	add_fd(fd);
@@ -100,7 +102,7 @@ bool poller::poll(struct epoll_event &event)
 			m_event_queue.pop();
 
 			if (event.events & EPOLLERR) {
-				_D("Poll error!");
+				_E("Poll error!");
 				return false;
 			}
 

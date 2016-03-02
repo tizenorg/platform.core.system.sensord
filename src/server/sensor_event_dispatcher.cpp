@@ -17,6 +17,7 @@
  *
  */
 
+#include <sensor_common.h>
 #include <command_common.h>
 #include <sensor_event_dispatcher.h>
 #include <sensor_log.h>
@@ -29,7 +30,6 @@ using std::pair;
 #define MAX_PENDING_CONNECTION 32
 
 sensor_event_dispatcher::sensor_event_dispatcher()
-: m_lcd_on(false)
 {
 }
 
@@ -282,8 +282,7 @@ void sensor_event_dispatcher::request_last_event(int client_id, sensor_id_t sens
 	}
 }
 
-
-bool sensor_event_dispatcher::add_active_virtual_sensor(virtual_sensor * sensor)
+bool sensor_event_dispatcher::add_active_virtual_sensor(virtual_sensor *sensor)
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 
@@ -297,7 +296,7 @@ bool sensor_event_dispatcher::add_active_virtual_sensor(virtual_sensor * sensor)
 	return true;
 }
 
-bool sensor_event_dispatcher::delete_active_virtual_sensor(virtual_sensor * sensor)
+bool sensor_event_dispatcher::delete_active_virtual_sensor(virtual_sensor *sensor)
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 

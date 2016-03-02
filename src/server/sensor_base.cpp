@@ -18,18 +18,20 @@
  */
 
 #include <stdint.h>
-#include <algorithm>
-#include <utility>
-#include <functional>
 #include <sensor_hal.h>
 #include <sensor_event_queue.h>
 #include <sensor_base.h>
+#include <sensor_common.h>
+
+#include <algorithm>
+#include <utility>
+#include <functional>
 
 using std::make_pair;
 using std::vector;
 
 sensor_base::sensor_base()
-: m_unique_id(-1)
+: m_id(SENSOR_ID_INVALID)
 , m_permission(SENSOR_PERMISSION_STANDARD)
 , m_started(false)
 , m_client(0)
@@ -42,15 +44,15 @@ sensor_base::~sensor_base()
 
 void sensor_base::set_id(sensor_id_t id)
 {
-	m_unique_id = id;
+	m_id = id;
 }
 
 sensor_id_t sensor_base::get_id(void)
 {
-	if (m_unique_id == -1)
+	if (m_id == SENSOR_ID_INVALID)
 		return UNKNOWN_SENSOR;
 
-	return m_unique_id;
+	return m_id;
 }
 
 sensor_type_t sensor_base::get_type(void)
@@ -80,7 +82,7 @@ bool sensor_base::is_virtual()
 
 int sensor_base::get_data(sensor_data_t **data, int *length)
 {
-	return -1;
+	return OP_ERROR;
 }
 
 bool sensor_base::flush(void)
@@ -90,12 +92,12 @@ bool sensor_base::flush(void)
 
 int sensor_base::set_attribute(int32_t cmd, int32_t value)
 {
-	return -1;
+	return OP_ERROR;
 }
 
 int sensor_base::set_attribute(int32_t attribute, char *value, int value_size)
 {
-	return -1;
+	return OP_ERROR;
 }
 
 bool sensor_base::start()
@@ -149,14 +151,14 @@ bool sensor_base::add_interval(int client_id, unsigned int interval, bool is_pro
 {
 	unsigned int prev_min, cur_min;
 
-	AUTOLOCK(m_plugin_info_list_mutex);
+	AUTOLOCK(m_sensor_info_list_mutex);
 
-	prev_min = m_plugin_info_list.get_min_interval();
+	prev_min = m_sensor_info_list.get_min_interval();
 
-	if (!m_plugin_info_list.add_interval(client_id, interval, is_processor))
+	if (!m_sensor_info_list.add_interval(client_id, interval, is_processor))
 		return false;
 
-	cur_min = m_plugin_info_list.get_min_interval();
+	cur_min = m_sensor_info_list.get_min_interval();
 
 	if (cur_min != prev_min) {
 		_I("Min interval for sensor[0x%llx] is changed from %dms to %dms"
@@ -173,14 +175,14 @@ bool sensor_base::add_interval(int client_id, unsigned int interval, bool is_pro
 bool sensor_base::delete_interval(int client_id, bool is_processor)
 {
 	unsigned int prev_min, cur_min;
-	AUTOLOCK(m_plugin_info_list_mutex);
+	AUTOLOCK(m_sensor_info_list_mutex);
 
-	prev_min = m_plugin_info_list.get_min_interval();
+	prev_min = m_sensor_info_list.get_min_interval();
 
-	if (!m_plugin_info_list.delete_interval(client_id, is_processor))
+	if (!m_sensor_info_list.delete_interval(client_id, is_processor))
 		return false;
 
-	cur_min = m_plugin_info_list.get_min_interval();
+	cur_min = m_sensor_info_list.get_min_interval();
 
 	if (!cur_min) {
 		_I("No interval for sensor[0x%llx] by%sclient[%d] deleting interval, "
@@ -203,23 +205,23 @@ bool sensor_base::delete_interval(int client_id, bool is_processor)
 
 unsigned int sensor_base::get_interval(int client_id, bool is_processor)
 {
-	AUTOLOCK(m_plugin_info_list_mutex);
+	AUTOLOCK(m_sensor_info_list_mutex);
 
-	return m_plugin_info_list.get_interval(client_id, is_processor);
+	return m_sensor_info_list.get_interval(client_id, is_processor);
 }
 
 bool sensor_base::add_batch(int client_id, unsigned int latency)
 {
 	unsigned int prev_max, cur_max;
 
-	AUTOLOCK(m_plugin_info_list_mutex);
+	AUTOLOCK(m_sensor_info_list_mutex);
 
-	prev_max = m_plugin_info_list.get_max_batch();
+	prev_max = m_sensor_info_list.get_max_batch();
 
-	if (!m_plugin_info_list.add_batch(client_id, latency))
+	if (!m_sensor_info_list.add_batch(client_id, latency))
 		return false;
 
-	cur_max = m_plugin_info_list.get_max_batch();
+	cur_max = m_sensor_info_list.get_max_batch();
 
 	if (cur_max != prev_max) {
 		_I("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] adding latency",
@@ -233,14 +235,14 @@ bool sensor_base::add_batch(int client_id, unsigned int latency)
 bool sensor_base::delete_batch(int client_id)
 {
 	unsigned int prev_max, cur_max;
-	AUTOLOCK(m_plugin_info_list_mutex);
+	AUTOLOCK(m_sensor_info_list_mutex);
 
-	prev_max = m_plugin_info_list.get_max_batch();
+	prev_max = m_sensor_info_list.get_max_batch();
 
-	if (!m_plugin_info_list.delete_batch(client_id))
+	if (!m_sensor_info_list.delete_batch(client_id))
 		return false;
 
-	cur_max = m_plugin_info_list.get_max_batch();
+	cur_max = m_sensor_info_list.get_max_batch();
 
 	if (!cur_max) {
 		_I("No latency for sensor[0x%llx] by client[%d] deleting latency, so set to default 0 ms",
@@ -259,23 +261,23 @@ bool sensor_base::delete_batch(int client_id)
 
 unsigned int sensor_base::get_batch(int client_id)
 {
-	AUTOLOCK(m_plugin_info_list_mutex);
+	AUTOLOCK(m_sensor_info_list_mutex);
 
-	return m_plugin_info_list.get_batch(client_id);
+	return m_sensor_info_list.get_batch(client_id);
 }
 
 bool sensor_base::add_wakeup(int client_id, int wakeup)
 {
 	int prev_wakeup, cur_wakeup;
 
-	AUTOLOCK(m_plugin_info_list_mutex);
+	AUTOLOCK(m_sensor_info_list_mutex);
 
-	prev_wakeup = m_plugin_info_list.is_wakeup_on();
+	prev_wakeup = m_sensor_info_list.is_wakeup_on();
 
-	if (!m_plugin_info_list.add_wakeup(client_id, wakeup))
+	if (!m_sensor_info_list.add_wakeup(client_id, wakeup))
 		return false;
 
-	cur_wakeup = m_plugin_info_list.is_wakeup_on();
+	cur_wakeup = m_sensor_info_list.is_wakeup_on();
 
 	if ((cur_wakeup == SENSOR_WAKEUP_ON) && (prev_wakeup < SENSOR_WAKEUP_ON)) {
 		_I("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] adding wakeup",
@@ -289,14 +291,14 @@ bool sensor_base::add_wakeup(int client_id, int wakeup)
 bool sensor_base::delete_wakeup(int client_id)
 {
 	int prev_wakeup, cur_wakeup;
-	AUTOLOCK(m_plugin_info_list_mutex);
+	AUTOLOCK(m_sensor_info_list_mutex);
 
-	prev_wakeup = m_plugin_info_list.is_wakeup_on();
+	prev_wakeup = m_sensor_info_list.is_wakeup_on();
 
-	if (!m_plugin_info_list.delete_wakeup(client_id))
+	if (!m_sensor_info_list.delete_wakeup(client_id))
 		return false;
 
-	cur_wakeup = m_plugin_info_list.is_wakeup_on();
+	cur_wakeup = m_sensor_info_list.is_wakeup_on();
 
 	if ((cur_wakeup < SENSOR_WAKEUP_ON) && (prev_wakeup == SENSOR_WAKEUP_ON)) {
 		_I("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] deleting wakeup",
@@ -309,9 +311,9 @@ bool sensor_base::delete_wakeup(int client_id)
 
 int sensor_base::get_wakeup(int client_id)
 {
-	AUTOLOCK(m_plugin_info_list_mutex);
+	AUTOLOCK(m_sensor_info_list_mutex);
 
-	return m_plugin_info_list.is_wakeup_on();
+	return m_sensor_info_list.is_wakeup_on();
 }
 
 bool sensor_base::is_wakeup_supported(void)
@@ -381,4 +383,3 @@ unsigned long long sensor_base::get_timestamp(timeval *t)
 
 	return ((unsigned long long)(t->tv_sec)*1000000LL +t->tv_usec);
 }
-

@@ -30,10 +30,8 @@
 
 /*header for common sensor type*/
 #include <sensor_common.h>
-
-/*header for each sensor type*/
 #include <sensor_types.h>
-
+#include <sensor_deprecated.h>
 #include <sensor_internal_deprecated.h>
 
 #ifdef __cplusplus
@@ -355,6 +353,7 @@ bool sensord_set_attribute_str(int handle, int attribute, const char *value, int
  * @return true on success, otherwise false.
  */
 bool sensord_send_sensorhub_data(int handle, const char *data, int data_len);
+bool sensord_send_command(int handle, const char *command, int command_len);
 
 /**
  * @brief get sensor data from a connected sensor

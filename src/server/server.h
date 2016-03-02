@@ -24,6 +24,11 @@
 #include <csocket.h>
 
 class server {
+public:
+	void run(void);
+	void stop(void);
+	static server& get_instance();
+
 private:
 	GMainLoop *m_mainloop;
 	csocket m_command_channel_accept_socket;
@@ -42,10 +47,6 @@ private:
 	void accept_event_channel(void);
 
 	int get_systemd_socket(const char *name);
-public:
-	void run(void);
-	void stop(void);
-	static server& get_instance();
 };
 
 #endif /* _SERVER_H_ */

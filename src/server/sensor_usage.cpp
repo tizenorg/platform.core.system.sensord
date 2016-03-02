@@ -17,7 +17,8 @@
  *
  */
 
-#include <sensor_internal.h>
+#include <sensor_common.h>
+#include <sensor_types.h>
 #include <sensor_usage.h>
 #include <sensor_log.h>
 

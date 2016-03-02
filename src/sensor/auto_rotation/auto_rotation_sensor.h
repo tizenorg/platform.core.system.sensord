@@ -21,7 +21,7 @@
 #define _AUTO_ROTATION_SENSOR_H_
 
 #include <virtual_sensor.h>
-#include <sensor_internal.h>
+#include <sensor_types.h>
 #include <auto_rotation_alg.h>
 
 class auto_rotation_sensor : public virtual_sensor {
@@ -67,4 +67,4 @@ private:
 	auto_rotation_alg *get_alg();
 };
 
-#endif
+#endif /* _AUTO_ROTATION_SENSOR_H_ */

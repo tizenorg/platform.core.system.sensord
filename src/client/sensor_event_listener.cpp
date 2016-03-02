@@ -25,10 +25,9 @@
 #include <chrono>
 #include <vector>
 
-#define MS_TO_US 1000
-#define MIN_DELIVERY_DIFF_FACTOR 0.75f
+#include <sensor_types.h>
 
-/* TODO: this macro should be adjusted */
+/* TODO: this macro should be adjusted(4224 = 4096(data) + 128(header)) */
 #define EVENT_BUFFER_SIZE 4224
 
 using std::thread;
@@ -352,8 +351,6 @@ ssize_t sensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, s
 
 	return len;
 }
-
-
 
 void sensor_event_listener::listen_events(void)
 {

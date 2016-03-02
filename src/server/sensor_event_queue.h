@@ -82,9 +82,9 @@ private:
 	typedef std::lock_guard<std::mutex> lock;
 	typedef std::unique_lock<std::mutex> ulock;
 
-	sensor_event_queue() {};
-	~sensor_event_queue() {};
-	sensor_event_queue(const sensor_event_queue &) {};
+	sensor_event_queue() {}
+	~sensor_event_queue() {}
+	sensor_event_queue(const sensor_event_queue &) {}
 	sensor_event_queue& operator=(const sensor_event_queue &);
 	void push_internal(void *event);
 public:

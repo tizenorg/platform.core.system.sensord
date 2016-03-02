@@ -23,9 +23,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
+#include <sensor_log.h>
 #include <dlog.h>
+#include <stddef.h>
 #include <sensor_common.h>
-#include "sensor_log.h"
+#include <sensor_types.h>
 
 #define PATH_MAX 256
 

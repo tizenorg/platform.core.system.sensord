@@ -27,7 +27,6 @@
 
 class command_channel {
 public:
-
 	command_channel();
 	~command_channel();
 
@@ -48,9 +47,9 @@ public:
 	bool cmd_unregister_events(event_type_vector &event_vec);
 	bool cmd_set_batch(unsigned int interval, unsigned int latency);
 	bool cmd_unset_batch(void);
-	bool cmd_get_data(unsigned int type, sensor_data_t* values);
+	bool cmd_get_data(unsigned int type, sensor_data_t *values);
 	bool cmd_set_attribute_int(int attribute, int value);
-	bool cmd_set_attribute_str(int attribute, const char* buffer, int data_len);
+	bool cmd_set_attribute_str(int attribute, const char *value, int value_len);
 private:
 	csocket m_command_socket;
 	int m_client_id;
@@ -58,4 +57,4 @@ private:
 	bool command_handler(cpacket *packet, void **return_payload);
 };
 
-#endif /* COMMAND_CHANNEL_H_ */
+#endif /* _COMMAND_CHANNEL_H_ */

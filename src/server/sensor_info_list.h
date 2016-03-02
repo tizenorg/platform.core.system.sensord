@@ -17,53 +17,40 @@
  *
  */
 
-#ifndef _PLUGIN_INFO_LIST_H_
-#define _PLUGIN_INFO_LIST_H_
+#ifndef _SENSOR_INFO_LIST_H_
+#define _SENSOR_INFO_LIST_H_
 
 #include <list>
 
-class cinterval_info {
+class interval_info {
 public:
-	cinterval_info(int client_id, bool is_processor, unsigned int interval);
+	interval_info(int client_id, bool is_processor, unsigned int interval);
 	int client_id;
 	bool is_processor;
 	unsigned int interval;
 };
 
-typedef std::list<cinterval_info>::iterator cinterval_info_iterator;
+typedef std::list<interval_info>::iterator interval_info_iterator;
 
-class cbatch_info {
+class batch_info {
 public:
-	cbatch_info(int client_id, unsigned int latency);
+	batch_info(int client_id, unsigned int latency);
 	int client_id;
 	unsigned int latency;
 };
 
-typedef std::list<cbatch_info>::iterator cbatch_info_iterator;
+typedef std::list<batch_info>::iterator batch_info_iterator;
 
-class cwakeup_info {
+class wakeup_info {
 public:
-	cwakeup_info(int client_id, int wakeup);
+	wakeup_info(int client_id, int wakeup);
 	int client_id;
 	int wakeup;
 };
 
-typedef std::list<cwakeup_info>::iterator cwakeup_info_iterator;
+typedef std::list<wakeup_info>::iterator wakeup_info_iterator;
 
-class plugin_info_list {
-private:
-	static bool comp_interval_info(cinterval_info a, cinterval_info b);
-	cinterval_info_iterator find_if_interval_info(int client_id, bool is_processor);
-
-	static bool comp_batch_info(cbatch_info a, cbatch_info b);
-	cbatch_info_iterator find_if_batch_info(int client_id);
-
-	cwakeup_info_iterator find_if_wakeup_info(int client_id);
-
-	std::list<cinterval_info> m_interval_info_list;
-	std::list<cbatch_info> m_batch_info_list;
-	std::list<cwakeup_info> m_wakeup_info_list;
-
+class sensor_info_list {
 public:
 	bool add_interval(int client_id, unsigned int interval, bool is_processor);
 	bool delete_interval(int client_id, bool is_processor);
@@ -79,5 +66,18 @@ public:
 	bool delete_wakeup(int client_id);
 	int get_wakeup(int client_id);
 	int is_wakeup_on(void);
+
+private:
+	static bool comp_interval_info(interval_info a, interval_info b);
+	interval_info_iterator find_if_interval_info(int client_id, bool is_processor);
+
+	static bool comp_batch_info(batch_info a, batch_info b);
+	batch_info_iterator find_if_batch_info(int client_id);
+
+	wakeup_info_iterator find_if_wakeup_info(int client_id);
+
+	std::list<interval_info> m_interval_info_list;
+	std::list<batch_info> m_batch_info_list;
+	std::list<wakeup_info> m_wakeup_info_list;
 };
-#endif /* _PLUGIN_INFO_LIST_H_ */
+#endif /* _SENSOR_INFO_LIST_H_ */

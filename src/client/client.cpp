@@ -17,9 +17,11 @@
  *
  */
 
+#include <sensor_common.h>
 #include <sensor_internal_deprecated.h>
 #include <sensor_internal.h>
 #include <sensor_event_listener.h>
+#include <sensor_client_info.h>
 #include <client_common.h>
 #include <vconf.h>
 #include <cmutex.h>
@@ -36,9 +38,6 @@ using std::vector;
 #endif
 
 #define DEFAULT_INTERVAL POLL_10HZ_MS
-
-static const int OP_SUCCESS = 0;
-static const int OP_ERROR =  -1;
 
 static cmutex lock;
 
@@ -161,7 +160,7 @@ void restore_session(void)
 {
 	AUTOLOCK(lock);
 
-	_I("Trying to restore session for %s", get_client_name());
+	_I("Trying to restore sensor client session for %s", get_client_name());
 
 	command_channel *cmd_channel;
 	int client_id;
@@ -221,7 +220,7 @@ void restore_session(void)
 		++it_sensor;
 	}
 
-	_I("Succeeded to restore session for %s", get_client_name());
+	_I("Succeeded to restore sensor client session for %s", get_client_name());
 
 	return;
 
@@ -486,11 +485,12 @@ API bool sensord_get_supported_event_types(sensor_t sensor, unsigned int **event
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
 	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !event_types || !count,
-		false, "Invalid param: sensor (%p), event_types(%p), count(%)", sensor, event_types, count);
+		false, "Invalid param: sensor (%p), event_types(%p), count(%p)", sensor, event_types, count);
 
 	unsigned int event_type;
 	event_type = info->get_supported_event();
-	*event_types = (unsigned int *) malloc(sizeof(unsigned int));
+	*event_types = (unsigned int *)malloc(sizeof(unsigned int));
+
 	retvm_if(!*event_types, false, "Failed to allocate memory");
 
 	(*event_types)[0] = event_type;
@@ -504,7 +504,7 @@ API bool sensord_is_supported_event_type(sensor_t sensor, unsigned int event_typ
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
 	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !event_type || !supported,
-		false, "Invalid param: sensor (%p), event_type(%p), supported(%)", sensor, event_type, supported);
+		false, "Invalid param: sensor (%p), event_type(%p), supported(%p)", sensor, event_type, supported);
 
 	*supported = info->is_supported_event(event_type);
 
@@ -548,7 +548,11 @@ API int sensord_connect(sensor_t sensor)
 
 	if (!sensor_registered) {
 		cmd_channel = new(std::nothrow) command_channel();
-		retvm_if (!cmd_channel, OP_ERROR, "Failed to allocate memory");
+		if (!cmd_channel) {
+			_E("Failed to allocated memory");
+			sensor_client_info::get_instance().delete_handle(handle);
+			return OP_ERROR;
+		}
 
 		if (!cmd_channel->create_channel()) {
 			_E("%s failed to create command channel for %s", get_client_name(), get_sensor_name(sensor_id));
@@ -881,15 +885,15 @@ static bool change_event_batch(int handle, unsigned int event_type, unsigned int
 		return false;
 	}
 
+	if (interval == 0)
+		interval = DEFAULT_INTERVAL;
+
 	_I("%s changes batch of event %s[0x%x] for %s[%d] to (%d, %d)", get_client_name(), get_event_name(event_type),
 			event_type, get_sensor_name(sensor_id), handle, interval, latency);
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, prev_rep);
 
 	sensor_client_info::get_instance().get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb_type, prev_cb, prev_user_data);
-
-	if (interval == 0)
-		interval = DEFAULT_INTERVAL;
 
 	if (!sensor_client_info::get_instance().set_event_batch(handle, event_type, interval, latency))
 		return false;
@@ -1068,12 +1072,12 @@ API bool sensord_set_attribute_str(int handle, int attribute, const char *value,
 	AUTOLOCK(lock);
 
 	if (!sensor_client_info::get_instance().get_sensor_id(handle, sensor_id)) {
-		_E("client %s failed to get handle information", get_client_name());
+		_E("Client %s failed to get handle information", get_client_name());
 		return false;
 	}
 
 	if (!sensor_client_info::get_instance().get_command_channel(sensor_id, &cmd_channel)) {
-		_E("client %s failed to get command channel for %s",
+		_E("Client %s failed to get command channel for %s",
 			get_client_name(), get_sensor_name(sensor_id));
 		return false;
 	}
@@ -1099,6 +1103,11 @@ API bool sensord_set_attribute_str(int handle, int attribute, const char *value,
 API bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
 {
 	return sensord_set_attribute_str(handle, 0, data, data_len);
+}
+
+API bool sensord_send_command(int handle, const char *command, int command_len)
+{
+	return sensord_set_attribute_str(handle, 0, command, command_len);
 }
 
 API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data)

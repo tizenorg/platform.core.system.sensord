@@ -20,12 +20,12 @@
 #ifndef _SENSOR_HANDLE_INFO_H_
 #define _SENSOR_HANDLE_INFO_H_
 
+#include <sensor_internal.h>
 #include <reg_event_info.h>
 #include <sensor_log.h>
 #include <string.h>
 #include <unordered_map>
 #include <glib.h>
-#include <sensor_internal.h>
 
 typedef std::unordered_map<unsigned int,reg_event_info> event_info_map;
 

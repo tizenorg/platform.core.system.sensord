@@ -69,16 +69,6 @@ typedef enum {
 	SENSOR_DEVICE_GYROSCOPE_RV,
 	SENSOR_DEVICE_GEOMAGNETIC_RV,
 
-	SENSOR_DEVICE_ACTIVITY_STATIONARY = 0x100,
-	SENSOR_DEVICE_ACTIVITY_WALK,
-	SENSOR_DEVICE_ACTIVITY_RUN,
-	SENSOR_DEVICE_ACTIVITY_IN_VEHICLE,
-	SENSOR_DEVICE_ACTIVITY_ON_BICYCLE,
-
-	SENSOR_DEVICE_GESTURE_MOVEMENT = 0x200,
-	SENSOR_DEVICE_GESTURE_WRIST_UP,
-	SENSOR_DEVICE_GESTURE_WRIST_DOWN,
-
 	SENSOR_DEVICE_HUMAN_PEDOMETER = 0x300,
 	SENSOR_DEVICE_HUMAN_SLEEP_MONITOR,
 
@@ -96,11 +86,21 @@ typedef enum {
 	SENSOR_DEVICE_HRM_RAW,
 	SENSOR_DEVICE_TILT,
 	SENSOR_DEVICE_ROTATION_VECTOR_RAW,
+
+	SENSOR_DEVICE_ACTIVITY_STATIONARY = 0x1100,
+	SENSOR_DEVICE_ACTIVITY_WALK,
+	SENSOR_DEVICE_ACTIVITY_RUN,
+	SENSOR_DEVICE_ACTIVITY_IN_VEHICLE,
+	SENSOR_DEVICE_ACTIVITY_ON_BICYCLE,
+
+	SENSOR_DEVICE_GESTURE_MOVEMENT = 0x1200,
+	SENSOR_DEVICE_GESTURE_WRIST_UP,
+	SENSOR_DEVICE_GESTURE_WRIST_DOWN,
 } sensor_device_type;
 
 /*
  * A platform sensor handler is generated based on this handle
- * ID can be assigned from HAL developer. so it has to be unique in HAL.
+ * This id can be assigned from HAL developer. so it has to be unique in 1 sensor_device.
  */
 typedef struct sensor_info_t {
 	uint32_t id;
@@ -175,15 +175,29 @@ public:
 	virtual bool enable(uint32_t id) = 0;
 	virtual bool disable(uint32_t id) = 0;
 
-	virtual bool set_interval(uint32_t id, unsigned long val) = 0;
-	virtual bool set_batch_latency(uint32_t id, unsigned long val) = 0;
-	virtual bool set_attribute_int(uint32_t id, int32_t attribute, int32_t value) = 0;
-	virtual bool set_attribute_str(uint32_t id, int32_t attribute, char *value, int value_len) = 0;
-
 	virtual int read_fd(uint32_t **ids) = 0;
 	virtual int get_data(uint32_t id, sensor_data_t **data, int *length) = 0;
 
-	virtual bool flush(uint32_t id) = 0;
+	virtual bool set_interval(uint32_t id, unsigned long val)
+	{
+		return false;
+	}
+	virtual bool set_batch_latency(uint32_t id, unsigned long val)
+	{
+		return false;
+	}
+	virtual bool set_attribute_int(uint32_t id, int32_t attribute, int32_t value)
+	{
+		return false;
+	}
+	virtual bool set_attribute_str(uint32_t id, int32_t attribute, char *value, int value_len)
+	{
+		return false;
+	}
+	virtual bool flush(uint32_t id)
+	{
+		return false;
+	}
 };
 #endif /* __cplusplus */
 

@@ -17,6 +17,7 @@
  *
  */
 
+#include <sensor_log.h>
 #include <csocket.h>
 #include <attr/xattr.h>
 #include <sys/stat.h>

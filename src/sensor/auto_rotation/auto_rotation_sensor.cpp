@@ -174,6 +174,11 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event)
 	int remains;
 
 	rotation_event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
+	if (!rotation_event) {
+		_E("Failed to allocate memory");
+		return;
+	}
+
 	remains = get_data(&rotation_data, &data_length);
 
 	if (remains < 0)

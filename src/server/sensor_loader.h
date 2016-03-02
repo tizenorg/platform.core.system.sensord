@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _SENSOR_PLUGIN_LOADER_H_
-#define _SENSOR_PLUGIN_LOADER_H_
+#ifndef _SENSOR_LOADER_H_
+#define _SENSOR_LOADER_H_
 
 #include <sensor_common.h>
 #include <sensor_types.h>
@@ -32,8 +32,6 @@
 #include <map>
 #include <set>
 #include <memory>
-#include <physical_sensor.h>
-#include <virtual_sensor.h>
 
 class sensor_base;
 
@@ -52,7 +50,7 @@ private:
 	template <typename _sensor> sensor_base* create_sensor(void);
 
 	void show_sensor_info(void);
-	bool get_paths_from_dir(const std::string &dir_path, std::vector<std::string> &plugin_paths);
+	bool get_paths_from_dir(const std::string &dir_path, std::vector<std::string> &hal_paths);
 
 	sensor_map_t m_sensors;
 	sensor_device_map_t m_devices;
@@ -67,4 +65,4 @@ public:
 	std::vector<sensor_base *> get_sensors(sensor_type_t type);
 	std::vector<sensor_base *> get_virtual_sensors(void);
 };
-#endif	/* _SENSOR_PLUGIN_LOADER_H_ */
+#endif	/* _SENSOR_LOADER_H_ */

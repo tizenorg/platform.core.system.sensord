@@ -97,6 +97,8 @@ private:
 
 	hup_observer_t m_hup_observer;
 
+	sensor_client_info &m_client_info;
+
 	sensor_event_listener();
 	~sensor_event_listener();
 
@@ -106,7 +108,7 @@ private:
 	bool create_event_channel(void);
 	void close_event_channel(void);
 
-	ssize_t sensor_event_poll(void* buffer, int buffer_len, struct epoll_event &event);
+	ssize_t sensor_event_poll(void *buffer, int buffer_len, struct epoll_event &event);
 
 	void listen_events(void);
 	client_callback_info* handle_calibration_cb(sensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy);
@@ -122,7 +124,5 @@ private:
 	static gboolean callback_dispatcher(gpointer data);
 
 	void set_thread_state(thread_state state);
-
-	sensor_client_info &m_client_info;
 };
 #endif /* _SENSOR_EVENT_LISTENER_H_ */

@@ -17,40 +17,39 @@
  *
  */
 
-#include <plugin_info_list.h>
+#include <sensor_info_list.h>
 #include <algorithm>
 
-
-cinterval_info::cinterval_info(int client_id, bool is_processor, unsigned int interval)
+interval_info::interval_info(int client_id, bool is_processor, unsigned int interval)
 {
 	this->client_id = client_id;
 	this->is_processor = is_processor;
 	this->interval = interval;
 }
 
-cbatch_info::cbatch_info(int client_id, unsigned int latency)
+batch_info::batch_info(int client_id, unsigned int latency)
 {
 	this->client_id = client_id;
 	this->latency = latency;
 }
 
-cwakeup_info::cwakeup_info(int client_id, int wakeup)
+wakeup_info::wakeup_info(int client_id, int wakeup)
 {
 	this->client_id = client_id;
 	this->wakeup = wakeup;
 }
 
-bool plugin_info_list::comp_interval_info(cinterval_info a, cinterval_info b)
+bool sensor_info_list::comp_interval_info(interval_info a, interval_info b)
 {
 	return a.interval < b.interval;
 }
 
-bool plugin_info_list::comp_batch_info(cbatch_info a, cbatch_info b)
+bool sensor_info_list::comp_batch_info(batch_info a, batch_info b)
 {
 	return a.latency < b.latency;
 }
 
-cinterval_info_iterator plugin_info_list::find_if_interval_info(int client_id, bool is_processor)
+interval_info_iterator sensor_info_list::find_if_interval_info(int client_id, bool is_processor)
 {
 	auto iter = m_interval_info_list.begin();
 
@@ -64,7 +63,7 @@ cinterval_info_iterator plugin_info_list::find_if_interval_info(int client_id, b
 	return iter;
 }
 
-cbatch_info_iterator plugin_info_list::find_if_batch_info(int client_id)
+batch_info_iterator sensor_info_list::find_if_batch_info(int client_id)
 {
 	auto iter = m_batch_info_list.begin();
 
@@ -78,7 +77,7 @@ cbatch_info_iterator plugin_info_list::find_if_batch_info(int client_id)
 	return iter;
 }
 
-cwakeup_info_iterator plugin_info_list::find_if_wakeup_info(int client_id)
+wakeup_info_iterator sensor_info_list::find_if_wakeup_info(int client_id)
 {
 	auto iter = m_wakeup_info_list.begin();
 
@@ -92,19 +91,19 @@ cwakeup_info_iterator plugin_info_list::find_if_wakeup_info(int client_id)
 	return iter;
 }
 
-bool plugin_info_list::add_interval(int client_id, unsigned int interval, bool is_processor)
+bool sensor_info_list::add_interval(int client_id, unsigned int interval, bool is_processor)
 {
 	auto iter = find_if_interval_info(client_id, is_processor);
 
 	if (iter != m_interval_info_list.end())
-		*iter = cinterval_info(client_id, is_processor, interval);
+		*iter = interval_info(client_id, is_processor, interval);
 	else
-		m_interval_info_list.push_back(cinterval_info(client_id, is_processor, interval));
+		m_interval_info_list.push_back(interval_info(client_id, is_processor, interval));
 
 	return true;
 }
 
-bool plugin_info_list::delete_interval(int client_id, bool is_processor)
+bool sensor_info_list::delete_interval(int client_id, bool is_processor)
 {
 	auto iter = find_if_interval_info(client_id, is_processor);
 
@@ -116,7 +115,7 @@ bool plugin_info_list::delete_interval(int client_id, bool is_processor)
 	return true;
 }
 
-unsigned int plugin_info_list::get_interval(int client_id, bool is_processor)
+unsigned int sensor_info_list::get_interval(int client_id, bool is_processor)
 {
 	auto iter = find_if_interval_info(client_id, is_processor);
 
@@ -126,7 +125,7 @@ unsigned int plugin_info_list::get_interval(int client_id, bool is_processor)
 	return iter->interval;
 }
 
-unsigned int plugin_info_list::get_min_interval(void)
+unsigned int sensor_info_list::get_min_interval(void)
 {
 	if (m_interval_info_list.empty())
 		return 0;
@@ -136,19 +135,19 @@ unsigned int plugin_info_list::get_min_interval(void)
 	return iter->interval;
 }
 
-bool plugin_info_list::add_batch(int client_id, unsigned int latency)
+bool sensor_info_list::add_batch(int client_id, unsigned int latency)
 {
 	auto iter = find_if_batch_info(client_id);
 
 	if (iter != m_batch_info_list.end())
-		*iter = cbatch_info(client_id, latency);
+		*iter = batch_info(client_id, latency);
 	else
-		m_batch_info_list.push_back(cbatch_info(client_id, latency));
+		m_batch_info_list.push_back(batch_info(client_id, latency));
 
 	return true;
 }
 
-bool plugin_info_list::delete_batch(int client_id)
+bool sensor_info_list::delete_batch(int client_id)
 {
 	auto iter = find_if_batch_info(client_id);
 
@@ -160,7 +159,7 @@ bool plugin_info_list::delete_batch(int client_id)
 	return true;
 }
 
-unsigned int plugin_info_list::get_batch(int client_id)
+unsigned int sensor_info_list::get_batch(int client_id)
 {
 	auto iter = find_if_batch_info(client_id);
 
@@ -170,7 +169,7 @@ unsigned int plugin_info_list::get_batch(int client_id)
 	return iter->latency;
 }
 
-unsigned int plugin_info_list::get_max_batch(void)
+unsigned int sensor_info_list::get_max_batch(void)
 {
 	if (m_batch_info_list.empty())
 		return 0;
@@ -180,19 +179,19 @@ unsigned int plugin_info_list::get_max_batch(void)
 	return iter->latency;
 }
 
-bool plugin_info_list::add_wakeup(int client_id, int wakeup)
+bool sensor_info_list::add_wakeup(int client_id, int wakeup)
 {
 	auto iter = find_if_wakeup_info(client_id);
 
 	if (iter != m_wakeup_info_list.end())
-		*iter = cwakeup_info(client_id, wakeup);
+		*iter = wakeup_info(client_id, wakeup);
 	else
-		m_wakeup_info_list.push_back(cwakeup_info(client_id, wakeup));
+		m_wakeup_info_list.push_back(wakeup_info(client_id, wakeup));
 
 	return true;
 }
 
-bool plugin_info_list::delete_wakeup(int client_id)
+bool sensor_info_list::delete_wakeup(int client_id)
 {
 	auto iter = find_if_wakeup_info(client_id);
 
@@ -204,7 +203,7 @@ bool plugin_info_list::delete_wakeup(int client_id)
 	return true;
 }
 
-int plugin_info_list::get_wakeup(int client_id)
+int sensor_info_list::get_wakeup(int client_id)
 {
 	auto iter = find_if_wakeup_info(client_id);
 
@@ -214,7 +213,7 @@ int plugin_info_list::get_wakeup(int client_id)
 	return iter->wakeup;
 }
 
-int plugin_info_list::is_wakeup_on(void)
+int sensor_info_list::is_wakeup_on(void)
 {
 	if (m_wakeup_info_list.empty())
 		return -1;

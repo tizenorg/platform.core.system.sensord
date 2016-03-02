@@ -24,9 +24,6 @@
 #include <thread>
 #include <chrono>
 
-#define MS_TO_US 1000
-#define MIN_DELIVERY_DIFF_FACTOR 0.75f
-
 using std::thread;
 using std::pair;
 
@@ -417,7 +414,6 @@ bool sensor_client_info::close_command_channel(sensor_id_t sensor_id)
 	return true;
 }
 
-
 bool sensor_client_info::has_client_id(void)
 {
 	return (m_client_id != CLIENT_ID_INVALID);
@@ -640,7 +636,6 @@ bool sensor_client_info::is_sensor_registered(sensor_id_t sensor)
 
 	return false;
 }
-
 
 bool sensor_client_info::is_sensor_active(sensor_id_t sensor)
 {

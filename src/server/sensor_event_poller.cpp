@@ -24,8 +24,6 @@
 #include <sensor_loader.h>
 #include <algorithm>
 
-#define EPOLL_MAX_FD 32
-
 sensor_event_poller::sensor_event_poller()
 {
 	init_sensor_map();

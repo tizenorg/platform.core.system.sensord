@@ -30,12 +30,8 @@
 
 /*header for common sensor type*/
 #include <sensor_common.h>
-
-/*header for each sensor type*/
 #include <sensor_types.h>
-
 #include <sensor_deprecated.h>
-
 
 #ifdef __cplusplus
 extern "C"

@@ -25,16 +25,16 @@
 #include <sensor_log.h>
 
 class device_config {
-protected:
-	virtual bool load_config(const std::string& config_path) = 0;
-
-	std::string m_device_id;
 public:
 	device_config();
 	virtual ~device_config();
 
 	bool get_device_id(void);
 
+protected:
+	virtual bool load_config(const std::string& config_path) = 0;
+
+	std::string m_device_id;
 };
 
 #endif /* _DEVICE_CONFIG_H_ */

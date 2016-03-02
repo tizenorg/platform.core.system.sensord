@@ -18,7 +18,7 @@
  */
 
 #include <sensor_event_queue.h>
-#include "sensor_log.h"
+#include <sensor_log.h>
 
 sensor_event_queue& sensor_event_queue::get_instance()
 {

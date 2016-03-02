@@ -20,9 +20,8 @@
 #ifndef _SENSOR_BASE_H_
 #define _SENSOR_BASE_H_
 
-#include <vector>
 #include <sensor_types.h>
-#include <plugin_info_list.h>
+#include <sensor_info_list.h>
 #include <cmutex.h>
 
 #include <sensor_log.h>
@@ -30,6 +29,7 @@
 #include <worker_thread.h>
 #include <sensor_info.h>
 #include <sensor_hal.h>
+#include <vector>
 
 class sensor_base {
 public:
@@ -44,9 +44,9 @@ public:
 	virtual sensor_type_t get_type();
 	virtual unsigned int get_event_type(void);
 	virtual const char* get_name(void);
+	virtual bool is_virtual(void);
 
 	virtual bool get_sensor_info(sensor_info &info);
-	virtual bool is_virtual(void);
 
 	/* set/get data */
 	virtual int get_data(sensor_data_t **data, int *length);
@@ -61,16 +61,16 @@ public:
 	bool is_started(void);
 
 	/* interval / batch / wakeup */
-	bool add_interval(int client_id, unsigned int interval, bool is_processor);
-	bool delete_interval(int client_id, bool is_processor);
+	virtual bool add_interval(int client_id, unsigned int interval, bool is_processor);
+	virtual bool delete_interval(int client_id, bool is_processor);
 	unsigned int get_interval(int client_id, bool is_processor);
 
-	bool add_batch(int client_id, unsigned int latency);
-	bool delete_batch(int client_id);
+	virtual bool add_batch(int client_id, unsigned int latency);
+	virtual bool delete_batch(int client_id);
 	unsigned int get_batch(int client_id);
 
-	bool add_wakeup(int client_id, int wakeup);
-	bool delete_wakeup(int client_id);
+	virtual bool add_wakeup(int client_id, int wakeup);
+	virtual bool delete_wakeup(int client_id);
 	int get_wakeup(int client_id);
 	bool is_wakeup_supported(void);
 
@@ -83,11 +83,11 @@ protected:
 	void set_permission(int permission);
 
 private:
-	sensor_id_t m_unique_id;
+	sensor_id_t m_id;
 	int m_permission;
 
-	plugin_info_list m_plugin_info_list;
-	cmutex m_plugin_info_list_mutex;
+	sensor_info_list m_sensor_info_list;
+	cmutex m_sensor_info_list_mutex;
 
 	bool m_started;
 	unsigned int m_client;

@@ -42,7 +42,7 @@ public:
 	int get_min_interval(void);
 	int get_fifo_count(void);
 	int get_max_batch_count(void);
-	unsigned int get_supported_event();
+	unsigned int get_supported_event(void);
 	bool is_supported_event(unsigned int event);
 	bool is_wakeup_supported(void);
 

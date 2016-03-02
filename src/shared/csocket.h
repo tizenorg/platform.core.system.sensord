@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
-#include "sensor_log.h"
+#include <sensor_log.h>
 
 class csocket {
 public:

@@ -22,7 +22,6 @@
 
 
 virtual_sensor::virtual_sensor()
-: m_hardware_fusion(false)
 {
 
 }

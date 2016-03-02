@@ -20,6 +20,7 @@
 #ifndef _SENSOR_EVENT_DISPATCHER_H_
 #define _SENSOR_EVENT_DISPATCHER_H_
 
+#include <sensor_common.h>
 #include <sensor_event_queue.h>
 #include <client_info_manager.h>
 #include <csocket.h>
@@ -28,13 +29,11 @@
 #include <list>
 #include <vector>
 
-
 typedef std::unordered_map<unsigned int, sensor_event_t> event_type_last_event_map;
 typedef std::list<virtual_sensor *> virtual_sensors;
 
 class sensor_event_dispatcher {
 private:
-	bool m_lcd_on;
 	csocket m_accept_socket;
 	cmutex m_mutex;
 	cmutex m_last_events_mutex;

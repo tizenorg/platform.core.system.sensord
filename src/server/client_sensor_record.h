@@ -20,7 +20,8 @@
 #ifndef _CLIENT_SENSOR_RECORD_H_
 #define _CLIENT_SENSOR_RECORD_H_
 
-#include <sensor_internal.h>
+#include <sensor_common.h>
+#include <sensor_types.h>
 #include <sensor_usage.h>
 #include <csocket.h>
 #include <unordered_map>

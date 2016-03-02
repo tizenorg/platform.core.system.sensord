@@ -20,13 +20,13 @@
 #ifndef _COMMAND_WORKER_H_
 #define _COMMAND_WORKER_H_
 
+#include <sensor_common.h>
 #include <command_common.h>
 #include <worker_thread.h>
 #include <client_info_manager.h>
 #include <sensor_event_dispatcher.h>
 #include <sensor_base.h>
 #include <map>
-#include <cpacket.h>
 
 typedef std::multimap<int, raw_data_t> sensor_raw_data_map;
 void insert_priority_list(unsigned int);
@@ -34,9 +34,6 @@ void insert_priority_list(unsigned int);
 class command_worker {
 private:
 	typedef bool (command_worker::*cmd_handler_t)(void *payload);
-
-	static const int OP_ERROR = -1;
-	static const int OP_SUCCESS = 0;
 
 	int m_client_id;
 	int m_permission;

@@ -34,7 +34,7 @@
 using std::string;
 using std::vector;
 
-#define SENSOR_NAME "GAMING_RV_SENSOR"
+#define SENSOR_NAME "GYROSCOPE_RV_SENSOR"
 #define SENSOR_TYPE_GAMING_RV "GAMING_ROTATION_VECTOR"
 
 #define ACCELEROMETER_ENABLED 0x01
@@ -144,7 +144,7 @@ bool gaming_rv_sensor::init()
 
 void gaming_rv_sensor::get_types(vector<sensor_type_t> &types)
 {
-	types.push_back(GAMING_RV_SENSOR);
+	types.push_back(GYROSCOPE_RV_SENSOR);
 }
 
 bool gaming_rv_sensor::on_start(void)

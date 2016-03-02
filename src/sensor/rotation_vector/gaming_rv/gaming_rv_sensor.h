@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef _GAMING_RV_SENSOR_H_
-#define _GAMING_RV_SENSOR_H_
+#ifndef _GYROSCOPE_RV_SENSOR_H_
+#define _GYROSCOPE_RV_SENSOR_H_
 
 #include <sensor_internal.h>
 #include <virtual_sensor.h>
@@ -70,4 +70,4 @@ private:
 	bool on_stop(void);
 };
 
-#endif /*_GAMING_RV_SENSOR_H_*/
+#endif /*_GYROSCOPE_RV_SENSOR_H_*/

@@ -125,7 +125,7 @@ int main(int argc, char **argv)
 		 event = GEOMAGNETIC_RV_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "gaming_rv") == 0) {
-		 sensor_type = GAMING_RV_SENSOR;
+		 sensor_type = GYROSCOPE_RV_SENSOR;
 		 event = GAMING_RV_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "light") == 0) {

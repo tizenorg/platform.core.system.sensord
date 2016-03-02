@@ -57,7 +57,7 @@ int server::get_systemd_socket(const char *name)
 	}
 
 	if (sd_listen_fds(fd_env) < 0) {
-		ERR("Failed to listen fds from systemd");
+		_E("Failed to listen fds from systemd");
 		return -1;
 	}
 

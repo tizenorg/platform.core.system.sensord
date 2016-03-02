@@ -17,10 +17,10 @@
  *
  */
 
+#include <sensor_common.h>
 #include <command_common.h>
 #include <sensor_loader.h>
 #include <sensor_info.h>
-#include <sensor_types.h>
 #include <thread>
 #include <string>
 #include <vector>
@@ -221,7 +221,6 @@ bool command_worker::stopped(void *ctx)
 	_I("%s is stopped", info.c_str());
 
 	if ((inst->m_module) && (inst->m_client_id != CLIENT_ID_INVALID)) {
-
 		if (get_client_info_manager().is_started(inst->m_client_id, inst->m_sensor_id)) {
 			_W("Does not receive cmd_stop before connection broken for [%s]!!", inst->m_module->get_name());
 			inst->m_module->delete_interval(inst->m_client_id, false);

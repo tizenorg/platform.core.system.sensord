@@ -20,21 +20,22 @@
 #ifndef _COMMAND_COMMON_H_
 #define _COMMAND_COMMON_H_
 
+#include <cpacket.h>
 #include <sensor_common.h>
 
-#define COMMAND_CHANNEL_PATH			"/tmp/sensord_command_socket"
-#define EVENT_CHANNEL_PATH				"/tmp/sensord_event_socket"
+#define COMMAND_CHANNEL_PATH		"/tmp/sensord_command_socket"
+#define EVENT_CHANNEL_PATH			"/tmp/sensord_event_socket"
 
 #define MAX_HANDLE			256
 #define MAX_HANDLE_REACHED	-2
 
 enum packet_type_t {
+	CMD_DONE = -1,
 	CMD_NONE = 0,
 	CMD_GET_ID,
 	CMD_GET_SENSOR_LIST,
 	CMD_HELLO,
 	CMD_BYEBYE,
-	CMD_DONE,
 	CMD_START,
 	CMD_STOP,
 	CMD_REG,

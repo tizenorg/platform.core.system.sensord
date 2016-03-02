@@ -17,10 +17,10 @@
  *
  */
 
-#ifndef _SENSOR_LOGS_H_
-#define _SENSOR_LOGS_H_
+#ifndef _SENSOR_LOG_H_
+#define _SENSOR_LOG_H_
 
-#include <dlog.h>
+#include <dlog/dlog.h>
 #include <sys/types.h>
 
 #define EVENT_TYPE_SHIFT 16
@@ -32,6 +32,8 @@
 	#undef LOG_TAG
 #endif
 #define LOG_TAG	"SENSOR"
+
+#define LOG_DUMP(fp, fmt, arg...) do { if (fp) fprintf(fp, fmt, ##arg); else _E(fmt, ##arg); } while(0)
 
 #ifdef _DEBUG
 #define DBG SLOGD
@@ -123,4 +125,4 @@ bool get_proc_name(pid_t pid, char *process_name);
 }
 #endif
 
-#endif /* _SENSOR_LOGS_H_ */
+#endif /* _SENSOR_LOG_H_ */

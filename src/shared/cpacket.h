@@ -20,6 +20,8 @@
 #ifndef _CPACKET_H_
 #define _CPACKET_H_
 
+#include <stddef.h>
+
 typedef struct packet_header {
 	int cmd;
 	size_t size;

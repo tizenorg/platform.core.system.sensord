@@ -17,13 +17,11 @@
  *
  */
 
+#include <sensor_common.h>
 #include <physical_sensor.h>
 #include <sensor_event_queue.h>
 
 #define UNKNOWN_NAME "UNKNOWN_SENSOR"
-
-#define OP_SUCCESS 0
-#define OP_ERROR -1
 
 cmutex physical_sensor::m_mutex;
 
@@ -74,7 +72,7 @@ int physical_sensor::get_poll_fd()
 	AUTOLOCK(m_mutex);
 
 	if (!m_sensor_device)
-		return -1;
+		return OP_ERROR;
 
 	return m_sensor_device->get_poll_fd();
 }
@@ -101,14 +99,14 @@ int physical_sensor::get_data(sensor_data_t **data, int *length)
 	AUTOLOCK(m_mutex);
 
 	if (!m_sensor_device)
-		return -1;
+		return OP_ERROR;
 
 	int remains = 0;
 	remains = m_sensor_device->get_data(m_info->id, data, length);
 
 	if (*length < 0) {
 		_E("Failed to get sensor event");
-		return -1;
+		return OP_ERROR;
 	}
 
 	return remains;
@@ -153,7 +151,7 @@ int physical_sensor::set_attribute(int32_t attribute, int32_t value)
 	AUTOLOCK(m_mutex);
 
 	if (!m_sensor_device)
-		return false;
+		return OP_ERROR;
 
 	if (!m_sensor_device->set_attribute_int(m_info->id, attribute, value))
 		return OP_ERROR;
@@ -166,7 +164,7 @@ int physical_sensor::set_attribute(int32_t attribute, char *value, int value_len
 	AUTOLOCK(m_mutex);
 
 	if (!m_sensor_device)
-		return false;
+		return OP_ERROR;
 
 	if (!m_sensor_device->set_attribute_str(m_info->id, attribute, value, value_len))
 		return OP_ERROR;
@@ -210,7 +208,7 @@ bool physical_sensor::get_sensor_info(sensor_info &info)
 	info.set_max_range(m_info->max_range);
 	info.set_resolution(m_info->resolution);
 	info.set_min_interval(m_info->min_interval);
-	info.set_fifo_count(0); // FIXME
+	info.set_fifo_count(0);
 	info.set_max_batch_count(m_info->max_batch_count);
 	info.set_supported_event(get_event_type());
 	info.set_wakeup_supported(m_info->wakeup_supported);

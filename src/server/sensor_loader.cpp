@@ -17,15 +17,15 @@
  *
  */
 
-#include <sensor_loader.h>
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
-#include <sensor_hal.h>
-#include <sensor_base.h>
-#include <physical_sensor.h>
 #include <dlfcn.h>
 #include <dirent.h>
+#include <sensor_common.h>
+#include <sensor_loader.h>
+#include <sensor_hal.h>
+#include <sensor_base.h>
 #include <sensor_log.h>
+#include <physical_sensor.h>
+#include <virtual_sensor.h>
 #include <unordered_set>
 #include <algorithm>
 
@@ -37,9 +37,7 @@
 using std::vector;
 using std::string;
 
-#define DEVICE_PLUGINS_DIR_PATH "/usr/lib/sensor"
-#define SENSOR_TYPE_SHIFT 32
-#define SENSOR_INDEX_MASK 0xFFFFFFFF
+#define DEVICE_HAL_DIR_PATH "/usr/lib/sensor"
 
 sensor_loader::sensor_loader()
 {
@@ -53,10 +51,10 @@ sensor_loader& sensor_loader::get_instance()
 
 bool sensor_loader::load(void)
 {
-	std::vector<string> device_plugin_paths;
-	std::vector<string> unique_device_plugin_paths;
+	std::vector<string> device_hal_paths;
+	std::vector<string> unique_device_hal_paths;
 
-	get_paths_from_dir(string(DEVICE_PLUGINS_DIR_PATH), device_plugin_paths);
+	get_paths_from_dir(string(DEVICE_HAL_DIR_PATH), device_hal_paths);
 
 	std::unordered_set<string> s;
 	auto unique = [&s](vector<string> &paths, const string &path) {
@@ -64,13 +62,13 @@ bool sensor_loader::load(void)
 			paths.push_back(path);
 	};
 
-	for_each(device_plugin_paths.begin(), device_plugin_paths.end(),
+	for_each(device_hal_paths.begin(), device_hal_paths.end(),
 		[&](const string &path) {
-			unique(unique_device_plugin_paths, path);
+			unique(unique_device_hal_paths, path);
 		}
 	);
 
-	for_each(unique_device_plugin_paths.begin(), unique_device_plugin_paths.end(),
+	for_each(unique_device_hal_paths.begin(), unique_device_hal_paths.end(),
 		[&](const string &path) {
 			void *handle;
 			load_sensor_devices(path, handle);
@@ -86,7 +84,7 @@ bool sensor_loader::load(void)
 bool sensor_loader::load_sensor_devices(const string &path, void* &handle)
 {
 	sensor_device_t *_devices = NULL;
-	sensor_device *device;
+	sensor_device *device = NULL;
 	const sensor_info_t *infos;
 
 	_I("load device: [%s]", path.c_str());
@@ -156,7 +154,7 @@ void sensor_loader::create_physical_sensors(sensor_type_t type)
 				continue;
 		}
 
-		sensor = reinterpret_cast<physical_sensor *>(create_sensor<_sensor>());
+		sensor = dynamic_cast<physical_sensor *>(create_sensor<_sensor>());
 
 		if (!sensor) {
 			_E("Memory allocation failed[%s]", info->name);
@@ -177,7 +175,6 @@ void sensor_loader::create_physical_sensors(sensor_type_t type)
 
 		m_devices[info] = NULL;
 	}
-	return;
 }
 
 template <typename _sensor>
@@ -187,7 +184,7 @@ void sensor_loader::create_virtual_sensors(const char *name)
 	sensor_type_t type;
 	virtual_sensor *instance;
 
-	instance = reinterpret_cast<virtual_sensor *>(create_sensor<_sensor>());
+	instance = dynamic_cast<virtual_sensor *>(create_sensor<_sensor>());
 	if (!instance) {
 		_E("Memory allocation failed[%s]", name);
 		return;
@@ -249,7 +246,7 @@ void sensor_loader::show_sensor_info(void)
 	_I("===============================================\n");
 }
 
-bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &plugin_paths)
+bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &hal_paths)
 {
 	DIR *dir = NULL;
 	struct dirent *dir_entry = NULL;
@@ -263,13 +260,13 @@ bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &p
 
 	string name;
 
-	while ((dir_entry = readdir(dir))) {
+	while (dir_entry = readdir(dir)) {
 		name = string(dir_entry->d_name);
 
 		if (name == "." || name == "..")
 			continue;
 
-		plugin_paths.push_back(dir_path + "/" + name);
+		hal_paths.push_back(dir_path + "/" + name);
 	}
 
 	closedir(dir);
@@ -278,12 +275,12 @@ bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &p
 
 sensor_base* sensor_loader::get_sensor(sensor_type_t type)
 {
-	auto it_plugins = m_sensors.find(type);
+	auto it = m_sensors.find(type);
 
-	if (it_plugins == m_sensors.end())
+	if (it == m_sensors.end())
 		return NULL;
 
-	return it_plugins->second.get();
+	return it->second.get();
 }
 
 sensor_base* sensor_loader::get_sensor(sensor_id_t id)
@@ -336,12 +333,13 @@ vector<sensor_base *> sensor_loader::get_virtual_sensors(void)
 	vector<sensor_base *> virtual_list;
 	sensor_base* sensor;
 
-	for (auto sensor_it = m_sensors.begin(); sensor_it != m_sensors.end(); ++sensor_it) {
-		sensor = sensor_it->second.get();
+	for (auto it = m_sensors.begin(); it != m_sensors.end(); ++it) {
+		sensor = it->second.get();
 
-		if (sensor && sensor->is_virtual() == true) {
-			virtual_list.push_back(sensor);
-		}
+		if (!sensor || !sensor->is_virtual())
+			continue;
+
+		virtual_list.push_back(sensor);
 	}
 
 	return virtual_list;
