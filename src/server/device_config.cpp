@@ -54,16 +54,18 @@ bool device_config::get_device_id(void)
 		getline(in_file, line);
 		start_pos = line.find(START_DELIMETER);
 
-		if (start_pos != std::string::npos) {
-			start_pos = start_pos + START_DELIMETER.size();
-			end_pos = line.find(END_DELIMETER, start_pos);
+		if (start_pos == std::string::npos)
+			continue;
 
-			if (end_pos != std::string::npos) {
-				m_device_id = line.substr(start_pos, end_pos - start_pos);
-				ret = true;
-				break;
-			}
-		}
+		start_pos = start_pos + START_DELIMETER.size();
+		end_pos = line.find(END_DELIMETER, start_pos);
+
+		if (end_pos == std::string::npos)
+			continue;
+
+		m_device_id = line.substr(start_pos, end_pos - start_pos);
+		ret = true;
+		break;
 	}
 
 	in_file.close();

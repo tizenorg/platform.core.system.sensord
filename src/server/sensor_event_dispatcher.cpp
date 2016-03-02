@@ -143,7 +143,7 @@ void sensor_event_dispatcher::dispatch_event(void)
 void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 {
 	void *event;
-	sensor_event_t *sensor_events = NULL;
+	sensor_event_t *sensor_event = NULL;
 	client_info_manager& client_info_manager = get_client_info_manager();
 
 	const int RESERVED_CLIENT_CNT = 20;
@@ -154,19 +154,10 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 		unsigned int event_type;
 		int length;
 
-		sensor_events = (sensor_event_t*)events[i];
-		length = sizeof(sensor_event_t) + sensor_events->data_length;
-		sensor_id = sensor_events->sensor_id;
-		event_type = sensor_events->event_type;
-
-		event = (void *)malloc(length);
-		if (!event) {
-			_E("Failed to allocate memory");
-			return;
-		}
-
-		memcpy(event, sensor_events, sizeof(sensor_event_t));
-		memcpy((char *)event + sizeof(sensor_event_t), sensor_events->data, sensor_events->data_length);
+		sensor_event = (sensor_event_t*)events[i];
+		length = sizeof(sensor_event_t) + sensor_event->data_length;
+		sensor_id = sensor_event->sensor_id;
+		event_type = sensor_event->event_type;
 
 		id_vec.clear();
 		client_info_manager.get_listener_ids(sensor_id, event_type, id_vec);
@@ -176,7 +167,9 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 		while (it_client_id != id_vec.end()) {
 			csocket client_socket;
 			client_info_manager.get_event_socket(*it_client_id, client_socket);
-			bool ret = (client_socket.send(event, length) > 0);
+			bool ret = (client_socket.send(sensor_event, sizeof(sensor_event_t)) > 0);
+
+			ret = (ret & (client_socket.send(sensor_event->data, sensor_event->data_length) > 0));
 
 			if (ret)
 				_D("Event[0x%x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
@@ -186,8 +179,8 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 			++it_client_id;
 		}
 
-		free(sensor_events->data);
-		free(sensor_events);
+		free(sensor_event->data);
+		free(sensor_event);
 	}
 }
 

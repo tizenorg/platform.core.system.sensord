@@ -20,62 +20,22 @@
 #ifndef _SENSOR_EVENT_QUEUE_H_
 #define _SENSOR_EVENT_QUEUE_H_
 
-#include <cstring>
-#include <utility>
+#include <sensor_common.h>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
-#include <set>
-#include <sensor_common.h>
-
-extern std::set<unsigned int> priority_list;
 
 class sensor_event_queue {
+public:
+	static sensor_event_queue& get_instance();
+
+	void push(sensor_event_t *event);
+	void* pop(void);
+
 private:
 	static const unsigned int QUEUE_FULL_SIZE = 1000;
 
-	class compare {
-	public:
-		bool operator() (void *&v1, void *&v2) {
-			sensor_event_t *e1 = (sensor_event_t *)v1;
-			sensor_event_t *e2 = (sensor_event_t *)v2;
-			bool prioritize_e1 = true;
-			bool prioritize_e2 = true;
-
-			if (priority_list.empty())
-				return (e2->data->timestamp < e1->data->timestamp);
-
-			std::set<unsigned int>::iterator iter_e1 = priority_list.find(e1->event_type);
-			std::set<unsigned int>::iterator iter_e2 = priority_list.find(e2->event_type);
-
-			if (iter_e1 == priority_list.end())
-				prioritize_e1 = false;
-
-			if (iter_e2 == priority_list.end())
-				prioritize_e2 = false;
-
-			if (prioritize_e2) {
-				if (!prioritize_e1)
-					return true;
-				else {
-					if (e2->data->timestamp <= e1->data->timestamp)
-						return true;
-					return false;
-				}
-			}
-			else {
-				if (prioritize_e1)
-					return false;
-				else if (e2->data->timestamp <= e1->data->timestamp)
-					return true;
-				else
-					return false;
-			}
-		}
-	};
-
-	std::priority_queue<void *, std::vector<void *>, compare> m_queue;
-
+	std::queue<void *> m_queue;
 	std::mutex m_mutex;
 	std::condition_variable m_cond_var;
 
@@ -87,11 +47,6 @@ private:
 	sensor_event_queue(const sensor_event_queue &) {}
 	sensor_event_queue& operator=(const sensor_event_queue &);
 	void push_internal(void *event);
-public:
-	static sensor_event_queue& get_instance();
-
-	void push(sensor_event_t *event);
-	void* pop(void);
 };
 
 #endif /* _SENSOR_EVENT_QUEUE_H_*/
