@@ -12,19 +12,9 @@ MESSAGE("FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
 # Internal Debugging Options
 #add_definitions(-Wall -g -D_DEBUG)
 
-INCLUDE_DIRECTORIES(
-	${CMAKE_CURRENT_SOURCE_DIR}/src/
-	${CMAKE_CURRENT_SOURCE_DIR}/src/shared
-	${CMAKE_CURRENT_SOURCE_DIR}/src/hal
-)
-
 # Sub-directory
 ADD_SUBDIRECTORY(src/server)
 ADD_SUBDIRECTORY(src/client)
 ADD_SUBDIRECTORY(src/shared)
 ADD_SUBDIRECTORY(src/hal)
-
-IF("${TEST_SUITE}" STREQUAL "ON")
-ADD_SUBDIRECTORY(test)
-ENDIF()
-
+ADD_SUBDIRECTORY(src/test)
