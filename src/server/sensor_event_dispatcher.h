@@ -33,6 +33,17 @@ typedef std::unordered_map<unsigned int, sensor_event_t> event_type_last_event_m
 typedef std::list<virtual_sensor *> virtual_sensors;
 
 class sensor_event_dispatcher {
+public:
+	static sensor_event_dispatcher& get_instance();
+
+	bool run(void);
+	void accept_event_connections(csocket client_socket);
+
+	void request_last_event(int client_id, sensor_id_t sensor_id);
+
+	bool add_active_virtual_sensor(virtual_sensor *sensor);
+	bool delete_active_virtual_sensor(virtual_sensor *sensor);
+
 private:
 	csocket m_accept_socket;
 	cmutex m_mutex;
@@ -61,16 +72,6 @@ private:
 	virtual_sensors get_active_virtual_sensors(void);
 
 	void sort_sensor_events(std::vector<void *> &events);
-public:
-	static sensor_event_dispatcher& get_instance();
-
-	bool run(void);
-	void accept_event_connections(csocket client_socket);
-
-	void request_last_event(int client_id, sensor_id_t sensor_id);
-
-	bool add_active_virtual_sensor(virtual_sensor *sensor);
-	bool delete_active_virtual_sensor(virtual_sensor *sensor);
 };
 
 #endif /* _SENSOR_EVENT_DISPATCHER_H_ */

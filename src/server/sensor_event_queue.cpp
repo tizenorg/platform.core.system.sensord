@@ -47,7 +47,7 @@ void* sensor_event_queue::pop(void)
 	while (m_queue.empty())
 		m_cond_var.wait(u);
 
-	void *event = m_queue.top();
+	void *event = m_queue.front();
 	m_queue.pop();
 
 	return event;

@@ -42,19 +42,16 @@ void sensor_event_poller::init_sensor_map()
 	std::vector<sensor_base *> sensors;
 	sensors = sensor_loader::get_instance().get_sensors(ALL_SENSOR);
 
-	auto it_sensor = sensors.begin();
+	std::vector<sensor_base *>::iterator it;
 
-	while (it_sensor != sensors.end()) {
-		if ((*it_sensor)->is_virtual()) {
-			++it_sensor;
+	for (it = sensors.begin(); it != sensors.end(); ++it) {
+		sensor = dynamic_cast<physical_sensor *>(*it);
+		if (sensor == NULL)
 			continue;
-		}
 
-		sensor = dynamic_cast<physical_sensor *>(*it_sensor);
 		fd = sensor->get_poll_fd();
 
 		m_fd_sensors.insert(std::make_pair(fd, sensor));
-		++it_sensor;
 	}
 }
 
@@ -62,8 +59,8 @@ void sensor_event_poller::init_fd()
 {
 	fd_sensors_t::iterator it;
 	for (it = m_fd_sensors.begin(); it != m_fd_sensors.end(); it = m_fd_sensors.upper_bound(it->first)) {
-		if (!add_poll_fd(it->first))
-			continue;
+		/* if fd is not valid, it is not added to poller */
+		add_poll_fd(it->first);
 	}
 }
 
@@ -88,10 +85,9 @@ bool sensor_event_poller::poll()
 		if (!read_fd(fd, ids))
 			continue;
 
-		process_event(fd, ids);
+		if (!process_event(fd, ids))
+			continue;
 	}
-
-	return true;
 }
 
 bool sensor_event_poller::read_fd(int fd, std::vector<uint32_t> &ids)
@@ -143,7 +139,10 @@ bool sensor_event_poller::process_event(int fd, const std::vector<uint32_t> &ids
 			event->data_length = data_length;
 			event->data = data;
 
-			sensor->push(event);
+			if (!sensor->push(event)) {
+				free(event);
+				free(data);
+			}
 		}
 	}
 
