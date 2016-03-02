@@ -2,11 +2,13 @@ Name:       sensord
 Summary:    Sensor daemon
 Version:    2.0.2
 Release:    0
-Group:		System/Sensor Framework
+Group:      System/Sensor Framework
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
-Source1:	sensord.manifest
-Source2:	libsensord.manifest
+Source1:    sensord.service
+Source2:    sensord_command.socket
+Source3:    sensord_event.socket
+
 
 BuildRequires:  cmake
 BuildRequires:  libattr-devel
@@ -70,8 +72,6 @@ Sensor functional testing
 
 %prep
 %setup -q
-cp %{SOURCE1} .
-cp %{SOURCE2} .
 
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 
@@ -88,6 +88,12 @@ make %{?jobs:-j%jobs}
 %install
 rm -rf %{buildroot}
 %make_install
+
+mkdir -p %{buildroot}%{_libdir}/systemd/system/
+
+install -m 0644 %SOURCE1 %{buildroot}%{_libdir}/systemd/system/
+install -m 0644 %SOURCE2 %{buildroot}%{_libdir}/systemd/system/
+install -m 0644 %SOURCE3 %{buildroot}%{_libdir}/systemd/system/
 
 %install_service multi-user.target.wants sensord.service
 %install_service sockets.target.wants sensord_event.socket
@@ -108,7 +114,7 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 
 %files
 %attr(0644,root,root)/usr/etc/virtual_sensors.xml
-%manifest sensord.manifest
+%manifest packaging/sensord.manifest
 %{_bindir}/sensord
 %{_unitdir}/sensord.service
 %{_unitdir}/sensord_command.socket
@@ -120,7 +126,7 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 
 %files -n libsensord
 %defattr(-,root,root,-)
-%manifest libsensord.manifest
+%manifest packaging/libsensord.manifest
 %{_libdir}/libsensor.so.*
 %{_libdir}/libsensord-shared.so
 %license LICENSE.APLv2

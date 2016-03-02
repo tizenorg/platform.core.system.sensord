@@ -19,7 +19,6 @@ INCLUDE_DIRECTORIES(
 )
 
 # Sub-directory
-ADD_SUBDIRECTORY(systemd)
 ADD_SUBDIRECTORY(src/server)
 ADD_SUBDIRECTORY(src/client)
 ADD_SUBDIRECTORY(src/shared)
