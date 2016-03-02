@@ -25,7 +25,6 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include <set>
 #include <permission_checker.h>
 #include <command_worker.h>
 
@@ -36,8 +35,7 @@ using std::make_pair;
 command_worker::cmd_handler_t command_worker::m_cmd_handlers[];
 sensor_raw_data_map command_worker::m_sensor_raw_data_map;
 cpacket command_worker::m_sensor_list;
-
-std::set<unsigned int> priority_list;
+cmutex command_worker::m_shared_mutex;
 
 command_worker::command_worker(const csocket& socket)
 : m_client_id(CLIENT_ID_INVALID)
@@ -47,6 +45,8 @@ command_worker::command_worker(const csocket& socket)
 , m_sensor_id(UNKNOWN_SENSOR)
 {
 	static bool init = false;
+
+	AUTOLOCK(m_shared_mutex);
 
 	if (!init) {
 		init_cmd_handlers();
@@ -320,10 +320,12 @@ bool command_worker::send_cmd_get_data_done(int state, sensor_data_t *data)
 
 	if (m_socket.send(ret_packet->packet(), ret_packet->size()) <= 0) {
 		_E("Failed to send a cmd_get_data_done");
+		free(data);
 		delete ret_packet;
 		return false;
 	}
 
+	free(data);
 	delete ret_packet;
 	return true;
 }
@@ -541,8 +543,6 @@ bool command_worker::cmd_register_event(void *payload)
 		ret_value = OP_ERROR;
 		goto out;
 	}
-
-	insert_priority_list(cmd->event_type);
 
 	ret_value = OP_SUCCESS;
 	_D("Registering Event [0x%x] is done for client [%d]", cmd->event_type, m_client_id);
@@ -885,24 +885,3 @@ sensor_event_dispatcher& command_worker::get_event_dispathcher(void)
 	return sensor_event_dispatcher::get_instance();
 }
 
-void insert_priority_list(unsigned int event_type)
-{
-	if (event_type == ORIENTATION_RAW_DATA_EVENT ||
-			event_type == LINEAR_ACCEL_RAW_DATA_EVENT ||
-			event_type == GRAVITY_RAW_DATA_EVENT ||
-			event_type == ROTATION_VECTOR_RAW_DATA_EVENT) {
-		priority_list.insert(ACCELEROMETER_RAW_DATA_EVENT);
-		priority_list.insert(GYROSCOPE_RAW_DATA_EVENT);
-		priority_list.insert(GEOMAGNETIC_RAW_DATA_EVENT);
-	}
-
-	if (event_type == GEOMAGNETIC_RV_RAW_DATA_EVENT) {
-		priority_list.insert(ACCELEROMETER_RAW_DATA_EVENT);
-		priority_list.insert(GEOMAGNETIC_RAW_DATA_EVENT);
-	}
-
-	if (event_type == GAMING_RV_RAW_DATA_EVENT) {
-		priority_list.insert(ACCELEROMETER_RAW_DATA_EVENT);
-		priority_list.insert(GYROSCOPE_RAW_DATA_EVENT);
-	}
-}

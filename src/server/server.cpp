@@ -26,7 +26,7 @@
 #include <sys/epoll.h>
 #include <sensor_event_poller.h>
 
-#define SYSTEMD_SOCKET_MAX 2
+#define SYSTEMD_SOCKET_MAX    2
 
 using std::thread;
 
@@ -162,7 +162,7 @@ bool server::listen_command_channel(void)
 	sock_fd = get_systemd_socket(COMMAND_CHANNEL_PATH);
 
 	if (sock_fd >= 0) {
-		INFO("Succeeded to get systemd socket(%d)", sock_fd);
+		_I("Succeeded to get systemd socket(%d)", sock_fd);
 		m_command_channel_accept_socket = csocket(sock_fd);
 		return true;
 	}
@@ -195,7 +195,7 @@ bool server::listen_event_channel(void)
 	sock_fd = get_systemd_socket(EVENT_CHANNEL_PATH);
 
 	if (sock_fd >= 0) {
-		INFO("Succeeded to get systemd socket(%d)", sock_fd);
+		_I("Succeeded to get systemd socket(%d)", sock_fd);
 		m_event_channel_accept_socket = csocket(sock_fd);
 		return true;
 	}

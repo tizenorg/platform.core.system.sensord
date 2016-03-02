@@ -29,7 +29,6 @@
 #include <map>
 
 typedef std::multimap<int, raw_data_t> sensor_raw_data_map;
-void insert_priority_list(unsigned int);
 
 class command_worker {
 private:
@@ -83,6 +82,10 @@ private:
 
 	static client_info_manager& get_client_info_manager(void);
 	static sensor_event_dispatcher& get_event_dispathcher(void);
+
+protected:
+	static cmutex m_shared_mutex;
+
 public:
 	command_worker(const csocket& socket);
 	virtual ~command_worker();
