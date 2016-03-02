@@ -56,13 +56,13 @@ public:
 	{
 		sensor_event_listener::get_instance().set_hup_observer(restore_session);
 	}
-
-	~initiator()
-	{
-		_D("Good bye! %s\n", get_client_name());
-		clean_up();
-	}
 };
+
+void good_bye(void)
+{
+	_I("Good bye! %s\n", get_client_name());
+	clean_up();
+}
 
 static initiator g_initiator;
 
@@ -539,6 +539,9 @@ API int sensord_connect(sensor_t sensor)
 	AUTOLOCK(lock);
 
 	sensor_registered = sensor_client_info::get_instance().is_sensor_registered(sensor_id);
+
+	// lazy loading after creating static variables
+	atexit(good_bye);
 
 	handle = sensor_client_info::get_instance().create_handle(sensor_id);
 	if (handle == MAX_HANDLE_REACHED) {
