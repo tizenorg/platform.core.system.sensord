@@ -23,8 +23,8 @@
 #include <cpacket.h>
 #include <sensor_common.h>
 
-#define COMMAND_CHANNEL_PATH		"/tmp/sensord_command_socket"
-#define EVENT_CHANNEL_PATH			"/tmp/sensord_event_socket"
+#define COMMAND_CHANNEL_PATH		"/tmp/sensord_command_socket\0"
+#define EVENT_CHANNEL_PATH			"/tmp/sensord_event_socket\0"
 
 #define MAX_HANDLE			256
 #define MAX_HANDLE_REACHED	-2
