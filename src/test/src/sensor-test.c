@@ -215,7 +215,11 @@ int main(int argc, char **argv)
 		arg.event = event;
 		arg.interval = interval;
 
-		return check_sensor((void*)&arg);
+		void *result = check_sensor((void*)&arg);
 
+		if (!result)
+			return -1;
+
+		return 0;
 	}
 }

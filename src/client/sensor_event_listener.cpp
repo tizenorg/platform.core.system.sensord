@@ -28,7 +28,7 @@
 #include <sensor_types.h>
 
 /* TODO: this macro should be adjusted(4224 = 4096(data) + 128(header)) */
-#define EVENT_BUFFER_SIZE 4224
+#define EVENT_BUFFER_SIZE sizeof(sensor_event_t)
 
 using std::thread;
 using std::pair;
@@ -368,7 +368,8 @@ void sensor_event_listener::listen_events(void)
 			break;
 		}
 
-		data_len = ((sensor_event_t *)buffer)->data_length;
+		sensor_event_t *sensor_event = reinterpret_cast<sensor_event_t *>(buffer);
+		data_len = sensor_event->data_length;
 		buffer_data = malloc(data_len);
 
 		len = sensor_event_poll(buffer_data, data_len, event);
@@ -378,7 +379,7 @@ void sensor_event_listener::listen_events(void)
 			break;
 		}
 
-		((sensor_event_t *)buffer)->data = (sensor_data_t *)buffer_data;
+		sensor_event->data = reinterpret_cast<sensor_data_t *>(buffer_data);
 
 		handle_events((void *)buffer);
 	} while (true);

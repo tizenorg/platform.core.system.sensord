@@ -260,7 +260,7 @@ bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &h
 
 	string name;
 
-	while (dir_entry = readdir(dir)) {
+	while ((dir_entry = readdir(dir))) {
 		name = string(dir_entry->d_name);
 
 		if (name == "." || name == "..")

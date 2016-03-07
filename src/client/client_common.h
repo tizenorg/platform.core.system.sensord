@@ -27,12 +27,11 @@
 #include <sensor_log.h>
 
 #define BASE_GATHERING_INTERVAL	100
-
 #define CLIENT_NAME_SIZE NAME_MAX+10
 
 struct log_attr {
-	char *sensor_name;
-	char *event_name;
+	const char *sensor_name;
+	const char *event_name;
 };
 
 bool is_one_shot_event(unsigned int event_type);

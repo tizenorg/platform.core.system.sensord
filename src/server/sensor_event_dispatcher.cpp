@@ -151,10 +151,8 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 	for (unsigned int i = 0; i < events.size(); ++i) {
 		sensor_id_t sensor_id;
 		unsigned int event_type;
-		int length;
 
 		sensor_event = (sensor_event_t*)events[i];
-		length = sizeof(sensor_event_t) + sensor_event->data_length;
 		sensor_id = sensor_event->sensor_id;
 		event_type = sensor_event->event_type;
 
