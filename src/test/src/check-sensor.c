@@ -27,7 +27,16 @@
 #include <string.h>
 #include "check-sensor.h"
 
+#ifndef _THREAD_TEST_
+#define _THREAD_TEST_
+#endif
 
+#ifdef _THREAD_TEST_
+#include <pthread.h>
+
+GMainContext *maincontext2;
+GMainLoop *mainloop2;
+#endif
 
 void printpollinglogs(sensor_type_t type,sensor_data_t data)
 {
@@ -177,9 +186,18 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 {
 	sensor_type_t sensor_type = event_type >> 16;
 
+#ifdef _THREAD_TEST_
+    pthread_t tid;
+    tid = pthread_self(); 
+#endif
+
 	switch (sensor_type) {
 	case ACCELEROMETER_SENSOR:
+#ifdef _THREAD_TEST_
 		printf("Accelerometer [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+#else
+		printf("@@@@@ tid(%u) @@@@@ Accelerometer [%lld] [%6.6f] [%6.6f] [%6.6f]\n", tid, data->timestamp, data->values[0], data->values[1], data->values[2]);
+#endif
 		break;
 	case AUTO_ROTATION_SENSOR:
 		printf("Auto Rotation [%lld] [%6.6f]\n", data->timestamp, data->values[0]);
@@ -238,6 +256,20 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 	}
 }
 
+#ifdef _THREAD_TEST_
+void *mythread_function(void *arg)
+{
+    pthread_t tid;
+    tid = pthread_self(); 
+
+	printf("@@@@@ mythread_function tid(%u)\n", tid);
+
+	g_main_loop_run(mainloop2);
+
+	g_main_loop_unref(mainloop2);
+}
+#endif
+
 void *check_sensor(void *arg)
 {
 	struct pthread_arguments * argu = (struct pthread_arguments *) arg;
@@ -245,6 +277,15 @@ void *check_sensor(void *arg)
 	GMainLoop *mainloop;
 	int handle;
 	bool result, start_handle, stop_handle;
+
+#ifdef _THREAD_TEST_
+    pthread_t tid;
+	pthread_t mythread_id;
+
+    tid = pthread_self(); 
+
+	printf("@@@@@ check_sensor tid(%u)\n", tid);
+#endif
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 
@@ -258,6 +299,13 @@ void *check_sensor(void *arg)
 		return NULL;
 	}
 
+#ifdef _THREAD_TEST_
+	maincontext2 = g_main_context_new();
+	mainloop2 = g_main_loop_new(maincontext2, FALSE);
+
+	sensord_change_event_maincontext(handle, argu->event, maincontext2);
+#endif
+
 	start_handle = sensord_start(handle, 0);
 
 	if (!start_handle) {
@@ -266,6 +314,10 @@ void *check_sensor(void *arg)
 		sensord_disconnect(handle);
 		return NULL;
 	}
+
+#ifdef _THREAD_TEST_
+	pthread_create(&mythread_id, NULL, mythread_function, NULL);
+#endif
 
 	g_main_loop_run(mainloop);
 	g_main_loop_unref(mainloop);
