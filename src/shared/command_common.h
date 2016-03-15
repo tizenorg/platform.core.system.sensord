@@ -46,6 +46,7 @@ enum packet_type_t {
 	CMD_GET_DATA,
 	CMD_SET_ATTRIBUTE_INT,
 	CMD_SET_ATTRIBUTE_STR,
+	CMD_FLUSH,
 	CMD_CNT,
 };
 
@@ -125,6 +126,9 @@ typedef struct  {
 	int value_len;
 	char value[0];
 } cmd_set_attribute_str_t;
+
+typedef struct {
+} cmd_flush_t;
 
 #define CHANNEL_MAGIC_NUM 0xCAFECAFE
 

@@ -49,6 +49,8 @@ public:
 	bool cmd_get_data(unsigned int type, sensor_data_t *values);
 	bool cmd_set_attribute_int(int attribute, int value);
 	bool cmd_set_attribute_str(int attribute, const char *value, int value_len);
+	bool cmd_flush(void);
+
 private:
 	csocket m_command_socket;
 	int m_client_id;

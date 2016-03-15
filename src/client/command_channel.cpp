@@ -684,3 +684,36 @@ bool command_channel::cmd_set_attribute_str(int attribute, const char* value, in
 	delete packet;
 	return true;
 }
+
+bool command_channel::cmd_flush(void)
+{
+	cpacket *packet;
+	cmd_done_t *cmd_done;
+
+	packet = new(std::nothrow) cpacket(sizeof(cmd_flush_t));
+	retvm_if(!packet, false, "Failed to allocate memory");
+
+	packet->set_cmd(CMD_FLUSH);
+
+	_I("%s send cmd_flush(client_id=%d)", get_client_name(), m_client_id);
+
+	if (!command_handler(packet, (void **)&cmd_done)) {
+		_E("%s failed to send flush with client_id [%d]",
+			get_client_name(), m_client_id);
+		delete packet;
+		return false;
+	}
+
+	if (cmd_done->value < 0) {
+		_E("%s got error[%d] from server with client_id [%d]",
+			get_client_name(), cmd_done->value, m_client_id);
+
+		delete [] (char *)cmd_done;
+		delete packet;
+		return false;
+	}
+
+	delete [] (char *)cmd_done;
+	delete packet;
+	return true;
+}

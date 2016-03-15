@@ -73,6 +73,7 @@ private:
 	bool cmd_get_data(void *payload);
 	bool cmd_set_attribute_int(void *payload);
 	bool cmd_set_attribute_str(void *payload);
+	bool cmd_flush(void *payload);
 
 	void get_info(std::string &info);
 

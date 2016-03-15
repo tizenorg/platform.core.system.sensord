@@ -355,6 +355,20 @@ bool sensord_send_command(int handle, const char *command, int command_len);
 bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data);
 
 /**
+ * @brief flush sensor data from a connected sensor
+ *
+ * @param[in] handle a handle represensting a connected context sensor.
+ * @return true on success, otherwise false.
+ */
+bool sensord_flush(int handle);
+
+typedef void (*sensor_external_command_cb_t)(int handle, const char* data, int data_cnt, void *user_data);
+
+int sensord_external_connect(const char *key, sensor_external_command_cb_t cb, void *user_data);
+bool sensord_external_disconnect(int handle);
+bool sensord_external_post(int handle, unsigned long long timestamp, const float* data, int data_cnt);
+
+/**
   * @}
  */
 
