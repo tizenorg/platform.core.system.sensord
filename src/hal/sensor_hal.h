@@ -21,8 +21,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define SENSOR_HAL_VERSION(maj,min) \
-			((((maj) & 0xffff) << 24) | ((min) & 0xffff))
+#define SENSOR_HAL_VERSION(maj, min) \
+		((((maj) & 0xFFFF) << 24) | ((min) & 0xFFFF))
 
 #ifdef __cplusplus
 extern "C"
@@ -74,6 +74,7 @@ typedef enum {
 
 	SENSOR_DEVICE_FUSION = 0x900,
 	SENSOR_DEVICE_AUTO_ROTATION,
+	SENSOR_DEVICE_AUTO_BRIGHTNESS,
 
 	SENSOR_DEVICE_CONTEXT = 0x1000,
 	SENSOR_DEVICE_MOTION,
@@ -86,16 +87,33 @@ typedef enum {
 	SENSOR_DEVICE_HRM_RAW,
 	SENSOR_DEVICE_TILT,
 	SENSOR_DEVICE_ROTATION_VECTOR_RAW,
-
-	SENSOR_DEVICE_ACTIVITY_STATIONARY = 0x1100,
-	SENSOR_DEVICE_ACTIVITY_WALK,
-	SENSOR_DEVICE_ACTIVITY_RUN,
-	SENSOR_DEVICE_ACTIVITY_IN_VEHICLE,
-	SENSOR_DEVICE_ACTIVITY_ON_BICYCLE,
+	SENSOR_DEVICE_EXERCISE,
+	SENSOR_DEVICE_GSR,
+	SENSOR_DEVICE_SIMSENSE,
+	SENSOR_DEVICE_PPG,
 
 	SENSOR_DEVICE_GESTURE_MOVEMENT = 0x1200,
 	SENSOR_DEVICE_GESTURE_WRIST_UP,
 	SENSOR_DEVICE_GESTURE_WRIST_DOWN,
+	SENSOR_DEVICE_GESTURE_MOVEMENT_STATE,
+
+	SENSOR_DEVICE_WEAR_STATUS = 0x1A00,
+	SENSOR_DEVICE_WEAR_ON_MONITOR,
+	SENSOR_DEVICE_GPS_BATCH,
+	SENSOR_DEVICE_ACTIVITY_TRACKER,
+	SENSOR_DEVICE_SLEEP_DETECTOR,
+	SENSOR_DEVICE_NO_MOVE_DETECTOR = 0x1A80,
+	SENSOR_DEVICE_HRM_CTRL,
+	SENSOR_DEVICE_EXERCISE_COACH,
+	SENSOR_DEVICE_EXERCISE_HR,
+	SENSOR_DEVICE_RESTING_HR,
+	SENSOR_DEVICE_STEP_LEVEL_MONITOR,
+	SENSOR_DEVICE_ACTIVITY_LEVEL_MONITOR,
+	SENSOR_DEVICE_CYCLE_MONITOR,
+	SENSOR_DEVICE_STRESS_MONITOR,
+	SENSOR_DEVICE_AUTOSESSION_EXERCISE,
+	SENSOR_DEVICE_STAIR_TRACKER,
+
 } sensor_device_type;
 
 /*
@@ -141,8 +159,24 @@ typedef struct sensor_data_t {
 typedef struct sensorhub_data_t {
 	int accuracy;
 	unsigned long long timestamp;
-	int value_count;
-	char values[SENSORHUB_DATA_VALUE_SIZE];
+
+	/*
+	 *  Use "value_count" instead of "hub_data_size"
+	 *  which is going to be removed soon
+	 */
+	union {
+		int value_count;
+		int hub_data_size; /* deprecated */
+	};
+
+	/*
+	 *  Use "values" instead of "hub_data"
+	 *  which is going to be removed soon
+	 */
+	union {
+		char values[SENSORHUB_DATA_VALUE_SIZE];
+		char hub_data[SENSORHUB_DATA_VALUE_SIZE]; /* deprecated */
+	};
 } sensorhub_data_t;
 
 /*
