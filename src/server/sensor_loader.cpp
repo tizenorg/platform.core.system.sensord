@@ -29,9 +29,16 @@
 #include <unordered_set>
 #include <algorithm>
 
-#include <accel_sensor.h>
+#include <hrm_sensor.h>
+
 #ifdef ENABLE_AUTO_ROTATION
 #include <auto_rotation_sensor.h>
+#endif
+#ifdef ENABLE_GRAVITY
+#include <gravity_sensor.h>
+#endif
+#ifdef ENABLE_LINEAR_ACCEL
+#include <linear_accel_sensor.h>
 #endif
 
 using std::vector;
@@ -127,10 +134,24 @@ bool sensor_loader::load_sensor_devices(const string &path, void* &handle)
 
 void sensor_loader::create_sensors(void)
 {
-	create_physical_sensors<accel_sensor>(ACCELEROMETER_SENSOR);
+	/* HRM sensors need SENSOR_PERMISSION_BIO */
+	create_physical_sensors<hrm_sensor>(HRM_RAW_SENSOR);
+	create_physical_sensors<hrm_sensor>(HRM_SENSOR);
+	create_physical_sensors<hrm_sensor>(HRM_LED_GREEN_SENSOR);
+	create_physical_sensors<hrm_sensor>(HRM_LED_IR_SENSOR);
+	create_physical_sensors<hrm_sensor>(HRM_LED_RED_SENSOR);
+
 	create_physical_sensors<physical_sensor>(UNKNOWN_SENSOR);
 
+#ifdef ENABLE_AUTO_ROTATION
 	create_virtual_sensors<auto_rotation_sensor>("Auto Rotation");
+#endif
+#ifdef ENABLE_GRAVITY
+	create_virtual_sensors<gravity_sensor>("Gravity");
+#endif
+#ifdef ENABLE_LINEAR_ACCEL
+	create_virtual_sensors<linear_accel_sensor>("Linear Accel");
+#endif
 }
 
 template<typename _sensor>

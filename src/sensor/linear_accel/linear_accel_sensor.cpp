@@ -25,145 +25,32 @@
 #include <time.h>
 #include <sys/types.h>
 #include <dlfcn.h>
+
 #include <sensor_log.h>
+#include <sensor_types.h>
+
+#include <sensor_common.h>
+#include <virtual_sensor.h>
 #include <linear_accel_sensor.h>
 #include <sensor_loader.h>
-#include <virtual_sensor_config.h>
-
-using std::string;
-using std::vector;
+#include <fusion_util.h>
 
 #define SENSOR_NAME "LINEAR_ACCEL_SENSOR"
-#define SENSOR_TYPE_LINEAR_ACCEL	"LINEAR_ACCEL"
-#define SENSOR_TYPE_GRAVITY		"GRAVITY"
-#define SENSOR_TYPE_ORIENTATION		"ORIENTATION"
 
-#define ELEMENT_NAME											"NAME"
-#define ELEMENT_VENDOR											"VENDOR"
-#define ELEMENT_RAW_DATA_UNIT									"RAW_DATA_UNIT"
-#define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
-#define ELEMENT_ACCEL_STATIC_BIAS								"ACCEL_STATIC_BIAS"
-#define ELEMENT_ACCEL_ROTATION_DIRECTION_COMPENSATION			"ACCEL_ROTATION_DIRECTION_COMPENSATION"
-#define ELEMENT_ACCEL_SCALE										"ACCEL_SCALE"
-#define ELEMENT_LINEAR_ACCEL_SIGN_COMPENSATION					"LINEAR_ACCEL_SIGN_COMPENSATION"
-#define ELEMENT_ORIENTATION_DATA_UNIT							"RAW_DATA_UNIT"
-#define ELEMENT_GRAVITY_SIGN_COMPENSATION						"GRAVITY_SIGN_COMPENSATION"
-#define ELEMENT_PITCH_ROTATION_COMPENSATION						"PITCH_ROTATION_COMPENSATION"
-#define ELEMENT_ROLL_ROTATION_COMPENSATION						"ROLL_ROTATION_COMPENSATION"
-#define ELEMENT_AZIMUTH_ROTATION_COMPENSATION					"AZIMUTH_ROTATION_COMPENSATION"
-
-#define INITIAL_VALUE -1
 #define GRAVITY 9.80665
-#define DEVIATION 0.1
-
-#define PI 3.141593
-#define AZIMUTH_OFFSET_DEGREES 360
-#define AZIMUTH_OFFSET_RADIANS (2 * PI)
-
-#define MS_TO_US 1000
-#define MIN_DELIVERY_DIFF_FACTOR 0.75f
-
-#define ACCELEROMETER_ENABLED 0x01
-#define GRAVITY_ENABLED 0x02
-#define LINEAR_ACCEL_ENABLED 3
 
 linear_accel_sensor::linear_accel_sensor()
 : m_accel_sensor(NULL)
-, m_gyro_sensor(NULL)
-, m_magnetic_sensor(NULL)
-, m_fusion_sensor(NULL)
+, m_gravity_sensor(NULL)
+, m_x(0)
+, m_y(0)
+, m_z(0)
+, m_gx(0)
+, m_gy(0)
+, m_gz(0)
+, m_accuracy(0)
 , m_time(0)
 {
-	virtual_sensor_config &config = virtual_sensor_config::get_instance();
-
-	m_name = string(SENSOR_NAME);
-	m_enable_linear_accel = 0;
-	register_supported_event(LINEAR_ACCEL_RAW_DATA_EVENT);
-
-	sensor_hal *fusion_sensor_hal = sensor_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
-	if (!fusion_sensor_hal)
-		m_hardware_fusion = false;
-	else
-		m_hardware_fusion = true;
-
-
-	if (!config.get(SENSOR_TYPE_LINEAR_ACCEL, ELEMENT_VENDOR, m_vendor)) {
-		_E("[VENDOR] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_vendor = %s", m_vendor.c_str());
-
-	if (!config.get(SENSOR_TYPE_LINEAR_ACCEL, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
-		_E("[RAW_DATA_UNIT] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_raw_data_unit = %s", m_raw_data_unit.c_str());
-
-	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_ORIENTATION_DATA_UNIT, m_orientation_data_unit)) {
-		_E("[ORIENTATION_DATA_UNIT] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_orientation_data_unit = %s", m_orientation_data_unit.c_str());
-
-	if (!config.get(SENSOR_TYPE_LINEAR_ACCEL, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
-		_E("[DEFAULT_SAMPLING_TIME] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_default_sampling_time = %d", m_default_sampling_time);
-
-	if (!config.get(SENSOR_TYPE_LINEAR_ACCEL, ELEMENT_ACCEL_STATIC_BIAS, m_accel_static_bias, 3)) {
-		_E("[ACCEL_STATIC_BIAS] is empty\n");
-		throw ENXIO;
-	}
-
-	if (!config.get(SENSOR_TYPE_LINEAR_ACCEL, ELEMENT_ACCEL_ROTATION_DIRECTION_COMPENSATION, m_accel_rotation_direction_compensation, 3)) {
-		_E("[ACCEL_ROTATION_DIRECTION_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_accel_rotation_direction_compensation = (%d, %d, %d)", m_accel_rotation_direction_compensation[0], m_accel_rotation_direction_compensation[1], m_accel_rotation_direction_compensation[2]);
-
-	if (!config.get(SENSOR_TYPE_GRAVITY, ELEMENT_GRAVITY_SIGN_COMPENSATION, m_gravity_sign_compensation, 3)) {
-		_E("[GRAVITY_SIGN_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_gravity_sign_compensation = (%d, %d, %d)", m_gravity_sign_compensation[0], m_gravity_sign_compensation[1], m_gravity_sign_compensation[2]);
-
-	if (!config.get(SENSOR_TYPE_LINEAR_ACCEL, ELEMENT_LINEAR_ACCEL_SIGN_COMPENSATION, m_linear_accel_sign_compensation, 3)) {
-		_E("[LINEAR_ACCEL_SIGN_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_linear_accel_sign_compensation = (%d, %d, %d)", m_linear_accel_sign_compensation[0], m_linear_accel_sign_compensation[1], m_linear_accel_sign_compensation[2]);
-
-	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_AZIMUTH_ROTATION_COMPENSATION, &m_azimuth_rotation_compensation)) {
-		_E("[AZIMUTH_ROTATION_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_azimuth_rotation_compensation = %d", m_azimuth_rotation_compensation);
-
-	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_PITCH_ROTATION_COMPENSATION, &m_pitch_rotation_compensation)) {
-		_E("[PITCH_ROTATION_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_pitch_rotation_compensation = %d", m_pitch_rotation_compensation);
-
-	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_ROLL_ROTATION_COMPENSATION, &m_roll_rotation_compensation)) {
-		_E("[ROLL_ROTATION_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_roll_rotation_compensation = %d", m_roll_rotation_compensation);
-
-	m_interval = m_default_sampling_time * MS_TO_US;
-
 }
 
 linear_accel_sensor::~linear_accel_sensor()
@@ -174,249 +61,177 @@ linear_accel_sensor::~linear_accel_sensor()
 bool linear_accel_sensor::init()
 {
 	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
-	m_gyro_sensor = sensor_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
-	m_magnetic_sensor = sensor_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
 
-	m_fusion_sensor = sensor_loader::get_instance().get_sensor(FUSION_SENSOR);
-
-	if (!m_accel_sensor || !m_gyro_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
-		_E("Failed to load sensors,  accel: 0x%x, gyro: 0x%x, mag: 0x%x, fusion: 0x%x",
-			m_accel_sensor, m_gyro_sensor, m_magnetic_sensor, m_fusion_sensor);
+	if (!m_accel_sensor) {
+		_E("cannot load accelerometer sensor_hal[%s]", get_name());
 		return false;
 	}
 
-	_I("%s is created!", sensor_base::get_name());
+	m_gravity_sensor = sensor_loader::get_instance().get_sensor(GRAVITY_SENSOR);
+
+	if (!m_gravity_sensor) {
+		_E("cannot load gravity sensor_hal[%s]", get_name());
+		return false;
+	}
+
+	_I("%s is created!\n", get_name());
+
 	return true;
 }
 
-void linear_accel_sensor::get_types(vector<sensor_type_t> &types)
+sensor_type_t linear_accel_sensor::get_type(void)
 {
-	types.push_back(LINEAR_ACCEL_SENSOR);
+	return LINEAR_ACCEL_SENSOR;
+}
+
+unsigned int linear_accel_sensor::get_event_type(void)
+{
+	return LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME;
+}
+
+const char* linear_accel_sensor::get_name(void)
+{
+	return SENSOR_NAME;
+}
+
+bool linear_accel_sensor::get_sensor_info(sensor_info &info)
+{
+	info.set_type(get_type());
+	info.set_id(get_id());
+	info.set_privilege(SENSOR_PRIVILEGE_PUBLIC); // FIXME
+	info.set_name("Linear Accelerometer Sensor");
+	info.set_vendor("Samsung Electronics");
+	info.set_min_range(-19.6);
+	info.set_max_range(19.6);
+	info.set_resolution(0.01);
+	info.set_min_interval(1);
+	info.set_fifo_count(0);
+	info.set_max_batch_count(0);
+	info.set_supported_event(get_event_type());
+	info.set_wakeup_supported(false);
+
+	return true;
+}
+
+void linear_accel_sensor::synthesize(const sensor_event_t& event)
+{
+	if (event.event_type == GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME) {
+		m_gx = event.data->values[0];
+		m_gy = event.data->values[1];
+		m_gz = event.data->values[2];
+		return;
+	}
+
+	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
+		m_time = event.data->timestamp;
+		m_x = event.data->values[0] - m_gx;
+		m_y = event.data->values[1] - m_gy;
+		m_z = event.data->values[2] - m_gz;
+
+		sensor_event_t *linear_accel_event;
+		sensor_data_t *linear_accel_data;
+		int data_length;
+		int remains;
+
+		linear_accel_event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
+		if (!linear_accel_event) {
+			_E("Failed to allocate memory");
+			return;
+		}
+
+		remains = get_data(&linear_accel_data, &data_length);
+
+		if (remains < 0)
+			return;
+
+		linear_accel_event->sensor_id = get_id();
+		linear_accel_event->event_type = LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME;
+		linear_accel_event->data_length = data_length;
+		linear_accel_event->data = linear_accel_data;
+
+		push(linear_accel_event);
+	}
+}
+
+int linear_accel_sensor::get_data(sensor_data_t **data, int *length)
+{
+	/* if It is batch sensor, remains can be 2+ */
+	int remains = 1;
+
+	sensor_data_t *sensor_data;
+	sensor_data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
+
+	sensor_data->accuracy = SENSOR_ACCURACY_GOOD;
+	sensor_data->timestamp = m_time;
+	sensor_data->value_count = 3;
+	sensor_data->values[0] = m_x;
+	sensor_data->values[1] = m_y;
+	sensor_data->values[2] = m_z;
+
+	*data = sensor_data;
+	*length = sizeof(sensor_data_t);
+
+	return --remains;
+}
+
+bool linear_accel_sensor::add_interval(int client_id, unsigned int interval, bool is_processor)
+{
+	if (m_accel_sensor)
+		m_accel_sensor->add_interval(client_id, interval, true);
+
+	if (m_gravity_sensor)
+		m_gravity_sensor->add_interval(client_id, interval, true);
+
+	return sensor_base::add_interval(client_id, interval, is_processor);
+}
+
+bool linear_accel_sensor::delete_interval(int client_id, bool is_processor)
+{
+	if (m_accel_sensor)
+		m_accel_sensor->delete_interval(client_id, true);
+
+	if (m_gravity_sensor)
+		m_gravity_sensor->delete_interval(client_id, true);
+
+	return sensor_base::delete_interval(client_id, is_processor);
+}
+
+bool linear_accel_sensor::set_interval(unsigned long interval)
+{
+	m_interval = interval;
+	return true;
+}
+
+bool linear_accel_sensor::set_batch_latency(unsigned long latency)
+{
+	return false;
+}
+
+bool linear_accel_sensor::set_wakeup(int wakeup)
+{
+	return false;
 }
 
 bool linear_accel_sensor::on_start(void)
 {
-	AUTOLOCK(m_mutex);
+	if (m_accel_sensor)
+		m_accel_sensor->start();
 
-	m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
-	m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-	m_accel_sensor->start();
+	if (m_gravity_sensor)
+		m_gravity_sensor->start();
 
-	if (!m_hardware_fusion) {
-		m_gyro_sensor->add_client(GYROSCOPE_RAW_DATA_EVENT);
-		m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-		m_gyro_sensor->start();
-		m_magnetic_sensor->add_client(GEOMAGNETIC_RAW_DATA_EVENT);
-		m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-		m_magnetic_sensor->start();
-	}
-
-	m_fusion_sensor->register_supported_event(FUSION_EVENT);
-	m_fusion_sensor->register_supported_event(FUSION_ORIENTATION_ENABLED);
-	m_fusion_sensor->add_client(FUSION_EVENT);
-	m_fusion_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-	m_fusion_sensor->start();
-
-	activate();
-	return true;
+	m_time = 0;
+	return activate();
 }
 
 bool linear_accel_sensor::on_stop(void)
 {
-	AUTOLOCK(m_mutex);
-	m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
-	m_accel_sensor->delete_interval((intptr_t)this, false);
-	m_accel_sensor->stop();
+	if (m_accel_sensor)
+		m_accel_sensor->stop();
 
-	if (!m_hardware_fusion) {
-		m_gyro_sensor->delete_client(GYROSCOPE_RAW_DATA_EVENT);
-		m_gyro_sensor->delete_interval((intptr_t)this, false);
-		m_gyro_sensor->stop();
-		m_magnetic_sensor->delete_client(GEOMAGNETIC_RAW_DATA_EVENT);
-		m_magnetic_sensor->delete_interval((intptr_t)this, false);
-		m_magnetic_sensor->stop();
-	}
+	if (m_gravity_sensor)
+		m_gravity_sensor->stop();
 
-	m_fusion_sensor->delete_client(FUSION_EVENT);
-	m_fusion_sensor->delete_interval((intptr_t)this, false);
-	m_fusion_sensor->unregister_supported_event(FUSION_EVENT);
-	m_fusion_sensor->unregister_supported_event(FUSION_ORIENTATION_ENABLED);
-	m_fusion_sensor->stop();
-
-	deactivate();
-	return true;
+	m_time = 0;
+	return deactivate();
 }
-
-bool linear_accel_sensor::add_interval(int client_id, unsigned int interval)
-{
-	AUTOLOCK(m_mutex);
-	m_accel_sensor->add_interval(client_id, interval, false);
-
-	if (!m_hardware_fusion) {
-		m_gyro_sensor->add_interval(client_id, interval, false);
-		m_magnetic_sensor->add_interval(client_id, interval, false);
-	}
-
-	m_fusion_sensor->add_interval(client_id, interval, false);
-
-	return sensor_base::add_interval(client_id, interval, false);
-}
-
-bool linear_accel_sensor::delete_interval(int client_id)
-{
-	AUTOLOCK(m_mutex);
-	m_accel_sensor->delete_interval(client_id, false);
-
-	if (!m_hardware_fusion) {
-		m_gyro_sensor->delete_interval(client_id, false);
-		m_magnetic_sensor->delete_interval(client_id, false);
-	}
-
-	m_fusion_sensor->delete_interval(client_id, false);
-
-	return sensor_base::delete_interval(client_id, false);
-}
-
-sensor_data_t linear_accel_sensor::calculate_gravity(sensor_data_t data)
-{
-	sensor_data_t gravity_data;
-	float pitch, roll, azimuth;
-	float azimuth_offset;
-
-	quaternion<float> quat(data.values[0], data.values[1],
-			data.values[2], data.values[3]);
-
-	euler_angles<float> euler = quat2euler(quat);
-
-	if(m_orientation_data_unit == "DEGREES") {
-		euler = rad2deg(euler);
-		azimuth_offset = AZIMUTH_OFFSET_DEGREES;
-	}
-	else {
-		azimuth_offset = AZIMUTH_OFFSET_RADIANS;
-	}
-
-	euler.m_ang.m_vec[0] *= m_pitch_rotation_compensation;
-	euler.m_ang.m_vec[1] *= m_roll_rotation_compensation;
-	euler.m_ang.m_vec[2] *= m_azimuth_rotation_compensation;
-
-	pitch = euler.m_ang.m_vec[0];
-	roll = euler.m_ang.m_vec[1];
-	if (euler.m_ang.m_vec[2] >= 0)
-		azimuth = euler.m_ang.m_vec[2];
-	else
-		azimuth = euler.m_ang.m_vec[2] + azimuth_offset;
-
-	if(m_orientation_data_unit == "DEGREES") {
-		azimuth *= DEG2RAD;
-		pitch *= DEG2RAD;
-		roll *= DEG2RAD;
-	}
-
-
-	if ((roll >= (M_PI/2)-DEVIATION && roll <= (M_PI/2)+DEVIATION) ||
-			(roll >= -(M_PI/2)-DEVIATION && roll <= -(M_PI/2)+DEVIATION)) {
-		gravity_data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(roll) * cos(azimuth);
-		gravity_data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(azimuth);
-		gravity_data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(roll);
-	} else if ((pitch >= (M_PI/2)-DEVIATION && pitch <= (M_PI/2)+DEVIATION) ||
-			(pitch >= -(M_PI/2)-DEVIATION && pitch <= -(M_PI/2)+DEVIATION)) {
-		gravity_data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(azimuth);
-		gravity_data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(pitch) * cos(azimuth);
-		gravity_data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(pitch);
-	} else {
-		gravity_data.values[0] = m_gravity_sign_compensation[0] * GRAVITY * sin(roll);
-		gravity_data.values[1] = m_gravity_sign_compensation[1] * GRAVITY * sin(pitch);
-		gravity_data.values[2] = m_gravity_sign_compensation[2] * GRAVITY * cos(roll) * cos(pitch);
-	}
-	gravity_data.value_count = 3;
-	gravity_data.timestamp = m_time;
-	gravity_data.accuracy = SENSOR_ACCURACY_GOOD;
-
-	return gravity_data;
-}
-
-void linear_accel_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
-{
-	sensor_event_t lin_accel_event;
-	sensor_data_t gravity_data;
-
-	unsigned long long diff_time;
-
-	if (event.event_type == ACCELEROMETER_RAW_DATA_EVENT) {
-		diff_time = event.data.timestamp - m_time;
-
-		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
-			return;
-
-		m_accel.m_data.m_vec[0] = m_accel_rotation_direction_compensation[0] * (event.data.values[0] - m_accel_static_bias[0]) / ACCEL_SCALE;
-		m_accel.m_data.m_vec[1] = m_accel_rotation_direction_compensation[1] * (event.data.values[1] - m_accel_static_bias[1]) / ACCEL_SCALE;
-		m_accel.m_data.m_vec[2] = m_accel_rotation_direction_compensation[2] * (event.data.values[2] - m_accel_static_bias[2]) / ACCEL_SCALE;
-
-		m_accel.m_time_stamp = event.data.timestamp;
-
-		m_enable_linear_accel |= ACCELEROMETER_ENABLED;
-	}
-	else if (event.event_type == FUSION_EVENT) {
-		diff_time = event.data.timestamp - m_time;
-
-		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
-			return;
-
-		gravity_data = calculate_gravity(event.data);
-
-		m_enable_linear_accel |= GRAVITY_ENABLED;
-	}
-
-	if (m_enable_linear_accel == LINEAR_ACCEL_ENABLED) {
-		m_enable_linear_accel = 0;
-
-		m_time = get_timestamp();
-		lin_accel_event.sensor_id = get_id();
-		lin_accel_event.event_type = LINEAR_ACCEL_RAW_DATA_EVENT;
-		lin_accel_event.data.value_count = 3;
-		lin_accel_event.data.timestamp = m_time;
-		lin_accel_event.data.accuracy = SENSOR_ACCURACY_GOOD;
-		lin_accel_event.data.values[0] = m_linear_accel_sign_compensation[0] * (m_accel.m_data.m_vec[0] - gravity_data.values[0]);
-		lin_accel_event.data.values[1] = m_linear_accel_sign_compensation[1] * (m_accel.m_data.m_vec[1] - gravity_data.values[1]);
-		lin_accel_event.data.values[2] = m_linear_accel_sign_compensation[2] * (m_accel.m_data.m_vec[2] - gravity_data.values[2]);
-		push(lin_accel_event);
-	}
-
-	return;
-}
-
-int linear_accel_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &data)
-{
-	sensor_data_t gravity_data, accel_data, fusion_data;
-	m_fusion_sensor->get_sensor_data(FUSION_ORIENTATION_ENABLED, fusion_data);
-	m_accel_sensor->get_sensor_data(ACCELEROMETER_RAW_DATA_EVENT, accel_data);
-
-	gravity_data = calculate_gravity(fusion_data);
-
-	accel_data.values[0] = m_accel_rotation_direction_compensation[0] * (accel_data.values[0] - m_accel_static_bias[0]) / ACCEL_SCALE;
-	accel_data.values[1] = m_accel_rotation_direction_compensation[1] * (accel_data.values[1] - m_accel_static_bias[1]) / ACCEL_SCALE;
-	accel_data.values[2] = m_accel_rotation_direction_compensation[2] * (accel_data.values[2] - m_accel_static_bias[2]) / ACCEL_SCALE;
-
-	if (event_type != LINEAR_ACCEL_RAW_DATA_EVENT)
-		return -1;
-
-	data.accuracy = SENSOR_ACCURACY_GOOD;
-	data.timestamp = get_timestamp();
-	data.values[0] = m_linear_accel_sign_compensation[0] * (accel_data.values[0] - gravity_data.values[0]);
-	data.values[1] = m_linear_accel_sign_compensation[1] * (accel_data.values[1] - gravity_data.values[1]);
-	data.values[2] = m_linear_accel_sign_compensation[2] * (accel_data.values[2] - gravity_data.values[2]);
-	data.value_count = 3;
-	return 0;
-}
-
-bool linear_accel_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
-{
-	m_accel_sensor->get_properties(ACCELEROMETER_SENSOR, properties);
-	properties.name = "Linear Acceleration Sensor";
-	properties.vendor = m_vendor;
-	properties.resolution = 0.000001;
-
-	return true;
-}
-
