@@ -88,20 +88,6 @@ bool client_sensor_record::set_option(sensor_id_t sensor_id, int option)
 	return true;
 }
 
-bool client_sensor_record::set_wakeup(sensor_id_t sensor_id, int wakeup)
-{
-	auto it_usage = m_sensor_usages.find(sensor_id);
-
-	if (it_usage == m_sensor_usages.end()) {
-		sensor_usage usage;
-		usage.m_wakeup = wakeup;
-		m_sensor_usages.insert(pair<sensor_id_t, sensor_usage>(sensor_id, usage));
-	} else {
-		it_usage->second.m_wakeup = wakeup;
-	}
-
-	return true;
-}
 
 bool client_sensor_record::set_start(sensor_id_t sensor_id, bool start)
 {

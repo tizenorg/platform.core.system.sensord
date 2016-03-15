@@ -999,40 +999,6 @@ API bool sensord_set_option(int handle, int option)
 
 }
 
-API bool sensord_set_wakeup(int handle, int wakeup)
-{
-	sensor_id_t sensor_id;
-	command_channel *cmd_channel;
-	int client_id;
-
-	AUTOLOCK(lock);
-
-	if (!sensor_client_info::get_instance().get_sensor_id(handle, sensor_id)) {
-		_E("client %s failed to get handle information", get_client_name());
-		return false;
-	}
-
-	retvm_if ((wakeup != SENSOR_WAKEUP_ON) && (wakeup != SENSOR_WAKEUP_OFF), false, "Invalid wakeup value : %d, handle: %d, %s, %s",
-		wakeup, handle, get_sensor_name(sensor_id), get_client_name());
-
-	sensor_client_info::get_instance().set_sensor_wakeup(handle, wakeup);
-
-	if (!sensor_client_info::get_instance().get_command_channel(sensor_id, &cmd_channel)) {
-		_E("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
-		return false;
-	}
-
-	client_id = sensor_client_info::get_instance().get_client_id();
-	retvm_if ((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
-
-	if (!cmd_channel->cmd_set_wakeup(wakeup)) {
-		_E("Sending cmd_set_wakeup(%d, %s, %d) failed for %s", client_id, get_sensor_name(sensor_id), wakeup, get_client_name());
-		return false;
-	}
-
-	return true;
-}
-
 API bool sensord_set_attribute_int(int handle, int attribute, int value)
 {
 	sensor_id_t sensor_id;

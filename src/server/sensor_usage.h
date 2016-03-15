@@ -30,7 +30,6 @@ public:
 	unsigned int m_interval;
 	unsigned int m_latency;
 	int m_option;
-	int m_wakeup;
 	reg_event_vector m_reg_events;
 	bool m_start;
 

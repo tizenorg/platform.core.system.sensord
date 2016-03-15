@@ -33,12 +33,6 @@ batch_info::batch_info(int client_id, unsigned int latency)
 	this->latency = latency;
 }
 
-wakeup_info::wakeup_info(int client_id, int wakeup)
-{
-	this->client_id = client_id;
-	this->wakeup = wakeup;
-}
-
 bool sensor_info_list::comp_interval_info(interval_info a, interval_info b)
 {
 	return a.interval < b.interval;
@@ -69,20 +63,6 @@ batch_info_iterator sensor_info_list::find_if_batch_info(int client_id)
 
 	while (iter != m_batch_info_list.end()) {
 		if ((iter->client_id == client_id))
-			break;
-
-		++iter;
-	}
-
-	return iter;
-}
-
-wakeup_info_iterator sensor_info_list::find_if_wakeup_info(int client_id)
-{
-	auto iter = m_wakeup_info_list.begin();
-
-	while (iter != m_wakeup_info_list.end()) {
-		if (iter->client_id == client_id)
 			break;
 
 		++iter;
@@ -177,56 +157,5 @@ unsigned int sensor_info_list::get_max_batch(void)
 	auto iter = max_element(m_batch_info_list.begin(), m_batch_info_list.end(), comp_batch_info);
 
 	return iter->latency;
-}
-
-bool sensor_info_list::add_wakeup(int client_id, int wakeup)
-{
-	auto iter = find_if_wakeup_info(client_id);
-
-	if (iter != m_wakeup_info_list.end())
-		*iter = wakeup_info(client_id, wakeup);
-	else
-		m_wakeup_info_list.push_back(wakeup_info(client_id, wakeup));
-
-	return true;
-}
-
-bool sensor_info_list::delete_wakeup(int client_id)
-{
-	auto iter = find_if_wakeup_info(client_id);
-
-	if (iter == m_wakeup_info_list.end())
-		return false;
-
-	m_wakeup_info_list.erase(iter);
-
-	return true;
-}
-
-int sensor_info_list::get_wakeup(int client_id)
-{
-	auto iter = find_if_wakeup_info(client_id);
-
-	if (iter == m_wakeup_info_list.end())
-		return -1;
-
-	return iter->wakeup;
-}
-
-int sensor_info_list::is_wakeup_on(void)
-{
-	if (m_wakeup_info_list.empty())
-		return -1;
-
-	auto iter = m_wakeup_info_list.begin();
-
-	while (iter != m_wakeup_info_list.end()) {
-		if (iter->wakeup == true)
-			break;
-
-		++iter;
-	}
-
-	return iter->wakeup;
 }
 

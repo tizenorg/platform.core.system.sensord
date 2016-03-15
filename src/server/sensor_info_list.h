@@ -41,15 +41,6 @@ public:
 
 typedef std::list<batch_info>::iterator batch_info_iterator;
 
-class wakeup_info {
-public:
-	wakeup_info(int client_id, int wakeup);
-	int client_id;
-	int wakeup;
-};
-
-typedef std::list<wakeup_info>::iterator wakeup_info_iterator;
-
 class sensor_info_list {
 public:
 	bool add_interval(int client_id, unsigned int interval, bool is_processor);
@@ -62,11 +53,6 @@ public:
 	unsigned int get_batch(int client_id);
 	unsigned int get_max_batch(void);
 
-	bool add_wakeup(int client_id, int wakeup);
-	bool delete_wakeup(int client_id);
-	int get_wakeup(int client_id);
-	int is_wakeup_on(void);
-
 private:
 	static bool comp_interval_info(interval_info a, interval_info b);
 	interval_info_iterator find_if_interval_info(int client_id, bool is_processor);
@@ -74,10 +60,7 @@ private:
 	static bool comp_batch_info(batch_info a, batch_info b);
 	batch_info_iterator find_if_batch_info(int client_id);
 
-	wakeup_info_iterator find_if_wakeup_info(int client_id);
-
 	std::list<interval_info> m_interval_info_list;
 	std::list<batch_info> m_batch_info_list;
-	std::list<wakeup_info> m_wakeup_info_list;
 };
 #endif /* _SENSOR_INFO_LIST_H_ */

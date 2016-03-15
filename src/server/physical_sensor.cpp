@@ -172,11 +172,6 @@ int physical_sensor::set_attribute(int32_t attribute, char *value, int value_len
 	return OP_SUCCESS;
 }
 
-bool physical_sensor::set_wakeup(int wakeup)
-{
-	return false;
-}
-
 bool physical_sensor::on_start()
 {
 	AUTOLOCK(m_mutex);

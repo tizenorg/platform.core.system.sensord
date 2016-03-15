@@ -60,7 +60,7 @@ public:
 	bool stop(void);
 	bool is_started(void);
 
-	/* interval / batch / wakeup */
+	/* interval / batch */
 	virtual bool add_interval(int client_id, unsigned int interval, bool is_processor);
 	virtual bool delete_interval(int client_id, bool is_processor);
 	unsigned int get_interval(int client_id, bool is_processor);
@@ -68,11 +68,6 @@ public:
 	virtual bool add_batch(int client_id, unsigned int latency);
 	virtual bool delete_batch(int client_id);
 	unsigned int get_batch(int client_id);
-
-	virtual bool add_wakeup(int client_id, int wakeup);
-	virtual bool delete_wakeup(int client_id);
-	int get_wakeup(int client_id);
-	bool is_wakeup_supported(void);
 
 	bool push(sensor_event_t *event);
 
@@ -95,7 +90,6 @@ private:
 
 	virtual bool set_interval(unsigned long interval);
 	virtual bool set_batch_latency(unsigned long latency);
-	virtual bool set_wakeup(int wakeup);
 
 	virtual bool on_start(void);
 	virtual bool on_stop(void);

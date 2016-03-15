@@ -374,45 +374,6 @@ bool command_channel::cmd_set_option(int option)
 	return true;
 }
 
-bool command_channel::cmd_set_wakeup(int wakeup)
-{
-	cpacket *packet;
-	cmd_set_wakeup_t *cmd_set_wakeup;
-	cmd_done_t *cmd_done;
-
-	packet = new(std::nothrow) cpacket(sizeof(cmd_set_wakeup_t));
-	retvm_if(!packet, false, "Failed to allocate memory");
-
-	packet->set_cmd(CMD_SET_WAKEUP);
-
-	cmd_set_wakeup = (cmd_set_wakeup_t*)packet->data();
-	cmd_set_wakeup->wakeup = wakeup;
-
-	_I("%s send cmd_set_wakeup(client_id=%d, %s, wakeup=%d)",
-		get_client_name(), m_client_id, get_sensor_name(m_sensor_id), wakeup);
-
-	if (!command_handler(packet, (void **)&cmd_done)) {
-		_E("Client %s failed to send/receive command for sensor[%s] with client_id [%d], wakeup[%d]",
-			get_client_name(), get_sensor_name(m_sensor_id), m_client_id, wakeup);
-		delete packet;
-		return false;
-	}
-
-	if (cmd_done->value < 0) {
-		_E("Client %s got error[%d] from server for sensor[%s] with client_id [%d], wakeup[%d]",
-			get_client_name(), cmd_done->value, get_sensor_name(m_sensor_id), m_client_id, wakeup);
-
-		delete[] (char *)cmd_done;
-		delete packet;
-		return false;
-	}
-
-	delete[] (char *)cmd_done;
-	delete packet;
-
-	return true;
-}
-
 bool command_channel::cmd_register_event(unsigned int event_type)
 {
 	cpacket *packet;

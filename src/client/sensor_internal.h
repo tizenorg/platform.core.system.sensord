@@ -312,18 +312,7 @@ bool sensord_change_event_maincontext(int handle, unsigned int event_type, GMain
  */
 bool sensord_set_option(int handle, int option);
 
-/**
- * @brief Change the wakeup mode of a connected sensor.
- *
- * @param[in] handle a handle represensting a connected sensor.
- * @param[in] wakeup either one of SENSOR_WAKEUP_OFF and SENSOR_WAKEUP_ON.
- *				     with SENSOR_WAKEUP_OFF, it stops to listening events when AP is asleep.
- * 				     with SENSOR_WAKEUP_ON, it continues to listening events even when AP is asleep.
- * @return true on success, otherwise false.
- */
-bool sensord_set_wakeup(int handle, int wakeup);
-
-/**
+/*
  * @brief Set the attribute to a connected sensor
  *
  * @param[in] handle a handle represensting a connected sensor.

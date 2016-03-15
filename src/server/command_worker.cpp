@@ -82,7 +82,6 @@ void command_worker::init_cmd_handlers(void)
 	m_cmd_handlers[CMD_REG]					= &command_worker::cmd_register_event;
 	m_cmd_handlers[CMD_UNREG]				= &command_worker::cmd_unregister_event;
 	m_cmd_handlers[CMD_SET_OPTION]			= &command_worker::cmd_set_option;
-	m_cmd_handlers[CMD_SET_WAKEUP]			= &command_worker::cmd_set_wakeup;
 	m_cmd_handlers[CMD_SET_BATCH]			= &command_worker::cmd_set_batch;
 	m_cmd_handlers[CMD_UNSET_BATCH]			= &command_worker::cmd_unset_batch;
 	m_cmd_handlers[CMD_GET_DATA]			= &command_worker::cmd_get_data;
@@ -691,36 +690,6 @@ bool command_worker::cmd_set_option(void *payload)
 	}
 
 	ret_value = OP_SUCCESS;
-out:
-	if (!send_cmd_done(ret_value))
-		_E("Failed to send cmd_done to a client");
-
-	return true;
-}
-
-bool command_worker::cmd_set_wakeup(void *payload)
-{
-	cmd_set_wakeup_t *cmd;
-	long ret_value = OP_ERROR;
-
-	cmd = (cmd_set_wakeup_t*)payload;
-
-	if (!is_permission_allowed()) {
-		_E("Permission denied to set wakeup for client [%d], for sensor [0x%llx] with wakeup [%d] to client info manager",
-			m_client_id, m_sensor_id, cmd->wakeup);
-		ret_value = OP_ERROR;
-		goto out;
-	}
-
-	if (!get_client_info_manager().set_wakeup(m_client_id, m_sensor_id, cmd->wakeup)) {
-		_E("Failed to set wakeup for client [%d], for sensor [0x%llx] with wakeup [%d] to client info manager",
-			m_client_id, m_sensor_id, cmd->wakeup);
-		ret_value = OP_ERROR;
-		goto out;
-	}
-
-	ret_value = m_module->add_wakeup(m_client_id, cmd->wakeup);
-
 out:
 	if (!send_cmd_done(ret_value))
 		_E("Failed to send cmd_done to a client");

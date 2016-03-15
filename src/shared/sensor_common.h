@@ -71,12 +71,6 @@ enum sensor_option_t {
 typedef enum sensor_option_t sensor_option_e;
 #endif
 
-enum sensor_wakeup_t {
-	SENSOR_WAKEUP_UNKNOWN = -1,
-	SENSOR_WAKEUP_OFF = 0,
-	SENSOR_WAKEUP_ON = 1,
-};
-
 enum poll_interval_t {
 	POLL_100HZ_MS	= 10,
 	POLL_50HZ_MS	= 20,

@@ -266,61 +266,6 @@ unsigned int sensor_base::get_batch(int client_id)
 	return m_sensor_info_list.get_batch(client_id);
 }
 
-bool sensor_base::add_wakeup(int client_id, int wakeup)
-{
-	int prev_wakeup, cur_wakeup;
-
-	AUTOLOCK(m_sensor_info_list_mutex);
-
-	prev_wakeup = m_sensor_info_list.is_wakeup_on();
-
-	if (!m_sensor_info_list.add_wakeup(client_id, wakeup))
-		return false;
-
-	cur_wakeup = m_sensor_info_list.is_wakeup_on();
-
-	if ((cur_wakeup == SENSOR_WAKEUP_ON) && (prev_wakeup < SENSOR_WAKEUP_ON)) {
-		_I("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] adding wakeup",
-			get_id(), prev_wakeup, cur_wakeup, client_id);
-		set_wakeup(SENSOR_WAKEUP_ON);
-	}
-
-	return true;
-}
-
-bool sensor_base::delete_wakeup(int client_id)
-{
-	int prev_wakeup, cur_wakeup;
-	AUTOLOCK(m_sensor_info_list_mutex);
-
-	prev_wakeup = m_sensor_info_list.is_wakeup_on();
-
-	if (!m_sensor_info_list.delete_wakeup(client_id))
-		return false;
-
-	cur_wakeup = m_sensor_info_list.is_wakeup_on();
-
-	if ((cur_wakeup < SENSOR_WAKEUP_ON) && (prev_wakeup == SENSOR_WAKEUP_ON)) {
-		_I("Wakeup for sensor[0x%llx] is changed from %d to %d by client[%d] deleting wakeup",
-			get_id(), prev_wakeup, cur_wakeup, client_id);
-		set_wakeup(SENSOR_WAKEUP_OFF);
-	}
-
-	return true;
-}
-
-int sensor_base::get_wakeup(int client_id)
-{
-	AUTOLOCK(m_sensor_info_list_mutex);
-
-	return m_sensor_info_list.is_wakeup_on();
-}
-
-bool sensor_base::is_wakeup_supported(void)
-{
-	return false;
-}
-
 int sensor_base::get_permission(void)
 {
 	return m_permission;
@@ -348,11 +293,6 @@ bool sensor_base::set_interval(unsigned long interval)
 }
 
 bool sensor_base::set_batch_latency(unsigned long latency)
-{
-	return false;
-}
-
-bool sensor_base::set_wakeup(int wakeup)
 {
 	return false;
 }

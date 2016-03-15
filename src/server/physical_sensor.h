@@ -54,7 +54,6 @@ private:
 	virtual bool set_batch_latency(unsigned long latency);
 	virtual int set_attribute(int32_t attribute, int32_t value);
 	virtual int set_attribute(int32_t attribute, char *value, int value_len);
-	virtual bool set_wakeup(int wakeup);
 	virtual bool on_start(void);
 	virtual bool on_stop(void);
 	virtual bool get_sensor_info(sensor_info &info);
