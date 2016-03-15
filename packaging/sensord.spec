@@ -89,11 +89,11 @@ make %{?jobs:-j%jobs}
 rm -rf %{buildroot}
 %make_install
 
-mkdir -p %{buildroot}%{_libdir}/systemd/system/
+mkdir -p %{buildroot}%{_unitdir}
 
-install -m 0644 %SOURCE1 %{buildroot}%{_libdir}/systemd/system/
-install -m 0644 %SOURCE2 %{buildroot}%{_libdir}/systemd/system/
-install -m 0644 %SOURCE3 %{buildroot}%{_libdir}/systemd/system/
+install -m 0644 %SOURCE1 %{buildroot}%{_unitdir}
+install -m 0644 %SOURCE2 %{buildroot}%{_unitdir}
+install -m 0644 %SOURCE3 %{buildroot}%{_unitdir}
 
 %install_service multi-user.target.wants sensord.service
 %install_service sockets.target.wants sensord_event.socket
