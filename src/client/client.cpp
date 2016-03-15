@@ -18,6 +18,7 @@
  */
 
 #include <sensor_common.h>
+#include <sensor_internal_deprecated.h>
 #include <sensor_internal.h>
 #include <sensor_event_listener.h>
 #include <sensor_client_info.h>
@@ -543,7 +544,7 @@ API int sensord_connect(sensor_t sensor)
 	atexit(good_bye);
 
 	handle = sensor_client_info::get_instance().create_handle(sensor_id);
-	if (handle == MAX_HANDLE_REACHED) {
+	if (handle == MAX_HANDLE) {
 		_E("Maximum number of handles reached, sensor: %s in client %s", get_sensor_name(sensor_id), get_client_name());
 		return OP_ERROR;
 	}
@@ -1108,11 +1109,10 @@ API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* senso
 		return false;
 	}
 
-	if(!cmd_channel->cmd_get_data(data_id, sensor_data)) {
+	if (!cmd_channel->cmd_get_data(data_id, sensor_data)) {
 		_E("cmd_get_data(%d, %d, 0x%x) failed for %s", client_id, data_id, sensor_data, get_client_name());
 		return false;
 	}
 
 	return true;
-
 }

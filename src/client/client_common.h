@@ -27,6 +27,7 @@
 #include <sensor_log.h>
 
 #define BASE_GATHERING_INTERVAL	100
+
 #define CLIENT_NAME_SIZE NAME_MAX+10
 
 struct log_attr {

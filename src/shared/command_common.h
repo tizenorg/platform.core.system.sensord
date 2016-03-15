@@ -126,12 +126,12 @@ typedef struct  {
 	char value[0];
 } cmd_set_attribute_str_t;
 
-#define EVENT_CHANNEL_MAGIC 0xCAFECAFE
+#define CHANNEL_MAGIC_NUM 0xCAFECAFE
 
 typedef struct {
 	unsigned int magic;
 	int client_id;
-} event_channel_ready_t;
+} channel_ready_t;
 
 typedef void *(*cmd_func_t)(void *data, void *cb_data);
 

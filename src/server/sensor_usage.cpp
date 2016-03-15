@@ -23,7 +23,7 @@
 #include <sensor_log.h>
 
 sensor_usage::sensor_usage()
-: m_interval(POLL_MAX_HZ_MS)
+: m_interval(POLL_1HZ_MS)
 , m_latency(0)
 , m_option(SENSOR_OPTION_DEFAULT)
 , m_start(false)

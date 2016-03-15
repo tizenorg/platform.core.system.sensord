@@ -141,9 +141,9 @@ void sensor_loader::create_physical_sensors(sensor_type_t type)
 	physical_sensor *sensor;
 	sensor_device *device;
 
-	sensor_device_map_t::iterator it = m_devices.begin();
+	sensor_device_map_t::iterator it;
 
-	for (sensor_device_map_t::iterator it = m_devices.begin(); it != m_devices.end(); ++it) {
+	for (it = m_devices.begin(); it != m_devices.end(); ++it) {
 		info = it->first;
 		device = it->second;
 		if (m_devices[info] == NULL)
