@@ -1,7 +1,7 @@
 /*
- * libsensord
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ sensor_handle_info::sensor_handle_info()
 , m_sensor_id(UNKNOWN_SENSOR)
 , m_sensor_state(SENSOR_STATE_UNKNOWN)
 , m_sensor_option(SENSOR_OPTION_DEFAULT)
-, m_sensor_wakeup(SENSOR_WAKEUP_OFF)
 , m_bad_accuracy(false)
 , m_accuracy(-1)
 , m_accuracy_cb(NULL)
@@ -150,7 +149,7 @@ void sensor_handle_info::get_batch(unsigned int &interval, unsigned int &latency
 {
 	if (m_reg_event_infos.empty()) {
 		_D("No events are registered for client %s", get_client_name());
-		interval = POLL_MAX_HZ_MS;
+		interval = POLL_1HZ_MS;
 		latency = 0;
 		return;
 	}

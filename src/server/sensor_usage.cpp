@@ -1,7 +1,7 @@
 /*
- * libsensord-share
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
  *
  */
 
-#include <sensor_internal.h>
+#include <sensor_common.h>
+#include <sensor_types.h>
 #include <sensor_usage.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 
 sensor_usage::sensor_usage()
-: m_interval(POLL_MAX_HZ_MS)
+: m_interval(POLL_1HZ_MS)
 , m_latency(0)
 , m_option(SENSOR_OPTION_DEFAULT)
-, m_wakeup(SENSOR_WAKEUP_OFF)
 , m_start(false)
 {
 

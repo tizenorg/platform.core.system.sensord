@@ -1,5 +1,5 @@
 /*
- * libsensord-share
+ * sensord
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -22,7 +22,6 @@
 
 
 virtual_sensor::virtual_sensor()
-: m_hardware_fusion(false)
 {
 
 }

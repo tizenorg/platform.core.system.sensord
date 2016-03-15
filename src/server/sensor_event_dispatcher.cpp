@@ -1,7 +1,7 @@
 /*
- * libsensord-share
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
  *
  */
 
+#include <sensor_common.h>
 #include <command_common.h>
 #include <sensor_event_dispatcher.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <thread>
 
 using std::thread;
@@ -29,7 +30,6 @@ using std::pair;
 #define MAX_PENDING_CONNECTION 32
 
 sensor_event_dispatcher::sensor_event_dispatcher()
-: m_lcd_on(false)
 {
 }
 
@@ -42,30 +42,8 @@ sensor_event_dispatcher& sensor_event_dispatcher::get_instance()
 	return inst;
 }
 
-
 bool sensor_event_dispatcher::run(void)
 {
-	_I("Starting Event Dispatcher\n");
-
-	if (!m_accept_socket.create(SOCK_SEQPACKET)) {
-		_E("Listener Socket Creation failed in Server \n");
-		return false;
-	}
-
-	if(!m_accept_socket.bind(EVENT_CHANNEL_PATH)) {
-		_E("Listener Socket Binding failed in Server \n");
-		m_accept_socket.close();
-		return false;
-	}
-
-	if(!m_accept_socket.listen(MAX_PENDING_CONNECTION)) {
-		_E("Socket Listen failed in Server \n");
-		return false;
-	}
-
-	thread accepter(&sensor_event_dispatcher::accept_connections, this);
-	accepter.detach();
-
 	thread dispatcher(&sensor_event_dispatcher::dispatch_event, this);
 	dispatcher.detach();
 
@@ -75,7 +53,7 @@ bool sensor_event_dispatcher::run(void)
 void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 {
 	int client_id;
-	event_channel_ready_t event_channel_ready;
+	channel_ready_t event_channel_ready;
 	client_info_manager& client_info_manager = get_client_info_manager();
 
 	client_socket.set_connection_mode();
@@ -87,15 +65,13 @@ void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 
 	client_socket.set_transfer_mode();
 
-	AUTOLOCK(m_mutex);
-
 	if(!get_client_info_manager().set_event_socket(client_id, client_socket)) {
 		_E("Failed to store event socket[%d] for %s", client_socket.get_socket_fd(),
 			client_info_manager.get_client_info(client_id));
 		return;
 	}
 
-	event_channel_ready.magic = EVENT_CHANNEL_MAGIC;
+	event_channel_ready.magic = CHANNEL_MAGIC_NUM;
 	event_channel_ready.client_id = client_id;
 
 	_I("Event channel is accepted for %s on socket[%d]",
@@ -108,23 +84,10 @@ void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 	}
 }
 
-void sensor_event_dispatcher::accept_connections(void)
+void sensor_event_dispatcher::accept_event_connections(csocket client_socket)
 {
-	_I("Event channel acceptor is started.\n");
-
-	while (true) {
-		csocket client_socket;
-
-		if (!m_accept_socket.accept(client_socket)) {
-			_E("Accepting socket failed in Server \n");
-			continue;
-		}
-
-		_I("New client connected (socket_fd : %d)\n", client_socket.get_socket_fd());
-
-		thread event_channel_creator(&sensor_event_dispatcher::accept_event_channel, this, client_socket);
-		event_channel_creator.detach();
-	}
+	thread event_channel_creator(&sensor_event_dispatcher::accept_event_channel, this, client_socket);
+	event_channel_creator.detach();
 }
 
 void sensor_event_dispatcher::dispatch_event(void)
@@ -179,8 +142,7 @@ void sensor_event_dispatcher::dispatch_event(void)
 
 void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 {
-	void *event;
-	sensor_event_t *sensor_events = NULL;
+	sensor_event_t *sensor_event = NULL;
 	client_info_manager& client_info_manager = get_client_info_manager();
 
 	const int RESERVED_CLIENT_CNT = 20;
@@ -189,21 +151,10 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 	for (unsigned int i = 0; i < events.size(); ++i) {
 		sensor_id_t sensor_id;
 		unsigned int event_type;
-		int length;
 
-		sensor_events = (sensor_event_t*)events[i];
-		length = sizeof(sensor_event_t) + sensor_events->data_length;
-		sensor_id = sensor_events->sensor_id;
-		event_type = sensor_events->event_type;
-
-		event = (void *)malloc(length);
-		if (!event) {
-			_E("Failed to allocate memory");
-			return;
-		}
-
-		memcpy(event, sensor_events, sizeof(sensor_event_t));
-		memcpy((char *)event + sizeof(sensor_event_t), sensor_events->data, sensor_events->data_length);
+		sensor_event = (sensor_event_t*)events[i];
+		sensor_id = sensor_event->sensor_id;
+		event_type = sensor_event->event_type;
 
 		id_vec.clear();
 		client_info_manager.get_listener_ids(sensor_id, event_type, id_vec);
@@ -213,7 +164,9 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 		while (it_client_id != id_vec.end()) {
 			csocket client_socket;
 			client_info_manager.get_event_socket(*it_client_id, client_socket);
-			bool ret = (client_socket.send(event, length) > 0);
+			bool ret = (client_socket.send(sensor_event, sizeof(sensor_event_t)) > 0);
+
+			ret = (ret & (client_socket.send(sensor_event->data, sensor_event->data_length) > 0));
 
 			if (ret)
 				_D("Event[0x%x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
@@ -223,8 +176,8 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 			++it_client_id;
 		}
 
-		free(sensor_events->data);
-		free(sensor_events);
+		free(sensor_event->data);
+		free(sensor_event);
 	}
 }
 
@@ -319,8 +272,7 @@ void sensor_event_dispatcher::request_last_event(int client_id, sensor_id_t sens
 	}
 }
 
-
-bool sensor_event_dispatcher::add_active_virtual_sensor(virtual_sensor * sensor)
+bool sensor_event_dispatcher::add_active_virtual_sensor(virtual_sensor *sensor)
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 
@@ -334,7 +286,7 @@ bool sensor_event_dispatcher::add_active_virtual_sensor(virtual_sensor * sensor)
 	return true;
 }
 
-bool sensor_event_dispatcher::delete_active_virtual_sensor(virtual_sensor * sensor)
+bool sensor_event_dispatcher::delete_active_virtual_sensor(virtual_sensor *sensor)
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 

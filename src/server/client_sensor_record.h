@@ -1,7 +1,7 @@
 /*
- * libsensord-share
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@
 #ifndef _CLIENT_SENSOR_RECORD_H_
 #define _CLIENT_SENSOR_RECORD_H_
 
-#include <sensor_internal.h>
+#include <sensor_common.h>
+#include <sensor_types.h>
 #include <sensor_usage.h>
 #include <csocket.h>
 #include <unordered_map>
@@ -47,7 +48,6 @@ public:
 	bool set_batch(sensor_id_t sensor_id, unsigned int interval, unsigned int latency);
 	bool get_batch(sensor_id_t sensor_id, unsigned int &interval, unsigned int &latency);
 	bool set_option(sensor_id_t sensor_id, int option);
-	bool set_wakeup(sensor_id_t sensor_id, int wakeup);
 
 	bool set_start(sensor_id_t sensor_id, bool start);
 	bool is_started(sensor_id_t sensor_id);

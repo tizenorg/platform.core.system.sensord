@@ -1,5 +1,5 @@
 /*
- * libsensord-share
+ * sensord
  *
  * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *

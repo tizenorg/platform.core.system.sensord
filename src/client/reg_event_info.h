@@ -1,7 +1,7 @@
 /*
- * libsensord
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,17 +40,16 @@ public:
 	void *m_cb;
 	void *m_user_data;
 	unsigned long long m_previous_event_time;
-	bool	m_fired;
+	bool m_fired;
 	GMainContext *m_maincontext;
 
-	reg_event_info():m_id(0), m_handle(-1),
-			type(0), m_interval(POLL_1HZ_MS),
-			m_latency(0),
-			m_cb_type(SENSOR_EVENT_CB), m_cb(NULL), m_user_data(NULL),
-			m_previous_event_time(0), m_fired(false), m_maincontext(NULL){}
+	reg_event_info()
+	: m_id(0), m_handle(-1),
+	type(0), m_interval(POLL_1HZ_MS), m_latency(0),
+	m_cb_type(SENSOR_EVENT_CB), m_cb(NULL), m_user_data(NULL),
+	m_previous_event_time(0), m_fired(false), m_maincontext(NULL) {}
 
-	~reg_event_info(){}
+	~reg_event_info() {}
 };
-
 
 #endif /* _REG_EVENT_INFO_H_ */

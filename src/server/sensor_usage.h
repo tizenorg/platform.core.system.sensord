@@ -1,7 +1,7 @@
 /*
- * libsensord-share
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ public:
 	unsigned int m_interval;
 	unsigned int m_latency;
 	int m_option;
-	int m_wakeup;
 	reg_event_vector m_reg_events;
 	bool m_start;
 

@@ -1,7 +1,7 @@
 /*
- * libsensord
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@
 
 class command_channel {
 public:
-
 	command_channel();
 	~command_channel();
 
@@ -41,16 +40,17 @@ public:
 	bool cmd_start(void);
 	bool cmd_stop(void);
 	bool cmd_set_option(int option);
-	bool cmd_set_wakeup(int wakeup);
 	bool cmd_register_event(unsigned int event_type);
 	bool cmd_register_events(event_type_vector &event_vec);
 	bool cmd_unregister_event(unsigned int event_type);
 	bool cmd_unregister_events(event_type_vector &event_vec);
 	bool cmd_set_batch(unsigned int interval, unsigned int latency);
 	bool cmd_unset_batch(void);
-	bool cmd_get_data(unsigned int type, sensor_data_t* values);
+	bool cmd_get_data(unsigned int type, sensor_data_t *values);
 	bool cmd_set_attribute_int(int attribute, int value);
-	bool cmd_set_attribute_str(int attribute, const char* buffer, int data_len);
+	bool cmd_set_attribute_str(int attribute, const char *value, int value_len);
+	bool cmd_flush(void);
+
 private:
 	csocket m_command_socket;
 	int m_client_id;
@@ -58,4 +58,4 @@ private:
 	bool command_handler(cpacket *packet, void **return_payload);
 };
 
-#endif /* COMMAND_CHANNEL_H_ */
+#endif /* _COMMAND_CHANNEL_H_ */

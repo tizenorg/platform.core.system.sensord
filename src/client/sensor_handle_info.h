@@ -1,7 +1,7 @@
 /*
- * libsensord
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@
 #ifndef _SENSOR_HANDLE_INFO_H_
 #define _SENSOR_HANDLE_INFO_H_
 
+#include <sensor_internal.h>
 #include <reg_event_info.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <string.h>
 #include <unordered_map>
 #include <glib.h>
-#include <sensor_internal.h>
 
 typedef std::unordered_map<unsigned int,reg_event_info> event_info_map;
 
@@ -35,7 +35,6 @@ public:
 	sensor_id_t m_sensor_id;
 	int m_sensor_state;
 	int m_sensor_option;
-	int m_sensor_wakeup;
 	int m_bad_accuracy;
 	int m_accuracy;
 	sensor_accuracy_changed_cb_t m_accuracy_cb;

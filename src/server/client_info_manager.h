@@ -1,7 +1,7 @@
 /*
- * libsensord-share
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 
 #include <client_sensor_record.h>
 #include <unordered_map>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <cmutex.h>
 #include <vector>
 
@@ -53,7 +53,6 @@ public:
 	bool set_batch(int client_id, sensor_id_t sensor_id, unsigned int interval, unsigned int latency);
 	bool get_batch(int client_id, sensor_id_t sensor_id, unsigned int &interval, unsigned int &latency);
 	bool set_option(int client_id, sensor_id_t sensor_id, int option);
-	bool set_wakeup(int client_id, sensor_id_t sensor_id, int wakeup);
 
 	bool set_start(int client_id, sensor_id_t sensor_id, bool start);
 	bool is_started(int client_id, sensor_id_t sensor_id);

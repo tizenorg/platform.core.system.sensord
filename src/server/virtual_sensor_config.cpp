@@ -1,5 +1,5 @@
 /*
- * libsensord-share
+ * sensord
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -18,7 +18,7 @@
  */
 
 #include <virtual_sensor_config.h>
-#include "sensor_logs.h"
+#include "sensor_log.h"
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <string>

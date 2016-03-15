@@ -1,0 +1,10 @@
+[Unit]
+Description=Sensor command socket
+
+[Socket]
+ListenStream=/tmp/sensord_command_socket
+SocketMode=0777
+PassCredentials=yes
+Accept=false
+SmackLabelIPIn=*
+SmackLabelIPOut=@

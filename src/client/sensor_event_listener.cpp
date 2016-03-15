@@ -1,5 +1,5 @@
 /*
- * libsensord
+ * sensord
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -25,11 +25,10 @@
 #include <chrono>
 #include <vector>
 
-#define MS_TO_US 1000
-#define MIN_DELIVERY_DIFF_FACTOR 0.75f
+#include <sensor_types.h>
 
-/* TODO: this macro should be adjusted */
-#define EVENT_BUFFER_SIZE 4224
+/* TODO: this macro should be adjusted(4224 = 4096(data) + 128(header)) */
+#define EVENT_BUFFER_SIZE sizeof(sensor_event_t)
 
 using std::thread;
 using std::pair;
@@ -46,14 +45,6 @@ sensor_event_listener::sensor_event_listener()
 sensor_event_listener::~sensor_event_listener()
 {
 	stop_event_listener();
-}
-
-sensor_event_listener::sensor_event_listener(const sensor_event_listener& listener)
-: m_poller(listener.m_poller)
-, m_thread_state(listener.m_thread_state)
-, m_hup_observer(listener.m_hup_observer)
-, m_client_info(listener.m_client_info)
-{
 }
 
 sensor_event_listener& sensor_event_listener::get_instance(void)
@@ -78,26 +69,23 @@ void sensor_event_listener::operate_sensor(sensor_id_t sensor, int power_save_st
 
 	m_client_info.get_sensor_handle_info(sensor, handles_info);
 
-	auto it_handle = handles_info.begin();
+	for (auto it_handle = handles_info.begin(); it_handle != handles_info.end(); ++it_handle) {
+		if (it_handle->second.m_sensor_id != sensor)
+			continue;
 
-	while (it_handle != handles_info.end()) {
-		if (it_handle->second.m_sensor_id == sensor) {
-			if ((it_handle->second.m_sensor_state == SENSOR_STATE_STARTED) &&
-				power_save_state &&
-				!(it_handle->second.m_sensor_option & power_save_state)) {
+		if ((it_handle->second.m_sensor_state == SENSOR_STATE_STARTED) &&
+			power_save_state &&
+			!(it_handle->second.m_sensor_option & power_save_state)) {
 
-				m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_PAUSED);
-				_I("%s's %s[%d] is paused", get_client_name(), get_sensor_name(sensor), it_handle->first);
+			m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_PAUSED);
+			_I("%s's %s[%d] is paused", get_client_name(), get_sensor_name(sensor), it_handle->first);
 
-			} else if ((it_handle->second.m_sensor_state == SENSOR_STATE_PAUSED) &&
-				(!power_save_state || (it_handle->second.m_sensor_option & power_save_state))) {
+		} else if ((it_handle->second.m_sensor_state == SENSOR_STATE_PAUSED) &&
+			(!power_save_state || (it_handle->second.m_sensor_option & power_save_state))) {
 
-				m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_STARTED);
-				_I("%s's %s[%d] is resumed", get_client_name(), get_sensor_name(sensor), it_handle->first);
-			}
+			m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_STARTED);
+			_I("%s's %s[%d] is resumed", get_client_name(), get_sensor_name(sensor), it_handle->first);
 		}
-
-		++it_handle;
 	}
 }
 
@@ -172,7 +160,6 @@ void sensor_event_listener::handle_events(void* event)
 
 	sensor_event_t *sensor_event = (sensor_event_t *)event;
 	sensor_id = sensor_event->sensor_id;
-	sensor_event->data = (sensor_data_t *)((char *)sensor_event + sizeof(sensor_event_t));
 	sensor_data = sensor_event->data;
 	cur_time = sensor_event->data->timestamp;
 	accuracy = sensor_event->data->accuracy;
@@ -317,7 +304,7 @@ gboolean sensor_event_listener::callback_dispatcher(gpointer data)
 		delete[] (char *)data->event_data;
 	}
 
-	free(cb_info->buffer);
+	free(cb_info->sensor_data);
 	delete cb_info;
 
 /*
@@ -353,41 +340,40 @@ ssize_t sensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, s
 	return len;
 }
 
-
-
 void sensor_event_listener::listen_events(void)
 {
+	char buffer[EVENT_BUFFER_SIZE];
 	struct epoll_event event;
 	ssize_t len = -1;
 
 	do {
+		void *buffer_data;
+		int data_len;
+
 		lock l(m_thread_mutex);
-		if (m_thread_state == THREAD_STATE_START) {
-			void *buffer = malloc(EVENT_BUFFER_SIZE);
+		if (m_thread_state != THREAD_STATE_START)
+			break;
 
-			if (!buffer) {
-				_E("Failed to allocate memory");
-				break;
-			}
-
-			len = sensor_event_poll(buffer, EVENT_BUFFER_SIZE, event);
-			if (len <= 0) {
-				_I("sensor_event_poll failed");
-				free(buffer);
-				break;
-			}
-
-			void *buffer_shrinked = realloc(buffer, len);
-			if (!buffer_shrinked) {
-				_E("Failed to allocate memory");
-				free(buffer);
-				break;
-			}
-
-			handle_events(buffer_shrinked);
-		} else {
+		len = sensor_event_poll(buffer, sizeof(sensor_event_t), event);
+		if (len <= 0) {
+			_I("Failed to sensor_event_poll()");
 			break;
 		}
+
+		sensor_event_t *sensor_event = reinterpret_cast<sensor_event_t *>(buffer);
+		data_len = sensor_event->data_length;
+		buffer_data = malloc(data_len);
+
+		len = sensor_event_poll(buffer_data, data_len, event);
+		if (len <= 0) {
+			_I("Failed to sensor_event_poll() for sensor_data");
+			free(buffer_data);
+			break;
+		}
+
+		sensor_event->data = reinterpret_cast<sensor_data_t *>(buffer_data);
+
+		handle_events((void *)buffer);
 	} while (true);
 
 	if (m_poller != NULL) {
@@ -415,7 +401,7 @@ void sensor_event_listener::listen_events(void)
 bool sensor_event_listener::create_event_channel(void)
 {
 	int client_id;
-	event_channel_ready_t event_channel_ready;
+	channel_ready_t event_channel_ready;
 
 	if (!m_event_socket.create(SOCK_SEQPACKET))
 		return false;
@@ -443,7 +429,7 @@ bool sensor_event_listener::create_event_channel(void)
 		return false;
 	}
 
-	if ((event_channel_ready.magic != EVENT_CHANNEL_MAGIC) || (event_channel_ready.client_id != client_id)) {
+	if ((event_channel_ready.magic != CHANNEL_MAGIC_NUM) || (event_channel_ready.client_id != client_id)) {
 		_E("Event_channel_ready packet is wrong, magic = 0x%x, client id = %d",
 			event_channel_ready.magic, event_channel_ready.client_id);
 		return false;

@@ -1,7 +1,7 @@
 /*
- * libsensord-share
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,32 +20,33 @@
 #ifndef _COMMAND_COMMON_H_
 #define _COMMAND_COMMON_H_
 
+#include <cpacket.h>
 #include <sensor_common.h>
 
-#define COMMAND_CHANNEL_PATH			"/tmp/sensord_command_socket"
-#define EVENT_CHANNEL_PATH				"/tmp/sensord_event_socket"
+#define COMMAND_CHANNEL_PATH		"/tmp/sensord_command_socket\0"
+#define EVENT_CHANNEL_PATH			"/tmp/sensord_event_socket\0"
 
 #define MAX_HANDLE			256
 #define MAX_HANDLE_REACHED	-2
 
 enum packet_type_t {
+	CMD_DONE = -1,
 	CMD_NONE = 0,
 	CMD_GET_ID,
 	CMD_GET_SENSOR_LIST,
 	CMD_HELLO,
 	CMD_BYEBYE,
-	CMD_DONE,
 	CMD_START,
 	CMD_STOP,
 	CMD_REG,
 	CMD_UNREG,
 	CMD_SET_OPTION,
-	CMD_SET_WAKEUP,
 	CMD_SET_BATCH,
 	CMD_UNSET_BATCH,
 	CMD_GET_DATA,
 	CMD_SET_ATTRIBUTE_INT,
 	CMD_SET_ATTRIBUTE_STR,
+	CMD_FLUSH,
 	CMD_CNT,
 };
 
@@ -114,9 +115,6 @@ typedef struct {
 	int option;
 } cmd_set_option_t;
 
-typedef struct {
-	int wakeup;
-} cmd_set_wakeup_t;
 
 typedef struct  {
 	int attribute;
@@ -129,12 +127,15 @@ typedef struct  {
 	char value[0];
 } cmd_set_attribute_str_t;
 
-#define EVENT_CHANNEL_MAGIC 0xCAFECAFE
+typedef struct {
+} cmd_flush_t;
+
+#define CHANNEL_MAGIC_NUM 0xCAFECAFE
 
 typedef struct {
 	unsigned int magic;
 	int client_id;
-} event_channel_ready_t;
+} channel_ready_t;
 
 typedef void *(*cmd_func_t)(void *data, void *cb_data);
 

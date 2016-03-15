@@ -1,7 +1,7 @@
 /*
- * libsensord
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  */
 
 #include <sensor_info.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -81,7 +81,7 @@ int sensor_info::get_max_batch_count(void)
 	return m_max_batch_count;
 }
 
-unsigned int sensor_info::get_supported_event()
+unsigned int sensor_info::get_supported_event(void)
 {
 	return m_supported_event;
 }
@@ -221,8 +221,7 @@ void sensor_info::show(void)
 	_I("Min_interval = %d", m_min_interval);
 	_I("Fifo_count = %d", m_fifo_count);
 	_I("Max_batch_count = %d", m_max_batch_count);
-	_I("supported_event = 0x%x", m_supported_event);
-
+	_I("Supported_event = 0x%x", m_supported_event);
 	_I("Wakeup_supported = %d", m_wakeup_supported);
 }
 
@@ -249,7 +248,7 @@ void sensor_info::put(raw_data_t &data, int value)
 {
 	char buffer[sizeof(value)];
 
-	int *temp = (int *) buffer;
+	int *temp = (int *)buffer;
 	*temp = value;
 
 	copy(&buffer[0], &buffer[sizeof(buffer)], back_inserter(data));
@@ -259,7 +258,7 @@ void sensor_info::put(raw_data_t &data, unsigned int value)
 {
 	char buffer[sizeof(value)];
 
-	unsigned int *temp = (unsigned int *) buffer;
+	unsigned int *temp = (unsigned int *)buffer;
 	*temp = value;
 
 	copy(&buffer[0], &buffer[sizeof(buffer)], back_inserter(data));

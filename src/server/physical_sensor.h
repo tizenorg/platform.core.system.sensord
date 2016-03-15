@@ -1,5 +1,5 @@
 /*
- * libsensord-share
+ * sensord
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -40,24 +40,27 @@ public:
 
 	int get_poll_fd();
 
+	virtual bool on_event(const sensor_data_t *data, int remains);
+
 	virtual bool read_fd(std::vector<uint32_t> &ids);
 	virtual int get_data(sensor_data_t **data, int *length);
 	virtual bool flush(void);
-private:
-	static cmutex m_mutex;
 
+protected:
 	const sensor_info_t *m_info;
 	sensor_device *m_sensor_device;
 	uint32_t hal_id;
 
-	virtual bool set_interval(unsigned long interval);
-	virtual bool set_batch_latency(unsigned long latency);
-	virtual int set_attribute(int32_t attribute, int32_t value);
-	virtual int set_attribute(int32_t attribute, char *value, int value_len);
-	virtual bool set_wakeup(int wakeup);
 	virtual bool on_start(void);
 	virtual bool on_stop(void);
+	virtual int set_attribute(int32_t attribute, int32_t value);
+	virtual int set_attribute(int32_t attribute, char *value, int value_len);
+	virtual bool set_interval(unsigned long interval);
+	virtual bool set_batch_latency(unsigned long latency);
 	virtual bool get_sensor_info(sensor_info &info);
+
+private:
+	static cmutex m_mutex;
 };
 
 #endif /* _PHYSICAL_SENSOR_H_ */

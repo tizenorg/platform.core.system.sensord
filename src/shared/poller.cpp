@@ -1,7 +1,7 @@
 /*
- * libsensord
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,19 @@
  */
 #include <errno.h>
 #include <string.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <poller.h>
 
 #define EPOLL_MAX 32
 
 poller::poller()
+: m_epfd(-1)
 {
 	init_poll_fd();
 }
 
 poller::poller(int fd)
+: m_epfd(-1)
 {
 	init_poll_fd();
 	add_fd(fd);
@@ -100,7 +102,7 @@ bool poller::poll(struct epoll_event &event)
 			m_event_queue.pop();
 
 			if (event.events & EPOLLERR) {
-				_D("Poll error!");
+				_E("Poll error!");
 				return false;
 			}
 

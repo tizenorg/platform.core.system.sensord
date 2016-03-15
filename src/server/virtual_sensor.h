@@ -1,5 +1,5 @@
 /*
- * libsensord-share
+ * sensord
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -50,12 +50,8 @@ protected:
 	bool deactivate(void);
 
 private:
-	bool m_hardware_fusion;
-
 	virtual bool set_interval(unsigned long interval) = 0;
 	virtual bool set_batch_latency(unsigned long latency) = 0;
-	virtual bool set_wakeup(int wakeup) = 0;
-
 	virtual bool on_start(void) = 0;
 	virtual bool on_stop(void) = 0;
 };

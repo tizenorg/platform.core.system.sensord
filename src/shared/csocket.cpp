@@ -1,7 +1,7 @@
 /*
- * libsensord-share
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  *
  */
 
+#include <sensor_log.h>
 #include <csocket.h>
 #include <attr/xattr.h>
 #include <sys/stat.h>
@@ -88,30 +89,13 @@ bool csocket::bind (const char *sock_path)
 		return false;
 	}
 
-	if((fsetxattr(m_sock_fd, "security.SMACK64IPOUT", "@", 2, 0)) < 0) {
-		if(errno != EOPNOTSUPP) {
-			close();
-			_E("security.SMACK64IPOUT error = [%d][%s]\n", errno, strerror(errno) );
-			return false;
-		}
-	}
-
-	if((fsetxattr(m_sock_fd, "security.SMACK64IPIN", "*", 2, 0)) < 0) {
-		if(errno != EOPNOTSUPP)	{
-			close();
-			_E("security.SMACK64IPIN error  = [%d][%s]\n", errno, strerror(errno) );
-			return false;
-		}
-	}
-
 	if (!access(sock_path, F_OK)) {
 		unlink(sock_path);
 	}
 
 	m_addr.sun_family = AF_UNIX;
 
-	strncpy(m_addr.sun_path, sock_path, sizeof(m_addr.sun_path));
-	m_addr.sun_path[sizeof(m_addr.sun_path)-1] = '\0';
+	strncpy(m_addr.sun_path, sock_path, strlen(sock_path));
 
 	length = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 
@@ -312,8 +296,7 @@ bool csocket::connect(const char *sock_path)
 
 	m_addr.sun_family = AF_UNIX;
 
-	strncpy(m_addr.sun_path, sock_path, sizeof(m_addr.sun_path));
-	m_addr.sun_path[sizeof(m_addr.sun_path)-1] = '\0';
+	strncpy(m_addr.sun_path, sock_path, strlen(sock_path));
 
 	addr_len = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 

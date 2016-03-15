@@ -1,7 +1,7 @@
 /*
- * libsensord-share
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  */
 
 #include <sensor_event_queue.h>
-#include "sensor_logs.h"
+#include <sensor_log.h>
 
 sensor_event_queue& sensor_event_queue::get_instance()
 {
@@ -47,7 +47,7 @@ void* sensor_event_queue::pop(void)
 	while (m_queue.empty())
 		m_cond_var.wait(u);
 
-	void *event = m_queue.top();
+	void *event = m_queue.front();
 	m_queue.pop();
 
 	return event;

@@ -1,7 +1,7 @@
 /*
- * libsensord-share
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 #include <command_common.h>
 #include <client_info_manager.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <csocket.h>
 
 using std::pair;
@@ -136,22 +136,6 @@ bool client_info_manager::set_option(int client_id, sensor_id_t sensor_id, int o
 	return true;
 }
 
-bool client_info_manager::set_wakeup(int client_id, sensor_id_t sensor_id, int wakeup)
-{
-	AUTOLOCK(m_mutex);
-
-	auto it_record = m_clients.find(client_id);
-
-	if (it_record == m_clients.end()) {
-		_E("Client[%d] is not found", client_id);
-		return false;
-	}
-
-	if(!it_record->second.set_wakeup(sensor_id, wakeup))
-		return false;
-
-	return true;
-}
 
 bool client_info_manager::set_start(int client_id, sensor_id_t sensor_id, bool start)
 {

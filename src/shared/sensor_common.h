@@ -1,5 +1,5 @@
 /*
- * libsensord-share
+ * sensord
  *
  * Copyright (c) 2014 Samsung Electronics Co., Ltd.
  *
@@ -20,11 +20,19 @@
 #ifndef __SENSOR_COMMON_H__
 #define __SENSOR_COMMON_H__
 
+#include <stddef.h>
+#include <stdint.h>
 #include <sensor_hal.h>
 #include <sensor_types.h>
-#include <stdint.h>
 
-#define CLIENT_ID_INVALID   -1
+#define OP_ERROR -1
+#define OP_SUCCESS 0
+
+#define CLIENT_ID_INVALID -1
+#define SENSOR_ID_INVALID -1
+
+#define SENSOR_TYPE_SHIFT 32
+#define SENSOR_INDEX_MASK 0xFFFFFFFF
 
 #ifndef NAME_MAX
 #define NAME_MAX 256
@@ -62,12 +70,6 @@ enum sensor_option_t {
 
 typedef enum sensor_option_t sensor_option_e;
 #endif
-
-enum sensor_wakeup_t {
-	SENSOR_WAKEUP_UNKNOWN = -1,
-	SENSOR_WAKEUP_OFF = 0,
-	SENSOR_WAKEUP_ON = 1,
-};
 
 enum poll_interval_t {
 	POLL_100HZ_MS	= 10,
@@ -125,6 +127,6 @@ typedef struct sensor_event_t {
 #include <vector>
 
 typedef std::vector<unsigned int> event_type_vector;
-#endif
+#endif /* __cplusplus */
 
 #endif /* __SENSOR_COMMON_H__ */

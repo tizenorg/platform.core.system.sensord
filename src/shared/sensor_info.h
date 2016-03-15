@@ -1,7 +1,7 @@
 /*
- * libsensord
+ * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2013 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public:
 	int get_min_interval(void);
 	int get_fifo_count(void);
 	int get_max_batch_count(void);
-	unsigned int get_supported_event();
+	unsigned int get_supported_event(void);
 	bool is_supported_event(unsigned int event);
 	bool is_wakeup_supported(void);
 

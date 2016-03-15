@@ -18,7 +18,7 @@
  */
 
 #include <signal.h>
-#include <sensor_logs.h>
+#include <sensor_log.h>
 #include <server.h>
 #include <sensor_loader.h>
 #include <string>

@@ -1,7 +1,7 @@
 /*
- * libsensord
+ * sensord
  *
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,6 @@
 
 #include <thread>
 #include <chrono>
-
-#define MS_TO_US 1000
-#define MIN_DELIVERY_DIFF_FACTOR 0.75f
 
 using std::thread;
 using std::pair;
@@ -417,7 +414,6 @@ bool sensor_client_info::close_command_channel(sensor_id_t sensor_id)
 	return true;
 }
 
-
 bool sensor_client_info::has_client_id(void)
 {
 	return (m_client_id != CLIENT_ID_INVALID);
@@ -528,38 +524,6 @@ bool sensor_client_info::get_sensor_state(int handle, int &sensor_state)
 	return true;
 }
 
-bool sensor_client_info::get_sensor_wakeup(int handle, int &sensor_wakeup)
-{
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		_E("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	sensor_wakeup = it_handle->second.m_sensor_wakeup;
-
-	return true;
-}
-
-bool sensor_client_info::set_sensor_wakeup(int handle, int sensor_wakeup)
-{
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		_E("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	it_handle->second.m_sensor_wakeup = sensor_wakeup;
-
-	return true;
-}
-
 void sensor_client_info::get_active_event_types(sensor_id_t sensor, event_type_vector &active_event_types)
 {
 	event_type_vector event_types;
@@ -640,7 +604,6 @@ bool sensor_client_info::is_sensor_registered(sensor_id_t sensor)
 
 	return false;
 }
-
 
 bool sensor_client_info::is_sensor_active(sensor_id_t sensor)
 {
