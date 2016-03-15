@@ -47,14 +47,6 @@ sensor_event_listener::~sensor_event_listener()
 	stop_event_listener();
 }
 
-sensor_event_listener::sensor_event_listener(const sensor_event_listener& listener)
-: m_poller(listener.m_poller)
-, m_thread_state(listener.m_thread_state)
-, m_hup_observer(listener.m_hup_observer)
-, m_client_info(listener.m_client_info)
-{
-}
-
 sensor_event_listener& sensor_event_listener::get_instance(void)
 {
 	static sensor_event_listener inst;
@@ -409,7 +401,7 @@ void sensor_event_listener::listen_events(void)
 bool sensor_event_listener::create_event_channel(void)
 {
 	int client_id;
-	event_channel_ready_t event_channel_ready;
+	channel_ready_t event_channel_ready;
 
 	if (!m_event_socket.create(SOCK_SEQPACKET))
 		return false;
@@ -437,7 +429,7 @@ bool sensor_event_listener::create_event_channel(void)
 		return false;
 	}
 
-	if ((event_channel_ready.magic != EVENT_CHANNEL_MAGIC) || (event_channel_ready.client_id != client_id)) {
+	if ((event_channel_ready.magic != CHANNEL_MAGIC_NUM) || (event_channel_ready.client_id != client_id)) {
 		_E("Event_channel_ready packet is wrong, magic = 0x%x, client id = %d",
 			event_channel_ready.magic, event_channel_ready.client_id);
 		return false;

@@ -53,7 +53,7 @@ bool sensor_event_dispatcher::run(void)
 void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 {
 	int client_id;
-	event_channel_ready_t event_channel_ready;
+	channel_ready_t event_channel_ready;
 	client_info_manager& client_info_manager = get_client_info_manager();
 
 	client_socket.set_connection_mode();
@@ -71,7 +71,7 @@ void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 		return;
 	}
 
-	event_channel_ready.magic = EVENT_CHANNEL_MAGIC;
+	event_channel_ready.magic = CHANNEL_MAGIC_NUM;
 	event_channel_ready.client_id = client_id;
 
 	_I("Event channel is accepted for %s on socket[%d]",

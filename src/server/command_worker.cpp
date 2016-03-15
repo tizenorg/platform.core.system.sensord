@@ -772,7 +772,7 @@ bool command_worker::cmd_set_attribute_int(void *payload)
 	cmd = (cmd_set_attribute_int_t*)payload;
 
 	if (!is_permission_allowed()) {
-		_E("Permission denied to set command for client [%d], for sensor [0x%llx] with attribute [%d]",
+		_E("Permission denied to set attribute for client [%d], for sensor [0x%llx] with attribute [%d]",
 			m_client_id, m_sensor_id, cmd->attribute);
 		ret_value = OP_ERROR;
 		goto out;
@@ -797,7 +797,7 @@ bool command_worker::cmd_set_attribute_str(void *payload)
 	cmd = (cmd_set_attribute_str_t*)payload;
 
 	if (!is_permission_allowed()) {
-		_E("Permission denied to send sensorhub_data for client [%d], for sensor [0x%llx]",
+		_E("Permission denied to set attribute for client [%d], for sensor [0x%llx]",
 			m_client_id, m_sensor_id);
 		ret_value = OP_ERROR;
 		goto out;

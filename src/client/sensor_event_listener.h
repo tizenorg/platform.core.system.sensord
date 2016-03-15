@@ -102,7 +102,6 @@ private:
 	sensor_event_listener();
 	~sensor_event_listener();
 
-	sensor_event_listener(const sensor_event_listener&);
 	sensor_event_listener& operator=(const sensor_event_listener&);
 
 	bool create_event_channel(void);

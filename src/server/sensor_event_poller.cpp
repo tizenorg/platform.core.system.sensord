@@ -131,8 +131,11 @@ bool sensor_event_poller::process_event(int fd, const std::vector<uint32_t> &ids
 
 		while (remains > 0) {
 			event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
-
 			remains = sensor->get_data(&data, &data_length);
+			if (remains < 0) {
+				_E("Failed to get sensor data");
+				break;
+			}
 
 			event->sensor_id = sensor->get_id();
 			event->event_type = sensor->get_event_type();
