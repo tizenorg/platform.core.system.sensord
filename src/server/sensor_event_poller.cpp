@@ -137,6 +137,12 @@ bool sensor_event_poller::process_event(int fd, const std::vector<uint32_t> &ids
 				break;
 			}
 
+			if (!sensor->on_event(data, remains)) {
+				free(event);
+				free(data);
+				break;
+			}
+
 			event->sensor_id = sensor->get_id();
 			event->event_type = sensor->get_event_type();
 			event->data_length = data_length;

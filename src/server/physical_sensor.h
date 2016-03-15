@@ -40,6 +40,8 @@ public:
 
 	int get_poll_fd();
 
+	virtual bool on_event(const sensor_data_t *data, int remains);
+
 	virtual bool read_fd(std::vector<uint32_t> &ids);
 	virtual int get_data(sensor_data_t **data, int *length);
 	virtual bool flush(void);

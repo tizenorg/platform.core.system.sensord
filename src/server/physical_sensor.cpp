@@ -77,6 +77,11 @@ int physical_sensor::get_poll_fd()
 	return m_sensor_device->get_poll_fd();
 }
 
+bool physical_sensor::on_event(const sensor_data_t *data, int remains)
+{
+	return true;
+}
+
 bool physical_sensor::read_fd(std::vector<uint32_t> &ids)
 {
 	AUTOLOCK(m_mutex);
