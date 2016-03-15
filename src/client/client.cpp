@@ -1116,3 +1116,39 @@ API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* senso
 
 	return true;
 }
+
+API bool sensord_flush(int handle)
+{
+	sensor_id_t sensor_id;
+	command_channel *cmd_channel;
+	int sensor_state;
+	int client_id;
+
+	AUTOLOCK(lock);
+
+	if (!sensor_client_info::get_instance().get_sensor_state(handle, sensor_state) ||
+		!sensor_client_info::get_instance().get_sensor_id(handle, sensor_id)) {
+		_E("client %s failed to get handle information", get_client_name());
+		return false;
+	}
+
+	if (!sensor_client_info::get_instance().get_command_channel(sensor_id, &cmd_channel)) {
+		_E("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
+		return false;
+	}
+
+	client_id = sensor_client_info::get_instance().get_client_id();
+	retvm_if ((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
+
+	if (sensor_state != SENSOR_STATE_STARTED) {
+		_E("Sensor %s is not started for client %s with handle: %d, sensor_state: %d", get_sensor_name(sensor_id), get_client_name(), handle, sensor_state);
+		return false;
+	}
+
+	if (!cmd_channel->cmd_flush()) {
+		_E("cmd_flush() failed for %s", get_client_name());
+		return false;
+	}
+
+	return true;
+}

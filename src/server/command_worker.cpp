@@ -87,6 +87,7 @@ void command_worker::init_cmd_handlers(void)
 	m_cmd_handlers[CMD_GET_DATA]			= &command_worker::cmd_get_data;
 	m_cmd_handlers[CMD_SET_ATTRIBUTE_INT]	= &command_worker::cmd_set_attribute_int;
 	m_cmd_handlers[CMD_SET_ATTRIBUTE_STR]	= &command_worker::cmd_set_attribute_str;
+	m_cmd_handlers[CMD_FLUSH]				= &command_worker::cmd_flush;
 }
 
 void command_worker::get_sensor_list(int permissions, cpacket &sensor_list)
@@ -804,6 +805,34 @@ bool command_worker::cmd_set_attribute_str(void *payload)
 	}
 
 	ret_value = m_module->set_attribute(cmd->attribute, cmd->value, cmd->value_len);
+
+out:
+	if (!send_cmd_done(ret_value))
+		_E("Failed to send cmd_done to a client");
+
+	return true;
+}
+
+bool command_worker::cmd_flush(void *payload)
+{
+	long ret_value = OP_ERROR;
+
+	_D("CMD_FLUSH Handler invoked");
+
+	if (!is_permission_allowed()) {
+		_E("Permission denied to flush sensor data for client [%d], for sensor [0x%llx]",
+			m_client_id, m_sensor_id);
+		ret_value = OP_ERROR;
+		goto out;
+	}
+
+	if (!m_module->flush()) {
+		_E("Failed to flush sensor_data [%d]", m_client_id);
+		ret_value = OP_ERROR;
+		goto out;
+	}
+
+	ret_value = OP_SUCCESS;
 
 out:
 	if (!send_cmd_done(ret_value))
