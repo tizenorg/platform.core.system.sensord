@@ -36,7 +36,7 @@
 #include <auto_rotation_alg.h>
 #include <auto_rotation_alg_emul.h>
 
-#define SENSOR_NAME "AUTO_ROTATION_SENSOR"
+#define SENSOR_NAME "SENSOR_AUTO_ROTATION"
 
 auto_rotation_sensor::auto_rotation_sensor()
 : m_accel_sensor(NULL)

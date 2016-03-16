@@ -35,7 +35,7 @@
 #include <sensor_loader.h>
 #include <fusion_util.h>
 
-#define SENSOR_NAME "LINEAR_ACCEL_SENSOR"
+#define SENSOR_NAME "SENSOR_LINEAR_ACCELERATION"
 
 #define GRAVITY 9.80665
 
