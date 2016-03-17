@@ -54,10 +54,7 @@
 #define ARCTAN(x, y) ((x) == 0 ? 0 : (y) != 0 ? atan2((x),(y)) : (x) > 0 ? M_PI/2.0 : -M_PI/2.0)
 
 gravity_sensor::gravity_sensor()
-: m_fusion(NULL)
-, m_accel_sensor(NULL)
-, m_gyro_sensor(NULL)
-, m_fusion_phase(0)
+: m_accel_sensor(NULL)
 , m_x(-1)
 , m_y(-1)
 , m_z(-1)
@@ -81,9 +78,7 @@ bool gravity_sensor::init()
 		return false;
 	}
 
-	m_gyro_sensor = sensor_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
-
-	_I("%s (%s) is created!\n", get_name(), m_gyro_sensor ? "Acc+Gyro Fusion" : "LowPass Acc");
+	_I("%s (%s) is created!\n", get_name());
 	return true;
 }
 
@@ -123,73 +118,8 @@ bool gravity_sensor::get_sensor_info(sensor_info &info)
 
 void gravity_sensor::synthesize(const sensor_event_t& event)
 {
-	/* If the rotation vector sensor is available */
-	if (m_fusion) {
-		synthesize_rv(event);
-		return;
-	}
-
-	/* If both Acc & Gyro are available */
-	if (m_gyro_sensor) {
-		synthesize_fusion(event);
-		return;
-	}
-
 	/* If only Acc is available */
 	synthesize_lowpass(event);
-}
-
-void gravity_sensor::synthesize_rv(const sensor_event_t& event)
-{
-	if (!m_fusion->is_data_ready())
-		return;
-
-	sensor_event_t *gravity_event;
-	float gravity[3];
-	float x, y, z, w, heading_accuracy;
-	int accuracy;
-
-	if (!m_fusion->get_rotation_vector(x, y, z, w, heading_accuracy, accuracy)) {
-		_E("Failed to get rotation vector");
-		return;
-	}
-
-	unsigned long long timestamp = m_fusion->get_data_timestamp();
-
-	if (!check_sampling_time(timestamp))
-		return;
-
-	float rotation[4] = {x, y, z, w};
-
-	rotation_to_gravity(rotation, gravity);
-
-	gravity_event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
-	if (!gravity_event) {
-		_E("Failed to allocate memory");
-		return;
-	}
-	gravity_event->data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
-	if (!gravity_event->data) {
-		_E("Failed to allocate memory");
-		return;
-	}
-
-	gravity_event->sensor_id = get_id();
-	gravity_event->event_type = GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME;
-	gravity_event->data_length = sizeof(sensor_data_t);
-	gravity_event->data->accuracy = accuracy;
-	gravity_event->data->timestamp = m_fusion->get_data_timestamp();
-	gravity_event->data->value_count = 3;
-	gravity_event->data->values[0] = gravity[0];
-	gravity_event->data->values[1] = gravity[1];
-	gravity_event->data->values[2] = gravity[2];
-	push(gravity_event);
-
-	m_time = event.data->timestamp;
-	m_x = gravity[0];
-	m_y = gravity[1];
-	m_z = gravity[2];
-	m_accuracy = accuracy;
 }
 
 void gravity_sensor::synthesize_lowpass(const sensor_event_t& event)
@@ -244,156 +174,6 @@ void gravity_sensor::synthesize_lowpass(const sensor_event_t& event)
 	m_accuracy = event.data->accuracy;
 }
 
-void gravity_sensor::synthesize_fusion(const sensor_event_t& event)
-{
-	sensor_event_t *gravity_event;
-
-	if (event.event_type == ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME) {
-		fusion_set_accel(event);
-		m_fusion_phase |= PHASE_ACCEL_READY;
-	} else if (event.event_type == GYROSCOPE_EVENT_RAW_DATA_REPORT_ON_TIME) {
-		fusion_set_gyro(event);
-		m_fusion_phase |= PHASE_GYRO_READY;
-	}
-
-	if (m_fusion_phase != PHASE_FUSION_READY)
-		return;
-
-	m_fusion_phase = 0;
-
-	fusion_update_angle();
-	fusion_get_gravity();
-
-	gravity_event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
-	if (!gravity_event) {
-		_E("Failed to allocate memory");
-		return;
-	}
-	gravity_event->data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
-	if (!gravity_event->data) {
-		_E("Failed to allocate memory");
-		return;
-	}
-
-	gravity_event->sensor_id = get_id();
-	gravity_event->event_type = GRAVITY_EVENT_RAW_DATA_REPORT_ON_TIME;
-	gravity_event->data_length = sizeof(sensor_data_t);
-	gravity_event->data->accuracy = m_accuracy;
-	gravity_event->data->timestamp = m_time;
-	gravity_event->data->value_count = 3;
-	gravity_event->data->values[0] = m_x;
-	gravity_event->data->values[1] = m_y;
-	gravity_event->data->values[2] = m_z;
-	push(gravity_event);
-}
-
-void gravity_sensor::fusion_set_accel(const sensor_event_t& event)
-{
-	double x = event.data->values[0];
-	double y = event.data->values[1];
-	double z = event.data->values[2];
-
-	m_accel_mag = NORM(x, y, z);
-
-	m_angle_n[0] = ARCTAN(z, y);
-	m_angle_n[1] = ARCTAN(x, z);
-	m_angle_n[2] = ARCTAN(y, x);
-
-	m_time_new = event.data->timestamp;
-
-	_D("AccIn: (%f, %f, %f)", x/m_accel_mag, y/m_accel_mag, z/m_accel_mag);
-}
-
-void gravity_sensor::fusion_set_gyro(const sensor_event_t& event)
-{
-	m_velocity[0] = -DEG2RAD(event.data->values[0]);
-	m_velocity[1] = -DEG2RAD(event.data->values[1]);
-	m_velocity[2] = -DEG2RAD(event.data->values[2]);
-
-	m_time_new = event.data->timestamp;
-}
-
-void gravity_sensor::fusion_update_angle()
-{
-	_D("AngleIn: (%f, %f, %f)", m_angle_n[0], m_angle_n[1], m_angle_n[2]);
-	_D("AngAccl: (%f, %f, %f)", m_velocity[0], m_velocity[1], m_velocity[2]);
-	_D("Angle  : (%f, %f, %f)", m_angle[0], m_angle[1], m_angle[2]);
-
-	if (m_angle[0] == INV_ANGLE) {
-		/* 1st iteration */
-		m_angle[0] = m_angle_n[0];
-		m_angle[1] = m_angle_n[1];
-		m_angle[2] = m_angle_n[2];
-	} else {
-		complementary(m_time_new - m_time);
-	}
-
-	_D("Angle' : (%f, %f, %f)", m_angle[0], m_angle[1], m_angle[2]);
-}
-
-void gravity_sensor::fusion_get_gravity()
-{
-	double x = 0, y = 0, z = 0;
-	double norm;
-	double vec[3][3];
-
-	/* Rotating along y-axis then z-axis */
-	vec[0][2] = cos(m_angle[1]);
-	vec[0][0] = sin(m_angle[1]);
-	vec[0][1] = vec[0][0] * tan(m_angle[2]);
-
-	/* Rotating along z-axis then x-axis */
-	vec[1][0] = cos(m_angle[2]);
-	vec[1][1] = sin(m_angle[2]);
-	vec[1][2] = vec[1][1] * tan(m_angle[0]);
-
-	/* Rotating along x-axis then y-axis */
-	vec[2][1] = cos(m_angle[0]);
-	vec[2][2] = sin(m_angle[0]);
-	vec[2][0] = vec[2][2] * tan(m_angle[1]);
-
-	/* Normalize */
-	for (int i = 0; i < 3; ++i) {
-		norm = NORM(vec[i][0], vec[i][1], vec[i][2]);
-		vec[i][0] /= norm;
-		vec[i][1] /= norm;
-		vec[i][2] /= norm;
-		x += vec[i][0];
-		y += vec[i][1];
-		z += vec[i][2];
-	}
-
-	norm = NORM(x, y, z);
-
-	m_x = x / norm * GRAVITY;
-	m_y = y / norm * GRAVITY;
-	m_z = z / norm * GRAVITY;
-	m_time = m_time_new;
-}
-
-void gravity_sensor::complementary(unsigned long long time_diff)
-{
-	double err = fabs(m_accel_mag - GRAVITY) / GRAVITY;
-	double tau = (err < 0.1 ? TAU_LOW : err > 0.9 ? TAU_HIGH : TAU_MID);
-	double delta_t = (double)time_diff/ US_PER_SEC;
-	double alpha = tau / (tau + delta_t);
-
-	_D("mag, err, tau, dt, alpha = %f, %f, %f, %f, %f", m_accel_mag, err, tau, delta_t, alpha);
-
-	m_angle[0] = complementary(m_angle[0], m_angle_n[0], m_velocity[0], delta_t, alpha);
-	m_angle[1] = complementary(m_angle[1], m_angle_n[1], m_velocity[1], delta_t, alpha);
-	m_angle[2] = complementary(m_angle[2], m_angle_n[2], m_velocity[2], delta_t, alpha);
-}
-
-double gravity_sensor::complementary(double angle, double angle_in, double vel, double delta_t, double alpha)
-{
-	double s, c;
-	angle = angle + vel * delta_t;
-	s = alpha * sin(angle) + (1 - alpha) * sin(angle_in);
-	c = alpha * cos(angle) + (1 - alpha) * cos(angle_in);
-	return ARCTAN(s, c);
-}
-
 int gravity_sensor::get_data(sensor_data_t **data, int *length)
 {
 	/* if It is batch sensor, remains can be 2+ */
@@ -427,32 +207,18 @@ bool gravity_sensor::set_wakeup(int wakeup)
 
 bool gravity_sensor::on_start(void)
 {
-	if (m_fusion)
-		m_fusion->start();
-
 	if (m_accel_sensor)
 		m_accel_sensor->start();
 
-	if (m_gyro_sensor)
-		m_gyro_sensor->start();
-
 	m_time = 0;
-	m_fusion_phase = 0;
-	m_angle[0] = INV_ANGLE;
 
 	return activate();
 }
 
 bool gravity_sensor::on_stop(void)
 {
-	if (m_fusion)
-		m_fusion->stop();
-
 	if (m_accel_sensor)
 		m_accel_sensor->stop();
-
-	if (m_gyro_sensor)
-		m_gyro_sensor->stop();
 
 	m_time = 0;
 
@@ -461,28 +227,16 @@ bool gravity_sensor::on_stop(void)
 
 bool gravity_sensor::add_interval(int client_id, unsigned int interval, bool is_processor)
 {
-	if (m_fusion)
-		m_fusion->set_interval(FUSION_EVENT_AGM, client_id, interval);
-
 	if (m_accel_sensor)
 		m_accel_sensor->add_interval(client_id, interval, true);
-
-	if (m_gyro_sensor)
-		m_gyro_sensor->add_interval(client_id, interval, true);
 
 	return sensor_base::add_interval(client_id, interval, is_processor);
 }
 
 bool gravity_sensor::delete_interval(int client_id, bool is_processor)
 {
-	if (m_fusion)
-		m_fusion->unset_interval(FUSION_EVENT_AGM, client_id);
-
 	if (m_accel_sensor)
 		m_accel_sensor->delete_interval(client_id, true);
-
-	if (m_gyro_sensor)
-		m_gyro_sensor->delete_interval(client_id, true);
 
 	return sensor_base::delete_interval(client_id, is_processor);
 }
@@ -490,33 +244,5 @@ bool gravity_sensor::delete_interval(int client_id, bool is_processor)
 bool gravity_sensor::set_interval(unsigned long interval)
 {
 	m_interval = interval;
-	return true;
-}
-
-bool gravity_sensor::rotation_to_gravity(const float *rotation, float *gravity)
-{
-	float R[9];
-
-	if (quat_to_matrix(rotation, R) < 0)
-		return false;
-
-	gravity[0] = R[6] * GRAVITY;
-	gravity[1] = R[7] * GRAVITY;
-	gravity[2] = R[8] * GRAVITY;
-
-	return true;
-}
-
-bool gravity_sensor::check_sampling_time(unsigned long long timestamp)
-{
-	const float MIN_DELIVERY_DIFF_FACTOR = 0.75f;
-	const int MS_TO_US = 1000;
-	long long diff_time;
-
-	diff_time = timestamp - m_time;
-
-	if (m_time && (diff_time < m_interval * MS_TO_US * MIN_DELIVERY_DIFF_FACTOR))
-		return false;
-
 	return true;
 }
