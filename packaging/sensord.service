@@ -2,6 +2,9 @@
 Description=Sensor Daemon
 
 [Service]
+User=system
+Group=system
+SmackProcessLabel=sensord
 Type=notify
 ExecStart=/usr/bin/sensord
 Restart=always

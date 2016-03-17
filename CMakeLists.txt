@@ -18,3 +18,8 @@ ADD_SUBDIRECTORY(src/client)
 ADD_SUBDIRECTORY(src/shared)
 ADD_SUBDIRECTORY(src/hal)
 ADD_SUBDIRECTORY(src/test)
+
+INSTALL(FILES sensord.efl DESTINATION /etc/smack/accesses.d)
+IF("${TIZEN_ZONE_ENABLED}" STREQUAL "ON")
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/packaging/sensord.res DESTINATION /etc/vasum/vsmzone.resource)
+ENDIF()

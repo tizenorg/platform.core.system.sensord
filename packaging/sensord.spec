@@ -18,9 +18,9 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(vconf)
 BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(capi-system-info)
-BuildRequires:  pkgconfig(cynara-creds-socket)
-BuildRequires:  pkgconfig(cynara-client)
-BuildRequires:  pkgconfig(cynara-session)
+#BuildRequires:  pkgconfig(cynara-creds-socket)
+#BuildRequires:  pkgconfig(cynara-client)
+#BuildRequires:  pkgconfig(cynara-session)
 Requires:   libsensord = %{version}-%{release}
 
 %define auto_rotation_state ON
@@ -33,6 +33,7 @@ Requires:   libsensord = %{version}-%{release}
 %define tilt_state OFF
 %define gyroscope_uncal_state OFF
 %define build_test_suite ON
+%define zone_enable ON
 
 %description
 Sensor daemon
@@ -80,7 +81,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DMAJORVER=${MAJORVER} -DFULLVER=%{ver
 	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
 	-DGYROSCOPE_UNCAL=%{gyroscope_uncal_state} -DAUTO_ROTATION=%{auto_rotation_state} \
-	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite}
+	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite} -DTIZEN_ZONE_ENABLED=%{zone_enable}
 
 %build
 make %{?jobs:-j%jobs}
@@ -90,16 +91,27 @@ rm -rf %{buildroot}
 %make_install
 
 mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}/usr/share/license
+mkdir -p %{buildroot}%{_libdir}/systemd/system/sockets.target.wants
 
 install -m 0644 %SOURCE1 %{buildroot}%{_unitdir}
 install -m 0644 %SOURCE2 %{buildroot}%{_unitdir}
 install -m 0644 %SOURCE3 %{buildroot}%{_unitdir}
 
-%install_service multi-user.target.wants sensord.service
-%install_service sockets.target.wants sensord_event.socket
-%install_service sockets.target.wants sensord_command.socket
+ln -s ../sensord_command.socket  %{buildroot}%{_unitdir}/sockets.target.wants/sensord_command.socket
+ln -s ../sensord_event.socket  %{buildroot}%{_unitdir}/sockets.target.wants/sensord_event.socket
+
+mkdir -p %{buildroot}/etc/smack/accesses.d
+cp sensord.efl %{buildroot}/etc/smack/accesses.d/sensord.efl
+
+#%install_service multi-user.target.wants sensord.service
+#%install_service sockets.target.wants sensord_event.socket
+#%install_service sockets.target.wants sensord_command.socket
 
 %post
+mkdir -p %{_sysconfdir}/systemd/default-extra-dependencies/ignore-units.d/
+ln -sf %{_unitdir}/sensord.service %{_sysconfdir}/systemd/default-extra-dependencies/ignore-units.d/
+
 systemctl daemon-reload
 
 %postun
@@ -119,10 +131,13 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 %{_unitdir}/sensord.service
 %{_unitdir}/sensord_command.socket
 %{_unitdir}/sensord_event.socket
-%{_unitdir}/multi-user.target.wants/sensord.service
 %{_unitdir}/sockets.target.wants/sensord_command.socket
 %{_unitdir}/sockets.target.wants/sensord_event.socket
 %license LICENSE.APLv2
+/etc/smack/accesses.d/sensord.efl
+%if %{?zone_enable} == ON
+/etc/vasum/vsmzone.resource/sensord.res
+%endif
 
 %files -n libsensord
 %defattr(-,root,root,-)
