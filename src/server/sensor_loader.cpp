@@ -270,7 +270,10 @@ void sensor_loader::show_sensor_info(void)
 bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &hal_paths)
 {
 	DIR *dir = NULL;
-	struct dirent *dir_entry = NULL;
+	struct dirent dir_entry;
+	struct dirent *result;
+	string name;
+	int error;
 
 	dir = opendir(dir_path.c_str());
 
@@ -279,10 +282,16 @@ bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &h
 		return false;
 	}
 
-	string name;
+	while (true) {
+		error = readdir_r(dir, &dir_entry, &result);
 
-	while ((dir_entry = readdir(dir))) {
-		name = string(dir_entry->d_name);
+		if (error != 0)
+			continue;
+
+		if (result == NULL)
+			break;
+
+		name = string(dir_entry.d_name);
 
 		if (name == "." || name == "..")
 			continue;
