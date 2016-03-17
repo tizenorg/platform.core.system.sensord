@@ -22,63 +22,106 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <map>
+#include <unordered_map>
+using std::unordered_map;
 
-typedef std::map<sensor_type_t, log_attr> sensor_type_map;
-static sensor_type_map g_log_maps = {
-	{UNKNOWN_SENSOR, {"UNKNOWN", "UNKNOWN_EVENT"}},
-	{ACCELEROMETER_SENSOR, {"ACCELEROMETER", "ACCELEROMETER_RAW_DATA_EVENT"}},
-	{GRAVITY_SENSOR, {"GRAVITY", "GRAVITY_RAW_DATA_EVENT"}},
-	{LINEAR_ACCEL_SENSOR, {"LINEAR_ACCEL", "LINEAR_ACCEL_RAW_DATA_EVENT"}},
-	{GEOMAGNETIC_SENSOR, {"GEOMAGNETIC SENSOR", "GEOMAGNETIC SENSOR_RAW_DATA_EVENT"}},
-	{ROTATION_VECTOR_SENSOR, {"ROTATION VECTOR", "ROTATION VECTOR_RAW_DATA_EVENT"}},
-	{ORIENTATION_SENSOR, {"ORIENTATION", "ORIENTATION_RAW_DATA_EVENT"}},
-	{GYROSCOPE_SENSOR, {"GYROSCOPE", "GYROSCOPE_RAW_DATA_EVENT"}},
-	{LIGHT_SENSOR, {"LIGHT", "LIGHT_RAW_DATA_EVENT"}},
-	{PROXIMITY_SENSOR, {"PROXIMITY", "PROXIMITY_RAW_DATA_EVENT"}},
-	{PRESSURE_SENSOR, {"PRESSURE", "PRESSURE_RAW_DATA_EVENT"}},
-	{ULTRAVIOLET_SENSOR, {"ULTRAVIOLET", "ULTRAVIOLET_RAW_DATA_EVENT"}},
-	{TEMPERATURE_SENSOR, {"TEMPERATURE", "TEMPERATURE_RAW_DATA_EVENT"}},
-	{HUMIDITY_SENSOR, {"HUMIDITY", "HUMIDITY_RAW_DATA_EVENT"}},
-	{BIO_HRM_SENSOR, {"BIO_HRM", "BIO_HRM_RAW_DATA_EVENT"}},
-	{BIO_LED_GREEN_SENSOR, {"BIO_LED_GREEN", "BIO_LED_GREEN_RAW_DATA_EVENT"}},
-	{BIO_LED_IR_SENSOR, {"BIO_LED_IR", "BIO_LED_IR_RAW_DATA_EVENT"}},
-	{BIO_LED_RED_SENSOR, {"BIO_LED_RED", "BIO_LED_RED_RAW_DATA_EVENT"}},
-	{GYROSCOPE_UNCAL_SENSOR, {"GYROSCOPE_UNCAL", "GYROSCOPE_UNCAL_RAW_DATA_EVENT"}},
-	{GEOMAGNETIC_UNCAL_SENSOR, {"GEOMAGNETIC_UNCAL", "GEOMAGNETIC_UNCAL_RAW_DATA_EVENT"}},
-	{GYROSCOPE_RV_SENSOR, {"GYROSCOPE_RV", "GYROSCOPE_RV_RAW_DATA_EVENT"}},
-	{GEOMAGNETIC_RV_SENSOR, {"GEOMAGNETIC_RV", "GEOMAGNETIC_RV_RAW_DATA_EVENT"}},
-	{CONTEXT_SENSOR, {"CONTEXT", "CONTEXT_RAW_DATA_EVENT"}},
+#define FILL_LOG_ELEMENT(ID, TYPE, CNT, PRINT_PER_CNT) {ID, TYPE, {#TYPE, CNT, PRINT_PER_CNT} }
+
+log_element g_log_elements[] = {
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, UNKNOWN_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, ACCELEROMETER_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, GEOMAGNETIC_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, LIGHT_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, PROXIMITY_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, GYROSCOPE_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, PRESSURE_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, CONTEXT_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, AUTO_ROTATION_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, GRAVITY_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, LINEAR_ACCEL_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, ORIENTATION_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, PRESSURE_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, TEMPERATURE_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, ROTATION_VECTOR_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, GEOMAGNETIC_RV_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, GYROSCOPE_UNCAL_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, ULTRAVIOLET_SENSOR, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_SENSOR_TYPE, BIO_LED_RED_SENSOR, 0, 1),
+
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, PROXIMITY_CHANGE_STATE_EVENT, 0,1),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, LIGHT_CHANGE_LEVEL_EVENT, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, PROXIMITY_STATE_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, PROXIMITY_DISTANCE_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, AUTO_ROTATION_CHANGE_STATE_EVENT, 0, 1),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, ACCELEROMETER_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, GYROSCOPE_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, GEOMAGNETIC_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, PRESSURE_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, LIGHT_LEVEL_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, LIGHT_LUX_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, GRAVITY_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, LINEAR_ACCEL_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, ORIENTATION_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, PRESSURE_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, TEMPERATURE_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, ROTATION_VECTOR_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, GEOMAGNETIC_RV_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, GYROSCOPE_UNCAL_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, ULTRAVIOLET_RAW_DATA_EVENT, 0, 10),
+	FILL_LOG_ELEMENT(LOG_ID_EVENT, BIO_LED_RED_RAW_DATA_EVENT, 0, 10),
 };
 
-const char* get_sensor_name(sensor_id_t sensor_id)
+typedef unordered_map<unsigned int, log_attr* > log_map;
+static log_map g_log_maps[LOG_ID_END];
+
+static void init_log_maps(void);
+
+class initiator {
+public:
+	initiator()
+	{
+		init_log_maps();
+	}
+};
+
+static initiator g_initiator;
+
+void init_log_maps(void)
+{
+	int cnt;
+
+	cnt = sizeof(g_log_elements) / sizeof(g_log_elements[0]);
+
+	for (int i = 0; i < cnt; ++i) {
+		g_log_maps[g_log_elements[i].id][g_log_elements[i].type] = &g_log_elements[i].log_attr;
+	}
+
+}
+
+const char* get_log_element_name(log_id id, unsigned int type)
 {
 	const char* p_unknown = "UNKNOWN";
-	sensor_type_t sensor_type = (sensor_type_t) (sensor_id >> SENSOR_TYPE_SHIFT);
 
-	auto iter = g_log_maps.find(sensor_type);
+	auto iter = g_log_maps[id].find(type);
 
-	if (iter == g_log_maps.end()) {
-		_I("Unknown type value: 0x%x", sensor_type);
+	if (iter == g_log_maps[id].end()) {
+		_I("Unknown type value: 0x%x", type);
 		return p_unknown;
 	}
 
-	return iter->second.sensor_name;
+	return iter->second->name;
+}
+
+const char* get_sensor_name(sensor_id_t sensor_id)
+{
+	sensor_type_t sensor_type = (sensor_type_t) (sensor_id >> SENSOR_TYPE_SHIFT);
+
+	return get_log_element_name(LOG_ID_SENSOR_TYPE, sensor_type);
 }
 
 const char* get_event_name(unsigned int event_type)
 {
-	const char* p_unknown = "UNKNOWN";
-	sensor_type_t sensor_type = (sensor_type_t) (event_type >> EVENT_TYPE_SHIFT);
-
-	auto iter = g_log_maps.find(sensor_type);
-
-	if (iter == g_log_maps.end()) {
-		_I("Unknown type value: 0x%x", sensor_type);
-		return p_unknown;
-	}
-
-	return iter->second.event_name;
+	return get_log_element_name(LOG_ID_EVENT, event_type);
 }
 
 bool is_one_shot_event(unsigned int event_type)
@@ -146,8 +189,27 @@ unsigned long long get_timestamp(void)
 
 void print_event_occurrence_log(sensor_handle_info &sensor_handle_info, const reg_event_info *event_info)
 {
-	_D("%s receives %s[%d]", get_client_name(),
-			get_sensor_name(sensor_handle_info.m_sensor_id), sensor_handle_info.m_handle);
+	log_attr *log_attr;
+
+	auto iter = g_log_maps[LOG_ID_EVENT].find(event_info->type);
+
+	if (iter == g_log_maps[LOG_ID_EVENT].end())
+		return;
+
+	log_attr = iter->second;
+
+	log_attr->cnt++;
+
+	if ((log_attr->cnt != 1) && ((log_attr->cnt % log_attr->print_per_cnt) != 0)) {
+		return;
+	}
+
+	_I("%s receives %s with %s[%d][state: %d, option: %d count: %d]", get_client_name(), log_attr->name,
+			get_sensor_name(sensor_handle_info.m_sensor_id), sensor_handle_info.m_handle, sensor_handle_info.m_sensor_state,
+			sensor_handle_info.m_sensor_option, log_attr->cnt);
+
+	_I("0x%x(cb_event_type = %s, &user_data, client_data = 0x%x)\n", event_info->m_cb,
+			log_attr->name, event_info->m_user_data);
 }
 
 /*

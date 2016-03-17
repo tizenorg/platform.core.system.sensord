@@ -30,10 +30,37 @@
 
 #define CLIENT_NAME_SIZE NAME_MAX+10
 
-struct log_attr {
-	const char *sensor_name;
-	const char *event_name;
+enum log_id {
+	LOG_ID_START = 0,
+	LOG_ID_SENSOR_TYPE = 0,
+	LOG_ID_EVENT,
+	LOG_ID_DATA,
+	LOG_ID_PROPERTY,
+	LOG_ID_END,
 };
+
+struct log_attr {
+	const char *name;
+	unsigned long cnt;
+	const unsigned int print_per_cnt;
+};
+
+struct log_element {
+	log_id id;
+	int type;
+	struct log_attr log_attr;
+};
+
+
+typedef struct {
+	int handle;
+	unsigned int event_type;
+	sensor_event_data_t ev_data;
+	int sensor_state;
+	int sensor_option;
+	sensor_type_t sensor;
+	reg_event_info event_info;
+} log_info;
 
 bool is_one_shot_event(unsigned int event_type);
 bool is_ontime_event(unsigned int event_type);
@@ -42,6 +69,7 @@ bool is_single_state_event(unsigned int event_type);
 unsigned int get_calibration_event_type(unsigned int event_type);
 unsigned long long get_timestamp(void);
 
+const char* get_log_element_name(log_id id, unsigned int type);
 const char* get_sensor_name(sensor_id_t sensor_id);
 const char* get_event_name(unsigned int event_type);
 void print_event_occurrence_log(sensor_handle_info &sensor_handle_info, const reg_event_info *event_info);
