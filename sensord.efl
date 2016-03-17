@@ -1,0 +1,3 @@
+sensord device::input rw---- ------
+sensord device::sys_logging rw---- ------
+sensord device::app_logging rw---- ------
