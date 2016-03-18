@@ -1000,7 +1000,7 @@ API bool sensord_set_option(int handle, int option)
 
 }
 
-API bool sensord_set_attribute_int(int handle, int attribute, int value)
+API int sensord_set_attribute_int(int handle, int attribute, int value)
 {
 	sensor_id_t sensor_id;
 	command_channel *cmd_channel;
@@ -1010,29 +1010,29 @@ API bool sensord_set_attribute_int(int handle, int attribute, int value)
 
 	if (!sensor_client_info::get_instance().get_sensor_id(handle, sensor_id)) {
 		_E("client %s failed to get handle information", get_client_name());
-		return false;
+		return -EINVAL;
 	}
 
 	if (!sensor_client_info::get_instance().get_command_channel(sensor_id, &cmd_channel)) {
 		_E("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
-		return false;
+		return -EPERM;
 	}
 
 	client_id = sensor_client_info::get_instance().get_client_id();
-	retvm_if ((client_id < 0), false,
+	retvm_if ((client_id < 0), -EPERM,
 			"Invalid client id : %d, handle: %d, %s, %s",
 			client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
 	if (!cmd_channel->cmd_set_attribute_int(attribute, value)) {
 		_E("Sending cmd_set_attribute_int(%d, %d) failed for %s",
 			client_id, value, get_client_name);
-		return false;
+		return -EPERM;
 	}
 
-	return true;
+	return OP_SUCCESS;
 }
 
-API bool sensord_set_attribute_str(int handle, int attribute, const char *value, int value_len)
+API int sensord_set_attribute_str(int handle, int attribute, const char *value, int value_len)
 {
 	sensor_id_t sensor_id;
 	command_channel *cmd_channel;
@@ -1042,41 +1042,41 @@ API bool sensord_set_attribute_str(int handle, int attribute, const char *value,
 
 	if (!sensor_client_info::get_instance().get_sensor_id(handle, sensor_id)) {
 		_E("Client %s failed to get handle information", get_client_name());
-		return false;
+		return -EINVAL;
 	}
 
 	if (!sensor_client_info::get_instance().get_command_channel(sensor_id, &cmd_channel)) {
 		_E("Client %s failed to get command channel for %s",
 			get_client_name(), get_sensor_name(sensor_id));
-		return false;
+		return -EPERM;
 	}
 
-	retvm_if((value_len < 0) || (value == NULL), false,
+	retvm_if((value_len < 0) || (value == NULL), -EINVAL,
 			"Invalid value_len: %d, value: 0x%x, handle: %d, %s, %s",
 			value_len, value, handle, get_sensor_name(sensor_id), get_client_name());
 
 	client_id = sensor_client_info::get_instance().get_client_id();
-	retvm_if ((client_id < 0), false,
+	retvm_if ((client_id < 0), -EPERM,
 			"Invalid client id : %d, handle: %d, %s, %s",
 			client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
 	if (!cmd_channel->cmd_set_attribute_str(attribute, value, value_len)) {
 		_E("Sending cmd_set_attribute_str(%d, %d, 0x%x) failed for %s",
 			client_id, value_len, value, get_client_name);
-		return false;
+		return -EPERM;
 	}
 
-	return true;
+	return OP_SUCCESS;
 }
 
 API bool sensord_send_sensorhub_data(int handle, const char *data, int data_len)
 {
-	return sensord_set_attribute_str(handle, 0, data, data_len);
+	return (sensord_set_attribute_str(handle, 0, data, data_len) == OP_SUCCESS);
 }
 
 API bool sensord_send_command(int handle, const char *command, int command_len)
 {
-	return sensord_set_attribute_str(handle, 0, command, command_len);
+	return (sensord_set_attribute_str(handle, 0, command, command_len) == OP_SUCCESS);
 }
 
 API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* sensor_data)
