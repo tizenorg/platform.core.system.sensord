@@ -143,7 +143,9 @@ bool csocket::accept(csocket& client_socket) const
 		client_socket.m_sock_fd = ::accept(m_sock_fd, (sockaddr *)&m_addr, (socklen_t *)&addr_length);
 		if (!client_socket.is_valid()) {
 			err = errno;
-			::close(client_socket.m_sock_fd);
+
+			if (client_socket.m_sock_fd >= 0)
+				::close(client_socket.m_sock_fd);
 		}
 	} while (err == EINTR);
 
@@ -159,6 +161,9 @@ bool csocket::accept(csocket& client_socket) const
 ssize_t csocket::send_for_seqpacket(const void *buffer, size_t size) const
 {
 	ssize_t err, len;
+
+	if (m_sock_fd < 0)
+		return -EINVAL;
 
 	do {
 		len = ::send(m_sock_fd, buffer, size, m_send_flags);
@@ -177,6 +182,9 @@ ssize_t csocket::send_for_seqpacket(const void *buffer, size_t size) const
 ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
 {
     ssize_t err, len;
+
+	if (m_sock_fd < 0)
+		return -EINVAL;
 
 	do {
         len = ::recv(m_sock_fd, buffer, size, m_recv_flags);
@@ -215,6 +223,9 @@ ssize_t csocket::send_for_stream(const void *buffer, size_t size) const
 	ssize_t err = 0;
 	size_t total_sent_size = 0;
 
+	if (m_sock_fd < 0)
+		return -EINVAL;
+
 	do {
 		len = ::send(m_sock_fd, (const void *)((uint8_t *)buffer + total_sent_size), size - total_sent_size, m_send_flags);
 
@@ -242,6 +253,9 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 	ssize_t len;
 	ssize_t err = 0;
 	size_t total_recv_size = 0;
+
+	if (m_sock_fd < 0)
+		return -EINVAL;
 
 	do {
 		len = ::recv(m_sock_fd, (void *)((uint8_t *)buffer + total_recv_size), size - total_recv_size, m_recv_flags);
@@ -368,6 +382,9 @@ bool csocket::set_blocking_mode(bool blocking)
 {
 	int flags;
 
+	if (m_sock_fd < 0)
+		return false;
+
 	flags = fcntl(m_sock_fd, F_GETFL);
 
 	if (flags == -1) {
@@ -418,6 +435,9 @@ bool csocket::set_connection_mode(void)
 	tv.tv_sec = TIMEOUT;
 	tv.tv_usec = 0;
 
+	if (m_sock_fd < 0)
+		return false;
+
 	if(setsockopt(m_sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
 		_E("Set SO_RCVTIMEO failed for %s, m_sock_fd : %d", get_client_name(), m_sock_fd);
 		_ERRNO(errno);
@@ -434,7 +454,6 @@ bool csocket::set_connection_mode(void)
 bool csocket::set_transfer_mode(void)
 {
 	set_blocking_mode(false);
-
 
 	m_send_flags = MSG_DONTWAIT | MSG_NOSIGNAL;
 	m_recv_flags = MSG_DONTWAIT | MSG_NOSIGNAL;
