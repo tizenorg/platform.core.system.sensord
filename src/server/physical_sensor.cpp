@@ -77,7 +77,7 @@ int physical_sensor::get_poll_fd()
 	return m_sensor_device->get_poll_fd();
 }
 
-bool physical_sensor::on_event(const sensor_data_t *data, int remains)
+bool physical_sensor::on_event(const sensor_data_t *data, int data_len, int remains)
 {
 	return true;
 }
