@@ -52,8 +52,9 @@ public:
 	virtual int get_data(sensor_data_t **data, int *length);
 
 	virtual bool flush(void);
-	virtual int set_attribute(int32_t attribute, int32_t value);
-	virtual int set_attribute(int32_t attribute, char *value, int value_size);
+	virtual int add_attribute(int client_id, int32_t attribute, int32_t value);
+	virtual int add_attribute(int client_id, int32_t attribute, char *value, int value_size);
+	virtual bool delete_attribute(int client_id);
 
 	/* start/stop */
 	bool start(void);
@@ -90,6 +91,9 @@ private:
 	bool m_started;
 	unsigned int m_client;
 	cmutex m_client_mutex;
+
+	virtual int set_attribute(int32_t attribute, int32_t value);
+	virtual int set_attribute(int32_t attribute, char *value, int value_size);
 
 	virtual bool set_interval(unsigned long interval);
 	virtual bool set_batch_latency(unsigned long latency);

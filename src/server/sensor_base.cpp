@@ -90,7 +90,22 @@ bool sensor_base::flush(void)
 	return true;
 }
 
-int sensor_base::set_attribute(int32_t cmd, int32_t value)
+int sensor_base::add_attribute(int client_id, int32_t attribute, int32_t value)
+{
+	return set_attribute(attribute, value);
+}
+
+int sensor_base::add_attribute(int client_id, int32_t attribute, char *value, int value_size)
+{
+	return set_attribute(attribute, value, value_size);
+}
+
+bool sensor_base::delete_attribute(int client_id)
+{
+	return true;
+}
+
+int sensor_base::set_attribute(int32_t attribute, int32_t value)
 {
 	return OP_ERROR;
 }

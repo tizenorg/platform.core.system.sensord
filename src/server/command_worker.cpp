@@ -504,6 +504,7 @@ bool command_worker::cmd_stop(void *payload)
 
 	if (m_module->stop()) {
 		get_client_info_manager().set_start(m_client_id, m_sensor_id, false);
+		m_module->delete_attribute(m_client_id);
 		ret_value = OP_SUCCESS;
 	} else {
 		_E("Failed to stop sensor [0x%llx] for client [%d]", m_sensor_id, m_client_id);
@@ -778,7 +779,7 @@ bool command_worker::cmd_set_attribute_int(void *payload)
 		goto out;
 	}
 
-	ret_value = m_module->set_attribute(cmd->attribute, cmd->value);
+	ret_value = m_module->add_attribute(m_client_id, cmd->attribute, cmd->value);
 
 out:
 	if (!send_cmd_done(ret_value))
@@ -803,7 +804,7 @@ bool command_worker::cmd_set_attribute_str(void *payload)
 		goto out;
 	}
 
-	ret_value = m_module->set_attribute(cmd->attribute, cmd->value, cmd->value_len);
+	ret_value = m_module->add_attribute(m_client_id, cmd->attribute, cmd->value, cmd->value_len);
 
 out:
 	if (!send_cmd_done(ret_value))
