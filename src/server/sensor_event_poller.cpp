@@ -117,6 +117,7 @@ bool sensor_event_poller::process_event(int fd, const std::vector<uint32_t> &ids
 	physical_sensor *sensor;
 	std::pair<fd_sensors_t::iterator, fd_sensors_t::iterator> ret;
 
+	/* find sensors which is based on same device(fd) */
 	ret = m_fd_sensors.equal_range(fd);
 
 	for (auto it_sensor = ret.first; it_sensor != ret.second; ++it_sensor) {
@@ -127,6 +128,7 @@ bool sensor_event_poller::process_event(int fd, const std::vector<uint32_t> &ids
 
 		sensor = it_sensor->second;
 
+		/* check whether the id of this sensor is in id list(parameter) or not */
 		auto result = std::find(std::begin(ids), std::end(ids), sensor->get_hal_id());
 
 		if (result == std::end(ids))
