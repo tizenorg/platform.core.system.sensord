@@ -51,6 +51,9 @@ void sensor_event_poller::init_sensor_map()
 
 		fd = sensor->get_poll_fd();
 
+		if (fd < 0)
+			continue;
+
 		m_fd_sensors.insert(std::make_pair(fd, sensor));
 	}
 }

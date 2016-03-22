@@ -712,6 +712,9 @@ bool command_worker::cmd_get_data(void *payload)
 
 	remain_count = m_module->get_data(&data, &length);
 
+	if (remain_count < 0)
+		state = OP_ERROR;
+
 	// In case of not getting sensor data, wait short time and retry again
 	// 1. changing interval to be less than 10ms
 	// 2. In case of first time, wait for INIT_WAIT_TIME
