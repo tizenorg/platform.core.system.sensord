@@ -37,6 +37,9 @@
 #ifdef ENABLE_GRAVITY
 #include <gravity_sensor.h>
 #endif
+#ifdef ENABLE_SIMPGRAV
+#include <simpgrav_sensor.h>
+#endif
 #ifdef ENABLE_LINEAR_ACCEL
 #include <linear_accel_sensor.h>
 #endif
@@ -148,6 +151,9 @@ void sensor_loader::create_sensors(void)
 #endif
 #ifdef ENABLE_GRAVITY
 	create_virtual_sensors<gravity_sensor>("Gravity");
+#endif
+#ifdef ENABLE_SIMPGRAV
+	create_virtual_sensors<simpgrav_sensor>("simpgrav");
 #endif
 #ifdef ENABLE_LINEAR_ACCEL
 	create_virtual_sensors<linear_accel_sensor>("Linear Accel");

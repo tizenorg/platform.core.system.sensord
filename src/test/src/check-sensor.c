@@ -71,6 +71,9 @@ void printpollinglogs(sensor_type_t type,sensor_data_t data)
 	case(GRAVITY_SENSOR):
 		printf("Gravity [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
 		break;
+	case(SIMPGRAV_SENSOR):
+		printf("simpgrav [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
+		break;
 	case(LINEAR_ACCEL_SENSOR):
 		printf("Linear Acceleration [%lld] [%6.6f] [%6.6f] [%6.6f]\n\n", data.timestamp, data.values[0], data.values[1], data.values[2]);
 		break;
@@ -146,6 +149,10 @@ int get_event(sensor_type_t sensor_type, char str[])
 		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return GRAVITY_RAW_DATA_EVENT;
 		break;
+	case SIMPGRAV_SENSOR:
+		if (strcmp(str, "RAW_DATA_EVENT") == 0)
+			return SIMPGRAV_RAW_DATA_EVENT;
+		break;
 	case LINEAR_ACCEL_SENSOR:
 		if (strcmp(str, "RAW_DATA_EVENT") == 0)
 			return LINEAR_ACCEL_RAW_DATA_EVENT;
@@ -216,6 +223,9 @@ void callback(sensor_t sensor, unsigned int event_type, sensor_data_t *data, voi
 		break;
 	case GRAVITY_SENSOR:
 		printf("Gravity [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
+		break;
+	case SIMPGRAV_SENSOR:
+		printf("simpgrav [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
 		break;
 	case LINEAR_ACCEL_SENSOR:
 		printf("Linear acceleration [%lld] [%6.6f] [%6.6f] [%6.6f]\n", data->timestamp, data->values[0], data->values[1], data->values[2]);
