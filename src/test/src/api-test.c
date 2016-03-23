@@ -223,6 +223,9 @@ int main(int argc, char **argv)
 	result = check_sensor_api(GRAVITY_RAW_DATA_EVENT, interval);
 	fprintf(fp, "Gravity - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 
+	result = check_sensor_api(SIMPGRAV_RAW_DATA_EVENT, interval);
+	fprintf(fp, "simpgrav - RAW_DATA_REPORT_ON_TIME - %d\n", result);
+
 	result = check_sensor_api(GYROSCOPE_RAW_DATA_EVENT, interval);
 	fprintf(fp, "Gyroscope - RAW_DATA_REPORT_ON_TIME - %d\n", result);
 

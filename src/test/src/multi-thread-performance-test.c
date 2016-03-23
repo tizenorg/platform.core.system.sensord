@@ -47,6 +47,7 @@ void usage()
 	printf("[orientation] ");
 	printf("[tilt] ");
 	printf("[gravity] ");
+	printf("[simpgrav] ");
 	printf("[linear_accel] ");
 	printf("[rotation_vector] ");
 	printf("[geomagnetic_rv] ");

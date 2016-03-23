@@ -42,6 +42,14 @@
 			<GRAVITY_SIGN_COMPENSATION value1="-1" value2="-1" value3="-1" />
 		</GRAVITY>
 
+		<SIMPGRAV>
+			<NAME value="SIMPGRAV_SENSOR" />
+			<VENDOR value="SAMSUNG" />
+			<RAW_DATA_UNIT value="M/S^2" />
+			<DEFAULT_SAMPLING_TIME value="100" />
+			<GRAVITY_SIGN_COMPENSATION value1="-1" value2="-1" value3="-1" />
+		</SIMPGRAV>
+
 		<LINEAR_ACCEL>
 			<NAME value="LINEAR_ACCEL_SENSOR" />
 			<VENDOR value="SAMSUNG" />
@@ -131,6 +139,14 @@
 			<GRAVITY_SIGN_COMPENSATION value1="1" value2="1" value3="1" />
 		</GRAVITY>
 
+		<SIMPGRAV>
+			<NAME value="SIMPGRAV_SENSOR" />
+			<VENDOR value="SAMSUNG" />
+			<RAW_DATA_UNIT value="M/S^2" />
+			<DEFAULT_SAMPLING_TIME value="100" />
+			<GRAVITY_SIGN_COMPENSATION value1="1" value2="1" value3="1" />
+		</SIMPGRAV>
+
 		<LINEAR_ACCEL>
 			<NAME value="LINEAR_ACCEL_SENSOR" />
 			<VENDOR value="SAMSUNG" />
@@ -219,6 +235,14 @@
 			<DEFAULT_SAMPLING_TIME value="100" />
 			<GRAVITY_SIGN_COMPENSATION value1="1" value2="1" value3="1" />
 		</GRAVITY>
+
+		<SIMPGRAV>
+			<NAME value="SIMPGRAV_SENSOR" />
+			<VENDOR value="SAMSUNG" />
+			<RAW_DATA_UNIT value="M/S^2" />
+			<DEFAULT_SAMPLING_TIME value="100" />
+			<GRAVITY_SIGN_COMPENSATION value1="1" value2="1" value3="1" />
+		</SIMPGRAV>
 
 		<LINEAR_ACCEL>
 			<NAME value="LINEAR_ACCEL_SENSOR" />

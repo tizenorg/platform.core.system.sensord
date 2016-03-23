@@ -41,6 +41,7 @@ void usage()
 	printf("[orientation] ");
 	printf("[tilt] ");
 	printf("[gravity] ");
+	printf("[simpgrav] ");
 	printf("[linear_accel] ");
 	printf("[rotation_vector] ");
 	printf("[geomagnetic_rv] ");
@@ -111,6 +112,10 @@ int main(int argc, char **argv)
 	else if (strcmp(argv[1], "gravity") == 0) {
 		 sensor_type = GRAVITY_SENSOR;
 		 event = GRAVITY_RAW_DATA_EVENT;
+	}
+	else if (strcmp(argv[1], "simpgrav") == 0) {
+		 sensor_type = SIMPGRAV_SENSOR;
+		 event = SIMPGRAV_RAW_DATA_EVENT;
 	}
 	else if (strcmp(argv[1], "linear_accel") == 0) {
 		 sensor_type = LINEAR_ACCEL_SENSOR;
