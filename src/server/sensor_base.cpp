@@ -18,7 +18,7 @@
  */
 
 #include <stdint.h>
-#include <sensor_hal.h>
+#include <sensor_hal_types.h>
 #include <sensor_event_queue.h>
 #include <sensor_base.h>
 #include <sensor_common.h>

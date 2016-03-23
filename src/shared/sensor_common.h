@@ -22,7 +22,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <sensor_hal.h>
+#include <sensor_hal_types.h>
 #include <sensor_types.h>
 
 #define OP_ERROR -1

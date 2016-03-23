@@ -28,7 +28,7 @@
 #include <sensor_common.h>
 #include <worker_thread.h>
 #include <sensor_info.h>
-#include <sensor_hal.h>
+#include <sensor_hal_types.h>
 #include <vector>
 
 class sensor_base {

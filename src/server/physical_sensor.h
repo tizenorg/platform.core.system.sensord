@@ -22,6 +22,7 @@
 
 #include <sensor_base.h>
 #include <worker_thread.h>
+#include <sensor_hal.h>
 
 class physical_sensor : public sensor_base {
 public:
