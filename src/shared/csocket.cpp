@@ -190,12 +190,8 @@ ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
 		}
     } while (err == EINTR);
 
-	if ((err == EAGAIN) || (err == EWOULDBLOCK)) {
-		_D("recv(%d, 0x%x, %d, 0x%x) = %d",
-			m_sock_fd, buffer, size, m_recv_flags, len);
-		_ERRNO(errno);
+	if ((err == EAGAIN) || (err == EWOULDBLOCK))
 		return 0;
-	}
 
 	if (err) {
 		_E("recv(%d, 0x%x, %d, 0x%x) = %d",
