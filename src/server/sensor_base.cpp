@@ -87,7 +87,7 @@ int sensor_base::get_data(sensor_data_t **data, int *length)
 
 bool sensor_base::flush(void)
 {
-	return false;
+	return true;
 }
 
 int sensor_base::set_attribute(int32_t cmd, int32_t value)
@@ -289,22 +289,22 @@ bool sensor_base::push(sensor_event_t *event)
 
 bool sensor_base::set_interval(unsigned long interval)
 {
-	return false;
+	return true;
 }
 
 bool sensor_base::set_batch_latency(unsigned long latency)
 {
-	return false;
+	return true;
 }
 
 bool sensor_base::on_start()
 {
-	return false;
+	return true;
 }
 
 bool sensor_base::on_stop()
 {
-	return false;
+	return true;
 }
 
 unsigned long long sensor_base::get_timestamp(void)
