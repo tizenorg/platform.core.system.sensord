@@ -1042,7 +1042,7 @@ API int sensord_set_attribute_int(int handle, int attribute, int value)
 
 	if (!cmd_channel->cmd_set_attribute_int(attribute, value)) {
 		_E("Sending cmd_set_attribute_int(%d, %d) failed for %s",
-			client_id, value, get_client_name);
+			client_id, value, get_client_name());
 		return -EPERM;
 	}
 
@@ -1079,7 +1079,7 @@ API int sensord_set_attribute_str(int handle, int attribute, const char *value, 
 
 	if (!cmd_channel->cmd_set_attribute_str(attribute, value, value_len)) {
 		_E("Sending cmd_set_attribute_str(%d, %d, 0x%x) failed for %s",
-			client_id, value_len, value, get_client_name);
+			client_id, value_len, value, get_client_name());
 		return -EPERM;
 	}
 
