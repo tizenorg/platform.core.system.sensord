@@ -119,6 +119,7 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 %files
 %manifest packaging/sensord.manifest
 %{_bindir}/sensord
+%{_bindir}/sensorctl
 %{_unitdir}/sensord.service
 %{_unitdir}/sensord_command.socket
 %{_unitdir}/sensord_event.socket
@@ -154,6 +155,7 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 %defattr(-,root,root,-)
 %{_bindir}/api-test
 %{_bindir}/sensor-test
+%{_bindir}/sensorctl
 %{_bindir}/multi-thread-performance-test
 %{_bindir}/multi-process-performance-test
 %{_bindir}/fusion-data-collection
