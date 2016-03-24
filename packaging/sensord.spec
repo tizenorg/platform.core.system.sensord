@@ -21,6 +21,7 @@ BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(cynara-creds-socket)
 BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
+BuildRequires:  gtest-devel
 Requires:   libsensord = %{version}-%{release}
 
 %define auto_rotation_state ON
@@ -118,6 +119,7 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 %attr(0644,root,root)/usr/etc/virtual_sensors.xml
 %manifest packaging/sensord.manifest
 %{_bindir}/sensord
+%{_bindir}/sensorctl
 %{_unitdir}/sensord.service
 %{_unitdir}/sensord_command.socket
 %{_unitdir}/sensord_event.socket
