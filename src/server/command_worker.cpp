@@ -137,8 +137,6 @@ void command_worker::get_sensor_list(int client_perms, cpacket &sensor_list)
 	int idx = 0;
 
 	total_raw_data_size = create_sensor_raw_list(client_perms, raw_list);
-	if (total_raw_data_size < 0)
-		return;
 
 	sensor_cnt = raw_list.size();
 
