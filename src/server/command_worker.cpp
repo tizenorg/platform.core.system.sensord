@@ -29,6 +29,8 @@
 #include <permission_checker.h>
 #include <command_worker.h>
 
+#define WAIT_TIME(X) ((1 << ((X) < 4 ? (X) : 4)) * 10000)	/* 20, 40, 80, 160, 160ms, ... */
+
 using std::string;
 using std::vector;
 using std::make_pair;
@@ -718,9 +720,7 @@ bool command_worker::cmd_get_data(void *payload)
 	// 5. repeat 2 ~ 4 operations RETRY_CNT times
 	// 6. reverting back to original interval
 	if ((remain_count >= 0) && !data->timestamp) {
-		const int RETRY_CNT	= 5;
-		const unsigned long long INIT_WAIT_TIME = 20000; //20ms
-		const unsigned long WAIT_TIME = 100000;	//100ms
+		const int RETRY_CNT	= 10;
 		int retry = 0;
 
 		unsigned int interval = m_module->get_interval(m_client_id, false);
@@ -732,7 +732,7 @@ bool command_worker::cmd_get_data(void *payload)
 
 		while ((remain_count >= 0) && !data->timestamp && (retry++ < RETRY_CNT)) {
 			_I("Wait sensor[0x%llx] data updated for client [%d] #%d", m_sensor_id, m_client_id, retry);
-			usleep((retry == 1) ? INIT_WAIT_TIME : WAIT_TIME);
+			usleep(WAIT_TIME(retry));
 			remain_count = m_module->get_data(&data, &length);
 		}
 
