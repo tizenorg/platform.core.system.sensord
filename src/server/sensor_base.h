@@ -77,6 +77,9 @@ public:
 protected:
 	void set_permission(int permission);
 
+	static unsigned long long get_timestamp(void);
+	static unsigned long long get_timestamp(timeval *t);
+
 private:
 	sensor_id_t m_id;
 	int m_permission;
@@ -93,9 +96,6 @@ private:
 
 	virtual bool on_start(void);
 	virtual bool on_stop(void);
-
-	static unsigned long long get_timestamp(void);
-	static unsigned long long get_timestamp(timeval *t);
 };
 
 #endif /* _SENSOR_BASE_H_ */
