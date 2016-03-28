@@ -87,6 +87,8 @@ typedef struct {
 typedef struct {
 	int state;
 	sensor_data_t base_data;
+	int extra_len;
+	char extra_data[];
 } cmd_get_data_done_t;
 
 typedef struct {

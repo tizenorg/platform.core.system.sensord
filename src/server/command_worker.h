@@ -55,7 +55,7 @@ private:
 
 	bool send_cmd_done(long value);
 	bool send_cmd_get_id_done(int client_id);
-	bool send_cmd_get_data_done(int state, sensor_data_t *data);
+	bool send_cmd_get_data_done(int state, sensor_data_t *data, int data_len);
 	bool send_cmd_get_sensor_list_done(void);
 
 	bool cmd_get_id(void *payload);

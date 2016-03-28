@@ -139,6 +139,8 @@ void command_worker::get_sensor_list(int client_perms, cpacket &sensor_list)
 	int idx = 0;
 
 	total_raw_data_size = create_sensor_raw_list(client_perms, raw_list);
+	if (total_raw_data_size < 0)
+		return;
 
 	sensor_cnt = raw_list.size();
 
@@ -220,7 +222,7 @@ bool command_worker::stopped(void *ctx)
 			inst->m_module->stop();
 		}
 
-		if (inst->m_sensor_id > UNKNOWN_SENSOR) {
+		if (inst->m_sensor_id) {
 			if (get_client_info_manager().has_sensor_record(inst->m_client_id, inst->m_sensor_id)) {
 				_I("Removing sensor[0x%llx] record for client_id[%d]", inst->m_sensor_id, inst->m_client_id);
 				get_client_info_manager().remove_sensor_record(inst->m_client_id, inst->m_sensor_id);
@@ -296,20 +298,28 @@ bool command_worker::send_cmd_get_id_done(int client_id)
 	return true;
 }
 
-bool command_worker::send_cmd_get_data_done(int state, sensor_data_t *data)
+bool command_worker::send_cmd_get_data_done(int state, sensor_data_t *data, int length)
 {
 	cpacket* ret_packet;
 	cmd_get_data_done_t *cmd_get_data_done;
+	int extra_len;
+	extra_len = length - sizeof(sensor_data_t);
+	extra_len = extra_len < 0 ? 0 : extra_len;
 
-	ret_packet = new(std::nothrow) cpacket(sizeof(cmd_get_data_done_t));
+	ret_packet = new(std::nothrow)cpacket(sizeof(cmd_get_data_done_t) + extra_len);
 	retvm_if(!ret_packet, false, "Failed to allocate memory");
 
+	ret_packet->set_payload_size(sizeof(cmd_get_data_done_t) + extra_len);
 	ret_packet->set_cmd(CMD_GET_DATA);
 
 	cmd_get_data_done = (cmd_get_data_done_t*)ret_packet->data();
 	cmd_get_data_done->state = state;
+	cmd_get_data_done->extra_len = extra_len;
 
-	memcpy(&cmd_get_data_done->base_data , data, sizeof(sensor_data_t));
+	if (data != NULL)
+		memcpy(&cmd_get_data_done->base_data, data, sizeof(sensor_data_t));
+	if (extra_len > 0)
+		memcpy(&cmd_get_data_done->extra_data, (char *)data + sizeof(sensor_data_t), extra_len);
 
 	if (m_socket.send(ret_packet->packet(), ret_packet->size()) <= 0) {
 		_E("Failed to send a cmd_get_data_done");
@@ -322,7 +332,6 @@ bool command_worker::send_cmd_get_data_done(int state, sensor_data_t *data)
 	delete ret_packet;
 	return true;
 }
-
 
 bool command_worker::send_cmd_get_sensor_list_done(void)
 {
@@ -503,6 +512,7 @@ bool command_worker::cmd_stop(void *payload)
 
 	if (m_module->stop()) {
 		get_client_info_manager().set_start(m_client_id, m_sensor_id, false);
+		m_module->delete_attribute(m_client_id);
 		ret_value = OP_SUCCESS;
 	} else {
 		_E("Failed to stop sensor [0x%llx] for client [%d]", m_sensor_id, m_client_id);
@@ -712,6 +722,9 @@ bool command_worker::cmd_get_data(void *payload)
 
 	remain_count = m_module->get_data(&data, &length);
 
+	if (remain_count < 0)
+		state = OP_ERROR;
+
 	// In case of not getting sensor data, wait short time and retry again
 	// 1. changing interval to be less than 10ms
 	// 2. In case of first time, wait for INIT_WAIT_TIME
@@ -720,7 +733,9 @@ bool command_worker::cmd_get_data(void *payload)
 	// 5. repeat 2 ~ 4 operations RETRY_CNT times
 	// 6. reverting back to original interval
 	if ((remain_count >= 0) && !data->timestamp) {
-		const int RETRY_CNT	= 10;
+		const int RETRY_CNT	= 5;
+		const unsigned long long INIT_WAIT_TIME = 20000; //20ms
+		const unsigned long WAIT_TIME = 100000;	//100ms
 		int retry = 0;
 
 		unsigned int interval = m_module->get_interval(m_client_id, false);
@@ -732,7 +747,7 @@ bool command_worker::cmd_get_data(void *payload)
 
 		while ((remain_count >= 0) && !data->timestamp && (retry++ < RETRY_CNT)) {
 			_I("Wait sensor[0x%llx] data updated for client [%d] #%d", m_sensor_id, m_client_id, retry);
-			usleep(WAIT_TIME(retry));
+			usleep((retry == 1) ? INIT_WAIT_TIME : WAIT_TIME);
 			remain_count = m_module->get_data(&data, &length);
 		}
 
@@ -770,7 +785,7 @@ bool command_worker::cmd_set_attribute_int(void *payload)
 		goto out;
 	}
 
-	ret_value = m_module->set_attribute(cmd->attribute, cmd->value);
+	ret_value = m_module->add_attribute(m_client_id, cmd->attribute, cmd->value);
 
 out:
 	if (!send_cmd_done(ret_value))
@@ -795,7 +810,7 @@ bool command_worker::cmd_set_attribute_str(void *payload)
 		goto out;
 	}
 
-	ret_value = m_module->set_attribute(cmd->attribute, cmd->value, cmd->value_len);
+	ret_value = m_module->add_attribute(m_client_id, cmd->attribute, cmd->value, cmd->value_len);
 
 out:
 	if (!send_cmd_done(ret_value))

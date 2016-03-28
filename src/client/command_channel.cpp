@@ -592,12 +592,12 @@ bool command_channel::cmd_get_data(unsigned int type, sensor_data_t* sensor_data
 	sensor_data_t *base_data;
 	base_data = &cmd_get_data_done->base_data;
 
-	sensor_data->timestamp = base_data->timestamp;
-	sensor_data->accuracy = base_data->accuracy;
-	sensor_data->value_count = base_data->value_count;
+	memcpy(sensor_data, base_data, sizeof(sensor_data_t));
 
-	memcpy(sensor_data->values, base_data->values,
-		sizeof(sensor_data->values[0]) * base_data->value_count);
+	if (&cmd_get_data_done->extra_len > 0) {
+		memcpy((char *)sensor_data + sizeof(sensor_data_t),
+			  &cmd_get_data_done->extra_data, cmd_get_data_done->extra_len);
+	}
 
 	delete[] (char *)cmd_get_data_done;
 	delete packet;
