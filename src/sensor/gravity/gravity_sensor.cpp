@@ -194,6 +194,9 @@ void gravity_sensor::synthesize_rv(const sensor_event_t& event)
 
 void gravity_sensor::synthesize_lowpass(const sensor_event_t& event)
 {
+	if (event.event_type != ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME)
+		return;
+
 	sensor_event_t *gravity_event;
 	float x, y, z, norm, alpha, tau, err;
 
