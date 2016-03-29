@@ -220,7 +220,7 @@ bool command_worker::stopped(void *ctx)
 			inst->m_module->stop();
 		}
 
-		if (inst->m_sensor_id) {
+		if (inst->m_sensor_id > UNKNOWN_SENSOR) {
 			if (get_client_info_manager().has_sensor_record(inst->m_client_id, inst->m_sensor_id)) {
 				_I("Removing sensor[0x%llx] record for client_id[%d]", inst->m_sensor_id, inst->m_client_id);
 				get_client_info_manager().remove_sensor_record(inst->m_client_id, inst->m_sensor_id);
