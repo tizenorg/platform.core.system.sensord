@@ -104,6 +104,7 @@ bool sensor_loader::load_sensor_devices(const string &path, void* &handle)
 
 	dlerror();
 
+	/* TODO: The out-param of the create function should be const */
 	create_t create_devices = (create_t) dlsym(_handle, "create");
 	if (!create_devices) {
 		_E("Failed to find symbols in %s", path.c_str());
@@ -128,7 +129,6 @@ bool sensor_loader::load_sensor_devices(const string &path, void* &handle)
 
 	handle = _handle;
 
-	delete _devices;
 	return true;
 }
 

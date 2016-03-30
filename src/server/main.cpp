@@ -32,7 +32,9 @@ static void sig_term_handler(int signo, siginfo_t *info, void *data)
 	get_proc_name(info->si_pid, proc_name);
 
 	_E("Received SIGTERM(%d) from %s(%d)\n", signo, proc_name, info->si_pid);
-	exit(EXIT_SUCCESS);
+
+	/* TODO: Refactoring */
+	raise(SIGKILL);
 }
 
 static void signal_init(void)
