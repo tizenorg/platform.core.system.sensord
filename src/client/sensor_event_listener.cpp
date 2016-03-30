@@ -338,6 +338,8 @@ void sensor_event_listener::listen_events(void)
 	struct epoll_event event;
 	ssize_t len = -1;
 
+	event.events = EPOLLIN | EPOLLPRI;
+
 	do {
 		void *buffer_data;
 		int data_len;
