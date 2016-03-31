@@ -181,8 +181,10 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event)
 
 	remains = get_data(&rotation_data, &data_length);
 
-	if (remains < 0)
+	if (remains < 0) {
+		free(rotation_event);
 		return;
+	}
 
 	rotation_event->sensor_id = get_id();
 	rotation_event->event_type = AUTO_ROTATION_CHANGE_STATE_EVENT;

@@ -141,8 +141,10 @@ void linear_accel_sensor::synthesize(const sensor_event_t& event)
 
 		remains = get_data(&linear_accel_data, &data_length);
 
-		if (remains < 0)
+		if (remains < 0) {
+			free(linear_accel_event);
 			return;
+		}
 
 		linear_accel_event->sensor_id = get_id();
 		linear_accel_event->event_type = LINEAR_ACCEL_EVENT_RAW_DATA_REPORT_ON_TIME;
