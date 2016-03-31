@@ -309,7 +309,8 @@ bool command_worker::send_cmd_get_data_done(int state, sensor_data_t *data)
 	cmd_get_data_done = (cmd_get_data_done_t*)ret_packet->data();
 	cmd_get_data_done->state = state;
 
-	memcpy(&cmd_get_data_done->base_data , data, sizeof(sensor_data_t));
+	if (data)
+		memcpy(&cmd_get_data_done->base_data, data, sizeof(sensor_data_t));
 
 	if (m_socket.send(ret_packet->packet(), ret_packet->size()) <= 0) {
 		_E("Failed to send a cmd_get_data_done");
@@ -707,13 +708,17 @@ bool command_worker::cmd_get_data(void *payload)
 		_E("Permission denied to get data for client [%d], for sensor [0x%llx]",
 			m_client_id, m_sensor_id);
 		state = OP_ERROR;
+		data = NULL;
 		goto out;
 	}
 
 	remain_count = m_module->get_data(&data, &length);
 
-	if (remain_count < 0)
+	if (remain_count < 0) {
 		state = OP_ERROR;
+		data = NULL;
+		goto out;
+	}
 
 	// In case of not getting sensor data, wait short time and retry again
 	// 1. changing interval to be less than 10ms
