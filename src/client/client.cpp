@@ -334,7 +334,7 @@ static bool get_sensor_list(void)
 	return true;
 }
 
-API int sensord_get_sensor_list_ex(sensor_type_t type, sensor_t **list, int *sensor_count)
+API int sensord_get_sensors(sensor_type_t type, sensor_t **list, int *sensor_count)
 {
 	retvm_if (!get_sensor_list(), -EPERM, "Fail to get sensor list from server");
 
@@ -361,7 +361,7 @@ API int sensord_get_sensor_list_ex(sensor_type_t type, sensor_t **list, int *sen
 	return OP_SUCCESS;
 }
 
-API int sensord_get_sensor_ex(sensor_type_t type, sensor_t *sensor)
+API int sensord_get_default_sensor(sensor_type_t type, sensor_t *sensor)
 {
 	retvm_if (!get_sensor_list(), -EPERM, "Fail to get sensor list from server");
 
@@ -383,13 +383,13 @@ API int sensord_get_sensor_ex(sensor_type_t type, sensor_t *sensor)
 
 API bool sensord_get_sensor_list(sensor_type_t type, sensor_t **list, int *sensor_count)
 {
-	return (sensord_get_sensor_list_ex(type, list, sensor_count) == OP_SUCCESS);
+	return (sensord_get_sensors(type, list, sensor_count) == OP_SUCCESS);
 }
 
 API sensor_t sensord_get_sensor(sensor_type_t type)
 {
 	sensor_t sensor;
-	sensord_get_sensor_ex(type, &sensor);
+	sensord_get_default_sensor(type, &sensor);
 
 	return sensor;
 }

@@ -73,7 +73,7 @@ sensor_t sensord_get_sensor(sensor_type_t type);
  * @retval -EACCES Permission denied
  * @retval -ENODATA NO sensor available
  */
-int sensord_get_sensor_list_ex(sensor_type_t type, sensor_t **list, int *sensor_count);
+int sensord_get_sensors(sensor_type_t type, sensor_t **list, int *sensor_count);
 
 /**
  * @brief Get the default sensor for a given type.
@@ -85,7 +85,7 @@ int sensord_get_sensor_list_ex(sensor_type_t type, sensor_t **list, int *sensor_
  * @retval -EPERM Operation not permitted
  * @retval -EACCES Permission denied
  */
-int sensord_get_sensor_ex(sensor_type_t type, sensor_t *sensor);
+int sensord_get_default_sensor(sensor_type_t type, sensor_t *sensor);
 
 /**
  * @brief Get the type of this sensor.
