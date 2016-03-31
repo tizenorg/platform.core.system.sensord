@@ -59,7 +59,6 @@ typedef struct {
 	unsigned long long timestamp;
 	int accuracy;
 	void *accuracy_user_data;
-	void *buffer;
 } client_callback_info;
 
 typedef void (*hup_observer_t)(void);
@@ -112,7 +111,7 @@ private:
 	client_callback_info* handle_calibration_cb(sensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy);
 	void handle_events(void* event);
 
-	client_callback_info* get_callback_info(sensor_id_t sensor_id, const reg_event_info *event_info, void *sensor_data, void *buffer);
+	client_callback_info* get_callback_info(sensor_id_t sensor_id, const reg_event_info *event_info, void *sensor_data);
 
 	unsigned long long renew_event_id(void);
 
