@@ -110,14 +110,14 @@ client_callback_info* sensor_event_listener::handle_calibration_cb(sensor_handle
 		if (!event_info)
 			return NULL;
 
-		sensor_data_t *cal_data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
-		retvm_if(!cal_data, NULL, "Failed to allocate memory");
-
 		if (event_info->m_cb_type == SENSOR_LEGACY_CB) {
 			cal_event_data.event_data = (void *)&(accuracy);
 			cal_event_data.event_data_size = sizeof(accuracy);
 			cal_sensor_data = &cal_event_data;
 		} else {
+			sensor_data_t *cal_data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
+			retvm_if(!cal_data, NULL, "Failed to allocate memory");
+
 			cal_data->accuracy = accuracy;
 			cal_data->timestamp = time;
 			cal_data->values[0] = accuracy;
