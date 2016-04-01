@@ -239,7 +239,7 @@ sensor_base* sensor_loader::create_sensor(void)
 		_E("Failed to create sensor, exception: %s", e.what());
 		return NULL;
 	} catch (int err) {
-		_ERRNO(errno);
+		_ERRNO(errno, _E, "Failed to create sensor");
 		return NULL;
 	}
 
