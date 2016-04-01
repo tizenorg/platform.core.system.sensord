@@ -255,7 +255,6 @@ client_callback_info* sensor_event_listener::get_callback_info(sensor_id_t senso
 	callback_info->timestamp = 0;
 	callback_info->accuracy = -1;
 	callback_info->accuracy_user_data = NULL;
-	callback_info->maincontext = event_info->m_maincontext;
 	callback_info->sensor_data = sensor_data;
 	callback_info->buffer = buffer;
 
@@ -264,14 +263,7 @@ client_callback_info* sensor_event_listener::get_callback_info(sensor_id_t senso
 
 void sensor_event_listener::post_callback_to_main_loop(client_callback_info* cb_info)
 {
-	if (cb_info->maincontext) {
-		GSource *_source = g_idle_source_new();
-
-		g_source_attach(_source, cb_info->maincontext);
-		g_source_set_callback(_source, callback_dispatcher, cb_info, NULL);
-	} else {
-		g_idle_add_full(G_PRIORITY_DEFAULT, callback_dispatcher, cb_info, NULL);
-	}
+	g_idle_add_full(G_PRIORITY_DEFAULT, callback_dispatcher, cb_info, NULL);
 }
 
 bool sensor_event_listener::is_valid_callback(client_callback_info *cb_info)

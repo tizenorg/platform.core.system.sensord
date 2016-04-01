@@ -131,20 +131,6 @@ bool sensor_handle_info::change_reg_event_batch(unsigned int event_type, unsigne
 	return true;
 }
 
-bool sensor_handle_info::change_reg_event_maincontext(unsigned int event_type, GMainContext *maincontext)
-{
-	auto it_event = m_reg_event_infos.find(event_type);
-
-	if (it_event == m_reg_event_infos.end()) {
-		_E("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
-		return false;
-	}
-
-	it_event->second.m_maincontext = maincontext;
-
-	return true;
-}
-
 void sensor_handle_info::get_batch(unsigned int &interval, unsigned int &latency)
 {
 	if (m_reg_event_infos.empty()) {

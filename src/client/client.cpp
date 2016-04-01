@@ -976,19 +976,6 @@ API bool sensord_change_event_max_batch_latency(int handle, unsigned int event_t
 	return change_event_batch(handle, event_type, prev_interval, max_batch_latency);
 }
 
-API bool sensord_change_event_maincontext(int handle, unsigned int event_type, GMainContext *maincontext)
-{
-	AUTOLOCK(lock);
-
-	if (!sensor_client_info::get_instance().set_event_maincontext(handle, event_type, maincontext)) {
-		_E("Failed to get event info with handle = %d, event_type = 0x%x, maincontext = 0x%x", handle, event_type, maincontext);
-		return false;
-	}
-
-	_I("handle = %d, event_type = 0x%x, maincontext = 0x%x", handle, event_type, maincontext);
-	return true;
-}
-
 API bool sensord_set_option(int handle, int option)
 {
 	sensor_id_t sensor_id;
