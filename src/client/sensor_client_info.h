@@ -76,7 +76,6 @@ public:
 	bool set_sensor_state(int handle, int sensor_state);
 	bool set_sensor_option(int handle, int sensor_option);
 	bool set_event_batch(int handle, unsigned int event_type, unsigned int interval, unsigned int latency);
-	bool set_event_maincontext(int handle, unsigned int event_type, GMainContext *maincontext);
 	bool set_accuracy(int handle, int accuracy);
 	bool set_bad_accuracy(int handle, int bad_accuracy);
 	bool get_event_info(int handle, unsigned int event_type, unsigned int &interval, unsigned int &latency, int &cb_type, void* &cb, void* &user_data);
