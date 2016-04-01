@@ -27,63 +27,24 @@
 #include <dlfcn.h>
 
 #include <sensor_log.h>
+#include <sensor_types.h>
 
+#include <sensor_common.h>
 #include <virtual_sensor.h>
 #include <auto_rotation_sensor.h>
 #include <sensor_loader.h>
-#include <virtual_sensor_config.h>
 #include <auto_rotation_alg.h>
 #include <auto_rotation_alg_emul.h>
 
-using std::bind1st;
-using std::mem_fun;
-using std::string;
-using std::vector;
-
-#define SENSOR_NAME						"AUTO_ROTATION_SENSOR"
-#define SENSOR_TYPE_AUTO_ROTATION		"AUTO_ROTATION"
-
-#define MS_TO_US 1000
-
-#define ELEMENT_NAME					"NAME"
-#define ELEMENT_VENDOR					"VENDOR"
-#define ELEMENT_RAW_DATA_UNIT			"RAW_DATA_UNIT"
-#define ELEMENT_DEFAULT_SAMPLING_TIME	"DEFAULT_SAMPLING_TIME"
-
-#define AUTO_ROTATION_LIB				"/usr/lib/sensord/libauto_rotation_sensor.so"
+#define SENSOR_NAME "AUTO_ROTATION_SENSOR"
 
 auto_rotation_sensor::auto_rotation_sensor()
 : m_accel_sensor(NULL)
 , m_alg(NULL)
 , m_rotation(0)
-, m_interval(1)
-, m_rotation_time(1) // rotation state is valid from initial state, so set rotation time to non-zero value
-, m_default_sampling_time(1)
+, m_interval(100)
+, m_rotation_time(0)
 {
-	virtual_sensor_config &config = virtual_sensor_config::get_instance();
-
-	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_VENDOR, m_vendor)) {
-		_E("[VENDOR] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_vendor = %s", m_vendor.c_str());
-
-	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
-		_E("[RAW_DATA_UNIT] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_raw_data_unit = %s", m_raw_data_unit.c_str());
-
-	if (!config.get(SENSOR_TYPE_AUTO_ROTATION, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
-		_E("[DEFAULT_SAMPLING_TIME] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_default_sampling_time = %d", m_default_sampling_time);
-
-	m_interval = m_default_sampling_time * MS_TO_US;
 }
 
 auto_rotation_sensor::~auto_rotation_sensor()
@@ -124,7 +85,7 @@ sensor_type_t auto_rotation_sensor::get_type(void)
 
 unsigned int auto_rotation_sensor::get_event_type(void)
 {
-	return (AUTO_ROTATION_SENSOR << 16) | 0x0001;
+	return AUTO_ROTATION_EVENT_CHANGE_STATE;
 }
 
 const char* auto_rotation_sensor::get_name(void)
@@ -153,7 +114,7 @@ bool auto_rotation_sensor::get_sensor_info(sensor_info &info)
 
 void auto_rotation_sensor::synthesize(const sensor_event_t& event)
 {
-	if (event.event_type != ACCELEROMETER_RAW_DATA_EVENT)
+	if (event.event_type != ACCELEROMETER_EVENT_RAW_DATA_REPORT_ON_TIME)
 		return;
 
 	int rotation;
@@ -187,7 +148,7 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event)
 	}
 
 	rotation_event->sensor_id = get_id();
-	rotation_event->event_type = AUTO_ROTATION_CHANGE_STATE_EVENT;
+	rotation_event->event_type = AUTO_ROTATION_EVENT_CHANGE_STATE;
 	rotation_event->data_length = data_length;
 	rotation_event->data = rotation_data;
 
@@ -218,6 +179,9 @@ int auto_rotation_sensor::get_data(sensor_data_t **data, int *length)
 
 bool auto_rotation_sensor::set_interval(unsigned long interval)
 {
+	m_accel_sensor->add_interval((intptr_t)this , m_interval, true);
+
+	m_interval = interval;
 	return false;
 }
 
@@ -237,7 +201,7 @@ bool auto_rotation_sensor::on_start(void)
 
 	m_alg->start();
 
-	m_accel_sensor->add_interval((intptr_t)this , (m_interval/MS_TO_US), true);
+	m_accel_sensor->add_interval((intptr_t)this , m_interval, true);
 	m_accel_sensor->start();
 
 	return activate();
@@ -251,14 +215,6 @@ bool auto_rotation_sensor::on_stop(void)
 	return deactivate();
 }
 
-bool auto_rotation_sensor::check_lib(void)
-{
-	if (access(AUTO_ROTATION_LIB, F_OK) < 0)
-		return false;
-
-	return true;
-}
-
 auto_rotation_alg *auto_rotation_sensor::get_alg()
 {
 	auto_rotation_alg *alg = new(std::nothrow) auto_rotation_alg_emul();
@@ -266,4 +222,3 @@ auto_rotation_alg *auto_rotation_sensor::get_alg()
 
 	return alg;
 }
-

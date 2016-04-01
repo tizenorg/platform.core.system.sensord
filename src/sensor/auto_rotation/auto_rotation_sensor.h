@@ -52,10 +52,6 @@ private:
 	unsigned int m_interval;
 	unsigned long long m_rotation_time;
 
-	std::string m_vendor;
-	std::string m_raw_data_unit;
-	int m_default_sampling_time;
-
 	virtual bool set_interval(unsigned long interval);
 	virtual bool set_batch_latency(unsigned long latency);
 	virtual bool set_wakeup(int wakeup);
@@ -63,7 +59,6 @@ private:
 	virtual bool on_start(void);
 	virtual bool on_stop(void);
 
-	bool check_lib(void);
 	auto_rotation_alg *get_alg();
 };
 
