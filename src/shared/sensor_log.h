@@ -49,14 +49,14 @@
 #define _I INFO
 #define _D DBG
 
-#define _ERRNO(errno) do { \
+#define _ERRNO(errno, tag, fmt, arg...) do { \
 		char buf[1024]; \
 		char *error = strerror_r(errno, buf, 1024); \
 		if (!error) { \
 			_E("Failed to strerror_r()"); \
 			break; \
 		} \
-		_E("%s : [errno: %d]", error, errno); \
+		tag(fmt" (%s[%d])", ##arg, error, errno); \
 	} while (0)
 
 #if defined(_DEBUG)
