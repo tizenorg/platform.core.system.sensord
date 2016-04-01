@@ -698,7 +698,6 @@ bool command_worker::cmd_get_data(void *payload)
 	const unsigned int GET_DATA_MIN_INTERVAL = 10;
 	int state;
 	bool adjusted = false;
-	int length;
 
 	sensor_data_t *data = NULL;
 
