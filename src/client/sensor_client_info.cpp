@@ -249,23 +249,6 @@ bool sensor_client_info::set_event_batch(int handle, unsigned int event_type, un
 	return true;
 }
 
-bool sensor_client_info::set_event_maincontext(int handle, unsigned int event_type, GMainContext *maincontext)
-{
-	AUTOLOCK(m_handle_info_lock);
-
-	auto it_handle = m_sensor_handle_infos.find(handle);
-
-	if (it_handle == m_sensor_handle_infos.end()) {
-		_E("Handle[%d] is not found for client %s", handle, get_client_name());
-		return false;
-	}
-
-	if (!it_handle->second.change_reg_event_maincontext(event_type, maincontext))
-		return false;
-
-	return true;
-}
-
 bool sensor_client_info::set_accuracy(int handle, int accuracy)
 {
 	AUTOLOCK(m_handle_info_lock);
