@@ -197,15 +197,14 @@ typedef struct {
 		int steps;
 		int walk_steps;
 		int run_steps;
+		int walk_up_steps;
+		int walk_down_steps;
+		int run_up_steps;
+		int run_down_steps;
 		float distance;
 		float calories;
 		float speed;
 	} diffs[SENSOR_PEDOMETER_DATA_DIFFS_SIZE];
-	unsigned long long accumulated_steps;
-	unsigned long long accumulated_walk_steps;
-	unsigned long long accumulated_run_steps;
-	double accumulated_distance;
-	double accumulated_calories;
 } sensor_pedometer_data_t;
 
 enum sensor_attribute {
