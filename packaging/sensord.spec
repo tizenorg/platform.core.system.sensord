@@ -141,6 +141,7 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 %files -n sensor-hal-devel
 %defattr(-,root,root,-)
 %{_includedir}/sensor/sensor_hal.h
+%{_includedir}/sensor/sensor_hal_types.h
 %license LICENSE.APLv2
 
 %if %{build_test_suite} == "ON"

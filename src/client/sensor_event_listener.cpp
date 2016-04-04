@@ -110,14 +110,14 @@ client_callback_info* sensor_event_listener::handle_calibration_cb(sensor_handle
 		if (!event_info)
 			return NULL;
 
-		sensor_data_t *cal_data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
-		retvm_if(!cal_data, NULL, "Failed to allocate memory");
-
 		if (event_info->m_cb_type == SENSOR_LEGACY_CB) {
 			cal_event_data.event_data = (void *)&(accuracy);
 			cal_event_data.event_data_size = sizeof(accuracy);
 			cal_sensor_data = &cal_event_data;
 		} else {
+			sensor_data_t *cal_data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
+			retvm_if(!cal_data, NULL, "Failed to allocate memory");
+
 			cal_data->accuracy = accuracy;
 			cal_data->timestamp = time;
 			cal_data->values[0] = accuracy;
@@ -125,7 +125,7 @@ client_callback_info* sensor_event_listener::handle_calibration_cb(sensor_handle
 			cal_sensor_data = cal_data;
 		}
 
-		cal_callback_info = get_callback_info(handle_info.m_sensor_id, cal_event_info, cal_sensor_data, cal_sensor_data);
+		cal_callback_info = get_callback_info(handle_info.m_sensor_id, cal_event_info, cal_sensor_data);
 
 		m_client_info.set_bad_accuracy(handle_info.m_handle, true);
 
@@ -202,9 +202,9 @@ void sensor_event_listener::handle_events(void* event)
 				client_callback_infos.push_back(cal_callback_info);
 
 			if (event_info->m_cb_type == SENSOR_LEGACY_CB)
-				callback_info = get_callback_info(sensor_id, event_info, &event_data, event);
+				callback_info = get_callback_info(sensor_id, event_info, &event_data);
 			else
-				callback_info = get_callback_info(sensor_id, event_info, sensor_data, event);
+				callback_info = get_callback_info(sensor_id, event_info, sensor_data);
 
 			if (!callback_info) {
 				_E("Failed to get callback_info");
@@ -237,7 +237,7 @@ void sensor_event_listener::handle_events(void* event)
 	}
 }
 
-client_callback_info* sensor_event_listener::get_callback_info(sensor_id_t sensor_id, const reg_event_info *event_info, void* sensor_data, void *buffer)
+client_callback_info* sensor_event_listener::get_callback_info(sensor_id_t sensor_id, const reg_event_info *event_info, void* sensor_data)
 {
 	client_callback_info* callback_info;
 
@@ -255,23 +255,14 @@ client_callback_info* sensor_event_listener::get_callback_info(sensor_id_t senso
 	callback_info->timestamp = 0;
 	callback_info->accuracy = -1;
 	callback_info->accuracy_user_data = NULL;
-	callback_info->maincontext = event_info->m_maincontext;
 	callback_info->sensor_data = sensor_data;
-	callback_info->buffer = buffer;
 
 	return callback_info;
 }
 
 void sensor_event_listener::post_callback_to_main_loop(client_callback_info* cb_info)
 {
-	if (cb_info->maincontext) {
-		GSource *_source = g_idle_source_new();
-
-		g_source_attach(_source, cb_info->maincontext);
-		g_source_set_callback(_source, callback_dispatcher, cb_info, NULL);
-	} else {
-		g_idle_add_full(G_PRIORITY_DEFAULT, callback_dispatcher, cb_info, NULL);
-	}
+	g_idle_add_full(G_PRIORITY_DEFAULT, callback_dispatcher, cb_info, NULL);
 }
 
 bool sensor_event_listener::is_valid_callback(client_callback_info *cb_info)
@@ -345,6 +336,8 @@ void sensor_event_listener::listen_events(void)
 	char buffer[EVENT_BUFFER_SIZE];
 	struct epoll_event event;
 	ssize_t len = -1;
+
+	event.events = EPOLLIN | EPOLLPRI;
 
 	do {
 		void *buffer_data;

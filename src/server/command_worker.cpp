@@ -309,7 +309,8 @@ bool command_worker::send_cmd_get_data_done(int state, sensor_data_t *data)
 	cmd_get_data_done = (cmd_get_data_done_t*)ret_packet->data();
 	cmd_get_data_done->state = state;
 
-	memcpy(&cmd_get_data_done->base_data , data, sizeof(sensor_data_t));
+	if (data)
+		memcpy(&cmd_get_data_done->base_data, data, sizeof(sensor_data_t));
 
 	if (m_socket.send(ret_packet->packet(), ret_packet->size()) <= 0) {
 		_E("Failed to send a cmd_get_data_done");
@@ -503,6 +504,7 @@ bool command_worker::cmd_stop(void *payload)
 
 	if (m_module->stop()) {
 		get_client_info_manager().set_start(m_client_id, m_sensor_id, false);
+		m_module->delete_attribute(m_client_id);
 		ret_value = OP_SUCCESS;
 	} else {
 		_E("Failed to stop sensor [0x%llx] for client [%d]", m_sensor_id, m_client_id);
@@ -694,23 +696,21 @@ out:
 bool command_worker::cmd_get_data(void *payload)
 {
 	const unsigned int GET_DATA_MIN_INTERVAL = 10;
-	int state = OP_ERROR;
-	int remain_count;
+	int state;
 	bool adjusted = false;
-	int length;
 
-	sensor_data_t *data;
+	sensor_data_t *data = NULL;
 
 	_D("CMD_GET_VALUE Handler invoked\n");
 
 	if (!is_permission_allowed()) {
 		_E("Permission denied to get data for client [%d], for sensor [0x%llx]",
 			m_client_id, m_sensor_id);
-		state = OP_ERROR;
+		state = -EACCES;
 		goto out;
 	}
 
-	remain_count = m_module->get_data(&data, &length);
+	state = m_module->get_cache(&data);
 
 	// In case of not getting sensor data, wait short time and retry again
 	// 1. changing interval to be less than 10ms
@@ -719,7 +719,7 @@ bool command_worker::cmd_get_data(void *payload)
 	// 4. retrying to get data
 	// 5. repeat 2 ~ 4 operations RETRY_CNT times
 	// 6. reverting back to original interval
-	if ((remain_count >= 0) && !data->timestamp) {
+	if (state == -ENODATA) {
 		const int RETRY_CNT	= 10;
 		int retry = 0;
 
@@ -730,18 +730,15 @@ bool command_worker::cmd_get_data(void *payload)
 			adjusted = true;
 		}
 
-		while ((remain_count >= 0) && !data->timestamp && (retry++ < RETRY_CNT)) {
+		while ((state == -ENODATA) && (retry++ < RETRY_CNT)) {
 			_I("Wait sensor[0x%llx] data updated for client [%d] #%d", m_sensor_id, m_client_id, retry);
 			usleep(WAIT_TIME(retry));
-			remain_count = m_module->get_data(&data, &length);
+			state = m_module->get_cache(&data);
 		}
 
 		if (adjusted)
 			m_module->add_interval(m_client_id, interval, false);
 	}
-
-	if (data->timestamp)
-		state = OP_SUCCESS;
 
 	if (state < 0) {
 		_E("Failed to get data for client [%d], for sensor [0x%llx]",
@@ -749,7 +746,7 @@ bool command_worker::cmd_get_data(void *payload)
 	}
 
 out:
-	send_cmd_get_data_done(state, data);
+	send_cmd_get_data_done(state < 0 ? OP_ERROR : OP_SUCCESS, data);
 
 	return true;
 }
@@ -770,7 +767,7 @@ bool command_worker::cmd_set_attribute_int(void *payload)
 		goto out;
 	}
 
-	ret_value = m_module->set_attribute(cmd->attribute, cmd->value);
+	ret_value = m_module->add_attribute(m_client_id, cmd->attribute, cmd->value);
 
 out:
 	if (!send_cmd_done(ret_value))
@@ -795,7 +792,7 @@ bool command_worker::cmd_set_attribute_str(void *payload)
 		goto out;
 	}
 
-	ret_value = m_module->set_attribute(cmd->attribute, cmd->value, cmd->value_len);
+	ret_value = m_module->add_attribute(m_client_id, cmd->attribute, cmd->value, cmd->value_len);
 
 out:
 	if (!send_cmd_done(ret_value))

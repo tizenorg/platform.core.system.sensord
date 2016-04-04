@@ -22,6 +22,7 @@
 
 #include <sensor_base.h>
 #include <worker_thread.h>
+#include <sensor_hal.h>
 
 class physical_sensor : public sensor_base {
 public:
@@ -40,7 +41,7 @@ public:
 
 	int get_poll_fd();
 
-	virtual bool on_event(const sensor_data_t *data, int remains);
+	virtual bool on_event(const sensor_data_t *data, int data_len, int remains);
 
 	virtual bool read_fd(std::vector<uint32_t> &ids);
 	virtual int get_data(sensor_data_t **data, int *length);

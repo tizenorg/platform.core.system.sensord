@@ -28,7 +28,7 @@
 #include <sensor_common.h>
 #include <worker_thread.h>
 #include <sensor_info.h>
-#include <sensor_hal.h>
+#include <sensor_hal_types.h>
 #include <vector>
 
 class sensor_base {
@@ -50,10 +50,12 @@ public:
 
 	/* set/get data */
 	virtual int get_data(sensor_data_t **data, int *length);
+	int get_cache(sensor_data_t **data);
 
 	virtual bool flush(void);
-	virtual int set_attribute(int32_t attribute, int32_t value);
-	virtual int set_attribute(int32_t attribute, char *value, int value_size);
+	virtual int add_attribute(int client_id, int32_t attribute, int32_t value);
+	virtual int add_attribute(int client_id, int32_t attribute, char *value, int value_size);
+	virtual bool delete_attribute(int client_id);
 
 	/* start/stop */
 	bool start(void);
@@ -77,6 +79,9 @@ public:
 protected:
 	void set_permission(int permission);
 
+	unsigned long long get_timestamp(void);
+	unsigned long long get_timestamp(timeval *t);
+
 private:
 	sensor_id_t m_id;
 	int m_permission;
@@ -88,14 +93,19 @@ private:
 	unsigned int m_client;
 	cmutex m_client_mutex;
 
+	sensor_data_t *m_last_data;
+	cmutex m_data_cache_mutex;
+
+	virtual int set_attribute(int32_t attribute, int32_t value);
+	virtual int set_attribute(int32_t attribute, char *value, int value_size);
+
 	virtual bool set_interval(unsigned long interval);
 	virtual bool set_batch_latency(unsigned long latency);
 
 	virtual bool on_start(void);
 	virtual bool on_stop(void);
 
-	static unsigned long long get_timestamp(void);
-	static unsigned long long get_timestamp(timeval *t);
+	void set_cache(sensor_data_t *data);
 };
 
 #endif /* _SENSOR_BASE_H_ */

@@ -23,7 +23,8 @@
 #include <sensor_loader.h>
 #include <string>
 
-using std::string;
+#define CAL_NODE_PATH "/sys/class/sensors/ssp_sensor/set_cal_data"
+#define SET_CAL 1
 
 static void sig_term_handler(int signo, siginfo_t *info, void *data)
 {
@@ -52,11 +53,30 @@ static void signal_init(void)
 	sigaction(SIGTERM, &sig_act, NULL);
 }
 
+static void set_cal_data(void)
+{
+	FILE *fp = fopen(CAL_NODE_PATH, "w");
+
+	if (!fp) {
+		_I("Not support calibration_node");
+		return;
+	}
+
+	fprintf(fp, "%d", SET_CAL);
+	fclose(fp);
+
+	_I("Succeeded to set calibration data");
+
+	return;
+}
+
 int main(int argc, char *argv[])
 {
 	_I("Sensord started");
 
 	signal_init();
+
+	set_cal_data();
 
 	sensor_loader::get_instance().load();
 

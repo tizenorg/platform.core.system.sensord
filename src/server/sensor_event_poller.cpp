@@ -51,6 +51,9 @@ void sensor_event_poller::init_sensor_map()
 
 		fd = sensor->get_poll_fd();
 
+		if (fd < 0)
+			continue;
+
 		m_fd_sensors.insert(std::make_pair(fd, sensor));
 	}
 }
@@ -114,6 +117,7 @@ bool sensor_event_poller::process_event(int fd, const std::vector<uint32_t> &ids
 	physical_sensor *sensor;
 	std::pair<fd_sensors_t::iterator, fd_sensors_t::iterator> ret;
 
+	/* find sensors which is based on same device(fd) */
 	ret = m_fd_sensors.equal_range(fd);
 
 	for (auto it_sensor = ret.first; it_sensor != ret.second; ++it_sensor) {
@@ -124,22 +128,27 @@ bool sensor_event_poller::process_event(int fd, const std::vector<uint32_t> &ids
 
 		sensor = it_sensor->second;
 
+		/* check whether the id of this sensor is in id list(parameter) or not */
 		auto result = std::find(std::begin(ids), std::end(ids), sensor->get_hal_id());
 
 		if (result == std::end(ids))
 			continue;
 
 		while (remains > 0) {
-			event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
 			remains = sensor->get_data(&data, &data_length);
 			if (remains < 0) {
 				_E("Failed to get sensor data");
 				break;
 			}
 
-			if (!sensor->on_event(data, remains)) {
-				free(event);
+			if (!sensor->on_event(data, data_length, remains)) {
 				free(data);
+				continue;
+			}
+
+			event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
+			if (!event) {
+				_E("Memory allocation failed");
 				break;
 			}
 

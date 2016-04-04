@@ -41,6 +41,7 @@ typedef std::map<const sensor_info_t *, sensor_device *> sensor_device_map_t;
 class sensor_loader {
 private:
 	sensor_loader();
+	virtual ~sensor_loader();
 
 	bool load_sensor_devices(const std::string &path, void* &handle);
 
@@ -54,6 +55,7 @@ private:
 
 	sensor_map_t m_sensors;
 	sensor_device_map_t m_devices;
+	std::vector<void *> m_handles;
 public:
 	static sensor_loader& get_instance();
 	bool load(void);

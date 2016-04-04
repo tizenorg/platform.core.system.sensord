@@ -334,7 +334,7 @@ static bool get_sensor_list(void)
 	return true;
 }
 
-API int sensord_get_sensor_list_ex(sensor_type_t type, sensor_t **list, int *sensor_count)
+API int sensord_get_sensors(sensor_type_t type, sensor_t **list, int *sensor_count)
 {
 	retvm_if (!get_sensor_list(), -EPERM, "Fail to get sensor list from server");
 
@@ -361,7 +361,7 @@ API int sensord_get_sensor_list_ex(sensor_type_t type, sensor_t **list, int *sen
 	return OP_SUCCESS;
 }
 
-API int sensord_get_sensor_ex(sensor_type_t type, sensor_t *sensor)
+API int sensord_get_default_sensor(sensor_type_t type, sensor_t *sensor)
 {
 	retvm_if (!get_sensor_list(), -EPERM, "Fail to get sensor list from server");
 
@@ -383,13 +383,13 @@ API int sensord_get_sensor_ex(sensor_type_t type, sensor_t *sensor)
 
 API bool sensord_get_sensor_list(sensor_type_t type, sensor_t **list, int *sensor_count)
 {
-	return (sensord_get_sensor_list_ex(type, list, sensor_count) == OP_SUCCESS);
+	return (sensord_get_sensors(type, list, sensor_count) == OP_SUCCESS);
 }
 
 API sensor_t sensord_get_sensor(sensor_type_t type)
 {
 	sensor_t sensor;
-	sensord_get_sensor_ex(type, &sensor);
+	sensord_get_default_sensor(type, &sensor);
 
 	return sensor;
 }
@@ -976,19 +976,6 @@ API bool sensord_change_event_max_batch_latency(int handle, unsigned int event_t
 	return change_event_batch(handle, event_type, prev_interval, max_batch_latency);
 }
 
-API bool sensord_change_event_maincontext(int handle, unsigned int event_type, GMainContext *maincontext)
-{
-	AUTOLOCK(lock);
-
-	if (!sensor_client_info::get_instance().set_event_maincontext(handle, event_type, maincontext)) {
-		_E("Failed to get event info with handle = %d, event_type = 0x%x, maincontext = 0x%x", handle, event_type, maincontext);
-		return false;
-	}
-
-	_I("handle = %d, event_type = 0x%x, maincontext = 0x%x", handle, event_type, maincontext);
-	return true;
-}
-
 API bool sensord_set_option(int handle, int option)
 {
 	sensor_id_t sensor_id;
@@ -1055,7 +1042,7 @@ API int sensord_set_attribute_int(int handle, int attribute, int value)
 
 	if (!cmd_channel->cmd_set_attribute_int(attribute, value)) {
 		_E("Sending cmd_set_attribute_int(%d, %d) failed for %s",
-			client_id, value, get_client_name);
+			client_id, value, get_client_name());
 		return -EPERM;
 	}
 
@@ -1092,7 +1079,7 @@ API int sensord_set_attribute_str(int handle, int attribute, const char *value, 
 
 	if (!cmd_channel->cmd_set_attribute_str(attribute, value, value_len)) {
 		_E("Sending cmd_set_attribute_str(%d, %d, 0x%x) failed for %s",
-			client_id, value_len, value, get_client_name);
+			client_id, value_len, value, get_client_name());
 		return -EPERM;
 	}
 

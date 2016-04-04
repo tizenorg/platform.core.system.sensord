@@ -47,10 +47,8 @@ reg_event_info* sensor_handle_info::get_reg_event_info(unsigned int event_type)
 {
 	auto it_event = m_reg_event_infos.find(event_type);
 
-	if (it_event == m_reg_event_infos.end()) {
-		_D("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
+	if (it_event == m_reg_event_infos.end())
 		return NULL;
-	}
 
 	return &(it_event->second);
 }
@@ -127,20 +125,6 @@ bool sensor_handle_info::change_reg_event_batch(unsigned int event_type, unsigne
 	it_event->second.m_id = renew_event_id();
 	it_event->second.m_interval = interval;
 	it_event->second.m_latency = latency;
-
-	return true;
-}
-
-bool sensor_handle_info::change_reg_event_maincontext(unsigned int event_type, GMainContext *maincontext)
-{
-	auto it_event = m_reg_event_infos.find(event_type);
-
-	if (it_event == m_reg_event_infos.end()) {
-		_E("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
-		return false;
-	}
-
-	it_event->second.m_maincontext = maincontext;
 
 	return true;
 }
