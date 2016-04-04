@@ -60,7 +60,7 @@ const char* get_sensor_name(sensor_id_t sensor_id)
 	auto iter = g_log_maps.find(sensor_type);
 
 	if (iter == g_log_maps.end()) {
-		_I("Unknown type value: 0x%x", sensor_type);
+		_I("Unknown type value: %#x", sensor_type);
 		return p_unknown;
 	}
 
@@ -75,7 +75,7 @@ const char* get_event_name(unsigned int event_type)
 	auto iter = g_log_maps.find(sensor_type);
 
 	if (iter == g_log_maps.end()) {
-		_I("Unknown type value: 0x%x", sensor_type);
+		_I("Unknown type value: %#x", sensor_type);
 		return p_unknown;
 	}
 

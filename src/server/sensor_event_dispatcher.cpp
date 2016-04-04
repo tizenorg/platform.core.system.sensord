@@ -169,9 +169,9 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 			ret = (ret & (client_socket.send(sensor_event->data, sensor_event->data_length) > 0));
 
 			if (ret)
-				_D("Event[0x%x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
+				_D("Event[%#x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
 			else
-				_E("Failed to send event[0x%x] to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
+				_E("Failed to send event[%#x] to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
 
 			++it_client_id;
 		}
@@ -261,10 +261,10 @@ void sensor_event_dispatcher::request_last_event(int client_id, sensor_id_t sens
 			sensor_event_t event;
 			if (is_record_event(*it_event) && get_last_event(*it_event, event)) {
 				if (client_socket.send(&event, sizeof(event)) > 0)
-					_I("Send the last event[0x%x] to %s on socket[%d]", event.event_type,
+					_I("Send the last event[%#x] to %s on socket[%d]", event.event_type,
 						client_info_manager.get_client_info(client_id), client_socket.get_socket_fd());
 				else
-					_E("Failed to send event[0x%x] to %s on socket[%d]", event.event_type,
+					_E("Failed to send event[%#x] to %s on socket[%d]", event.event_type,
 						client_info_manager.get_client_info(client_id), client_socket.get_socket_fd());
 			}
 			++it_event;

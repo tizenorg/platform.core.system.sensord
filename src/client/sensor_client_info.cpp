@@ -438,7 +438,7 @@ bool sensor_client_info::get_active_batch(sensor_id_t sensor, unsigned int &inte
 	}
 
 	if (!active_sensor_found) {
-		_D("Active sensor[0x%llx] is not found for client %s", sensor, get_client_name());
+		_D("Active sensor[%#llx] is not found for client %s", sensor, get_client_name());
 		return false;
 	}
 
@@ -470,7 +470,7 @@ unsigned int sensor_client_info::get_active_option(sensor_id_t sensor)
 	}
 
 	if (!active_sensor_found)
-		_D("Active sensor[0x%llx] is not found for client %s", sensor, get_client_name());
+		_D("Active sensor[%#llx] is not found for client %s", sensor, get_client_name());
 
 	return active_option;
 }

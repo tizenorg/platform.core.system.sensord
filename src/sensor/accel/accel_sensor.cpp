@@ -23,7 +23,7 @@
 
 accel_sensor::accel_sensor()
 {
-	_E("accel_sensor is created : 0x%x", this);
+	_E("accel_sensor is created : %#x", this);
 }
 
 accel_sensor::~accel_sensor()

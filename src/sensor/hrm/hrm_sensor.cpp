@@ -25,7 +25,7 @@ hrm_sensor::hrm_sensor()
 {
 	set_permission(SENSOR_PERMISSION_BIO);
 
-	_I("hrm_sensor is created : 0x%x", this);
+	_I("hrm_sensor is created : %#x", this);
 }
 
 hrm_sensor::~hrm_sensor()

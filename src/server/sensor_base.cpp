@@ -180,7 +180,7 @@ bool sensor_base::add_interval(int client_id, unsigned int interval, bool is_pro
 	cur_min = m_sensor_info_list.get_min_interval();
 
 	if (cur_min != prev_min) {
-		_I("Min interval for sensor[0x%llx] is changed from %dms to %dms"
+		_I("Min interval for sensor[%#llx] is changed from %dms to %dms"
 			" by%sclient[%d] adding interval",
 			get_id(), prev_min, cur_min,
 			is_processor ? " processor " : " ", client_id);
@@ -204,14 +204,14 @@ bool sensor_base::delete_interval(int client_id, bool is_processor)
 	cur_min = m_sensor_info_list.get_min_interval();
 
 	if (!cur_min) {
-		_I("No interval for sensor[0x%llx] by%sclient[%d] deleting interval, "
+		_I("No interval for sensor[%#llx] by%sclient[%d] deleting interval, "
 			 "so set to default %dms",
 			 get_id(), is_processor ? " processor " : " ",
 			 client_id, POLL_1HZ_MS);
 
 		set_interval(POLL_1HZ_MS);
 	} else if (cur_min != prev_min) {
-		_I("Min interval for sensor[0x%llx] is changed from %dms to %dms"
+		_I("Min interval for sensor[%#llx] is changed from %dms to %dms"
 			" by%sclient[%d] deleting interval",
 			get_id(), prev_min, cur_min,
 			is_processor ? " processor " : " ", client_id);
@@ -243,7 +243,7 @@ bool sensor_base::add_batch(int client_id, unsigned int latency)
 	cur_max = m_sensor_info_list.get_max_batch();
 
 	if (cur_max != prev_max) {
-		_I("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] adding latency",
+		_I("Max latency for sensor[%#llx] is changed from %dms to %dms by client[%d] adding latency",
 			get_id(), prev_max, cur_max, client_id);
 		set_batch_latency(cur_max);
 	}
@@ -264,12 +264,12 @@ bool sensor_base::delete_batch(int client_id)
 	cur_max = m_sensor_info_list.get_max_batch();
 
 	if (!cur_max) {
-		_I("No latency for sensor[0x%llx] by client[%d] deleting latency, so set to default 0 ms",
+		_I("No latency for sensor[%#llx] by client[%d] deleting latency, so set to default 0 ms",
 			 get_id(), client_id);
 
 		set_batch_latency(0);
 	} else if (cur_max != prev_max) {
-		_I("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] deleting latency",
+		_I("Max latency for sensor[%#llx] is changed from %dms to %dms by client[%d] deleting latency",
 			get_id(), prev_max, cur_max, client_id);
 
 		set_batch_latency(cur_max);

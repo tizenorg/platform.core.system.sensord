@@ -211,7 +211,7 @@ void sensor_info::set_raw_data(const char *data, int data_len)
 void sensor_info::show(void)
 {
 	_I("Type = %d", m_type);
-	_I("ID = 0x%llx", (int64_t)m_id);
+	_I("ID = %#llx", (int64_t)m_id);
 	_I("Privilege = %d", (int)m_privilege);
 	_I("Name = %s", m_name.c_str());
 	_I("Vendor = %s", m_vendor.c_str());
@@ -221,7 +221,7 @@ void sensor_info::show(void)
 	_I("Min_interval = %d", m_min_interval);
 	_I("Fifo_count = %d", m_fifo_count);
 	_I("Max_batch_count = %d", m_max_batch_count);
-	_I("Supported_event = 0x%x", m_supported_event);
+	_I("Supported_event = %#x", m_supported_event);
 	_I("Wakeup_supported = %d", m_wakeup_supported);
 }
 

@@ -40,7 +40,7 @@ bool sensor_usage::register_event(unsigned int event_type)
 	auto it_event = find(m_reg_events.begin(), m_reg_events.end(), event_type);
 
 	if (it_event != m_reg_events.end()) {
-		_E("Event[0x%x] is already registered", event_type);
+		_E("Event[%#x] is already registered", event_type);
 		return false;
 	}
 
@@ -53,7 +53,7 @@ bool sensor_usage::unregister_event(unsigned int event_type)
 	auto it_event = find(m_reg_events.begin(), m_reg_events.end(), event_type);
 
 	if (it_event == m_reg_events.end()) {
-		_E("Event[0x%x] is not found",event_type);
+		_E("Event[%#x] is not found",event_type);
 		return false;
 	}
 
@@ -67,7 +67,7 @@ bool sensor_usage::is_event_registered(unsigned int event_type)
 	auto it_event = find (m_reg_events.begin(), m_reg_events.end(), event_type);
 
 	if (it_event == m_reg_events.end()){
-		_D("Event[0x%x] is not registered",event_type);
+		_D("Event[%#x] is not registered",event_type);
 		return false;
 	}
 

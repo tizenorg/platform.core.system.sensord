@@ -159,7 +159,7 @@ ssize_t csocket::send_for_seqpacket(const void *buffer, size_t size) const
 	} while (err == EINTR);
 
 	if (err) {
-		_ERRNO(errno, _E, "Failed to send(%d, 0x%x, %d, 0x%x) = %d",
+		_ERRNO(errno, _E, "Failed to send(%d, %#x, %d, %#x) = %d",
 			m_sock_fd, buffer, size, m_send_flags, len);
 	}
 
@@ -176,7 +176,7 @@ ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
 		if (len > 0) {
 			err = 0;
 		} else if (len == 0) {
-			_E("recv(%d, 0x%p , %d) = %d, because the peer performed shutdown!",
+			_E("recv(%d, %#p , %d) = %d, because the peer performed shutdown!",
 				m_sock_fd, buffer, size, len);
 			err = 1;
 		} else {
@@ -185,13 +185,13 @@ ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
     } while (err == EINTR);
 
 	if ((err == EAGAIN) || (err == EWOULDBLOCK)) {
-		_ERRNO(err, _D, "Failed to recv(%d, 0x%x, %d, 0x%x) = %d",
+		_ERRNO(err, _D, "Failed to recv(%d, %#x, %d, %#x) = %d",
 			m_socket_fd, buffer, size, m_recv_flags, len);
 		return 0;
 	}
 
 	if (err) {
-		_ERRNO(err, _E, "Failed to recv(%d, 0x%x, %d, 0x%x) = %d",
+		_ERRNO(err, _E, "Failed to recv(%d, %#x, %d, %#x) = %d",
 			m_sock_fd, buffer, size, m_recv_flags, len);
 	}
 
@@ -212,7 +212,7 @@ ssize_t csocket::send_for_stream(const void *buffer, size_t size) const
 			total_sent_size += len;
 			err = 0;
 		} else {
-			_ERRNO(errno, _E, "Failed to send(%d, 0x%p + %d, %d - %d) = %d for %s",
+			_ERRNO(errno, _E, "Failed to send(%d, %#p + %d, %d - %d) = %d for %s",
 				m_sock_fd, buffer, total_sent_size, size, total_sent_size,
 				len, get_client_name());
 
@@ -238,12 +238,12 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 		if (len > 0) {
 			total_recv_size += len;
 		} else if (len == 0) {
-			_E("recv(%d, 0x%p + %d, %d - %d) = %d, because the peer of %s performed shutdown!",
+			_E("recv(%d, %#p + %d, %d - %d) = %d, because the peer of %s performed shutdown!",
 				m_sock_fd, buffer, total_recv_size, size, total_recv_size, len, get_client_name());
 			err = 1;
 			break;
 		} else {
-			_ERRNO(errno, _E, "Failed to recv(%d, 0x%p + %d, %d - %d) = %d for %s",
+			_ERRNO(errno, _E, "Failed to recv(%d, %#p + %d, %d - %d) = %d for %s",
 				m_sock_fd, buffer, total_recv_size, size, total_recv_size,
 				len, get_client_name());
 

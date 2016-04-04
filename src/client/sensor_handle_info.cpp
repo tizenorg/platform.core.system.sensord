@@ -70,7 +70,7 @@ bool sensor_handle_info::add_reg_event_info(unsigned int event_type, unsigned in
 	auto it_event = m_reg_event_infos.find(event_type);
 
 	if (it_event != m_reg_event_infos.end()) {
-		_E("Event %s[0x%x] is already registered for client %s", get_event_name(event_type), event_type, get_client_name());
+		_E("Event %s[%#x] is already registered for client %s", get_event_name(event_type), event_type, get_client_name());
 		return false;
 	}
 
@@ -93,7 +93,7 @@ bool sensor_handle_info::delete_reg_event_info(unsigned int event_type)
 	auto it_event = m_reg_event_infos.find(event_type);
 
 	if (it_event == m_reg_event_infos.end()) {
-		_E("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
+		_E("Event %s[%#x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
 		return false;
 	}
 
@@ -118,7 +118,7 @@ bool sensor_handle_info::change_reg_event_batch(unsigned int event_type, unsigne
 	auto it_event = m_reg_event_infos.find(event_type);
 
 	if (it_event == m_reg_event_infos.end()) {
-		_E("Event %s[0x%x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
+		_E("Event %s[%#x] is not registered for client %s", get_event_name(event_type), event_type, get_client_name());
 		return false;
 	}
 

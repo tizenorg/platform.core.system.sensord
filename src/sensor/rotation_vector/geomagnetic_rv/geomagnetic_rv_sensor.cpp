@@ -91,7 +91,7 @@ bool geomagnetic_rv_sensor::init()
 	m_fusion_sensor = sensor_loader::get_instance().get_sensor(FUSION_SENSOR);
 
 	if (!m_accel_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
-		_E("Failed to load sensors,  accel: 0x%x, mag: 0x%x, fusion: 0x%x",
+		_E("Failed to load sensors,  accel: %#x, mag: %#x, fusion: %#x",
 			m_accel_sensor, m_magnetic_sensor, m_fusion_sensor);
 		return false;
 	}

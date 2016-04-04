@@ -285,7 +285,7 @@ gboolean sensor_event_listener::callback_dispatcher(gpointer data)
 		else if (cb_info->cb_type == SENSOR_LEGACY_CB)
 			((sensor_legacy_cb_t) cb_info->cb)(cb_info->event_type, (sensor_event_data_t *) cb_info->sensor_data, cb_info->user_data);
 	} else {
-		_W("Discard invalid callback cb(0x%x)(%s, 0x%x, 0x%x) with id: %llu",
+		_W("Discard invalid callback cb(%#x)(%s, %#x, %#x) with id: %llu",
 		cb_info->cb, get_event_name(cb_info->event_type), cb_info->sensor_data,
 		cb_info->user_data, cb_info->event_id);
 	}
@@ -423,7 +423,7 @@ bool sensor_event_listener::create_event_channel(void)
 	}
 
 	if ((event_channel_ready.magic != CHANNEL_MAGIC_NUM) || (event_channel_ready.client_id != client_id)) {
-		_E("Event_channel_ready packet is wrong, magic = 0x%x, client id = %d",
+		_E("Event_channel_ready packet is wrong, magic = %#x, client id = %d",
 			event_channel_ready.magic, event_channel_ready.client_id);
 		return false;
 	}
