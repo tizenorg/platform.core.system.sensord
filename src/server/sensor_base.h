@@ -79,8 +79,8 @@ public:
 protected:
 	void set_permission(int permission);
 
-	static unsigned long long get_timestamp(void);
-	static unsigned long long get_timestamp(timeval *t);
+	unsigned long long get_timestamp(void);
+	unsigned long long get_timestamp(timeval *t);
 
 private:
 	sensor_id_t m_id;
