@@ -52,23 +52,23 @@ public:
 
 	virtual bool set_interval(uint32_t id, unsigned long val)
 	{
-		return false;
+		return true;
 	}
 	virtual bool set_batch_latency(uint32_t id, unsigned long val)
 	{
-		return false;
+		return true;
 	}
 	virtual bool set_attribute_int(uint32_t id, int32_t attribute, int32_t value)
 	{
-		return false;
+		return true;
 	}
 	virtual bool set_attribute_str(uint32_t id, int32_t attribute, char *value, int value_len)
 	{
-		return false;
+		return true;
 	}
 	virtual bool flush(uint32_t id)
 	{
-		return false;
+		return true;
 	}
 };
 

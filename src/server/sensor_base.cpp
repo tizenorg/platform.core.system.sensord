@@ -108,12 +108,12 @@ bool sensor_base::delete_attribute(int client_id)
 
 int sensor_base::set_attribute(int32_t attribute, int32_t value)
 {
-	return OP_ERROR;
+	return OP_SUCCESS;
 }
 
 int sensor_base::set_attribute(int32_t attribute, char *value, int value_size)
 {
-	return OP_ERROR;
+	return OP_SUCCESS;
 }
 
 bool sensor_base::start()
