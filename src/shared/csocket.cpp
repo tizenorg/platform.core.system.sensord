@@ -216,6 +216,16 @@ ssize_t csocket::send_for_stream(const void *buffer, size_t size) const
 				m_sock_fd, buffer, total_sent_size, size, total_sent_size,
 				len, get_client_name());
 
+			/*
+			* If socket is not available to use during for some time,
+			* EAGAIN(EWOULDBLOCK) is returned by ::send().
+			* so in order to prevent that data are omitted, retry to send it
+			*/
+			if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+				usleep(1000);
+				continue;
+			}
+
 			if (errno != EINTR) {
 				err = errno;
 				break;
@@ -246,6 +256,16 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 			_ERRNO(errno, _E, "Failed to recv(%d, %#p + %d, %d - %d) = %d for %s",
 				m_sock_fd, buffer, total_recv_size, size, total_recv_size,
 				len, get_client_name());
+
+			/*
+			* If socket is not available to use during for some time,
+			* EAGAIN(EWOULDBLOCK) is returned by ::recv().
+			* so in order to prevent that data are omitted, retry to receive it
+			*/
+			if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+				usleep(1000);
+				continue;
+			}
 
 			if (errno != EINTR) {
 				err = errno;
