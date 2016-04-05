@@ -79,7 +79,7 @@ enum poll_interval_t {
 	POLL_10HZ_MS	= 100,
 	POLL_5HZ_MS		= 200,
 	POLL_1HZ_MS		= 1000,
-	POLL_MAX_HZ_MS  = POLL_1HZ_MS,
+	POLL_MAX_HZ_MS  = 255000,
 };
 
 enum sensor_interval_t {
