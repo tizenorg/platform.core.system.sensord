@@ -112,7 +112,7 @@ bool tilt_sensor::init(void)
 	m_fusion_sensor = sensor_loader::get_instance().get_sensor(FUSION_SENSOR);
 
 	if (!m_accel_sensor || !m_fusion_sensor) {
-		_E("Failed to load sensors,  accel: 0x%x, fusion: 0x%x",
+		_E("Failed to load sensors,  accel: %#x, fusion: %#x",
 			m_accel_sensor, m_fusion_sensor);
 		return false;
 	}

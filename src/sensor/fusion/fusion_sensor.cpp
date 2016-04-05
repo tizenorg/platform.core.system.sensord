@@ -169,15 +169,15 @@ bool fusion_sensor::init(void)
 	m_magnetic_sensor = sensor_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
 
 	if (!m_accel_sensor) {
-		_E("Failed to load accel sensor: 0x%x", m_accel_sensor);
+		_E("Failed to load accel sensor: %#x", m_accel_sensor);
 		return false;
 	}
 
 	if (!m_gyro_sensor)
-		_I("Failed to load gyro sensor: 0x%x", m_gyro_sensor);
+		_I("Failed to load gyro sensor: %#x", m_gyro_sensor);
 
 	if (!m_magnetic_sensor)
-		_I("Failed to load geomagnetic sensor: 0x%x", m_magnetic_sensor);
+		_I("Failed to load geomagnetic sensor: %#x", m_magnetic_sensor);
 
 	_I("%s is created!", sensor_base::get_name());
 	return true;

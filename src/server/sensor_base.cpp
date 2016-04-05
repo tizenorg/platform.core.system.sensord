@@ -18,7 +18,7 @@
  */
 
 #include <stdint.h>
-#include <sensor_hal.h>
+#include <sensor_hal_types.h>
 #include <sensor_event_queue.h>
 #include <sensor_base.h>
 #include <sensor_common.h>
@@ -35,6 +35,7 @@ sensor_base::sensor_base()
 , m_permission(SENSOR_PERMISSION_STANDARD)
 , m_started(false)
 , m_client(0)
+, m_last_data(NULL)
 {
 }
 
@@ -87,10 +88,25 @@ int sensor_base::get_data(sensor_data_t **data, int *length)
 
 bool sensor_base::flush(void)
 {
-	return false;
+	return true;
 }
 
-int sensor_base::set_attribute(int32_t cmd, int32_t value)
+int sensor_base::add_attribute(int client_id, int32_t attribute, int32_t value)
+{
+	return set_attribute(attribute, value);
+}
+
+int sensor_base::add_attribute(int client_id, int32_t attribute, char *value, int value_size)
+{
+	return set_attribute(attribute, value, value_size);
+}
+
+bool sensor_base::delete_attribute(int client_id)
+{
+	return true;
+}
+
+int sensor_base::set_attribute(int32_t attribute, int32_t value)
 {
 	return OP_ERROR;
 }
@@ -133,6 +149,9 @@ bool sensor_base::stop(void)
 		}
 
 		m_started = false;
+
+		free(m_last_data);
+		m_last_data = NULL;
 	}
 
 	_I("[%s] sensor stopped, #client = %d", get_name(), m_client);
@@ -161,7 +180,7 @@ bool sensor_base::add_interval(int client_id, unsigned int interval, bool is_pro
 	cur_min = m_sensor_info_list.get_min_interval();
 
 	if (cur_min != prev_min) {
-		_I("Min interval for sensor[0x%llx] is changed from %dms to %dms"
+		_I("Min interval for sensor[%#llx] is changed from %dms to %dms"
 			" by%sclient[%d] adding interval",
 			get_id(), prev_min, cur_min,
 			is_processor ? " processor " : " ", client_id);
@@ -185,14 +204,14 @@ bool sensor_base::delete_interval(int client_id, bool is_processor)
 	cur_min = m_sensor_info_list.get_min_interval();
 
 	if (!cur_min) {
-		_I("No interval for sensor[0x%llx] by%sclient[%d] deleting interval, "
+		_I("No interval for sensor[%#llx] by%sclient[%d] deleting interval, "
 			 "so set to default %dms",
 			 get_id(), is_processor ? " processor " : " ",
 			 client_id, POLL_1HZ_MS);
 
 		set_interval(POLL_1HZ_MS);
 	} else if (cur_min != prev_min) {
-		_I("Min interval for sensor[0x%llx] is changed from %dms to %dms"
+		_I("Min interval for sensor[%#llx] is changed from %dms to %dms"
 			" by%sclient[%d] deleting interval",
 			get_id(), prev_min, cur_min,
 			is_processor ? " processor " : " ", client_id);
@@ -224,7 +243,7 @@ bool sensor_base::add_batch(int client_id, unsigned int latency)
 	cur_max = m_sensor_info_list.get_max_batch();
 
 	if (cur_max != prev_max) {
-		_I("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] adding latency",
+		_I("Max latency for sensor[%#llx] is changed from %dms to %dms by client[%d] adding latency",
 			get_id(), prev_max, cur_max, client_id);
 		set_batch_latency(cur_max);
 	}
@@ -245,12 +264,12 @@ bool sensor_base::delete_batch(int client_id)
 	cur_max = m_sensor_info_list.get_max_batch();
 
 	if (!cur_max) {
-		_I("No latency for sensor[0x%llx] by client[%d] deleting latency, so set to default 0 ms",
+		_I("No latency for sensor[%#llx] by client[%d] deleting latency, so set to default 0 ms",
 			 get_id(), client_id);
 
 		set_batch_latency(0);
 	} else if (cur_max != prev_max) {
-		_I("Max latency for sensor[0x%llx] is changed from %dms to %dms by client[%d] deleting latency",
+		_I("Max latency for sensor[%#llx] is changed from %dms to %dms by client[%d] deleting latency",
 			get_id(), prev_max, cur_max, client_id);
 
 		set_batch_latency(cur_max);
@@ -278,6 +297,8 @@ void sensor_base::set_permission(int permission)
 
 bool sensor_base::push(sensor_event_t *event)
 {
+	set_cache(event->data);
+
 	AUTOLOCK(m_client_mutex);
 
 	if (m_client <= 0)
@@ -287,24 +308,50 @@ bool sensor_base::push(sensor_event_t *event)
 	return true;
 }
 
+void sensor_base::set_cache(sensor_data_t *data)
+{
+	AUTOLOCK(m_data_cache_mutex);
+
+	/* Caching the last known data for sync-read support */
+	if (m_last_data == NULL) {
+		m_last_data = (sensor_data_t*)malloc(sizeof(sensor_data_t));
+		retm_if(m_last_data == NULL, "Memory allocation failed");
+	}
+
+	memcpy(m_last_data, data, sizeof(sensor_data_t));
+}
+
+int sensor_base::get_cache(sensor_data_t **data)
+{
+	retv_if(m_last_data == NULL, -ENODATA);
+
+	*data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
+	retvm_if(*data == NULL, -ENOMEM, "Memory allocation failed");
+
+	AUTOLOCK(m_data_cache_mutex);
+
+	memcpy(*data, m_last_data, sizeof(sensor_data_t));
+	return 0;
+}
+
 bool sensor_base::set_interval(unsigned long interval)
 {
-	return false;
+	return true;
 }
 
 bool sensor_base::set_batch_latency(unsigned long latency)
 {
-	return false;
+	return true;
 }
 
 bool sensor_base::on_start()
 {
-	return false;
+	return true;
 }
 
 bool sensor_base::on_stop()
 {
-	return false;
+	return true;
 }
 
 unsigned long long sensor_base::get_timestamp(void)

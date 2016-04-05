@@ -589,15 +589,7 @@ bool command_channel::cmd_get_data(unsigned int type, sensor_data_t* sensor_data
 		return false;
 	}
 
-	sensor_data_t *base_data;
-	base_data = &cmd_get_data_done->base_data;
-
-	sensor_data->timestamp = base_data->timestamp;
-	sensor_data->accuracy = base_data->accuracy;
-	sensor_data->value_count = base_data->value_count;
-
-	memcpy(sensor_data->values, base_data->values,
-		sizeof(sensor_data->values[0]) * base_data->value_count);
+	memcpy(sensor_data, &cmd_get_data_done->base_data, sizeof(sensor_data_t));
 
 	delete[] (char *)cmd_get_data_done;
 	delete packet;
@@ -620,18 +612,18 @@ bool command_channel::cmd_set_attribute_int(int attribute, int value)
 	cmd_set_attribute_int->attribute = attribute;
 	cmd_set_attribute_int->value = value;
 
-	_I("%s send cmd_set_attribute_int(client_id=%d, %s, 0x%x, %d)",
+	_I("%s send cmd_set_attribute_int(client_id=%d, %s, %#x, %d)",
 		get_client_name(), m_client_id, get_sensor_name(m_sensor_id), attribute, value);
 
 	if (!command_handler(packet, (void **)&cmd_done)) {
-		_E("Client %s failed to send/receive command for sensor[%s] with client_id [%d], attribute[0x%x], value[%d]",
+		_E("Client %s failed to send/receive command for sensor[%s] with client_id [%d], attribute[%#x], value[%d]",
 			get_client_name(), get_sensor_name(m_sensor_id), m_client_id, attribute, value);
 		delete packet;
 		return false;
 	}
 
 	if (cmd_done->value < 0) {
-		_E("Client %s got error[%d] from server for sensor[%s] with attribute[0x%x], value[%d]",
+		_E("Client %s got error[%d] from server for sensor[%s] with attribute[%#x], value[%d]",
 			get_client_name(), cmd_done->value, get_sensor_name(m_sensor_id), attribute, value);
 
 		delete[] (char *)cmd_done;
@@ -661,7 +653,7 @@ bool command_channel::cmd_set_attribute_str(int attribute, const char* value, in
 	cmd_set_attribute_str->value_len = value_len;
 	memcpy(cmd_set_attribute_str->value, value, value_len);
 
-	_I("%s send cmd_set_attribute_str(client_id=%d, attribute = 0x%x, value_len = %d, value = 0x%x)",
+	_I("%s send cmd_set_attribute_str(client_id=%d, attribute = %#x, value_len = %d, value = %#x)",
 		get_client_name(), m_client_id, attribute, value_len, value);
 
 	if (!command_handler(packet, (void **)&cmd_done)) {

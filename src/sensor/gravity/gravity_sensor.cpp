@@ -35,7 +35,7 @@
 #include <sensor_loader.h>
 #include <fusion_util.h>
 
-#define SENSOR_NAME "GRAVITY_SENSOR"
+#define SENSOR_NAME "SENSOR_GRAVITY"
 
 #define GRAVITY 9.80665
 
@@ -171,6 +171,7 @@ void gravity_sensor::synthesize_rv(const sensor_event_t& event)
 	gravity_event->data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
 	if (!gravity_event->data) {
 		_E("Failed to allocate memory");
+		free(gravity_event);
 		return;
 	}
 
@@ -226,6 +227,7 @@ void gravity_sensor::synthesize_lowpass(const sensor_event_t& event)
 	gravity_event->data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
 	if (!gravity_event->data) {
 		_E("Failed to allocate memory");
+		free(gravity_event);
 		return;
 	}
 
@@ -275,6 +277,7 @@ void gravity_sensor::synthesize_fusion(const sensor_event_t& event)
 	gravity_event->data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
 	if (!gravity_event->data) {
 		_E("Failed to allocate memory");
+		free(gravity_event);
 		return;
 	}
 

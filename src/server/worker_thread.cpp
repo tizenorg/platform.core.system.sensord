@@ -153,7 +153,7 @@ bool worker_thread::resume(void)
 
 void worker_thread::main(void)
 {
-	_D("Worker thread(0x%x) is created", std::this_thread::get_id());
+	_D("Worker thread(%#x) is created", std::this_thread::get_id());
 
 	transition_function(STARTED);
 
@@ -164,7 +164,7 @@ void worker_thread::main(void)
 		if (state == WORKER_STATE_WORKING) {
 			if (!transition_function(WORKING)) {
 				m_state = WORKER_STATE_STOPPED;
-				_D("Worker thread(0x%x) exits from working state", std::this_thread::get_id());
+				_D("Worker thread(%#x) exits from working state", std::this_thread::get_id());
 				m_thread_created = false;
 				transition_function(STOPPED);
 				break;
@@ -177,12 +177,12 @@ void worker_thread::main(void)
 		if (m_state == WORKER_STATE_PAUSED) {
 			transition_function(PAUSED);
 
-			_D("Worker thread(0x%x) is paused", std::this_thread::get_id());
+			_D("Worker thread(%#x) is paused", std::this_thread::get_id());
 			m_cond_working.wait(u);
 
 			if (m_state == WORKER_STATE_WORKING) {
 				transition_function(RESUMED);
-				_D("Worker thread(0x%x) is resumed", std::this_thread::get_id());
+				_D("Worker thread(%#x) is resumed", std::this_thread::get_id());
 			} else if (m_state == WORKER_STATE_STOPPED) {
 				m_thread_created = false;
 				transition_function(STOPPED);
@@ -194,7 +194,7 @@ void worker_thread::main(void)
 			break;
 		}
 	}
-	_I("Worker thread(0x%x)'s main is terminated", std::this_thread::get_id());
+	_I("Worker thread(%#x)'s main is terminated", std::this_thread::get_id());
 }
 
 void worker_thread::set_started(trans_func_t func)

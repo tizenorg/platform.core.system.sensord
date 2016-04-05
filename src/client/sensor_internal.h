@@ -26,7 +26,6 @@
 
 #include "stdbool.h"
 #include <sys/types.h>
-#include <glib.h>
 
 /*header for common sensor type*/
 #include <sensor_common.h>
@@ -73,7 +72,7 @@ sensor_t sensord_get_sensor(sensor_type_t type);
  * @retval -EACCES Permission denied
  * @retval -ENODATA NO sensor available
  */
-int sensord_get_sensor_list_ex(sensor_type_t type, sensor_t **list, int *sensor_count);
+int sensord_get_sensors(sensor_type_t type, sensor_t **list, int *sensor_count);
 
 /**
  * @brief Get the default sensor for a given type.
@@ -85,7 +84,7 @@ int sensord_get_sensor_list_ex(sensor_type_t type, sensor_t **list, int *sensor_
  * @retval -EPERM Operation not permitted
  * @retval -EACCES Permission denied
  */
-int sensord_get_sensor_ex(sensor_type_t type, sensor_t *sensor);
+int sensord_get_default_sensor(sensor_type_t type, sensor_t *sensor);
 
 /**
  * @brief Get the type of this sensor.
@@ -316,16 +315,6 @@ bool sensord_change_event_interval(int handle, unsigned int event_type, unsigned
  * @return true on success, otherwise false.
  */
 bool sensord_change_event_max_batch_latency(int handle, unsigned int event_type, unsigned int max_batch_latency);
-
-/**
- * @brief Change the maincontext of a specifed event type in a connected sensor.
- *
- * @param[in] handle a handle represensting a connected sensor.
- * @param[in] event_type an event type to change maincontext.
- * @param[in] maincontext an event is passed to default GMainLoop as default. And it can be changed to specific GMainContext.
- * @return true on success, otherwise false.
- */
-bool sensord_change_event_maincontext(int handle, unsigned int event_type, GMainContext *maincontext);
 
 /**
  * @brief Change the option of a connected sensor.

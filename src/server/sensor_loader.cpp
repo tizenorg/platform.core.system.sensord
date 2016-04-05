@@ -50,6 +50,14 @@ sensor_loader::sensor_loader()
 {
 }
 
+sensor_loader::~sensor_loader()
+{
+	for (auto it = m_handles.begin(); it != m_handles.end(); ++it)
+		dlclose(*it);
+
+	m_handles.clear();
+}
+
 sensor_loader& sensor_loader::get_instance()
 {
 	static sensor_loader inst;
@@ -79,6 +87,7 @@ bool sensor_loader::load(void)
 		[&](const string &path) {
 			void *handle;
 			load_sensor_devices(path, handle);
+			m_handles.push_back(handle);
 		}
 	);
 
@@ -239,7 +248,7 @@ sensor_base* sensor_loader::create_sensor(void)
 		_E("Failed to create sensor, exception: %s", e.what());
 		return NULL;
 	} catch (int err) {
-		_ERRNO(errno);
+		_ERRNO(errno, _E, "Failed to create sensor");
 		return NULL;
 	}
 

@@ -132,7 +132,7 @@ bool gaming_rv_sensor::init()
 	m_gyro_sensor = sensor_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
 
 	if (!m_accel_sensor || !m_gyro_sensor) {
-		_E("Failed to load sensors,  accel: 0x%x, gyro: 0x%x",
+		_E("Failed to load sensors,  accel: %#x, gyro: %#x",
 			m_accel_sensor, m_gyro_sensor);
 		return false;
 	}

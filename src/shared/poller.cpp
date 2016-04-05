@@ -55,7 +55,7 @@ bool poller::add_fd(int fd)
 	event.events = EPOLLIN | EPOLLERR | EPOLLHUP;
 
 	if (epoll_ctl(m_epfd, EPOLL_CTL_ADD, fd, &event)) {
-		_ERRNO(errno);
+		_ERRNO(errno, _E, "Failed to add fd[%d]", fd);
 		return false;
 	}
 
@@ -73,7 +73,7 @@ bool poller::fill_event_queue(void)
 		if (errno == EINTR)
 			return true;
 
-		_ERRNO(errno);
+		_ERRNO(errno, _E, "Failed to fill event queue");
 		return false;
 	}
 
