@@ -48,7 +48,7 @@ static void power_save_state_cb(keynode_t *node, void *data);
 static void clean_up(void);
 static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, sensor_rep &cur_rep);
 static void restore_session(void);
-static bool register_event(int handle, unsigned int event_type, unsigned int interval, int max_batch_latency, int cb_type, void* cb, void *user_data);
+static bool register_event(int handle, unsigned int event_type, unsigned int interval, int max_batch_latency, void* cb, void *user_data);
 
 class initiator {
 public:
@@ -698,7 +698,7 @@ API bool sensord_disconnect(int handle)
 }
 
 
-static bool register_event(int handle, unsigned int event_type, unsigned int interval, int max_batch_latency, int cb_type, void* cb, void *user_data)
+static bool register_event(int handle, unsigned int event_type, unsigned int interval, int max_batch_latency, void* cb, void *user_data)
 {
 	sensor_id_t sensor_id;
 	sensor_rep prev_rep, cur_rep;
@@ -721,7 +721,7 @@ static bool register_event(int handle, unsigned int event_type, unsigned int int
 		handle, interval, max_batch_latency, cb, user_data);
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, prev_rep);
-	sensor_client_info::get_instance().register_event(handle, event_type, interval, max_batch_latency, cb_type, cb, user_data);
+	sensor_client_info::get_instance().register_event(handle, event_type, interval, max_batch_latency, cb, user_data);
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, cur_rep);
 	ret = change_sensor_rep(sensor_id, prev_rep, cur_rep);
 
@@ -733,14 +733,8 @@ static bool register_event(int handle, unsigned int event_type, unsigned int int
 
 API bool sensord_register_event(int handle, unsigned int event_type, unsigned int interval, unsigned int max_batch_latency, sensor_cb_t cb, void *user_data)
 {
-	return register_event(handle, event_type, interval, max_batch_latency, SENSOR_EVENT_CB, (void *)cb, user_data);
+	return register_event(handle, event_type, interval, max_batch_latency, (void *)cb, user_data);
 }
-
-API bool sensord_register_hub_event(int handle, unsigned int event_type, unsigned int interval, unsigned int max_batch_latency, sensorhub_cb_t cb, void *user_data)
-{
-	return register_event(handle, event_type, interval, max_batch_latency, SENSORHUB_EVENT_CB, (void *)cb, user_data);
-}
-
 
 API bool sensord_unregister_event(int handle, unsigned int event_type)
 {
@@ -748,7 +742,6 @@ API bool sensord_unregister_event(int handle, unsigned int event_type)
 	sensor_rep prev_rep, cur_rep;
 	bool ret;
 	unsigned int prev_interval, prev_latency;
-	int prev_cb_type;
 	void *prev_cb;
 	void *prev_user_data;
 
@@ -763,7 +756,7 @@ API bool sensord_unregister_event(int handle, unsigned int event_type)
 		event_type, get_sensor_name(sensor_id), handle);
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, prev_rep);
-	sensor_client_info::get_instance().get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb_type, prev_cb, prev_user_data);
+	sensor_client_info::get_instance().get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb, prev_user_data);
 
 	if (!sensor_client_info::get_instance().unregister_event(handle, event_type)) {
 		_E("%s try to unregister non registered event %s[%#x] for sensor %s[%d]",
@@ -775,7 +768,7 @@ API bool sensord_unregister_event(int handle, unsigned int event_type)
 	ret =  change_sensor_rep(sensor_id, prev_rep, cur_rep);
 
 	if (!ret)
-		sensor_client_info::get_instance().register_event(handle, event_type, prev_interval, prev_latency, prev_cb_type, prev_cb, prev_user_data);
+		sensor_client_info::get_instance().register_event(handle, event_type, prev_interval, prev_latency, prev_cb, prev_user_data);
 
 	return ret;
 
@@ -907,7 +900,6 @@ static bool change_event_batch(int handle, unsigned int event_type, unsigned int
 	sensor_rep prev_rep, cur_rep;
 	bool ret;
 	unsigned int prev_interval, prev_latency;
-	int prev_cb_type;
 	void *prev_cb;
 	void *prev_user_data;
 
@@ -926,7 +918,7 @@ static bool change_event_batch(int handle, unsigned int event_type, unsigned int
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, prev_rep);
 
-	sensor_client_info::get_instance().get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb_type, prev_cb, prev_user_data);
+	sensor_client_info::get_instance().get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb, prev_user_data);
 
 	if (!sensor_client_info::get_instance().set_event_batch(handle, event_type, interval, latency))
 		return false;
@@ -944,13 +936,12 @@ static bool change_event_batch(int handle, unsigned int event_type, unsigned int
 API bool sensord_change_event_interval(int handle, unsigned int event_type, unsigned int interval)
 {
 	unsigned int prev_interval, prev_latency;
-	int prev_cb_type;
 	void *prev_cb;
 	void *prev_user_data;
 
 	AUTOLOCK(lock);
 
-	if (!sensor_client_info::get_instance().get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb_type, prev_cb, prev_user_data)) {
+	if (!sensor_client_info::get_instance().get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb, prev_user_data)) {
 		_E("Failed to get event info with handle = %d, event_type = %#x", handle, event_type);
 		return false;
 	}
@@ -962,13 +953,12 @@ API bool sensord_change_event_interval(int handle, unsigned int event_type, unsi
 API bool sensord_change_event_max_batch_latency(int handle, unsigned int event_type, unsigned int max_batch_latency)
 {
 	unsigned int prev_interval, prev_latency;
-	int prev_cb_type;
 	void *prev_cb;
 	void *prev_user_data;
 
 	AUTOLOCK(lock);
 
-	if (!sensor_client_info::get_instance().get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb_type, prev_cb, prev_user_data)) {
+	if (!sensor_client_info::get_instance().get_event_info(handle, event_type, prev_interval, prev_latency, prev_cb, prev_user_data)) {
 		_E("Failed to get event info with handle = %d, event_type = %#x", handle, event_type);
 		return false;
 	}
@@ -1169,3 +1159,9 @@ API bool sensord_flush(int handle)
 
 	return true;
 }
+
+API bool sensord_register_hub_event(int handle, unsigned int event_type, unsigned int interval, unsigned int max_batch_latency, sensorhub_cb_t cb, void *user_data)
+{
+	return false;
+}
+

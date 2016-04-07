@@ -63,7 +63,7 @@ void sensor_handle_info::get_reg_event_types(event_type_vector &event_types)
 	}
 }
 
-bool sensor_handle_info::add_reg_event_info(unsigned int event_type, unsigned int interval, unsigned int latency, int cb_type, void *cb, void *user_data)
+bool sensor_handle_info::add_reg_event_info(unsigned int event_type, unsigned int interval, unsigned int latency, void *cb, void *user_data)
 {
 	reg_event_info event_info;
 
@@ -79,7 +79,6 @@ bool sensor_handle_info::add_reg_event_info(unsigned int event_type, unsigned in
 	event_info.type = event_type;
 	event_info.m_interval = interval;
 	event_info.m_latency = latency;
-	event_info.m_cb_type = cb_type;
 	event_info.m_cb = cb;
 	event_info.m_user_data = user_data;
 
