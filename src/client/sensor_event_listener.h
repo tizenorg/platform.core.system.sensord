@@ -51,7 +51,6 @@ typedef struct {
 	int handle;
 	sensor_t sensor;
 	unsigned int event_type;
-	int cb_type;
 	void *cb;
 	void *sensor_data;
 	void *user_data;

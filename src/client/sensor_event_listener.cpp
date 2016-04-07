@@ -110,20 +110,14 @@ client_callback_info* sensor_event_listener::handle_calibration_cb(sensor_handle
 		if (!event_info)
 			return NULL;
 
-		if (event_info->m_cb_type == SENSOR_LEGACY_CB) {
-			cal_event_data.event_data = (void *)&(accuracy);
-			cal_event_data.event_data_size = sizeof(accuracy);
-			cal_sensor_data = &cal_event_data;
-		} else {
-			sensor_data_t *cal_data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
-			retvm_if(!cal_data, NULL, "Failed to allocate memory");
+		sensor_data_t *cal_data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
+		retvm_if(!cal_data, NULL, "Failed to allocate memory");
 
-			cal_data->accuracy = accuracy;
-			cal_data->timestamp = time;
-			cal_data->values[0] = accuracy;
-			cal_data->value_count = 1;
-			cal_sensor_data = cal_data;
-		}
+		cal_data->accuracy = accuracy;
+		cal_data->timestamp = time;
+		cal_data->values[0] = accuracy;
+		cal_data->value_count = 1;
+		cal_sensor_data = cal_data;
 
 		cal_callback_info = get_callback_info(handle_info.m_sensor_id, cal_event_info, cal_sensor_data);
 
@@ -201,10 +195,7 @@ void sensor_event_listener::handle_events(void* event)
 			if (cal_callback_info)
 				client_callback_infos.push_back(cal_callback_info);
 
-			if (event_info->m_cb_type == SENSOR_LEGACY_CB)
-				callback_info = get_callback_info(sensor_id, event_info, &event_data);
-			else
-				callback_info = get_callback_info(sensor_id, event_info, sensor_data);
+			callback_info = get_callback_info(sensor_id, event_info, sensor_data);
 
 			if (!callback_info) {
 				_E("Failed to get callback_info");
@@ -247,7 +238,6 @@ client_callback_info* sensor_event_listener::get_callback_info(sensor_id_t senso
 	callback_info->sensor = sensor_info_to_sensor(sensor_info_manager::get_instance().get_info(sensor_id));
 	callback_info->event_id = event_info->m_id;
 	callback_info->handle = event_info->m_handle;
-	callback_info->cb_type = event_info->m_cb_type;
 	callback_info->cb = event_info->m_cb;
 	callback_info->event_type = event_info->type;
 	callback_info->user_data = event_info->m_user_data;
@@ -274,26 +264,20 @@ gboolean sensor_event_listener::callback_dispatcher(gpointer data)
 {
 	client_callback_info *cb_info = (client_callback_info*) data;
 
-	if (sensor_event_listener::get_instance().is_valid_callback(cb_info)) {
-		if (cb_info->accuracy_cb)
-			cb_info->accuracy_cb(cb_info->sensor, cb_info->timestamp, cb_info->accuracy, cb_info->accuracy_user_data);
-
-		if (cb_info->cb_type == SENSOR_EVENT_CB)
-			((sensor_cb_t) cb_info->cb)(cb_info->sensor, cb_info->event_type, (sensor_data_t *) cb_info->sensor_data, cb_info->user_data);
-		else if (cb_info->cb_type == SENSORHUB_EVENT_CB)
-			((sensorhub_cb_t) cb_info->cb)(cb_info->sensor, cb_info->event_type, (sensorhub_data_t *) cb_info->sensor_data, cb_info->user_data);
-		else if (cb_info->cb_type == SENSOR_LEGACY_CB)
-			((sensor_legacy_cb_t) cb_info->cb)(cb_info->event_type, (sensor_event_data_t *) cb_info->sensor_data, cb_info->user_data);
-	} else {
+	if (!sensor_event_listener::get_instance().is_valid_callback(cb_info)) {
 		_W("Discard invalid callback cb(%#x)(%s, %#x, %#x) with id: %llu",
 		cb_info->cb, get_event_name(cb_info->event_type), cb_info->sensor_data,
 		cb_info->user_data, cb_info->event_id);
+
+		free(cb_info->sensor_data);
+		delete cb_info;
+		return false;
 	}
 
-	if (cb_info->cb_type == SENSOR_LEGACY_CB) {
-		sensor_event_data_t *data = (sensor_event_data_t *) cb_info->sensor_data;
-		delete[] (char *)data->event_data;
-	}
+	if (cb_info->accuracy_cb)
+		cb_info->accuracy_cb(cb_info->sensor, cb_info->timestamp, cb_info->accuracy, cb_info->accuracy_user_data);
+
+	((sensor_cb_t) cb_info->cb)(cb_info->sensor, cb_info->event_type, (sensor_data_t *) cb_info->sensor_data, cb_info->user_data);
 
 	free(cb_info->sensor_data);
 	delete cb_info;
@@ -303,8 +287,6 @@ gboolean sensor_event_listener::callback_dispatcher(gpointer data)
 */
 	return false;
 }
-
-
 
 ssize_t sensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, struct epoll_event &event)
 {

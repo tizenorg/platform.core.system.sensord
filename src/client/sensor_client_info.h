@@ -65,7 +65,7 @@ public:
 	int create_handle(sensor_id_t sensor_id);
 	bool delete_handle(int handle);
 	bool register_event(int handle, unsigned int event_type,
-			unsigned int interval, unsigned int latency, int cb_type, void *cb, void* user_data);
+			unsigned int interval, unsigned int latency, void *cb, void* user_data);
 	bool unregister_event(int handle, unsigned int event_type);
 
 	bool register_accuracy_cb(int handle, sensor_accuracy_changed_cb_t cb, void* user_data);
@@ -78,7 +78,7 @@ public:
 	bool set_event_batch(int handle, unsigned int event_type, unsigned int interval, unsigned int latency);
 	bool set_accuracy(int handle, int accuracy);
 	bool set_bad_accuracy(int handle, int bad_accuracy);
-	bool get_event_info(int handle, unsigned int event_type, unsigned int &interval, unsigned int &latency, int &cb_type, void* &cb, void* &user_data);
+	bool get_event_info(int handle, unsigned int event_type, unsigned int &interval, unsigned int &latency, void* &cb, void* &user_data);
 	void get_listening_sensors(sensor_id_vector &sensors);
 	void get_sensor_rep(sensor_id_t sensor, sensor_rep& rep);
 
