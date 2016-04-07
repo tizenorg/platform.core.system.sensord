@@ -34,6 +34,12 @@ using std::thread;
 using std::pair;
 using std::vector;
 
+struct free_data {
+	void operator()(void *data) {
+		free(data);
+	}
+};
+
 sensor_event_listener::sensor_event_listener()
 : m_poller(NULL)
 , m_thread_state(THREAD_STATE_TERMINATE)
@@ -101,8 +107,6 @@ client_callback_info* sensor_event_listener::handle_calibration_cb(sensor_handle
 
 	cal_event_info = handle_info.get_reg_event_info(cal_event_type);
 	if ((accuracy == SENSOR_ACCURACY_BAD) && !handle_info.m_bad_accuracy &&	cal_event_info) {
-		void *cal_sensor_data;
-
 		cal_event_info->m_previous_event_time = time;
 
 		event_info = handle_info.get_reg_event_info(event_type);
@@ -116,7 +120,7 @@ client_callback_info* sensor_event_listener::handle_calibration_cb(sensor_handle
 		cal_data->timestamp = time;
 		cal_data->values[0] = accuracy;
 		cal_data->value_count = 1;
-		cal_sensor_data = cal_data;
+		std::shared_ptr<void> cal_sensor_data(cal_data, free_data());
 
 		cal_callback_info = get_callback_info(handle_info.m_sensor_id, cal_event_info, cal_sensor_data);
 
@@ -131,14 +135,12 @@ client_callback_info* sensor_event_listener::handle_calibration_cb(sensor_handle
 	return cal_callback_info;
 }
 
-
 void sensor_event_listener::handle_events(void* event)
 {
 	unsigned long long cur_time;
 	reg_event_info *event_info = NULL;
 	sensor_id_t sensor_id;
 	sensor_handle_info_map handles_info;
-	void *sensor_data;
 
 	int accuracy = SENSOR_ACCURACY_GOOD;
 
@@ -149,9 +151,9 @@ void sensor_event_listener::handle_events(void* event)
 
 	sensor_event_t *sensor_event = (sensor_event_t *)event;
 	sensor_id = sensor_event->sensor_id;
-	sensor_data = sensor_event->data;
 	cur_time = sensor_event->data->timestamp;
 	accuracy = sensor_event->data->accuracy;
+	std::shared_ptr<void> sensor_data(sensor_event->data, free_data());
 
 	{	/* scope for the lock */
 		m_client_info.get_all_handle_info(handles_info);
@@ -209,7 +211,7 @@ void sensor_event_listener::handle_events(void* event)
 	}
 }
 
-client_callback_info* sensor_event_listener::get_callback_info(sensor_id_t sensor_id, const reg_event_info *event_info, void* sensor_data)
+client_callback_info* sensor_event_listener::get_callback_info(sensor_id_t sensor_id, const reg_event_info *event_info, std::shared_ptr<void> sensor_data)
 {
 	client_callback_info* callback_info;
 
@@ -247,10 +249,9 @@ gboolean sensor_event_listener::callback_dispatcher(gpointer data)
 
 	if (!sensor_event_listener::get_instance().is_valid_callback(cb_info)) {
 		_W("Discard invalid callback cb(%#x)(%s, %#x, %#x) with id: %llu",
-		cb_info->cb, get_event_name(cb_info->event_type), cb_info->sensor_data,
+		cb_info->cb, get_event_name(cb_info->event_type), cb_info->sensor_data.get(),
 		cb_info->user_data, cb_info->event_id);
 
-		free(cb_info->sensor_data);
 		delete cb_info;
 		return false;
 	}
@@ -258,9 +259,8 @@ gboolean sensor_event_listener::callback_dispatcher(gpointer data)
 	if (cb_info->accuracy_cb)
 		cb_info->accuracy_cb(cb_info->sensor, cb_info->timestamp, cb_info->accuracy, cb_info->accuracy_user_data);
 
-	((sensor_cb_t) cb_info->cb)(cb_info->sensor, cb_info->event_type, (sensor_data_t *) cb_info->sensor_data, cb_info->user_data);
+	((sensor_cb_t) cb_info->cb)(cb_info->sensor, cb_info->event_type, (sensor_data_t *) cb_info->sensor_data.get(), cb_info->user_data);
 
-	free(cb_info->sensor_data);
 	delete cb_info;
 
 /*
