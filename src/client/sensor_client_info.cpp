@@ -96,7 +96,7 @@ bool sensor_client_info::is_active()
 }
 
 bool sensor_client_info::register_event(int handle, unsigned int event_type,
-		unsigned int interval, unsigned int latency, int cb_type, void *cb, void* user_data)
+		unsigned int interval, unsigned int latency, void *cb, void* user_data)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -107,7 +107,7 @@ bool sensor_client_info::register_event(int handle, unsigned int event_type,
 		return false;
 	}
 
-	if (!it_handle->second.add_reg_event_info(event_type, interval, latency, cb_type, cb, user_data))
+	if (!it_handle->second.add_reg_event_info(event_type, interval, latency, cb, user_data))
 		return false;
 
 	return true;
@@ -281,7 +281,7 @@ bool sensor_client_info::set_bad_accuracy(int handle, int bad_accuracy)
 	return true;
 }
 
-bool sensor_client_info::get_event_info(int handle, unsigned int event_type, unsigned int &interval, unsigned int &latency, int &cb_type, void* &cb, void* &user_data)
+bool sensor_client_info::get_event_info(int handle, unsigned int event_type, unsigned int &interval, unsigned int &latency, void* &cb, void* &user_data)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -301,7 +301,6 @@ bool sensor_client_info::get_event_info(int handle, unsigned int event_type, uns
 
 
 	interval = event_info->m_interval;
-	cb_type = event_info->m_cb_type;
 	cb = event_info->m_cb;
 	user_data = event_info->m_user_data;
 	latency = event_info->m_latency;

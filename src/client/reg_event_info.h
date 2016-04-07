@@ -22,12 +22,6 @@
 
 #include <sensor_common.h>
 
-typedef enum {
-	SENSOR_EVENT_CB,
-	SENSORHUB_EVENT_CB,
-	SENSOR_LEGACY_CB,
-} event_cb_type_t;
-
 class reg_event_info {
 public:
 	unsigned long long m_id;
@@ -35,7 +29,6 @@ public:
 	unsigned int type;
 	unsigned int m_interval;
 	unsigned int m_latency;
-	int m_cb_type;
 	void *m_cb;
 	void *m_user_data;
 	unsigned long long m_previous_event_time;
@@ -44,7 +37,7 @@ public:
 	reg_event_info()
 	: m_id(0), m_handle(-1),
 	type(0), m_interval(POLL_1HZ_MS), m_latency(0),
-	m_cb_type(SENSOR_EVENT_CB), m_cb(NULL), m_user_data(NULL),
+	m_cb(NULL), m_user_data(NULL),
 	m_previous_event_time(0), m_fired(false) {}
 
 	~reg_event_info() {}
