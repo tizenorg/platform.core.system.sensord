@@ -34,6 +34,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <memory>
 #include <cmutex.h>
 #include <poller.h>
 
@@ -51,9 +52,8 @@ typedef struct {
 	int handle;
 	sensor_t sensor;
 	unsigned int event_type;
-	int cb_type;
 	void *cb;
-	void *sensor_data;
+	std::shared_ptr<void> sensor_data;
 	void *user_data;
 	sensor_accuracy_changed_cb_t accuracy_cb;
 	unsigned long long timestamp;
@@ -111,7 +111,7 @@ private:
 	client_callback_info* handle_calibration_cb(sensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy);
 	void handle_events(void* event);
 
-	client_callback_info* get_callback_info(sensor_id_t sensor_id, const reg_event_info *event_info, void *sensor_data);
+	client_callback_info* get_callback_info(sensor_id_t sensor_id, const reg_event_info *event_info, std::shared_ptr<void> sensor_data);
 
 	unsigned long long renew_event_id(void);
 

@@ -42,7 +42,7 @@ public:
 	sensor_handle_info();
 	~sensor_handle_info();
 
-	bool add_reg_event_info(unsigned int event_type, unsigned int interval, unsigned int latency, int cb_type, void *cb,void *user_data);
+	bool add_reg_event_info(unsigned int event_type, unsigned int interval, unsigned int latency, void *cb, void *user_data);
 	bool delete_reg_event_info(unsigned int event_type);
 
 	bool change_reg_event_batch(unsigned int event_type, unsigned int interval, unsigned int latency);
