@@ -126,7 +126,7 @@ client_callback_info* sensor_event_listener::handle_calibration_cb(sensor_handle
 
 		m_client_info.set_bad_accuracy(handle_info.m_handle, true);
 
-		print_event_occurrence_log(handle_info, cal_event_info);
+		print_event_occurrence_log(handle_info);
 	}
 
 	if ((accuracy != SENSOR_ACCURACY_BAD) && handle_info.m_bad_accuracy)
@@ -196,10 +196,7 @@ void sensor_event_listener::handle_events(void* event)
 
 			client_callback_infos.push_back(callback_info);
 
-			if (is_one_shot_event(event_type))
-				event_info->m_fired = true;
-
-			print_event_occurrence_log(sensor_handle_info, event_info);
+			print_event_occurrence_log(sensor_handle_info);
 		}
 	}
 
