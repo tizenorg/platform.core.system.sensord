@@ -168,9 +168,7 @@ void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 
 			ret = (ret & (client_socket.send(sensor_event->data, sensor_event->data_length) > 0));
 
-			if (ret)
-				_D("Event[%#x] sent to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
-			else
+			if (!ret)
 				_E("Failed to send event[%#x] to %s on socket[%d]", event_type, client_info_manager.get_client_info(*it_client_id), client_socket.get_socket_fd());
 
 			++it_client_id;

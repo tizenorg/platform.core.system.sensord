@@ -22,146 +22,81 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sensor_types.h>
+#include <string>
 #include <map>
 
-typedef std::map<sensor_type_t, log_attr> sensor_type_map;
-static sensor_type_map g_log_maps = {
-	{UNKNOWN_SENSOR, {"UNKNOWN", "UNKNOWN_EVENT"}},
-	{ACCELEROMETER_SENSOR, {"ACCELEROMETER", "ACCELEROMETER_RAW_DATA_EVENT"}},
-	{GRAVITY_SENSOR, {"GRAVITY", "GRAVITY_RAW_DATA_EVENT"}},
-	{LINEAR_ACCEL_SENSOR, {"LINEAR_ACCEL", "LINEAR_ACCEL_RAW_DATA_EVENT"}},
-	{GEOMAGNETIC_SENSOR, {"GEOMAGNETIC SENSOR", "GEOMAGNETIC SENSOR_RAW_DATA_EVENT"}},
-	{ROTATION_VECTOR_SENSOR, {"ROTATION VECTOR", "ROTATION VECTOR_RAW_DATA_EVENT"}},
-	{ORIENTATION_SENSOR, {"ORIENTATION", "ORIENTATION_RAW_DATA_EVENT"}},
-	{GYROSCOPE_SENSOR, {"GYROSCOPE", "GYROSCOPE_RAW_DATA_EVENT"}},
-	{LIGHT_SENSOR, {"LIGHT", "LIGHT_RAW_DATA_EVENT"}},
-	{PROXIMITY_SENSOR, {"PROXIMITY", "PROXIMITY_RAW_DATA_EVENT"}},
-	{PRESSURE_SENSOR, {"PRESSURE", "PRESSURE_RAW_DATA_EVENT"}},
-	{ULTRAVIOLET_SENSOR, {"ULTRAVIOLET", "ULTRAVIOLET_RAW_DATA_EVENT"}},
-	{TEMPERATURE_SENSOR, {"TEMPERATURE", "TEMPERATURE_RAW_DATA_EVENT"}},
-	{HUMIDITY_SENSOR, {"HUMIDITY", "HUMIDITY_RAW_DATA_EVENT"}},
-	{BIO_HRM_SENSOR, {"BIO_HRM", "BIO_HRM_RAW_DATA_EVENT"}},
-	{BIO_LED_GREEN_SENSOR, {"BIO_LED_GREEN", "BIO_LED_GREEN_RAW_DATA_EVENT"}},
-	{BIO_LED_IR_SENSOR, {"BIO_LED_IR", "BIO_LED_IR_RAW_DATA_EVENT"}},
-	{BIO_LED_RED_SENSOR, {"BIO_LED_RED", "BIO_LED_RED_RAW_DATA_EVENT"}},
-	{GYROSCOPE_UNCAL_SENSOR, {"GYROSCOPE_UNCAL", "GYROSCOPE_UNCAL_RAW_DATA_EVENT"}},
-	{GEOMAGNETIC_UNCAL_SENSOR, {"GEOMAGNETIC_UNCAL", "GEOMAGNETIC_UNCAL_RAW_DATA_EVENT"}},
-	{GYROSCOPE_RV_SENSOR, {"GYROSCOPE_RV", "GYROSCOPE_RV_RAW_DATA_EVENT"}},
-	{GEOMAGNETIC_RV_SENSOR, {"GEOMAGNETIC_RV", "GEOMAGNETIC_RV_RAW_DATA_EVENT"}},
-	{CONTEXT_SENSOR, {"CONTEXT", "CONTEXT_RAW_DATA_EVENT"}},
-	{EXERCISE_SENSOR, {"EXERCISE", "EXERCISE_RAW_DATA_EVENT"}},
-	{HUMAN_PEDOMETER_SENSOR, {"HUMAN_PEDOMETER", "HUMAN_PEDOMETER_EVENT_CHANGE_STATE"}},
-	{HUMAN_SLEEP_MONITOR_SENSOR, {"HUMAN_SLEEP_MONITOR", "HUMAN_SLEEP_MONITOR_EVENT"}},
-	{AUTO_ROTATION_SENSOR, {"AUTO_ROTATION", "AUTO_ROTATION_EVENT_CHANGE_STATE"}},
-	{GESTURE_MOVEMENT_SENSOR, {"GESTURE_MOVEMENT", "GESTURE_MOVEMENT_EVENT_CHANGE_STATE"}},
-	{GESTURE_WRIST_UP_SENSOR, {"GESTURE_WRIST_UP", "GESTURE_WRIST_UP_EVENT_CHANGE_STATE"}},
-	{GESTURE_WRIST_DOWN_SENSOR, {"GESTURE_WRIST_DOWN", "GESTURE_WRIST_DOWN_EVENT_CHANGE_STATE"}},
-	{GESTURE_MOVEMENT_STATE_SENSOR, {"GESTURE_MOVEMENT_STATE", "GESTURE_MOVEMENT_STATE_EVENT"}},
+#define LOG_PER_COUNT_EVERY_EVENT 1
+#define LOG_PER_COUNT_MAX 25
 
-	{WEAR_STATUS_SENSOR, {"WEAR_STATUS", "WEAR_STATUS_EVENT_CHANGE_STATE"}},
-	{WEAR_ON_MONITOR_SENSOR, {"WEAR_ON_MONITOR", "WEAR_ON_EVENT_CHANGE_STATE"}},
-	{GPS_BATCH_SENSOR, {"GPS_BATCH", "GPS_BATCH_EVENT_CHANGE_STATE"}},
-	{ACTIVITY_TRACKER_SENSOR, {"ACTIVITY_TRACKER", "ACTIVITY_TRACKER_EVENT_CHANGE_STATE"}},
-	{SLEEP_DETECTOR_SENSOR, {"SLEEP_DETECTOR", "SLEEP_DETECTOR_EVENT_CHANGE_STATE"}},
-};
+static std::map<sensor_id_t, unsigned int> sensor_log_count;
 
-const char* get_sensor_name(sensor_id_t sensor_id)
+const char* get_sensor_name(sensor_id_t id)
 {
-	const char* p_unknown = "UNKNOWN";
-	sensor_type_t sensor_type = (sensor_type_t) (sensor_id >> SENSOR_TYPE_SHIFT);
+	sensor_type_t type = (sensor_type_t) (id >> SENSOR_TYPE_SHIFT);
 
-	auto iter = g_log_maps.find(sensor_type);
-
-	if (iter == g_log_maps.end()) {
-		_I("Unknown type value: %#x", sensor_type);
-		return p_unknown;
-	}
-
-	return iter->second.sensor_name;
+	return util_sensor_type_t::get_string(type);
 }
 
 const char* get_event_name(unsigned int event_type)
 {
-	const char* p_unknown = "UNKNOWN";
-	sensor_type_t sensor_type = (sensor_type_t) (event_type >> EVENT_TYPE_SHIFT);
+	sensor_type_t type = (sensor_type_t) (event_type >> EVENT_TYPE_SHIFT);
+	std::string name(util_sensor_type_t::get_string(type));
 
-	auto iter = g_log_maps.find(sensor_type);
-
-	if (iter == g_log_maps.end()) {
-		_I("Unknown type value: %#x", sensor_type);
-		return p_unknown;
-	}
-
-	return iter->second.event_name;
-}
-
-bool is_one_shot_event(unsigned int event_type)
-{
-	return false;
-}
-
-bool is_ontime_event(unsigned int event_type)
-{
-	switch (event_type ) {
-	case ACCELEROMETER_RAW_DATA_EVENT:
-	case PROXIMITY_STATE_EVENT:
-	case GYROSCOPE_RAW_DATA_EVENT:
-	case LIGHT_LEVEL_DATA_EVENT:
-	case GEOMAGNETIC_RAW_DATA_EVENT:
-	case LIGHT_LUX_DATA_EVENT:
-	case PROXIMITY_DISTANCE_DATA_EVENT:
-	case GRAVITY_RAW_DATA_EVENT:
-	case LINEAR_ACCEL_RAW_DATA_EVENT:
-	case ORIENTATION_RAW_DATA_EVENT:
-	case PRESSURE_RAW_DATA_EVENT:
-		return true;
-		break;
-	}
-
-	return false;
-}
-
-bool is_panning_event(unsigned int event_type)
-{
-	return false;
-}
-
-bool is_single_state_event(unsigned int event_type)
-{
-	switch (event_type) {
-	case LIGHT_CHANGE_LEVEL_EVENT:
-	case PROXIMITY_CHANGE_STATE_EVENT:
-	case AUTO_ROTATION_CHANGE_STATE_EVENT:
-		return true;
-		break;
-	}
-
-	return false;
+	return name.append("_EVENT").c_str();
 }
 
 unsigned int get_calibration_event_type(unsigned int event_type)
 {
-	sensor_type_t sensor;
+	sensor_type_t type = (sensor_type_t)(event_type >> EVENT_TYPE_SHIFT);
 
-	sensor = (sensor_type_t)(event_type >> EVENT_TYPE_SHIFT);
-
-	switch (sensor) {
+	switch (type) {
+	case GEOMAGNETIC_SENSOR:
+	case ROTATION_VECTOR_SENSOR:
+	case RV_RAW_SENSOR:
+	case ORIENTATION_SENSOR:
+		return CALIBRATION_EVENT(type);
 	default:
 		return 0;
 	}
 }
 
-unsigned long long get_timestamp(void)
+unsigned int get_log_per_count(sensor_id_t id)
 {
-	struct timespec t;
-	clock_gettime(CLOCK_MONOTONIC, &t);
-	return ((unsigned long long)(t.tv_sec)*1000000000LL + t.tv_nsec) / 1000;
+	sensor_type_t type = (sensor_type_t)(id >> SENSOR_TYPE_SHIFT);
+
+	switch (type) {
+	/* on_changed_event type sensors */
+	case PROXIMITY_SENSOR:
+	case GESTURE_WRIST_UP_SENSOR:
+	case GESTURE_WRIST_DOWN_SENSOR:
+	case GESTURE_MOVEMENT_SENSOR:
+	case WEAR_STATUS_SENSOR:
+		return LOG_PER_COUNT_EVERY_EVENT;
+	default:
+		break;
+	}
+	return LOG_PER_COUNT_MAX;
 }
 
-void print_event_occurrence_log(sensor_handle_info &sensor_handle_info, const reg_event_info *event_info)
+void print_event_occurrence_log(sensor_handle_info &info)
 {
-	_D("%s receives %s[%d]", get_client_name(),
-			get_sensor_name(sensor_handle_info.m_sensor_id), sensor_handle_info.m_handle);
+	unsigned int count;
+	unsigned int log_per_count;
+
+	auto it_count = sensor_log_count.find(info.m_sensor_id);
+	if (it_count == sensor_log_count.end())
+		sensor_log_count[info.m_sensor_id] = 0;
+
+	count = ++sensor_log_count[info.m_sensor_id];
+	log_per_count = get_log_per_count(info.m_sensor_id);
+
+	if ((count != 1) && (count % log_per_count != 0))
+		return;
+
+	_D("%s receives %s[%d][state: %d, option: %d, count: %d]", get_client_name(),
+			get_sensor_name(info.m_sensor_id), info.m_handle,
+			info.m_sensor_state, info.m_sensor_option, count);
 }
 
 /*
