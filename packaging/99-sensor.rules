@@ -1,0 +1,4 @@
+SUBSYSTEM=="input", ENV{ID_INPUT_TOUCHPAD}!="1", ENV{ID_INPUT_TOUCHSCREEN}!="1", \
+ENV{ID_INPUT_KEY}!="1", ENV{ID_INPUT_KEYPAD}!="1", ENV{ID_INPUT_KEYBOARD}!="1", \
+ENV{ID_INPUT_MOUSE}!="1", ENV{ID_INPUT_JOYSTICK}!="1", ACTION=="add", \
+MODE="0660", RUN+="/bin/chown sensor:sensor %S/%p/enable %S/%p/poll_delay"
