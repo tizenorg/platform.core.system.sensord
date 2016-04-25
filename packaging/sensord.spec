@@ -1,6 +1,6 @@
 Name:       sensord
 Summary:    Sensor daemon
-Version:    2.0.3
+Version:    2.0.4
 Release:    0
 Group:      System/Sensor Framework
 License:    Apache-2.0
@@ -8,7 +8,7 @@ Source0:    %{name}-%{version}.tar.gz
 Source1:    sensord.service
 Source2:    sensord_command.socket
 Source3:    sensord_event.socket
-
+Source4:    99-sensor.rules
 
 BuildRequires:  cmake
 BuildRequires:  libattr-devel
@@ -90,10 +90,12 @@ rm -rf %{buildroot}
 %make_install
 
 mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}%{_libdir}/udev/rules.d
 
 install -m 0644 %SOURCE1 %{buildroot}%{_unitdir}
 install -m 0644 %SOURCE2 %{buildroot}%{_unitdir}
 install -m 0644 %SOURCE3 %{buildroot}%{_unitdir}
+install -m 0644 %SOURCE4 %{buildroot}%{_libdir}/udev/rules.d
 
 %install_service multi-user.target.wants sensord.service
 %install_service sockets.target.wants sensord_event.socket
@@ -122,6 +124,7 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 %{_unitdir}/multi-user.target.wants/sensord.service
 %{_unitdir}/sockets.target.wants/sensord_command.socket
 %{_unitdir}/sockets.target.wants/sensord_event.socket
+%{_libdir}/udev/rules.d/99-sensor.rules
 %license LICENSE.APLv2
 
 %files -n libsensord

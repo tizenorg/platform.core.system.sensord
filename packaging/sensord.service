@@ -2,6 +2,8 @@
 Description=Sensor Daemon
 
 [Service]
+User=sensor
+Group=input
 Type=notify
 ExecStart=/usr/bin/sensord
 Restart=always

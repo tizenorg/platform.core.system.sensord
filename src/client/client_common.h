@@ -28,23 +28,13 @@
 
 #define BASE_GATHERING_INTERVAL	100
 
-#define CLIENT_NAME_SIZE NAME_MAX+10
+const char *get_sensor_name(sensor_id_t sensor_id);
+const char *get_event_name(unsigned int event_type);
 
-struct log_attr {
-	const char *sensor_name;
-	const char *event_name;
-};
-
-bool is_one_shot_event(unsigned int event_type);
-bool is_ontime_event(unsigned int event_type);
-bool is_panning_event(unsigned int event_type);
-bool is_single_state_event(unsigned int event_type);
 unsigned int get_calibration_event_type(unsigned int event_type);
-unsigned long long get_timestamp(void);
+unsigned int get_log_per_count(sensor_id_t id);
 
-const char* get_sensor_name(sensor_id_t sensor_id);
-const char* get_event_name(unsigned int event_type);
-void print_event_occurrence_log(sensor_handle_info &sensor_handle_info, const reg_event_info *event_info);
+void print_event_occurrence_log(sensor_handle_info &sensor_handle_info);
 
 class sensor_info;
 sensor_info *sensor_to_sensor_info(sensor_t sensor);

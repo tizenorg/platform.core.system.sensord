@@ -25,6 +25,8 @@ extern "C"
 {
 #endif
 
+#define CALIBRATION_EVENT(sensor_type) (((sensor_type) << 16) | 0x2)
+
 #define ACCELEROMETER_EVENT_ROTATION_CHECK ((ACCELEROMETER_SENSOR << 16) | 0x0100)
 
 #define ACCELEROMETER_ORIENTATION_DATA_SET (ACCELEROMETER_SENSOR << 16) | 0x0002

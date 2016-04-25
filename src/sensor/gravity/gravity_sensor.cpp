@@ -305,6 +305,7 @@ void gravity_sensor::fusion_set_accel(const sensor_event_t& event)
 	m_angle_n[1] = ARCTAN(x, z);
 	m_angle_n[2] = ARCTAN(y, x);
 
+	m_accuracy = event.data->accuracy;
 	m_time_new = event.data->timestamp;
 
 	_D("AccIn: (%f, %f, %f)", x/m_accel_mag, y/m_accel_mag, z/m_accel_mag);
