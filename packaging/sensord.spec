@@ -115,7 +115,6 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 /sbin/ldconfig
 
 %files
-%attr(0644,root,root)/usr/etc/virtual_sensors.xml
 %manifest packaging/sensord.manifest
 %{_bindir}/sensord
 %{_unitdir}/sensord.service
