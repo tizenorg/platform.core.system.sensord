@@ -1,0 +1,4 @@
+SUBSYSTEMS=="sensors", DEVPATH=="*ssp_sensor*", \
+RUN+="/bin/chown :input %S/%p/enable %S/%p/set_cal_data %S/%p/accel_poll_delay %S/%p/gyro_poll_delay %S/%p/hrm_poll_delay %S/%p/light_poll_delay %S/%p/pressure_poll_delay %S/%p/uncal_gyro_poll_delay"
+SUBSYSTEMS=="sensors", DEVPATH=="*ssp_sensor*", \
+RUN+="/bin/chsmack -a * %S/%p/enable %S/%p/set_cal_data %S/%p/accel_poll_delay %S/%p/gyro_poll_delay %S/%p/hrm_poll_delay %S/%p/light_poll_delay %S/%p/pressure_poll_delay %S/%p/uncal_gyro_poll_delay"
