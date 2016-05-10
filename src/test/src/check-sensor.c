@@ -27,8 +27,6 @@
 #include <string.h>
 #include "check-sensor.h"
 
-
-
 void printpollinglogs(sensor_type_t type,sensor_data_t data)
 {
 	switch(type) {
@@ -299,7 +297,6 @@ int polling_sensor(sensor_type_t sensor_type, unsigned int event)
 	handle = sensord_connect(sensor);
 	result = sensord_start(handle, 1);
 
-
 	if (!result) {
 		printf("Can't start the sensor\n");
 		printf("Error\n\n\n\n");
@@ -308,7 +305,7 @@ int polling_sensor(sensor_type_t sensor_type, unsigned int event)
 
 	sensor_data_t data;
 
-	while(1) {
+	while (1) {
 		result = sensord_get_data(handle, event, &data);
 		printpollinglogs(sensor_type, data);
 		usleep(100000);

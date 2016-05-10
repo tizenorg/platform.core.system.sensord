@@ -65,7 +65,6 @@ typedef struct {
 typedef struct {
 } cmd_byebye_t;
 
-
 typedef struct {
 	unsigned int type;
 } cmd_get_data_t;
@@ -73,7 +72,6 @@ typedef struct {
 typedef struct {
 	long value;
 } cmd_done_t;
-
 
 typedef struct {
 	int client_id;
@@ -114,7 +112,6 @@ typedef struct {
 typedef struct {
 	int option;
 } cmd_set_option_t;
-
 
 typedef struct  {
 	int attribute;

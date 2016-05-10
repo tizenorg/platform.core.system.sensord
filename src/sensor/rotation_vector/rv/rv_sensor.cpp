@@ -257,4 +257,3 @@ bool rv_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &p
 
 	return true;
 }
-

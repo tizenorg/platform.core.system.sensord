@@ -33,8 +33,9 @@ sensor_event_dispatcher::sensor_event_dispatcher()
 {
 }
 
-sensor_event_dispatcher::~sensor_event_dispatcher() { }
-
+sensor_event_dispatcher::~sensor_event_dispatcher()
+{
+}
 
 sensor_event_dispatcher& sensor_event_dispatcher::get_instance()
 {
@@ -139,7 +140,6 @@ void sensor_event_dispatcher::dispatch_event(void)
 	}
 }
 
-
 void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 {
 	sensor_event_t *sensor_event = NULL;
@@ -221,7 +221,6 @@ bool sensor_event_dispatcher::has_active_virtual_sensor(virtual_sensor *sensor)
 
 	return (it_v_sensor != m_active_virtual_sensors.end());
 }
-
 
 virtual_sensors sensor_event_dispatcher::get_active_virtual_sensors(void)
 {

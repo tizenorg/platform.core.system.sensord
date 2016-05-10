@@ -33,12 +33,12 @@
 #endif
 #define LOG_TAG	"SENSOR"
 
-#define LOG_DUMP(fp, fmt, arg...) do { if (fp) fprintf(fp, fmt, ##arg); else _E(fmt, ##arg); } while(0)
+#define LOG_DUMP(fp, fmt, arg...) do { if (fp) fprintf(fp, fmt, ##arg); else _E(fmt, ##arg); } while (0)
 
 #ifdef _DEBUG
 #define DBG SLOGD
 #else
-#define DBG(...) do{} while(0)
+#define DBG(...) do {} while (0)
 #endif
 
 #define ERR SLOGE

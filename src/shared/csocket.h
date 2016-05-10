@@ -37,7 +37,7 @@ public:
 
 	//Server
 	bool create(int sock_type);
-	bool bind (const char *sock_path);
+	bool bind(const char *sock_path);
 	bool listen(const int max_connections);
 	bool accept(csocket& client_socket) const;
 

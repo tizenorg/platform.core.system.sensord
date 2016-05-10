@@ -30,5 +30,4 @@ hrm_sensor::hrm_sensor()
 
 hrm_sensor::~hrm_sensor()
 {
-
 }

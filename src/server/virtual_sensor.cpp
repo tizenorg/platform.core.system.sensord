@@ -20,15 +20,12 @@
 #include <virtual_sensor.h>
 #include <sensor_event_dispatcher.h>
 
-
 virtual_sensor::virtual_sensor()
 {
-
 }
 
 virtual_sensor::~virtual_sensor()
 {
-
 }
 
 bool virtual_sensor::init(void)

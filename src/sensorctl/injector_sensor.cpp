@@ -46,7 +46,7 @@ bool injector_sensor::inject(int option_count, char *options[])
 	event_sync.type = EV_SYN;
 	event_sync.code = SYN_REPORT;
 	event_sync.value = 100;
-	
+
 	static const char enable_wrist_up[] = {(char)-79, 19, 0, 0};
 	static const char disable_wrist_up[] = {(char)-78, 19, 0, 0};
 	static const char wrist_up[] = {1, 1, 19, 1};

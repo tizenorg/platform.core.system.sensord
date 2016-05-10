@@ -50,8 +50,6 @@ using std::vector;
 #define ELEMENT_PITCH_ROTATION_COMPENSATION						"PITCH_ROTATION_COMPENSATION"
 #define ELEMENT_ROLL_ROTATION_COMPENSATION						"ROLL_ROTATION_COMPENSATION"
 
-
-
 tilt_sensor::tilt_sensor()
 : m_accel_sensor(NULL)
 , m_fusion_sensor(NULL)
@@ -98,7 +96,6 @@ tilt_sensor::tilt_sensor()
 	_I("m_roll_rotation_compensation = %d", m_roll_rotation_compensation);
 
 	m_interval = m_default_sampling_time * MS_TO_US;
-
 }
 
 tilt_sensor::~tilt_sensor()
@@ -189,7 +186,6 @@ void tilt_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t>
 	unsigned long long diff_time;
 
 	if (event.event_type == FUSION_EVENT) {
-
 		diff_time = event.data.timestamp - m_time;
 
 		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
@@ -257,8 +253,7 @@ bool tilt_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s 
 	if(m_raw_data_unit == "DEGREES") {
 		properties.min_range = -180;
 		properties.max_range = 180;
-	}
-	else {
+	} else {
 		properties.min_range = -PI;
 		properties.max_range = PI;
 	}

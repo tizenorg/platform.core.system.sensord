@@ -36,13 +36,11 @@ sensor_client_info::~sensor_client_info()
 {
 }
 
-
 sensor_client_info& sensor_client_info::get_instance(void)
 {
 	static sensor_client_info inst;
 	return inst;
 }
-
 
 int sensor_client_info::create_handle(sensor_id_t sensor)
 {
@@ -67,7 +65,7 @@ int sensor_client_info::create_handle(sensor_id_t sensor)
 	handle_info.m_accuracy_cb = NULL;
 	handle_info.m_accuracy_user_data = NULL;
 
-	m_sensor_handle_infos.insert(pair<int,sensor_handle_info> (handle, handle_info));
+	m_sensor_handle_infos.insert(pair<int, sensor_handle_info>(handle, handle_info));
 
 	return handle;
 }
@@ -86,7 +84,6 @@ bool sensor_client_info::delete_handle(int handle)
 	m_sensor_handle_infos.erase(it_handle);
 	return true;
 }
-
 
 bool sensor_client_info::is_active()
 {
@@ -299,7 +296,6 @@ bool sensor_client_info::get_event_info(int handle, unsigned int event_type, uns
 	if (!event_info)
 		return NULL;
 
-
 	interval = event_info->m_interval;
 	cb = event_info->m_cb;
 	user_data = event_info->m_user_data;
@@ -307,7 +303,6 @@ bool sensor_client_info::get_event_info(int handle, unsigned int event_type, uns
 
 	return true;
 }
-
 
 void sensor_client_info::get_listening_sensors(sensor_id_vector &sensors)
 {
@@ -321,7 +316,7 @@ void sensor_client_info::get_listening_sensors(sensor_id_vector &sensors)
 	}
 
 	sort(sensors.begin(), sensors.end());
-	unique(sensors.begin(),sensors.end());
+	unique(sensors.begin(), sensors.end());
 }
 
 void sensor_client_info::get_sensor_rep(sensor_id_t sensor, sensor_rep& rep) {
@@ -346,11 +341,11 @@ bool sensor_client_info::add_command_channel(sensor_id_t sensor, command_channel
 		return false;
 	}
 
-	m_command_channels.insert(pair<sensor_id_t, command_channel *> (sensor, cmd_channel));
+	m_command_channels.insert(pair<sensor_id_t, command_channel *>(sensor, cmd_channel));
 
 	return true;
-
 }
+
 bool sensor_client_info::get_command_channel(sensor_id_t sensor, command_channel **cmd_channel)
 {
 	auto it_channel = m_command_channels.find(sensor);
@@ -364,7 +359,6 @@ bool sensor_client_info::get_command_channel(sensor_id_t sensor, command_channel
 
 	return true;
 }
-
 
 bool sensor_client_info::close_command_channel(void)
 {
@@ -528,9 +522,7 @@ void sensor_client_info::get_active_event_types(sensor_id_t sensor, event_type_v
 	sort(event_types.begin(), event_types.end());
 
 	unique_copy(event_types.begin(), event_types.end(), back_inserter(active_event_types));
-
 }
-
 
 void sensor_client_info::get_all_handles(handle_vector &handles)
 {
@@ -544,29 +536,28 @@ void sensor_client_info::get_all_handles(handle_vector &handles)
 	}
 }
 
-void sensor_client_info::get_sensor_handle_info(sensor_id_t sensor, sensor_handle_info_map &handles_info) {
-
+void sensor_client_info::get_sensor_handle_info(sensor_id_t sensor, sensor_handle_info_map &handles_info)
+{
 	AUTOLOCK(m_handle_info_lock);
 
 	auto it_handle = m_sensor_handle_infos.begin();
 
 	while (it_handle != m_sensor_handle_infos.end()) {
-		if (it_handle->second.m_sensor_id == sensor) {
-			handles_info.insert(pair<int,sensor_handle_info> (it_handle->first, it_handle->second));
-		}
+		if (it_handle->second.m_sensor_id == sensor)
+			handles_info.insert(pair<int, sensor_handle_info>(it_handle->first, it_handle->second));
 
 		++it_handle;
 	}
 }
 
-void sensor_client_info::get_all_handle_info(sensor_handle_info_map &handles_info) {
-
+void sensor_client_info::get_all_handle_info(sensor_handle_info_map &handles_info)
+{
 	AUTOLOCK(m_handle_info_lock);
 
 	auto it_handle = m_sensor_handle_infos.begin();
 
 	while (it_handle != m_sensor_handle_infos.end()) {
-		handles_info.insert(pair<int,sensor_handle_info> (it_handle->first, it_handle->second));
+		handles_info.insert(pair<int, sensor_handle_info>(it_handle->first, it_handle->second));
 		++it_handle;
 	}
 }

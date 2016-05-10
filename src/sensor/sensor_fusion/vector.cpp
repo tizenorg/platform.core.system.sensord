@@ -27,7 +27,6 @@ TYPE_SIZE vect<TYPE, SIZE>::vect(void)
 
 TYPE_SIZE vect<TYPE, SIZE>::vect(TYPE vec_data[SIZE])
 {
-
 	for (int j = 0; j < SIZE; j++)
 		m_vec[j] = vec_data[j];
 }
@@ -109,7 +108,7 @@ T_S_R_C matrix<T, R, S> operator *(const matrix<T, R, C> m, const vect<T, S> v)
 	assert(R == S);
 	assert(C == 1);
 
-	matrix<T,R,S> m1;
+	matrix<T, R, S> m1;
 
 	for (int i = 0; i < R; i++)
 		for (int j = 0; j < S; j++)
@@ -122,7 +121,7 @@ T_S_R_C vect<T, S> operator *(const vect<T, S> v, const matrix<T, R, C> m)
 {
 	assert(R == S);
 	assert(C != 1);
-	vect<T,C> v1;
+	vect<T, C> v1;
 
 	for (int j = 0; j < C; j++)
 	{
@@ -156,7 +155,7 @@ T_S vect<T, S> operator /(const vect<T, S> v, const T val)
 
 T_S1_S2 bool operator ==(const vect<T, S1> v1, const vect<T, S2> v2)
 {
-	if (S1==S2)
+	if (S1 == S2)
 	{
 		for (int i = 0; i < S1; i++)
 			if (v1.m_vec[i] != v2.m_vec[i])
