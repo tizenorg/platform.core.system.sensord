@@ -51,7 +51,6 @@ public:
 			const vect<T, REF_VEC_SIZE> ref_vec);
 	template<typename T> friend void pre_process_data(sensor_data<T> &data_out,
 			const T *data_in, T *bias, int *sign, int scale);
-
 };
 
 #include "sensor_data.cpp"

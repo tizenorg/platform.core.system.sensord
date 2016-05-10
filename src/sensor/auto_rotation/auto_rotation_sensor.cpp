@@ -155,7 +155,6 @@ void auto_rotation_sensor::synthesize(const sensor_event_t& event)
 	push(rotation_event);
 
 	_D("Rotation: %d, ACC[0]: %f, ACC[1]: %f, ACC[2]: %f", rotation, event.data->values[0], event.data->values[1], event.data->values[2]);
-	return;
 }
 
 int auto_rotation_sensor::get_data(sensor_data_t **data, int *length)

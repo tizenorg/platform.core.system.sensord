@@ -32,4 +32,5 @@ public:
 private:
 	int convert_rotation(int prev_rotation, float acc_pitch, float acc_theta);
 };
+
 #endif /* _AUTO_ROTATION_ALG_EMUL_H_ */

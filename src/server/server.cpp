@@ -33,7 +33,6 @@ using std::thread;
 server::server()
 : m_mainloop(NULL)
 {
-
 }
 
 server::~server()

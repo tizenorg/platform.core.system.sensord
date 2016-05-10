@@ -67,7 +67,6 @@ command_worker::~command_worker()
 	m_socket.close();
 }
 
-
 bool command_worker::start(void)
 {
 	return m_worker.start();
@@ -181,7 +180,6 @@ bool command_worker::working(void *ctx)
 	}
 
 	if (header.size > 0) {
-
 		payload = new(std::nothrow) char[header.size];
 		retvm_if(!payload, false, "Failed to allocate memory");
 
@@ -203,7 +201,6 @@ bool command_worker::working(void *ctx)
 
 	return ret;
 }
-
 
 bool command_worker::stopped(void *ctx)
 {
@@ -269,9 +266,7 @@ bool command_worker::send_cmd_done(long value)
 
 	delete ret_packet;
 	return true;
-
 }
-
 
 bool command_worker::send_cmd_get_id_done(int client_id)
 {
@@ -324,7 +319,6 @@ bool command_worker::send_cmd_get_data_done(int state, sensor_data_t *data)
 	return true;
 }
 
-
 bool command_worker::send_cmd_get_sensor_list_done(void)
 {
 	cpacket sensor_list;
@@ -372,7 +366,6 @@ bool command_worker::cmd_get_id(void *payload)
 
 	return true;
 }
-
 
 bool command_worker::cmd_get_sensor_list(void *payload)
 {
@@ -859,7 +852,6 @@ bool command_worker::is_permission_allowed(void)
 
 	return false;
 }
-
 
 client_info_manager& command_worker::get_client_info_manager(void)
 {

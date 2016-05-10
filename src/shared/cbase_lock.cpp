@@ -43,7 +43,6 @@ void cbase_lock::lock(lock_type type, const char* expr, const char *module, cons
 	unsigned long long lock_acquired_time = 0;
 	unsigned long long waiting_time = 0;
 
-
 	snprintf(m_curent_info, OWNER_INFO_LEN, "%s:%s(%d)", module, func, line);
 
 	if (type == LOCK_TYPE_MUTEX)
@@ -68,7 +67,6 @@ void cbase_lock::lock(lock_type type, const char* expr, const char *module, cons
 		m_curent_info, expr, this, m_owner_info);
 	pthread_mutex_unlock(&m_history_mutex);
 
-
 	if (type == LOCK_TYPE_MUTEX)
 		lock_impl();
 	else if (type == LOCK_TYPE_READ)
@@ -88,7 +86,6 @@ void cbase_lock::lock(lock_type type, const char* expr, const char *module, cons
 	pthread_mutex_unlock(&m_history_mutex);
 }
 
-
 void cbase_lock::lock(lock_type type)
 {
 	if (type == LOCK_TYPE_MUTEX)
@@ -103,7 +100,6 @@ void cbase_lock::unlock(void)
 {
 	unlock_impl();
 }
-
 
 int cbase_lock::lock_impl(void)
 {

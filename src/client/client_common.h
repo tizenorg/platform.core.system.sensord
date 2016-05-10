@@ -20,7 +20,6 @@
 #ifndef _CLIENT_COMMON_H_
 #define _CLIENT_COMMON_H_
 
-/*header for each sensor type*/
 #include <sensor_internal.h>
 #include <sensor_handle_info.h>
 #include <reg_event_info.h>

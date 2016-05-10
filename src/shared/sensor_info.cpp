@@ -225,7 +225,6 @@ void sensor_info::show(void)
 	_I("Wakeup_supported = %d", m_wakeup_supported);
 }
 
-
 void sensor_info::clear(void)
 {
 	m_type = UNKNOWN_SENSOR;
@@ -242,7 +241,6 @@ void sensor_info::clear(void)
 	m_supported_event = 0;
 	m_wakeup_supported = false;
 }
-
 
 void sensor_info::put(raw_data_t &data, int value)
 {

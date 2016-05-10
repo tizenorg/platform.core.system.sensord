@@ -50,7 +50,6 @@ void orientation_sensor::get_device_orientation(sensor_data<float> *accel_data,
 	}
 
 	orien_filter.get_device_orientation(accel_data, gyro_data, magnetic_data);
-
 }
 
-#endif
+#endif /* _ORIENTATION_SENSOR_H_ */

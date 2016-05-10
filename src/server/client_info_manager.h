@@ -26,7 +26,7 @@
 #include <cmutex.h>
 #include <vector>
 
-typedef std::unordered_map<int,client_sensor_record> client_id_sensor_record_map;
+typedef std::unordered_map<int, client_sensor_record> client_id_sensor_record_map;
 typedef std::vector<int> client_id_vec;
 
 class client_info_manager {

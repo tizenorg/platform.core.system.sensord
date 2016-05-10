@@ -40,12 +40,12 @@ public:
 	T_S friend ostream& operator << (ostream& dout, vect<T, S>& v);
 	T_S friend vect<T, S> operator +(const vect<T, S> v1, const vect<T, S> v2);
 	T_S friend vect<T, S> operator +(const vect<T, S> v, const T val);
-	T_S friend vect<T, S> operator -(const vect<T,S> v1, const vect<T,S> v2);
-	T_S friend vect<T, S> operator -(const vect<T,S> v, const T val);
+	T_S friend vect<T, S> operator -(const vect<T, S> v1, const vect<T, S> v2);
+	T_S friend vect<T, S> operator -(const vect<T, S> v, const T val);
 	T_S_R_C friend matrix<T, R, S> operator *(const matrix<T, R, C> v1, const vect<T, S> v2);
 	T_S_R_C friend vect<T, S> operator *(const vect<T, S> v, const matrix<T, R, C> m);
 	T_S friend vect<T, S> operator *(const vect<T, S> v, const T val);
-	T_S friend vect<T, S> operator /(const vect<T,S> v1, const T val);
+	T_S friend vect<T, S> operator /(const vect<T, S> v1, const T val);
 	T_S1_S2 friend bool operator ==(const vect<T, S1> v1, const vect<T, S2> v2);
 	T_S1_S2 friend bool operator !=(const vect<T, S1> v1, const vect<T, S2> v2);
 

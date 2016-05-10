@@ -248,8 +248,7 @@ void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_e
 		if(m_raw_data_unit == "DEGREES") {
 			euler = rad2deg(euler);
 			azimuth_offset = AZIMUTH_OFFSET_DEGREES;
-		}
-		else {
+		} else {
 			azimuth_offset = AZIMUTH_OFFSET_RADIANS;
 		}
 
@@ -294,8 +293,7 @@ int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_da
 	if(m_raw_data_unit == "DEGREES") {
 		euler = rad2deg(euler);
 		azimuth_offset = AZIMUTH_OFFSET_DEGREES;
-	}
-	else {
+	} else {
 		azimuth_offset = AZIMUTH_OFFSET_RADIANS;
 	}
 
@@ -321,8 +319,7 @@ bool orientation_sensor::get_properties(sensor_type_t sensor_type, sensor_proper
 	if(m_raw_data_unit == "DEGREES") {
 		properties.min_range = -180;
 		properties.max_range = 360;
-	}
-	else {
+	} else {
 		properties.min_range = -PI;
 		properties.max_range = 2 * PI;
 	}

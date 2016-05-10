@@ -51,7 +51,7 @@
 
 #define DEG2RAD(x) ((x) * M_PI / 180.0)
 #define NORM(x, y, z) sqrt((x)*(x) + (y)*(y) + (z)*(z))
-#define ARCTAN(x, y) ((x) == 0 ? 0 : (y) != 0 ? atan2((x),(y)) : (x) > 0 ? M_PI/2.0 : -M_PI/2.0)
+#define ARCTAN(x, y) ((x) == 0 ? 0 : (y) != 0 ? atan2((x), (y)) : (x) > 0 ? M_PI/2.0 : -M_PI/2.0)
 
 gravity_sensor::gravity_sensor()
 : m_fusion(NULL)

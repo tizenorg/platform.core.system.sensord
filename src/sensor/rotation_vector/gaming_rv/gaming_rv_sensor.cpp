@@ -97,7 +97,7 @@ gaming_rv_sensor::gaming_rv_sensor()
 
 	_I("m_accel_static_bias = (%f, %f, %f)", m_accel_static_bias[0], m_accel_static_bias[1], m_accel_static_bias[2]);
 
-	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_GYRO_STATIC_BIAS, m_gyro_static_bias,3)) {
+	if (!config.get(SENSOR_TYPE_GAMING_RV, ELEMENT_GYRO_STATIC_BIAS, m_gyro_static_bias, 3)) {
 		_E("[GYRO_STATIC_BIAS] is empty\n");
 		throw ENXIO;
 	}

@@ -82,13 +82,11 @@ void sensor_event_listener::operate_sensor(sensor_id_t sensor, int power_save_st
 		if ((it_handle->second.m_sensor_state == SENSOR_STATE_STARTED) &&
 			power_save_state &&
 			!(it_handle->second.m_sensor_option & power_save_state)) {
-
 			m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_PAUSED);
 			_I("%s's %s[%d] is paused", get_client_name(), get_sensor_name(sensor), it_handle->first);
 
 		} else if ((it_handle->second.m_sensor_state == SENSOR_STATE_PAUSED) &&
 			(!power_save_state || (it_handle->second.m_sensor_option & power_save_state))) {
-
 			m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_STARTED);
 			_I("%s's %s[%d] is resumed", get_client_name(), get_sensor_name(sensor), it_handle->first);
 		}
@@ -159,7 +157,6 @@ void sensor_event_listener::handle_events(void* event)
 		m_client_info.get_all_handle_info(handles_info);
 
 		for (auto it_handle = handles_info.begin(); it_handle != handles_info.end(); ++it_handle) {
-
 			sensor_handle_info &sensor_handle_info = it_handle->second;
 
 			event_info = sensor_handle_info.get_reg_event_info(event_type);
@@ -213,7 +210,7 @@ client_callback_info* sensor_event_listener::get_callback_info(sensor_id_t senso
 	client_callback_info* callback_info;
 
 	callback_info = new(std::nothrow)client_callback_info;
-	retvm_if (!callback_info, NULL, "Failed to allocate memory");
+	retvm_if(!callback_info, NULL, "Failed to allocate memory");
 
 	callback_info->sensor = sensor_info_to_sensor(sensor_info_manager::get_instance().get_info(sensor_id));
 	callback_info->event_id = event_info->m_id;
@@ -348,7 +345,6 @@ void sensor_event_listener::listen_events(void)
 		if (m_hup_observer)
 			m_hup_observer();
 	}
-
 }
 
 bool sensor_event_listener::create_event_channel(void)
@@ -394,12 +390,10 @@ bool sensor_event_listener::create_event_channel(void)
 	return true;
 }
 
-
 void sensor_event_listener::close_event_channel(void)
 {
 	m_event_socket.close();
 }
-
 
 void sensor_event_listener::stop_event_listener(void)
 {
@@ -434,7 +428,6 @@ void sensor_event_listener::clear(void)
 	m_client_info.set_client_id(CLIENT_ID_INVALID);
 }
 
-
 void sensor_event_listener::set_hup_observer(hup_observer_t observer)
 {
 	m_hup_observer = observer;
@@ -450,7 +443,7 @@ bool sensor_event_listener::start_event_listener(void)
 	m_event_socket.set_transfer_mode();
 
 	m_poller = new(std::nothrow) poller(m_event_socket.get_socket_fd());
-	retvm_if (!m_poller, false, "Failed to allocate memory");
+	retvm_if(!m_poller, false, "Failed to allocate memory");
 
 	set_thread_state(THREAD_STATE_START);
 
