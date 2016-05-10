@@ -174,7 +174,6 @@ bool sensord_get_fifo_count(sensor_t sensor, int *fifo_count);
  */
 bool sensord_get_max_batch_count(sensor_t sensor, int *max_batch_count);
 
-
 /**
  * @brief Get the supported event types of this sensor.
  *
@@ -184,7 +183,6 @@ bool sensord_get_max_batch_count(sensor_t sensor, int *max_batch_count);
  * @return true on success, otherwise false.
  */
 bool sensord_get_supported_event_types(sensor_t sensor, unsigned int **event_types, int *count);
-
 
 /**
  * @brief Check a given event type is supporeted by this sensor.
@@ -284,7 +282,6 @@ bool sensord_unregister_accuracy_cb(int handle);
  *				   with SENSOR_OPTION_ALWAYS_ON, it continues to listening events even when LCD is off or in power save mode.
  * @return true on success, otherwise false.
  */
-
 bool sensord_start(int handle, int option);
 
 /**
@@ -396,6 +393,5 @@ bool sensord_external_post(int handle, unsigned long long timestamp, const float
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif

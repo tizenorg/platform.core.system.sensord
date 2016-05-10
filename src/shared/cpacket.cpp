@@ -96,7 +96,7 @@ void cpacket::set_payload_size(size_t size)
 	}
 
 	m_packet = (packet_header*) new(std::nothrow) char[size + sizeof(packet_header)];
-	retm_if (!m_packet, "Failed to allocate memory");
+	retm_if(!m_packet, "Failed to allocate memory");
 	m_packet->size = size;
 
 	if (prev_cmd != CMD_NONE)

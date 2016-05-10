@@ -32,7 +32,6 @@ csocket::csocket()
 	memset(&m_addr, 0, sizeof(m_addr));
 }
 
-
 csocket::csocket(int sock_fd)
 : m_sock_fd(-1)
 , m_sock_type(SOCK_STREAM)
@@ -43,7 +42,6 @@ csocket::csocket(int sock_fd)
 	set_sock_type();
 	memset(&m_addr, 0, sizeof(m_addr));
 }
-
 
 csocket::csocket(const csocket &sock)
 : m_sock_fd(-1)
@@ -78,7 +76,7 @@ bool csocket::create(int sock_type)
 	return true;
 }
 
-bool csocket::bind (const char *sock_path)
+bool csocket::bind(const char *sock_path)
 {
 	int length;
 	mode_t socket_mode;
@@ -104,7 +102,7 @@ bool csocket::bind (const char *sock_path)
 		return false;
 	}
 
-	socket_mode = ( S_IRWXU | S_IRWXG | S_IRWXO );
+	socket_mode = (S_IRWXU | S_IRWXG | S_IRWXO);
 	if (chmod(sock_path, socket_mode) < 0) {
 		_ERRNO(errno, _E, "Failed to chmod for socket[%d]", m_sock_fd);
 		close();
@@ -198,7 +196,6 @@ ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
     return err == 0 ? len : -err;
 }
 
-
 ssize_t csocket::send_for_stream(const void *buffer, size_t size) const
 {
 	ssize_t len;
@@ -277,7 +274,6 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 	return err == 0 ? total_recv_size : -err;
 }
 
-
 ssize_t csocket::send(const void *buffer, size_t size) const
 {
 	if (!is_valid()) {
@@ -327,7 +323,7 @@ bool csocket::connect(const char *sock_path)
 
 	addr_len = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 
-	if (::connect(m_sock_fd,(sockaddr *) &m_addr, addr_len) < 0) {
+	if (::connect(m_sock_fd, (sockaddr *) &m_addr, addr_len) < 0) {
 		_ERRNO(errno, _E, "Failed to connect sock_fd: %d for %s",
 				m_sock_fd, get_client_name());
 		return false;
@@ -408,7 +404,6 @@ bool csocket::set_blocking_mode(bool blocking)
 	return true;
 }
 
-
 bool csocket::set_sock_type(void)
 {
 	socklen_t opt_len;
@@ -486,7 +481,6 @@ bool csocket::is_blocking_mode(void)
 
 	return !(flags & O_NONBLOCK);
 }
-
 
 bool csocket::is_valid(void) const
 {

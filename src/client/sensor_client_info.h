@@ -48,8 +48,8 @@ using std::condition_variable;
 
 typedef vector<unsigned int> handle_vector;
 typedef vector<sensor_id_t> sensor_id_vector;
-typedef unordered_map<int,sensor_handle_info> sensor_handle_info_map;
-typedef unordered_map<sensor_id_t, command_channel*> sensor_command_channel_map;
+typedef unordered_map<int, sensor_handle_info> sensor_handle_info_map;
+typedef unordered_map<sensor_id_t, command_channel *> sensor_command_channel_map;
 
 typedef struct sensor_rep {
 	bool active;
@@ -120,4 +120,5 @@ private:
 
 	cmutex m_handle_info_lock;
 };
+
 #endif /* _SENSOR_CLIENT_INFO_H_ */

@@ -21,8 +21,8 @@
 
 int main()
 {
-	float arr0[2][2] = {{-2.243, 2.57},{3.56, -3.02}};
-	float arr1[2][2] = {{2.2, 2.5},{3.5, 3.0}};
+	float arr0[2][2] = {{-2.243, 2.57}, {3.56, -3.02}};
+	float arr1[2][2] = {{2.2, 2.5}, {3.5, 3.0}};
 	float arr5[3][2] = {{0.22, 4.56}, {3.652, 5.86}, {1.430, 0.45}};
 	float arr11[1][3] = {{2.0, 3.0, 4.0}};
 	float arr12[3][1] = {{2.0}, {1.0}, {3.0}};
@@ -46,83 +46,83 @@ int main()
 	matrix<float, 2, 3> m22(arr15);
 	matrix<float, 3, 3> m9(arr9);
 
-	cout<< "Constructor Test\n";
-	cout<< "\n" << m6;
+	cout << "Constructor Test\n";
+	cout << "\n" << m6;
 
-	cout<<"\n\nAddition\n";
+	cout << "\n\nAddition\n";
 	m6 = m10 + m15;
 	m13 = m11 + m11;
-	cout<< "\n" << m10 <<"\n"<< m15;
-	cout<< "\nSum:\n" << m6 << endl;
-	cout<< "\n" << m11 << "\n"<< m11;
-	cout<< "\nSum:\n" << m13 << endl;
+	cout << "\n" << m10 << "\n" << m15;
+	cout << "\nSum:\n" << m6 << endl;
+	cout << "\n" << m11 << "\n" << m11;
+	cout << "\nSum:\n" << m13 << endl;
 
-	cout<< "\n\n\nSubtraction\n";
+	cout << "\n\n\nSubtraction\n";
 	m6 = m10 - m12;
-	cout<< "\n" << m10 << "\n" << m12;
-	cout<< "\nDifference:\n" << m6 << endl;
+	cout << "\n" << m10 << "\n" << m12;
+	cout << "\nDifference:\n" << m6 << endl;
 
-	cout<< "\n\n\nMultiplication\n";
+	cout << "\n\n\nMultiplication\n";
 	m6 = m10 * m12;
 	m3 = m1 * m2;
 	matrix<float, 1, 1> m7;
 	m7 = m20 * m21;
-	cout<< "\n" << m10 << "\n" << m12;
-	cout<< "\nProduct:\n" << m6 << endl;
-	cout<< "\n" << m1 << "\n" << m2;
-	cout<< "\nProduct:\n" << m3 << endl;
-	cout<< "\n" << m20 << "\n" << m21;
-	cout<< "\nProduct:\n" << m7 << endl;
-	cout<< "\n" << m9 << "\n" << m21;
+	cout << "\n" << m10 << "\n" << m12;
+	cout << "\nProduct:\n" << m6 << endl;
+	cout << "\n" << m1 << "\n" << m2;
+	cout << "\nProduct:\n" << m3 << endl;
+	cout << "\n" << m20 << "\n" << m21;
+	cout << "\nProduct:\n" << m7 << endl;
+	cout << "\n" << m9 << "\n" << m21;
 	m21 = m9 * m21;
-	cout<< "\nProduct:\n" << m21 << endl;
+	cout << "\nProduct:\n" << m21 << endl;
 
-	cout<< "\n\n\nDivision\n";
+	cout << "\n\n\nDivision\n";
 	m3 = m1 / (float)2.5;
-	cout<< "\n" << m1 << "\n" << "2.5";
-	cout<< "\nResult:\n" << m3 << endl;
+	cout << "\n" << m1 << "\n" << "2.5";
+	cout << "\nResult:\n" << m3 << endl;
 	m6 = m12 / (float)0.125;
-	cout<< "\n" << m12 << "\n" << ".125";
-	cout<< "\nResult:\n" << m6 << endl;
+	cout << "\n" << m12 << "\n" << ".125";
+	cout << "\nResult:\n" << m6 << endl;
 
 	float num = 5.5650;
 	float num1 = -2.32;
-	cout<< "\n\n\nScalar addition\n";
+	cout << "\n\n\nScalar addition\n";
 	m3 = m2 + num;
 	m6 = m10 + num1;
-	cout<< "\nNumber added:" << num;
-	cout<< "\n\n" << m2;
-	cout<< "\nResult:\n\n" << m3;
-	cout<< "\nNumber added:" << num1;
-	cout<< "\n\n" << m10;
-	cout<< "\nResult:\n\n" << m6;
+	cout << "\nNumber added:" << num;
+	cout << "\n\n" << m2;
+	cout << "\nResult:\n\n" << m3;
+	cout << "\nNumber added:" << num1;
+	cout << "\n\n" << m10;
+	cout << "\nResult:\n\n" << m6;
 
 	float x = 4.0;
 	float x1 = -2.5;
-	cout<< "\n\n\nScalar subtraction\n";
+	cout << "\n\n\nScalar subtraction\n";
 	m13 = m11 - x;
 	m6 = m10 - x1;
-	cout<< "\nNumber Subtracted:" << x;
-	cout<< "\n\n" << m11;
-	cout<< "\nResult:\n\n" << m13;
-	cout<< "\nNumber Subtracted:" << x1;
-	cout<< "\n\n" << m10;
-	cout<< "\nResult:\n\n" << m6;
+	cout << "\nNumber Subtracted:" << x;
+	cout << "\n\n" << m11;
+	cout << "\nResult:\n\n" << m13;
+	cout << "\nNumber Subtracted:" << x1;
+	cout << "\n\n" << m10;
+	cout << "\nResult:\n\n" << m6;
 
 	float z = 3.50;
 	float z1 = -5.567;
-	cout<< "\n\n\nScalar multiplication\n";
+	cout << "\n\n\nScalar multiplication\n";
 	m3 = m1 * z;
 	m6 = m12 * z1;
-	cout<< "\nNumber Multiplied:"<< z;
-	cout<< "\n\n" << m1;
-	cout<< "\nResult:\n\n" << m3;
-	cout<< "\nNumber Multiplied:" << z1;
-	cout<< "\n\n" << m12;
-	cout<< "\nResult:\n\n" << m6;
+	cout << "\nNumber Multiplied:" << z;
+	cout << "\n\n" << m1;
+	cout << "\nResult:\n\n" << m3;
+	cout << "\nNumber Multiplied:" << z1;
+	cout << "\n\n" << m12;
+	cout << "\nResult:\n\n" << m6;
 
 	m6 = tran(m15);
-	cout<< "\n\n\nTranspose:";
+	cout << "\n\n\nTranspose:";
 	cout << "\n\n" << m15;
 	cout << "\nResult:\n\n" << m6;
 
@@ -147,9 +147,8 @@ int main()
 	cout << (m6 != m1);
 
 
-	cout<< "\n\nAssignment\n";
+	cout << "\n\nAssignment\n";
 	matrix<float, 3, 3> m30 = m12;
-	cout<< "Input \n" << m12;
-	cout<< "\nOutput:\n" << m30 << endl;
-
+	cout << "Input \n" << m12;
+	cout << "\nOutput:\n" << m30 << endl;
 }

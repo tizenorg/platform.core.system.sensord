@@ -52,7 +52,7 @@ int main()
 		sdata[0] = strtof(line_accel.c_str(), &token);
 		sdata[1] = strtof(token, &token);
 		sdata[2] = strtof(token, &token);
-		time_stamp = strtoull (token, NULL, 10);
+		time_stamp = strtoull(token, NULL, 10);
 		sensor_data<float> accel_data(sdata[0], sdata[1], sdata[2], time_stamp);
 
 		cout << "Accel Data\t" << accel_data.m_data << "\t Time Stamp\t" << accel_data.m_time_stamp << "\n\n";
@@ -61,7 +61,7 @@ int main()
 		sdata[0] = strtof(line_gyro.c_str(), &token);
 		sdata[1] = strtof(token, &token);
 		sdata[2] = strtof(token, &token);
-		time_stamp = strtoull (token, NULL, 10);
+		time_stamp = strtoull(token, NULL, 10);
 		sensor_data<float> gyro_data(sdata[0], sdata[1], sdata[2], time_stamp);
 
 		cout << "Gyro Data\t" << gyro_data.m_data << "\t Time Stamp\t" << gyro_data.m_time_stamp << "\n\n";
@@ -70,7 +70,7 @@ int main()
 		sdata[0] = strtof(line_magnetic.c_str(), &token);
 		sdata[1] = strtof(token, &token);
 		sdata[2] = strtof(token, &token);
-		time_stamp = strtoull (token, NULL, 10);
+		time_stamp = strtoull(token, NULL, 10);
 		sensor_data<float> magnetic_data(sdata[0], sdata[1], sdata[2], time_stamp);
 
 		cout << "Magnetic Data\t" << magnetic_data.m_data << "\t Time Stamp\t" << magnetic_data.m_time_stamp << "\n\n";

@@ -21,12 +21,10 @@
 
 sensor_fusion::sensor_fusion()
 {
-
 }
 
 sensor_fusion::~sensor_fusion()
 {
-
 }
 
 bool sensor_fusion::is_fusion(void)

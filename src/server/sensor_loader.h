@@ -67,4 +67,5 @@ public:
 	std::vector<sensor_base *> get_sensors(sensor_type_t type);
 	std::vector<sensor_base *> get_virtual_sensors(void);
 };
+
 #endif	/* _SENSOR_LOADER_H_ */

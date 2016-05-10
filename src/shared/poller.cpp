@@ -88,7 +88,6 @@ bool poller::fill_event_queue(void)
 	return true;
 }
 
-
 bool poller::poll(struct epoll_event &event)
 {
 	while (true) {

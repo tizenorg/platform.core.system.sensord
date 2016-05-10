@@ -63,4 +63,5 @@ private:
 	std::list<interval_info> m_interval_info_list;
 	std::list<batch_info> m_batch_info_list;
 };
+
 #endif /* _SENSOR_INFO_LIST_H_ */

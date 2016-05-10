@@ -28,8 +28,8 @@ command_channel::command_channel()
 : m_client_id(CLIENT_ID_INVALID)
 , m_sensor_id(UNKNOWN_SENSOR)
 {
-
 }
+
 command_channel::~command_channel()
 {
 	if (m_command_socket.is_valid())
@@ -180,7 +180,6 @@ bool command_channel::cmd_get_sensor_list(void)
 	return true;
 }
 
-
 bool command_channel::cmd_hello(sensor_id_t sensor)
 {
 	cpacket *packet;
@@ -257,7 +256,6 @@ bool command_channel::cmd_byebye(void)
 
 	if (m_command_socket.is_valid())
 		m_command_socket.close();
-
 
 	m_client_id = CLIENT_ID_INVALID;
 	m_sensor_id = UNKNOWN_SENSOR;
@@ -413,7 +411,6 @@ bool command_channel::cmd_register_event(unsigned int event_type)
 	return true;
 }
 
-
 bool command_channel::cmd_register_events(event_type_vector &event_vec)
 {
 	auto it_event = event_vec.begin();
@@ -466,7 +463,6 @@ bool command_channel::cmd_unregister_event(unsigned int event_type)
 
 	return true;
 }
-
 
 bool command_channel::cmd_unregister_events(event_type_vector &event_vec)
 {
