@@ -29,7 +29,6 @@ template <typename T> T get_sign(T val)
 template <typename TYPE>
 rotation_matrix<TYPE>::rotation_matrix() : m_rot_mat()
 {
-
 }
 
 template <typename TYPE>
@@ -54,7 +53,6 @@ rotation_matrix<TYPE>::rotation_matrix(const rotation_matrix<TYPE>& rm)
 template <typename TYPE>
 rotation_matrix<TYPE>::~rotation_matrix()
 {
-
 }
 
 template <typename TYPE>

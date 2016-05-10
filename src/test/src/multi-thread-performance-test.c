@@ -27,7 +27,6 @@
 #include <pthread.h>
 #include "check-sensor.h"
 
-
 void usage()
 {
 	printf("Usage : ./multi-sensor <TIMEOUT> <interval>(optional)\n\n");
@@ -84,7 +83,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-
 	int MAX = 6, j = 0, k = 0;
 	struct pthread_arguments arg[MAX];
 	int t = 0;
@@ -102,17 +100,13 @@ int main(int argc, char **argv)
 	arg[5].sensor_type = LIGHT_SENSOR;
 	arg[5].event = LIGHT_LUX_DATA_EVENT;
 
-	for(t = 0; t < MAX; t++)
-	{
+	for (t = 0; t < MAX; t++)
 		arg[t].interval = interval;
-	}
 
 	pthread_t thread_id[MAX];
 
-	for(j = 0; j < MAX; j++)
-	{
+	for (j = 0; j < MAX; j++)
 		pthread_create(&thread_id[j], NULL, check_sensor, (void*)&arg[j]);
-	}
 
 	sleep(TIMEOUT);
 	return 0;

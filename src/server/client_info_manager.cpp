@@ -28,6 +28,7 @@ using std::string;
 client_info_manager::client_info_manager()
 {
 }
+
 client_info_manager::~client_info_manager()
 {
 	m_clients.clear();
@@ -55,7 +56,6 @@ bool client_info_manager::get_registered_events(int client_id, sensor_id_t senso
 
 	return true;
 }
-
 
 bool client_info_manager::register_event(int client_id, sensor_id_t sensor_id, unsigned int event_type)
 {
@@ -136,7 +136,6 @@ bool client_info_manager::set_option(int client_id, sensor_id_t sensor_id, int o
 	return true;
 }
 
-
 bool client_info_manager::set_start(int client_id, sensor_id_t sensor_id, bool start)
 {
 	AUTOLOCK(m_mutex);
@@ -152,7 +151,6 @@ bool client_info_manager::set_start(int client_id, sensor_id_t sensor_id, bool s
 		return false;
 
 	return true;
-
 }
 
 bool client_info_manager::is_started(int client_id, sensor_id_t sensor_id)
@@ -187,11 +185,10 @@ int client_info_manager::create_client_record(void)
 
 	client_record.set_client_id(client_id);
 
-	m_clients.insert(pair<int,client_sensor_record> (client_id, client_record));
+	m_clients.insert(pair<int, client_sensor_record> (client_id, client_record));
 
 	return client_id;
 }
-
 
 bool client_info_manager::remove_client_record(int client_id)
 {
@@ -211,7 +208,6 @@ bool client_info_manager::remove_client_record(int client_id)
 	return true;
 }
 
-
 bool client_info_manager::has_client_record(int client_id)
 {
 	AUTOLOCK(m_mutex);
@@ -220,7 +216,6 @@ bool client_info_manager::has_client_record(int client_id)
 
 	return (it_record != m_clients.end());
 }
-
 
 void client_info_manager::set_client_info(int client_id, pid_t pid, const string &name)
 {
@@ -318,7 +313,6 @@ bool client_info_manager::remove_sensor_record(int client_id, sensor_id_t sensor
 	return true;
 }
 
-
 bool client_info_manager::has_sensor_record(int client_id, sensor_id_t sensor_id)
 {
 	AUTOLOCK(m_mutex);
@@ -387,7 +381,6 @@ bool client_info_manager::get_event_socket(int client_id, csocket &socket)
 
 bool client_info_manager::set_event_socket(int client_id, const csocket &socket)
 {
-
 	AUTOLOCK(m_mutex);
 
 	auto it_record = m_clients.find(client_id);

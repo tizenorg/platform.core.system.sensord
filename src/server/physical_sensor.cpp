@@ -215,4 +215,3 @@ bool physical_sensor::get_sensor_info(sensor_info &info)
 
 	return true;
 }
-

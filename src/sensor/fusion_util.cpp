@@ -53,4 +53,3 @@ int quat_to_matrix(const float *quat, float *R)
 
 	return 0;
 }
-

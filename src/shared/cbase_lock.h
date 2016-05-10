@@ -29,23 +29,22 @@ enum lock_type {
 };
 
 #ifdef _LOCK_DEBUG
-#define AUTOLOCK(x) Autolock x##_autolock((x),LOCK_TYPE_MUTEX, #x, __MODULE__, __func__, __LINE__)
-#define AUTOLOCK_R(x) Autolock x##_autolock_r((x),LOCK_TYPE_READ, #x,  __MODULE__, __func__, __LINE__)
-#define AUTOLOCK_W(x) Autolock x##_autolock_w((x),LOCK_TYPE_WRITE, #x, __MODULE__, __func__, __LINE__)
+#define AUTOLOCK(x) Autolock x##_autolock((x), LOCK_TYPE_MUTEX, #x, __MODULE__, __func__, __LINE__)
+#define AUTOLOCK_R(x) Autolock x##_autolock_r((x), LOCK_TYPE_READ, #x,  __MODULE__, __func__, __LINE__)
+#define AUTOLOCK_W(x) Autolock x##_autolock_w((x), LOCK_TYPE_WRITE, #x, __MODULE__, __func__, __LINE__)
 #define LOCK(x)		(x).lock(#x, __MODULE__, __func__, __LINE__)
 #define LOCK_R(x)	(x).lock(LOCK_TYPE_READ, #x, __MODULE__, __func__, __LINE__)
 #define LOCK_W(x)	(x).lock(LOCK_TYPE_WRITE, #x, __MODULE__, __func__, __LINE__)
 #define UNLOCK(x)	(x).unlock()
 #else
-#define AUTOLOCK(x) Autolock x##_autolock((x),LOCK_TYPE_MUTEX)
-#define AUTOLOCK_R(x) Autolock x##_autolock_r((x),LOCK_TYPE_READ)
-#define AUTOLOCK_W(x) Autolock x##_autolock_w((x),LOCK_TYPE_WRITE)
+#define AUTOLOCK(x) Autolock x##_autolock((x), LOCK_TYPE_MUTEX)
+#define AUTOLOCK_R(x) Autolock x##_autolock_r((x), LOCK_TYPE_READ)
+#define AUTOLOCK_W(x) Autolock x##_autolock_w((x), LOCK_TYPE_WRITE)
 #define LOCK(x)		(x).lock()
 #define LOCK_R(x)	(x).lock(LOCK_TYPE_READ)
 #define LOCK_W(x)	(x).lock(LOCK_TYPE_WRITE)
 #define UNLOCK(x)	(x).unlock()
 #endif
-
 
 class cbase_lock {
 public:

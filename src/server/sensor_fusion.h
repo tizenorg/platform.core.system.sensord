@@ -29,7 +29,7 @@ enum fusion_event_type {
 	FUSION_EVENT_AGM = (FUSION_SENSOR << 16) | 0x0004,
 };
 
-typedef std::array<std::array<float,3> ,3> arr33_t;
+typedef std::array<std::array<float, 3>, 3> arr33_t;
 
 class sensor_fusion : public sensor_base {
 public:
@@ -56,4 +56,4 @@ public:
 	virtual bool get_orientation(float &azimuth, float &pitch, float &roll, int &accuracy);
 };
 
-#endif
+#endif /* _SENSOR_FUSION_H_ */

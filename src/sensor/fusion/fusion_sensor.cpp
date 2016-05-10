@@ -110,7 +110,7 @@ fusion_sensor::fusion_sensor()
 
 	_I("m_accel_static_bias = (%f, %f, %f)", m_accel_static_bias[0], m_accel_static_bias[1], m_accel_static_bias[2]);
 
-	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_GYRO_STATIC_BIAS, m_gyro_static_bias,3)) {
+	if (!config.get(SENSOR_TYPE_FUSION, ELEMENT_GYRO_STATIC_BIAS, m_gyro_static_bias, 3)) {
 		_E("[GYRO_STATIC_BIAS] is empty\n");
 		throw ENXIO;
 	}
@@ -304,8 +304,6 @@ void fusion_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_
 
 		m_orientation_filter.get_device_orientation(m_accel_ptr, m_gyro_ptr, m_magnetic_ptr);
 
-
-
 		if (m_enable_fusion == GYROSCOPE_UNCAL_ENABLED && sensor_base::is_supported(FUSION_GYROSCOPE_UNCAL_ENABLED)) {
 			m_time = get_timestamp();
 			fusion_event.sensor_id = get_id();
@@ -340,7 +338,6 @@ void fusion_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_
 		}
 
 		m_enable_fusion = 0;
-
 		m_accel_ptr = m_gyro_ptr = m_magnetic_ptr = NULL;
 	}
 
@@ -411,8 +408,7 @@ int fusion_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t 
 		data.values[0] = m_orientation_filter_poll.m_gyro_bias.m_vec[0];
 		data.values[1] = m_orientation_filter_poll.m_gyro_bias.m_vec[1];
 		data.values[2] = m_orientation_filter_poll.m_gyro_bias.m_vec[2];
-	}
-	else if (event_type == FUSION_ORIENTATION_ENABLED ||
+	} else if (event_type == FUSION_ORIENTATION_ENABLED ||
 			event_type == FUSION_ROTATION_VECTOR_ENABLED ||
 			event_type == FUSION_GAMING_ROTATION_VECTOR_ENABLED ||
 			event_type == FUSION_TILT_ENABLED ||
