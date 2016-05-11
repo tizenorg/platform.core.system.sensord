@@ -161,7 +161,10 @@ void gravity_sensor::synthesize_rv(const sensor_event_t& event)
 
 	float rotation[4] = {x, y, z, w};
 
-	rotation_to_gravity(rotation, gravity);
+	if (!rotation_to_gravity(rotation, gravity)) {
+		_D("Invalid rotation_vector: [%10f] [%10f] [%10f] [%10f]", x, y, z, w);
+		return;
+	}
 
 	gravity_event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
 	if (!gravity_event) {
