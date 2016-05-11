@@ -40,6 +40,12 @@
 #ifdef ENABLE_LINEAR_ACCEL
 #include <linear_accel_sensor.h>
 #endif
+#ifdef ENABLE_ORIENTATION
+#include <orientation_sensor.h>
+#endif
+#ifdef ENABLE_ROTATION_VECTOR
+#include <rotation_vector_sensor.h>
+#endif
 
 using std::vector;
 using std::string;
@@ -155,11 +161,17 @@ void sensor_loader::create_sensors(void)
 #ifdef ENABLE_AUTO_ROTATION
 	create_virtual_sensors<auto_rotation_sensor>("Auto Rotation");
 #endif
+#ifdef ENABLE_ROTATION_VECTOR
+	create_virtual_sensors<rotation_vector_sensor>("Rotation Vector");
+#endif
 #ifdef ENABLE_GRAVITY
 	create_virtual_sensors<gravity_sensor>("Gravity");
 #endif
 #ifdef ENABLE_LINEAR_ACCEL
 	create_virtual_sensors<linear_accel_sensor>("Linear Accel");
+#endif
+#ifdef ENABLE_ORIENTATION
+	create_virtual_sensors<orientation_sensor>("Orientation");
 #endif
 }
 
