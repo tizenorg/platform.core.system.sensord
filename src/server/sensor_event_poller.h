@@ -35,6 +35,7 @@ public:
 private:
 	poller m_poller;
 	fd_sensors_t m_fd_sensors;
+	int sfd;
 
 	void init_fd();
 	void init_sensor_map();

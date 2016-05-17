@@ -133,6 +133,21 @@ bool csocket::accept(csocket& client_socket) const
 	int addr_length = sizeof(m_addr);
 	int err = 0;
 
+	fd_set all_fds;
+
+	FD_ZERO(&all_fds);
+	FD_SET(m_sock_fd, &all_fds);
+
+	err = ::select(m_sock_fd + 1, &all_fds, NULL, NULL, NULL);
+
+	if (!FD_ISSET(m_sock_fd, &all_fds)) {
+		_ERRNO(errno, _E, "select failed, m_sock_fd : %d", m_sock_fd);
+		return false;
+	}
+
+	if (!is_valid())
+		return false;
+
 	do {
 		client_socket.m_sock_fd = ::accept(m_sock_fd, (sockaddr *)&m_addr, (socklen_t *)&addr_length);
 		if (!client_socket.is_valid())
@@ -143,6 +158,8 @@ bool csocket::accept(csocket& client_socket) const
 		_ERRNO(errno, _E, "Failed to accept for socket[%d]", m_sock_fd);
 		return false;
 	}
+
+	_I("ACCEPT: server[%d], client[%d]", m_sock_fd, client_socket.m_sock_fd);
 
 	return true;
 }
@@ -184,7 +201,7 @@ ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
 
 	if ((err == EAGAIN) || (err == EWOULDBLOCK)) {
 		_ERRNO(err, _D, "Failed to recv(%d, %#x, %d, %#x) = %d",
-			m_socket_fd, buffer, size, m_recv_flags, len);
+			m_sock_fd, buffer, size, m_recv_flags, len);
 		return 0;
 	}
 
@@ -372,6 +389,8 @@ bool csocket::connect(const char *sock_path)
 
 	if (prev_blocking_mode)
 		set_blocking_mode(true);
+
+	_I("CONNECT: socket[%d]", m_sock_fd);
 
 	return true;
 }

@@ -10,7 +10,7 @@ MESSAGE("FLAGS: ${CMAKE_CXX_FLAGS}")
 MESSAGE("FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
 
 # Internal Debugging Options
-#add_definitions(-Wall -g -D_DEBUG)
+add_definitions(-Wall -g -D_DEBUG)
 
 # Sub-directory
 ADD_SUBDIRECTORY(src/server)

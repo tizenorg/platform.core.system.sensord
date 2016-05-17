@@ -344,7 +344,7 @@ bool command_worker::cmd_get_id(void *payload)
 	struct ucred cr;
 	socklen_t opt_len = sizeof(cr);
 
-	_D("CMD_GET_ID Handler invoked\n");
+	_I("CMD_GET_ID Handler invoked\n");
 	cmd = (cmd_get_id_t*)payload;
 
 	if (getsockopt(m_socket.get_socket_fd(), SOL_SOCKET, SO_PEERCRED, &cr, &opt_len)) {
@@ -352,11 +352,16 @@ bool command_worker::cmd_get_id(void *payload)
 		return false;
 	}
 
+	_I("CMD_GET_ID Handler invoked\n");
 	client_id = get_client_info_manager().create_client_record();
 
+	_I("CMD_GET_ID Handler invoked\n");
 	get_client_info_manager().set_client_info(client_id, cr.pid, cmd->name);
 
+	_I("CMD_GET_ID Handler invoked\n");
 	m_permission = get_permission();
+
+	_I("CMD_GET_ID Handler invoked, %d, %d, %d", client_id, cr.pid, m_permission);
 	get_client_info_manager().set_permission(client_id, m_permission);
 
 	_I("New client id [%d] created", client_id);
@@ -830,6 +835,11 @@ void command_worker::get_info(string &info)
 	if (m_client_id != CLIENT_ID_INVALID)
 		client_info = get_client_info_manager().get_client_info(m_client_id);
 
+	if (!client_info) {
+		info = "there is no client info";
+		return ;
+	}
+
 	if (m_module)
 		sensor_info = m_module->get_name();
 
@@ -839,6 +849,8 @@ void command_worker::get_info(string &info)
 
 int command_worker::get_permission(void)
 {
+	AUTOLOCK(m_shared_mutex);
+
 	return permission_checker::get_instance().get_permission(m_socket.get_socket_fd());
 }
 

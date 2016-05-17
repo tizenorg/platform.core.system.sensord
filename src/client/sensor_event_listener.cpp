@@ -267,9 +267,9 @@ ssize_t sensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, s
 {
 	ssize_t len;
 
-	len = m_event_socket.recv(buffer, buffer_len);
+	//len = m_event_socket.recv(buffer, buffer_len);
 
-	if (!len) {
+	//if (!len) {
 		if(!m_poller->poll(event))
 			return -1;
 		len = m_event_socket.recv(buffer, buffer_len);
@@ -278,7 +278,7 @@ ssize_t sensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, s
 			_I("%s failed to read after poll!", get_client_name());
 			return -1;
 		}
-	}
+	//}
 
 	if (len < 0) {
 		_I("%s failed to recv event from event socket", get_client_name());

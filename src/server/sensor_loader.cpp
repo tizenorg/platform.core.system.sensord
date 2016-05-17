@@ -58,6 +58,16 @@ sensor_loader::sensor_loader()
 
 sensor_loader::~sensor_loader()
 {
+	/*
+	sensor_base *sensor;
+	sensor_map_t::iterator it;
+
+	for (it = m_sensors.begin(); it != m_sensors.end(); ++it) {
+		sensor = it->second.get();
+		delete sensor;
+	}
+	*/
+
 	for (auto it = m_handles.begin(); it != m_handles.end(); ++it)
 		dlclose(*it);
 

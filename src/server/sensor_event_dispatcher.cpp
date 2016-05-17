@@ -30,6 +30,7 @@ using std::pair;
 #define MAX_PENDING_CONNECTION 32
 
 sensor_event_dispatcher::sensor_event_dispatcher()
+: m_running(false)
 {
 }
 
@@ -45,10 +46,17 @@ sensor_event_dispatcher& sensor_event_dispatcher::get_instance()
 
 bool sensor_event_dispatcher::run(void)
 {
+	m_running = true;
+
 	thread dispatcher(&sensor_event_dispatcher::dispatch_event, this);
 	dispatcher.detach();
 
 	return true;
+}
+
+bool sensor_event_dispatcher::stop(void)
+{
+	m_running = false;
 }
 
 void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
@@ -99,7 +107,7 @@ void sensor_event_dispatcher::dispatch_event(void)
 
 	_I("Event Dispatcher started");
 
-	while (true) {
+	while (m_running) {
 		void *seed_event = get_event_queue().pop();
 
 		vector<void *> sensor_events;
@@ -287,14 +295,18 @@ bool sensor_event_dispatcher::delete_active_virtual_sensor(virtual_sensor *senso
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 
+	/*
 	auto it_v_sensor = find(m_active_virtual_sensors.begin(), m_active_virtual_sensors.end(), sensor);
 
 	if (it_v_sensor == m_active_virtual_sensors.end()) {
 		_E("Fail to delete non-existent [%s] sensor on active virtual sensors", sensor->get_name());
 		return false;
 	}
+	*/
 
-	m_active_virtual_sensors.erase(it_v_sensor);
+	//m_active_virtual_sensors.remove(it_v_sensor);
+	if (sensor)
+		m_active_virtual_sensors.remove(sensor);
 
 	return true;
 }

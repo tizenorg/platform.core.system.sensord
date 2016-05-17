@@ -34,8 +34,11 @@ static void sig_term_handler(int signo, siginfo_t *info, void *data)
 
 	_E("Received SIGTERM(%d) from %s(%d)\n", signo, proc_name, info->si_pid);
 
-	/* TODO: Refactoring */
-	raise(SIGKILL);
+	server::get_instance().stop();
+
+	_I("Sensord terminated");
+	exit(EXIT_SUCCESS);
+	//raise(SIGKILL);
 }
 
 static void signal_init(void)
@@ -63,7 +66,9 @@ static void set_cal_data(void)
 	}
 
 	fprintf(fp, "%d", SET_CAL);
-	fclose(fp);
+
+	if (fp)
+		fclose(fp);
 
 	_I("Succeeded to set calibration data");
 

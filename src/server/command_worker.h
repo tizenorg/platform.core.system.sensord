@@ -91,6 +91,7 @@ public:
 	virtual ~command_worker();
 
 	bool start(void);
+	//bool stop(void);
 };
 
 #endif /* _COMMAND_WORKER_H_ */

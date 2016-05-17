@@ -32,6 +32,14 @@ physical_sensor::physical_sensor()
 
 physical_sensor::~physical_sensor()
 {
+//	_E("%s", get_name());
+
+	/*
+	if (m_sensor_device) {
+		delete m_sensor_device;
+		m_sensor_device = NULL;
+	}
+	*/
 }
 
 void physical_sensor::set_sensor_info(const sensor_info_t *info)
