@@ -32,11 +32,13 @@ physical_sensor::physical_sensor()
 
 physical_sensor::~physical_sensor()
 {
+	_I("physical sensor is destroyed");
 }
 
 void physical_sensor::set_sensor_info(const sensor_info_t *info)
 {
 	m_info = info;
+	//memcpy(m_info, info, sizeof(sensor_info_t));
 }
 
 void physical_sensor::set_sensor_device(sensor_device *device)

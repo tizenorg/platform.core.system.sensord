@@ -34,8 +34,7 @@ static void sig_term_handler(int signo, siginfo_t *info, void *data)
 
 	_E("Received SIGTERM(%d) from %s(%d)\n", signo, proc_name, info->si_pid);
 
-	/* TODO: Refactoring */
-	raise(SIGKILL);
+	server::get_instance().stop();
 }
 
 static void signal_init(void)
@@ -51,6 +50,8 @@ static void signal_init(void)
 	sig_act.sa_sigaction = sig_term_handler;
 	sig_act.sa_flags = SA_SIGINFO;
 	sigaction(SIGTERM, &sig_act, NULL);
+	sigaction(SIGABRT, &sig_act, NULL);
+	sigaction(SIGINT, &sig_act, NULL);
 }
 
 static void set_cal_data(void)
@@ -63,7 +64,9 @@ static void set_cal_data(void)
 	}
 
 	fprintf(fp, "%d", SET_CAL);
-	fclose(fp);
+
+	if (fp)
+		fclose(fp);
 
 	_I("Succeeded to set calibration data");
 
@@ -78,6 +81,7 @@ int main(int argc, char *argv[])
 
 	set_cal_data();
 
+	/* TODO: loader has to be included in server */
 	sensor_loader::get_instance().load();
 
 	server::get_instance().run();
@@ -85,5 +89,6 @@ int main(int argc, char *argv[])
 	server::get_instance().stop();
 
 	_I("Sensord terminated");
+
 	return 0;
 }

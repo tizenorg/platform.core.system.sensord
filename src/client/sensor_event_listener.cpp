@@ -270,7 +270,7 @@ ssize_t sensor_event_listener::sensor_event_poll(void* buffer, int buffer_len, s
 	len = m_event_socket.recv(buffer, buffer_len);
 
 	if (!len) {
-		if(!m_poller->poll(event))
+		if (!m_poller->poll(event))
 			return -1;
 		len = m_event_socket.recv(buffer, buffer_len);
 

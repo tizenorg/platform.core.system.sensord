@@ -22,6 +22,7 @@
 
 #include <glib.h>
 #include <csocket.h>
+#include <vector>
 
 class server {
 public:
@@ -33,6 +34,11 @@ private:
 	GMainLoop *m_mainloop;
 	csocket m_command_channel_accept_socket;
 	csocket m_event_channel_accept_socket;
+
+	std::vector<csocket> client_command_sockets;
+	std::vector<csocket> client_event_sockets;
+
+	bool m_running;
 
 	server();
 	~server();

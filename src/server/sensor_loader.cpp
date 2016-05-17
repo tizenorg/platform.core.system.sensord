@@ -28,6 +28,7 @@
 #include <virtual_sensor.h>
 #include <unordered_set>
 #include <algorithm>
+#include <memory>
 
 #include <hrm_sensor.h>
 
@@ -58,10 +59,16 @@ sensor_loader::sensor_loader()
 
 sensor_loader::~sensor_loader()
 {
-	for (auto it = m_handles.begin(); it != m_handles.end(); ++it)
-		dlclose(*it);
+	sensor_device_map_t::iterator it_device;
+	std::vector<void *>::iterator it_handle;
 
-	m_handles.clear();
+	for (it_device = m_devices.begin(); it_device != m_devices.end();)
+		m_devices.erase(it_device++);
+
+	for (it_handle = m_handles.begin(); it_handle != m_handles.end();) {
+		dlclose(*it_handle);
+		m_handles.erase(it_handle++);
+	}
 }
 
 sensor_loader& sensor_loader::get_instance()
@@ -136,10 +143,11 @@ bool sensor_loader::load_sensor_devices(const string &path, void* &handle)
 
 	for (int i = 0; i < device_size; ++i) {
 		device = static_cast<sensor_device *>(_devices[i]);
+		std::shared_ptr<sensor_device> device_ptr(device);
 
-		int info_size = device->get_sensors(&infos);
+		int info_size = device_ptr->get_sensors(&infos);
 		for (int j = 0; j < info_size; ++j)
-			m_devices[&infos[j]] = device;
+			m_devices[&infos[j]] = device_ptr;
 	}
 
 	handle = _handle;
@@ -187,9 +195,7 @@ void sensor_loader::create_physical_sensors(sensor_type_t type)
 
 	for (it = m_devices.begin(); it != m_devices.end(); ++it) {
 		info = it->first;
-		device = it->second;
-		if (m_devices[info] == NULL)
-			continue;
+		device = it->second.get();
 
 		if (type != UNKNOWN_SENSOR) {
 			if (type != (sensor_type_t)(info->type))
@@ -214,8 +220,6 @@ void sensor_loader::create_physical_sensors(sensor_type_t type)
 		m_sensors.insert(std::make_pair(_type, sensor_ptr));
 
 		_I("created [%s] sensor", sensor->get_name());
-
-		m_devices[info] = NULL;
 	}
 }
 

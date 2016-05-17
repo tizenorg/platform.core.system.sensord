@@ -357,6 +357,7 @@ bool command_worker::cmd_get_id(void *payload)
 	get_client_info_manager().set_client_info(client_id, cr.pid, cmd->name);
 
 	m_permission = get_permission();
+
 	get_client_info_manager().set_permission(client_id, m_permission);
 
 	_I("New client id [%d] created", client_id);
@@ -829,6 +830,11 @@ void command_worker::get_info(string &info)
 
 	if (m_client_id != CLIENT_ID_INVALID)
 		client_info = get_client_info_manager().get_client_info(m_client_id);
+
+	if (!client_info) {
+		info = "Command worker for Unknown client";
+		return ;
+	}
 
 	if (m_module)
 		sensor_info = m_module->get_name();
