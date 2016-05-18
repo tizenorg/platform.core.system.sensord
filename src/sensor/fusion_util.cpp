@@ -34,7 +34,7 @@ static float clamp(float v)
 
 int quat_to_matrix(const float *quat, float *R)
 {
-	if(quat == NULL || R == NULL)
+	if (quat == NULL || R == NULL)
 		return -EINVAL;
 
 	float q0 = quat[3];

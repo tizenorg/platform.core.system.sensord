@@ -441,7 +441,7 @@ bool csocket::set_connection_mode(void)
 		return false;
 	}
 
-	if(setsockopt(m_sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+	if (setsockopt(m_sock_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
 		_ERRNO(errno, _E, "Set SO_RCVTIMEO failed for %s, m_sock_fd : %d", get_client_name(), m_sock_fd);
 		close();
 		return false;

@@ -416,7 +416,7 @@ bool command_channel::cmd_register_events(event_type_vector &event_vec)
 	auto it_event = event_vec.begin();
 
 	while (it_event != event_vec.end()) {
-		if(!cmd_register_event(*it_event))
+		if (!cmd_register_event(*it_event))
 			return false;
 
 		++it_event;
@@ -469,7 +469,7 @@ bool command_channel::cmd_unregister_events(event_type_vector &event_vec)
 	auto it_event = event_vec.begin();
 
 	while (it_event != event_vec.end()) {
-		if(!cmd_unregister_event(*it_event))
+		if (!cmd_unregister_event(*it_event))
 			return false;
 
 		++it_event;

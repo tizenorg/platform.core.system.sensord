@@ -602,7 +602,7 @@ API int sensord_connect(sensor_t sensor)
 
 	if (!sensor_client_info::get_instance().has_client_id()) {
 		first_connection = true;
-		if(!cmd_channel->cmd_get_id(client_id)) {
+		if (!cmd_channel->cmd_get_id(client_id)) {
 			_E("Sending cmd_get_id() failed for %s", get_sensor_name(sensor_id));
 			sensor_client_info::get_instance().close_command_channel(sensor_id);
 			sensor_client_info::get_instance().delete_handle(handle);
@@ -623,7 +623,7 @@ API int sensord_connect(sensor_t sensor)
 	sensor_client_info::get_instance().set_sensor_params(handle, SENSOR_STATE_STOPPED, SENSOR_OPTION_DEFAULT);
 
 	if (!sensor_registered) {
-		if(!cmd_channel->cmd_hello(sensor_id)) {
+		if (!cmd_channel->cmd_hello(sensor_id)) {
 			_E("Sending cmd_hello(%s, %d) failed for %s", get_sensor_name(sensor_id), client_id, get_client_name());
 			sensor_client_info::get_instance().close_command_channel(sensor_id);
 			sensor_client_info::get_instance().delete_handle(handle);
@@ -677,7 +677,7 @@ API bool sensord_disconnect(int handle)
 		sensor_client_info::get_instance().set_client_id(CLIENT_ID_INVALID);
 
 	if (!sensor_client_info::get_instance().is_sensor_registered(sensor_id)) {
-		if(!cmd_channel->cmd_byebye()) {
+		if (!cmd_channel->cmd_byebye()) {
 			_E("Sending cmd_byebye(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
 			return false;
 		}

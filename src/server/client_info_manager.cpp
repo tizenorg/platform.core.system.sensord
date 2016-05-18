@@ -51,7 +51,7 @@ bool client_info_manager::get_registered_events(int client_id, sensor_id_t senso
 		return false;
 	}
 
-	if(!it_record->second.get_registered_events(sensor_id, event_vec))
+	if (!it_record->second.get_registered_events(sensor_id, event_vec))
 		return false;
 
 	return true;
@@ -68,7 +68,7 @@ bool client_info_manager::register_event(int client_id, sensor_id_t sensor_id, u
 		return false;
 	}
 
-	if(!it_record->second.register_event(sensor_id, event_type))
+	if (!it_record->second.register_event(sensor_id, event_type))
 		return false;
 
 	return true;
@@ -85,7 +85,7 @@ bool client_info_manager::unregister_event(int client_id, sensor_id_t sensor_id,
 		return false;
 	}
 
-	if(!it_record->second.unregister_event(sensor_id, event_type))
+	if (!it_record->second.unregister_event(sensor_id, event_type))
 		return false;
 
 	return true;
@@ -130,7 +130,7 @@ bool client_info_manager::set_option(int client_id, sensor_id_t sensor_id, int o
 		return false;
 	}
 
-	if(!it_record->second.set_option(sensor_id, option))
+	if (!it_record->second.set_option(sensor_id, option))
 		return false;
 
 	return true;
@@ -147,7 +147,7 @@ bool client_info_manager::set_start(int client_id, sensor_id_t sensor_id, bool s
 		return false;
 	}
 
-	if(!it_record->second.set_start(sensor_id, start))
+	if (!it_record->second.set_start(sensor_id, start))
 		return false;
 
 	return true;
@@ -304,10 +304,10 @@ bool client_info_manager::remove_sensor_record(int client_id, sensor_id_t sensor
 		return false;
 	}
 
-	if(!it_record->second.remove_sensor_usage(sensor_id))
+	if (!it_record->second.remove_sensor_usage(sensor_id))
 		return false;
 
-	if(!it_record->second.has_sensor_usage())
+	if (!it_record->second.has_sensor_usage())
 		remove_client_record(client_id);
 
 	return true;
@@ -324,7 +324,7 @@ bool client_info_manager::has_sensor_record(int client_id, sensor_id_t sensor_id
 		return false;
 	}
 
-	if(!it_record->second.has_sensor_usage(sensor_id))
+	if (!it_record->second.has_sensor_usage(sensor_id))
 		return false;
 
 	return true;
@@ -341,7 +341,7 @@ bool client_info_manager::has_sensor_record(int client_id)
 		return false;
 	}
 
-	if(!it_record->second.has_sensor_usage())
+	if (!it_record->second.has_sensor_usage())
 		return false;
 
 	return true;
@@ -354,7 +354,7 @@ bool client_info_manager::get_listener_ids(sensor_id_t sensor_id, unsigned int e
 	auto it_record = m_clients.begin();
 
 	while (it_record != m_clients.end()) {
-		if(it_record->second.is_listening_event(sensor_id, event_type))
+		if (it_record->second.is_listening_event(sensor_id, event_type))
 			id_vec.push_back(it_record->first);
 
 		++it_record;

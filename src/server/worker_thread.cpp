@@ -40,7 +40,7 @@ worker_thread::~worker_thread()
 bool worker_thread::transition_function(trans_func_index index)
 {
 	if (m_trans_func[index] != NULL) {
-		if(!m_trans_func[index](m_context)) {
+		if (!m_trans_func[index](m_context)) {
 			_E("Transition[%d] function returning false", index);
 			return false;
 		}

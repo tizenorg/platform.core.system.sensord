@@ -66,7 +66,7 @@ void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 
 	client_socket.set_transfer_mode();
 
-	if(!get_client_info_manager().set_event_socket(client_id, client_socket)) {
+	if (!get_client_info_manager().set_event_socket(client_id, client_socket)) {
 		_E("Failed to store event socket[%d] for %s", client_socket.get_socket_fd(),
 			client_info_manager.get_client_info(client_id));
 		return;

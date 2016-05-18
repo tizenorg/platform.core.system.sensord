@@ -74,13 +74,13 @@ bool virtual_sensor_config::load_config(const string& config_path)
 	}
 
 	cur = xmlDocGetRootElement(doc);
-	if(cur == NULL) {
+	if (cur == NULL) {
 		_E("There is no root element in %s\n", config_path.c_str());
 		xmlFreeDoc(doc);
 		return false;
 	}
 
-	if(xmlStrcmp(cur->name, (const xmlChar *)ROOT_ELEMENT)) {
+	if (xmlStrcmp(cur->name, (const xmlChar *)ROOT_ELEMENT)) {
 		_E("Wrong type document: there is no [%s] root element in %s\n", ROOT_ELEMENT, config_path.c_str());
 		xmlFreeDoc(doc);
 		return false;
