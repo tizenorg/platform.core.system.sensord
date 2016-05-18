@@ -357,6 +357,7 @@ bool command_worker::cmd_get_id(void *payload)
 	get_client_info_manager().set_client_info(client_id, cr.pid, cmd->name);
 
 	m_permission = get_permission();
+
 	get_client_info_manager().set_permission(client_id, m_permission);
 
 	_I("New client id [%d] created", client_id);
