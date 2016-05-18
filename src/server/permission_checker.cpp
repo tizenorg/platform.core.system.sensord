@@ -77,6 +77,8 @@ permission_checker& permission_checker::get_instance()
 
 void permission_checker::init()
 {
+	AUTOLOCK(m_mutex);
+
 	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_STANDARD, false, ""));
 	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_BIO, true, "http://tizen.org/privilege/healthinfo"));
 
@@ -96,6 +98,8 @@ void permission_checker::init()
 
 void permission_checker::deinit()
 {
+	AUTOLOCK(m_mutex);
+
 	if (cynara_env)
 		cynara_finish(cynara_env);
 
@@ -104,6 +108,8 @@ void permission_checker::deinit()
 
 int permission_checker::get_permission(int sock_fd)
 {
+	AUTOLOCK(m_mutex);
+
 	int permission = SENSOR_PERMISSION_NONE;
 
 	for (unsigned int i = 0; i < m_permission_infos.size(); ++i) {
