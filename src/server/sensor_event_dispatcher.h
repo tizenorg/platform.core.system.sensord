@@ -37,6 +37,7 @@ public:
 	static sensor_event_dispatcher& get_instance();
 
 	bool run(void);
+	bool stop(void);
 	void accept_event_connections(csocket client_socket);
 
 	void request_last_event(int client_id, sensor_id_t sensor_id);
@@ -51,6 +52,7 @@ private:
 	event_type_last_event_map m_last_events;
 	virtual_sensors m_active_virtual_sensors;
 	cmutex m_active_virtual_sensors_mutex;
+	bool m_running;
 
 	sensor_event_dispatcher();
 	~sensor_event_dispatcher();
