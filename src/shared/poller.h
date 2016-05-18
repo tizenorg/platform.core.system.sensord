@@ -31,12 +31,20 @@ public:
 	poller(int fd);
 	virtual ~poller();
 
+	bool add_signal_fd(int fd);
+
 	bool add_fd(int fd);
+	bool del_fd(int fd);
+
 	bool poll(struct epoll_event &event);
+
 private:
 	int m_epfd;
+	int sfd;
+
 	std::queue<struct epoll_event> m_event_queue;
 
+private:
 	void init_poll_fd(void);
 	bool fill_event_queue(void);
 };

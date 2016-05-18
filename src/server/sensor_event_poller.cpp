@@ -17,21 +17,27 @@
  *
  */
 
-#include <vector>
+#include <signal.h>
+#include <sys/signalfd.h>
 #include <sensor_base.h>
 #include <physical_sensor.h>
 #include <sensor_event_poller.h>
 #include <sensor_loader.h>
 #include <algorithm>
+#include <vector>
 
 sensor_event_poller::sensor_event_poller()
 {
 	init_sensor_map();
 	init_fd();
+	init_signal_fd();
 }
 
 sensor_event_poller::~sensor_event_poller()
 {
+	fd_sensors_t::iterator it;
+	for (it = m_fd_sensors.begin(); it != m_fd_sensors.end(); it = m_fd_sensors.upper_bound(it->first))
+		m_poller.del_fd(it->first);
 }
 
 void sensor_event_poller::init_sensor_map()
@@ -58,13 +64,27 @@ void sensor_event_poller::init_sensor_map()
 	}
 }
 
-void sensor_event_poller::init_fd()
+void sensor_event_poller::init_fd(void)
 {
 	fd_sensors_t::iterator it;
 	for (it = m_fd_sensors.begin(); it != m_fd_sensors.end(); it = m_fd_sensors.upper_bound(it->first)) {
 		/* if fd is not valid, it is not added to poller */
 		add_poll_fd(it->first);
 	}
+}
+
+void sensor_event_poller::init_signal_fd(void)
+{
+	int sfd;
+	sigset_t mask;
+
+	sigemptyset(&mask);
+	sigaddset(&mask, SIGTERM);
+	sigaddset(&mask, SIGABRT);
+	sigaddset(&mask, SIGINT);
+
+	sfd = signalfd(-1, &mask, 0);
+	m_poller.add_signal_fd(sfd);
 }
 
 bool sensor_event_poller::add_poll_fd(int fd)
