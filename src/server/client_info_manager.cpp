@@ -31,6 +31,8 @@ client_info_manager::client_info_manager()
 
 client_info_manager::~client_info_manager()
 {
+	AUTOLOCK(m_mutex);
+
 	m_clients.clear();
 }
 
@@ -43,6 +45,8 @@ client_info_manager& client_info_manager::get_instance()
 bool client_info_manager::get_registered_events(int client_id, sensor_id_t sensor_id, event_type_vector &event_vec)
 {
 	AUTOLOCK(m_mutex);
+
+	retvm_if(m_clients.empty(), false, "client list is empty");
 
 	auto it_record = m_clients.find(client_id);
 
@@ -61,6 +65,8 @@ bool client_info_manager::register_event(int client_id, sensor_id_t sensor_id, u
 {
 	AUTOLOCK(m_mutex);
 
+	retvm_if(m_clients.empty(), false, "client list is empty");
+
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
@@ -77,6 +83,8 @@ bool client_info_manager::register_event(int client_id, sensor_id_t sensor_id, u
 bool client_info_manager::unregister_event(int client_id, sensor_id_t sensor_id, unsigned int event_type)
 {
 	AUTOLOCK(m_mutex);
+
+	retvm_if(m_clients.empty(), false, "client list is empty");
 
 	auto it_record = m_clients.find(client_id);
 
@@ -95,6 +103,8 @@ bool client_info_manager::set_batch(int client_id, sensor_id_t sensor_id, unsign
 {
 	AUTOLOCK(m_mutex);
 
+	retvm_if(m_clients.empty(), false, "client list is empty");
+
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
@@ -109,6 +119,8 @@ bool client_info_manager::get_batch(int client_id, sensor_id_t sensor_id, unsign
 {
 	AUTOLOCK(m_mutex);
 
+	retvm_if(m_clients.empty(), false, "client list is empty");
+
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
@@ -122,6 +134,8 @@ bool client_info_manager::get_batch(int client_id, sensor_id_t sensor_id, unsign
 bool client_info_manager::set_option(int client_id, sensor_id_t sensor_id, int option)
 {
 	AUTOLOCK(m_mutex);
+
+	retvm_if(m_clients.empty(), false, "client list is empty");
 
 	auto it_record = m_clients.find(client_id);
 
@@ -140,6 +154,8 @@ bool client_info_manager::set_start(int client_id, sensor_id_t sensor_id, bool s
 {
 	AUTOLOCK(m_mutex);
 
+	retvm_if(m_clients.empty(), false, "client list is empty");
+
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
@@ -156,6 +172,8 @@ bool client_info_manager::set_start(int client_id, sensor_id_t sensor_id, bool s
 bool client_info_manager::is_started(int client_id, sensor_id_t sensor_id)
 {
 	AUTOLOCK(m_mutex);
+
+	retvm_if(m_clients.empty(), false, "client list is empty");
 
 	auto it_record = m_clients.find(client_id);
 
@@ -194,6 +212,8 @@ bool client_info_manager::remove_client_record(int client_id)
 {
 	AUTOLOCK(m_mutex);
 
+	retvm_if(m_clients.empty(), false, "client list is empty");
+
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
@@ -211,6 +231,8 @@ bool client_info_manager::remove_client_record(int client_id)
 bool client_info_manager::has_client_record(int client_id)
 {
 	AUTOLOCK(m_mutex);
+
+	retvm_if(m_clients.empty(), false, "client list is empty");
 
 	auto it_record = m_clients.find(client_id);
 
@@ -237,6 +259,8 @@ const char* client_info_manager::get_client_info(int client_id)
 {
 	AUTOLOCK(m_mutex);
 
+	retvm_if(m_clients.empty(), NULL, "client list is empty");
+
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
@@ -250,6 +274,8 @@ const char* client_info_manager::get_client_info(int client_id)
 bool client_info_manager::set_permission(int client_id, int permission)
 {
 	AUTOLOCK(m_mutex);
+
+	retvm_if(m_clients.empty(), false, "client list is empty");
 
 	auto it_record = m_clients.find(client_id);
 
@@ -266,6 +292,8 @@ bool client_info_manager::get_permission(int client_id, int &permission)
 {
 	AUTOLOCK(m_mutex);
 
+	retvm_if(m_clients.empty(), false, "client list is empty");
+
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
@@ -280,6 +308,8 @@ bool client_info_manager::get_permission(int client_id, int &permission)
 bool client_info_manager::create_sensor_record(int client_id, sensor_id_t sensor_id)
 {
 	AUTOLOCK(m_mutex);
+
+	retvm_if(m_clients.empty(), false, "client list is empty");
 
 	auto it_record = m_clients.find(client_id);
 
@@ -296,6 +326,8 @@ bool client_info_manager::create_sensor_record(int client_id, sensor_id_t sensor
 bool client_info_manager::remove_sensor_record(int client_id, sensor_id_t sensor_id)
 {
 	AUTOLOCK(m_mutex);
+
+	retvm_if(m_clients.empty(), false, "client list is empty");
 
 	auto it_record = m_clients.find(client_id);
 
@@ -317,6 +349,8 @@ bool client_info_manager::has_sensor_record(int client_id, sensor_id_t sensor_id
 {
 	AUTOLOCK(m_mutex);
 
+	retvm_if(m_clients.empty(), false, "client list is empty");
+
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
@@ -333,6 +367,8 @@ bool client_info_manager::has_sensor_record(int client_id, sensor_id_t sensor_id
 bool client_info_manager::has_sensor_record(int client_id)
 {
 	AUTOLOCK(m_mutex);
+
+	retvm_if(m_clients.empty(), false, "client list is empty");
 
 	auto it_record = m_clients.find(client_id);
 
@@ -351,6 +387,8 @@ bool client_info_manager::get_listener_ids(sensor_id_t sensor_id, unsigned int e
 {
 	AUTOLOCK(m_mutex);
 
+	retvm_if(m_clients.empty(), false, "client list is empty");
+
 	auto it_record = m_clients.begin();
 
 	while (it_record != m_clients.end()) {
@@ -367,6 +405,8 @@ bool client_info_manager::get_event_socket(int client_id, csocket &socket)
 {
 	AUTOLOCK(m_mutex);
 
+	retvm_if(m_clients.empty(), false, "client list is empty");
+
 	auto it_record = m_clients.find(client_id);
 
 	if (it_record == m_clients.end()) {
@@ -382,6 +422,8 @@ bool client_info_manager::get_event_socket(int client_id, csocket &socket)
 bool client_info_manager::set_event_socket(int client_id, const csocket &socket)
 {
 	AUTOLOCK(m_mutex);
+
+	retvm_if(m_clients.empty(), false, "client list is empty");
 
 	auto it_record = m_clients.find(client_id);
 
