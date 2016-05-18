@@ -39,10 +39,8 @@ poller::poller(int fd)
 
 poller::~poller()
 {
-	if (m_epfd) {
+	if (m_epfd >= 0)
 		::close(m_epfd);
-		m_epfd = NULL;
-	}
 }
 
 void poller::init_poll_fd(void)

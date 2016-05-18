@@ -178,7 +178,7 @@ int auto_rotation_sensor::get_data(sensor_data_t **data, int *length)
 
 bool auto_rotation_sensor::set_interval(unsigned long interval)
 {
-	m_accel_sensor->add_interval((intptr_t)this , m_interval, true);
+	m_accel_sensor->add_interval((intptr_t)this , interval, true);
 
 	m_interval = interval;
 	return false;
