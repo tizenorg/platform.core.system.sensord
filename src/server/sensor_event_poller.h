@@ -31,13 +31,17 @@ public:
 	sensor_event_poller();
 	virtual ~sensor_event_poller();
 
-	bool poll();
+	bool poll(void);
+
 private:
 	poller m_poller;
 	fd_sensors_t m_fd_sensors;
 
-	void init_fd();
-	void init_sensor_map();
+private:
+	void init_sensor_map(void);
+	void init_fd(void);
+	void init_signal_fd(void);
+
 	bool add_poll_fd(int fd);
 	bool read_fd(int fd, std::vector<uint32_t> &ids);
 	bool process_event(int fd, const std::vector<uint32_t> &ids);

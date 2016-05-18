@@ -25,6 +25,7 @@
 
 poller::poller()
 : m_epfd(-1)
+, sfd(-1)
 {
 	init_poll_fd();
 }
@@ -38,13 +39,19 @@ poller::poller(int fd)
 
 poller::~poller()
 {
-	if (m_epfd)
-		close(m_epfd);
+	if (m_epfd >= 0)
+		::close(m_epfd);
 }
 
 void poller::init_poll_fd(void)
 {
 	m_epfd = epoll_create(EPOLL_MAX);
+}
+
+bool poller::add_signal_fd(int fd)
+{
+	sfd = fd;
+	return add_fd(fd);
 }
 
 bool poller::add_fd(int fd)
@@ -56,6 +63,20 @@ bool poller::add_fd(int fd)
 
 	if (epoll_ctl(m_epfd, EPOLL_CTL_ADD, fd, &event)) {
 		_ERRNO(errno, _E, "Failed to add fd[%d]", fd);
+		return false;
+	}
+
+	return true;
+}
+
+bool poller::del_fd(int fd)
+{
+	struct epoll_event event;
+
+	event.data.fd = fd;
+
+	if (epoll_ctl(m_epfd, EPOLL_CTL_DEL, fd, &event)) {
+		_ERRNO(errno, _E, "Failed to del fd[%d]", fd);
 		return false;
 	}
 
@@ -82,7 +103,7 @@ bool poller::fill_event_queue(void)
 		return false;
 	}
 
-    for (int i = 0; i < nr_events; i++)
+	for (int i = 0; i < nr_events; i++)
 		m_event_queue.push(event_items[i]);
 
 	return true;
@@ -107,6 +128,11 @@ bool poller::poll(struct epoll_event &event)
 
 			if (event.events & EPOLLHUP) {
 				_I("Poll: Connetion is closed from the other side");
+				return false;
+			}
+
+			if (event.data.fd == sfd) {
+				_E("received signal");
 				return false;
 			}
 
