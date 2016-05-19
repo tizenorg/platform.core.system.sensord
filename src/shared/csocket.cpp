@@ -130,8 +130,45 @@ bool csocket::listen(const int max_connections)
 
 bool csocket::accept(csocket& client_socket) const
 {
+	const int TIMEOUT = 1;
+	struct timeval tv;
 	int addr_length = sizeof(m_addr);
 	int err = 0;
+
+	fd_set read_fds;
+
+	while (true) {
+		FD_ZERO(&read_fds);
+		FD_SET(m_sock_fd, &read_fds);
+
+		tv.tv_sec = TIMEOUT;
+		tv.tv_usec = 0;
+
+		err = ::select(m_sock_fd + 1, &read_fds, NULL, NULL, &tv);
+		if (err == -1) {
+			_ERRNO(errno, _E, "Failed to select(), m_sock_fd : %d", m_sock_fd);
+			return false;
+		}
+
+		if (!is_valid()) {
+			_E("socket is closed, m_sock_fd : %d", m_sock_fd);
+			return false;
+		}
+
+		/* timeout */
+		if (!err)
+			continue;
+
+		if (FD_ISSET(m_sock_fd, &read_fds))
+			break;
+
+		_ERRNO(errno, _E, "Failed to select(), msock_fd : %d", m_sock_fd);
+	}
+
+	if (!is_valid()) {
+		_E("socket is closed, m_sock_fd : %d", m_sock_fd);
+		return false;
+	}
 
 	do {
 		client_socket.m_sock_fd = ::accept(m_sock_fd, (sockaddr *)&m_addr, (socklen_t *)&addr_length);
@@ -169,7 +206,7 @@ ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
 	ssize_t err, len;
 
 	do {
-        len = ::recv(m_sock_fd, buffer, size, m_recv_flags);
+		len = ::recv(m_sock_fd, buffer, size, m_recv_flags);
 
 		if (len > 0) {
 			err = 0;
@@ -180,20 +217,17 @@ ssize_t csocket::recv_for_seqpacket(void* buffer, size_t size) const
 		} else {
 			err = errno;
 		}
-    } while (err == EINTR);
+	} while (err == EINTR);
 
-	if ((err == EAGAIN) || (err == EWOULDBLOCK)) {
-		_ERRNO(err, _D, "Failed to recv(%d, %#x, %d, %#x) = %d",
-			m_socket_fd, buffer, size, m_recv_flags, len);
+	if ((err == EAGAIN) || (err == EWOULDBLOCK))
 		return 0;
-	}
 
 	if (err) {
 		_ERRNO(err, _E, "Failed to recv(%d, %#x, %d, %#x) = %d",
 			m_sock_fd, buffer, size, m_recv_flags, len);
 	}
 
-    return err == 0 ? len : -err;
+	return err == 0 ? len : -err;
 }
 
 ssize_t csocket::send_for_stream(const void *buffer, size_t size) const

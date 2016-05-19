@@ -69,6 +69,7 @@ private:
 	ssize_t recv_for_seqpacket(void* buffer, size_t size) const;
 	ssize_t recv_for_stream(void* buffer, size_t size) const;
 
+private:
 	int m_sock_fd;
 	int m_sock_type;
 	sockaddr_un m_addr;
