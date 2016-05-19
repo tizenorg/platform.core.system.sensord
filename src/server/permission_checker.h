@@ -52,13 +52,15 @@ private:
 	permission_checker(permission_checker const&) {};
 	permission_checker& operator=(permission_checker const&);
 
-	void init();
-	void deinit();
+	void init(void);
+	void deinit(void);
 
 private:
 	permission_info_vector m_permission_infos;
 	int m_permission_set;
 	cmutex m_mutex;
+
+	void init_cynara(void);
 };
 
 #endif /* _PERMISSION_CHECKER_H_ */
