@@ -26,6 +26,8 @@
 #define CAL_NODE_PATH "/sys/class/sensors/ssp_sensor/set_cal_data"
 #define SET_CAL 1
 
+#define TIMEOUT 10
+
 static void sig_term_handler(int signo, siginfo_t *info, void *data)
 {
 	char proc_name[NAME_MAX];
@@ -73,6 +75,18 @@ static void set_cal_data(void)
 	return;
 }
 
+static gboolean terminate(gpointer data)
+{
+	std::vector<sensor_base *> sensors = sensor_loader::get_instance().get_sensors(ALL_SENSOR);
+
+	if (sensors.size() == 0) {
+		_I("Terminating sensord..");
+		server::get_instance().stop();
+	}
+
+	return FALSE;
+}
+
 int main(int argc, char *argv[])
 {
 	_I("Sensord started");
@@ -81,8 +95,9 @@ int main(int argc, char *argv[])
 
 	set_cal_data();
 
-	/* TODO: loader has to be moved to server */
+	/* TODO: loading sequence has to be moved to server */
 	sensor_loader::get_instance().load();
+	g_timeout_add_seconds(TIMEOUT, terminate, NULL);
 
 	server::get_instance().run();
 	server::get_instance().stop();
