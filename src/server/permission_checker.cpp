@@ -25,6 +25,8 @@
 #include <sensor_loader.h>
 #include <sensor_base.h>
 
+#define CACHE_SIZE 16
+
 static cynara *cynara_env = NULL;
 
 static bool check_privilege_by_sockfd(int sock_fd, const char *priv)
@@ -90,10 +92,33 @@ void permission_checker::init()
 
 	_I("Permission Set = %d", m_permission_set);
 
-	if (cynara_initialize(&cynara_env, NULL) != CYNARA_API_SUCCESS) {
-		cynara_env = NULL;
-		_E("Cynara initialization failed");
+	init_cynara();
+}
+
+void permission_checker::init_cynara(void)
+{
+	cynara_configuration *conf;
+
+	int err = cynara_configuration_create(&conf);
+	retm_if(err != CYNARA_API_SUCCESS, "Failed to create cynara configuration");
+
+	err = cynara_configuration_set_cache_size(conf, CACHE_SIZE);
+	if (err != CYNARA_API_SUCCESS) {
+		_E("Failed to set cynara cache");
+		cynara_configuration_destroy(conf);
+		return;
 	}
+
+	err = cynara_initialize(&cynara_env, conf);
+	cynara_configuration_destroy(conf);
+
+	if (err != CYNARA_API_SUCCESS) {
+		_E("Failed to initialize cynara");
+		cynara_env = NULL;
+		return;
+	}
+
+	_I("Cynara initialized");
 }
 
 void permission_checker::deinit()
