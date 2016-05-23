@@ -234,10 +234,10 @@ void server::close_socket(void)
 	m_command_channel_accept_socket.close();
 	m_event_channel_accept_socket.close();
 
-	for (int i = 0; i < client_command_sockets.size(); ++i)
+	for (unsigned int i = 0; i < client_command_sockets.size(); ++i)
 		client_command_sockets[i].close();
 
-	for (int i = 0; i < client_event_sockets.size(); ++i)
+	for (unsigned int i = 0; i < client_event_sockets.size(); ++i)
 		client_event_sockets[i].close();
 
 	client_command_sockets.clear();
