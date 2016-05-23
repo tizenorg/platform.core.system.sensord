@@ -30,5 +30,5 @@ hrm_sensor::hrm_sensor()
 
 hrm_sensor::~hrm_sensor()
 {
-
+	_I("hrm_sensor is destroyed : %#x", this);
 }

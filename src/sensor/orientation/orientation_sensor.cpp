@@ -1,7 +1,7 @@
 /*
  * sensord
  *
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,314 +25,187 @@
 #include <time.h>
 #include <sys/types.h>
 #include <dlfcn.h>
+
 #include <sensor_log.h>
+#include <sensor_types.h>
+
+#include <sensor_common.h>
+#include <virtual_sensor.h>
 #include <orientation_sensor.h>
 #include <sensor_loader.h>
-#include <orientation_filter.h>
-#include <virtual_sensor_config.h>
+#include <fusion_util.h>
 
-using std::string;
-using std::vector;
-
-#define SENSOR_NAME "ORIENTATION_SENSOR"
-#define SENSOR_TYPE_ORIENTATION		"ORIENTATION"
-
-#define INITIAL_VALUE -1
-
-#define MS_TO_US 1000
-#define MIN_DELIVERY_DIFF_FACTOR 0.75f
-
-#define PI 3.141593
-#define AZIMUTH_OFFSET_DEGREES 360
-#define AZIMUTH_OFFSET_RADIANS (2 * PI)
-
-#define ELEMENT_NAME											"NAME"
-#define ELEMENT_VENDOR											"VENDOR"
-#define ELEMENT_RAW_DATA_UNIT									"RAW_DATA_UNIT"
-#define ELEMENT_DEFAULT_SAMPLING_TIME							"DEFAULT_SAMPLING_TIME"
-#define ELEMENT_PITCH_ROTATION_COMPENSATION						"PITCH_ROTATION_COMPENSATION"
-#define ELEMENT_ROLL_ROTATION_COMPENSATION						"ROLL_ROTATION_COMPENSATION"
-#define ELEMENT_AZIMUTH_ROTATION_COMPENSATION					"AZIMUTH_ROTATION_COMPENSATION"
+#define SENSOR_NAME "SENSOR_ORIENTATION"
 
 orientation_sensor::orientation_sensor()
-: m_accel_sensor(NULL)
-, m_gyro_sensor(NULL)
-, m_magnetic_sensor(NULL)
-, m_fusion_sensor(NULL)
+: m_rotation_vector_sensor(NULL)
+, m_azimuth(-1)
+, m_pitch(-1)
+, m_roll(-1)
+, m_accuracy(-1)
 , m_time(0)
 {
-	virtual_sensor_config &config = virtual_sensor_config::get_instance();
-
-	sensor_hal *fusion_sensor_hal = sensor_loader::get_instance().get_sensor_hal(SENSOR_HAL_TYPE_FUSION);
-	if (!fusion_sensor_hal)
-		m_hardware_fusion = false;
-	else
-		m_hardware_fusion = true;
-
-	m_name = string(SENSOR_NAME);
-	register_supported_event(ORIENTATION_RAW_DATA_EVENT);
-
-	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_VENDOR, m_vendor)) {
-		_E("[VENDOR] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_vendor = %s", m_vendor.c_str());
-
-	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_RAW_DATA_UNIT, m_raw_data_unit)) {
-		_E("[RAW_DATA_UNIT] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_raw_data_unit = %s", m_raw_data_unit.c_str());
-
-	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_DEFAULT_SAMPLING_TIME, &m_default_sampling_time)) {
-		_E("[DEFAULT_SAMPLING_TIME] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_default_sampling_time = %d", m_default_sampling_time);
-
-	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_AZIMUTH_ROTATION_COMPENSATION, &m_azimuth_rotation_compensation)) {
-		_E("[AZIMUTH_ROTATION_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_azimuth_rotation_compensation = %d", m_azimuth_rotation_compensation);
-
-	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_PITCH_ROTATION_COMPENSATION, &m_pitch_rotation_compensation)) {
-		_E("[PITCH_ROTATION_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_pitch_rotation_compensation = %d", m_pitch_rotation_compensation);
-
-	if (!config.get(SENSOR_TYPE_ORIENTATION, ELEMENT_ROLL_ROTATION_COMPENSATION, &m_roll_rotation_compensation)) {
-		_E("[ROLL_ROTATION_COMPENSATION] is empty\n");
-		throw ENXIO;
-	}
-
-	_I("m_roll_rotation_compensation = %d", m_roll_rotation_compensation);
-
-	m_interval = m_default_sampling_time * MS_TO_US;
 }
 
 orientation_sensor::~orientation_sensor()
 {
-	_I("orientation_sensor is destroyed!\n");
+	_I("%s is destroyed!", SENSOR_NAME);
 }
 
-bool orientation_sensor::init(void)
+bool orientation_sensor::init()
 {
-	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
-	m_gyro_sensor = sensor_loader::get_instance().get_sensor(GYROSCOPE_SENSOR);
-	m_magnetic_sensor = sensor_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);
+	m_rotation_vector_sensor = sensor_loader::get_instance().get_sensor(ROTATION_VECTOR_SENSOR);
 
-	m_fusion_sensor = sensor_loader::get_instance().get_sensor(FUSION_SENSOR);
-
-	if (!m_accel_sensor || !m_gyro_sensor || !m_magnetic_sensor || !m_fusion_sensor) {
-		_E("Failed to load sensors,  accel: %#x, gyro: %#x, mag: %#x, fusion: %#x",
-			m_accel_sensor, m_gyro_sensor, m_magnetic_sensor, m_fusion_sensor);
+	if (!m_rotation_vector_sensor) {
+		_E("cannot load sensor[%s]", SENSOR_NAME);
 		return false;
 	}
+	_I("%s is created!", SENSOR_NAME);
+	return true;
+}
 
-	_I("%s is created!\n", sensor_base::get_name());
+sensor_type_t orientation_sensor::get_type(void)
+{
+	return ORIENTATION_SENSOR;
+}
+
+unsigned int orientation_sensor::get_event_type(void)
+{
+	return ORIENTATION_EVENT_RAW_DATA_REPORT_ON_TIME;
+}
+
+const char* orientation_sensor::get_name(void)
+{
+	return SENSOR_NAME;
+}
+
+bool orientation_sensor::get_sensor_info(sensor_info &info)
+{
+	info.set_type(get_type());
+	info.set_id(get_id());
+	info.set_privilege(SENSOR_PRIVILEGE_PUBLIC);
+	info.set_name(get_name());
+	info.set_vendor("Samsung Electronics");
+	info.set_min_range(-180);
+	info.set_max_range(360);
+	info.set_resolution(0.01);
+	info.set_min_interval(1);
+	info.set_fifo_count(0);
+	info.set_max_batch_count(0);
+	info.set_supported_event(get_event_type());
+	info.set_wakeup_supported(false);
 
 	return true;
 }
 
-void orientation_sensor::get_types(vector<sensor_type_t> &types)
+void orientation_sensor::synthesize(const sensor_event_t& event)
 {
-	types.push_back(ORIENTATION_SENSOR);
+	int error;
+	sensor_event_t *orientation_event;
+	float azimuth, pitch, roll;
+
+	if (CONVERT_ID_TYPE(event.sensor_id) != ROTATION_VECTOR_SENSOR)
+		return;
+
+	error = quat_to_orientation(event.data->values, azimuth, pitch, roll);
+	ret_if(error);
+
+	orientation_event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
+	if (!orientation_event) {
+		_E("Failed to allocate memory");
+		return;
+	}
+	orientation_event->data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
+	if (!orientation_event->data) {
+		_E("Failed to allocate memory");
+		free(orientation_event);
+		return;
+	}
+
+	orientation_event->sensor_id = get_id();
+	orientation_event->event_type = CONVERT_TYPE_EVENT(ORIENTATION_SENSOR);
+	orientation_event->data_length = sizeof(sensor_data_t);
+	orientation_event->data->accuracy = event.data->accuracy;
+	orientation_event->data->timestamp = event.data->timestamp;
+	orientation_event->data->value_count = 3;
+	orientation_event->data->values[0] = azimuth;
+	orientation_event->data->values[1] = pitch;
+	orientation_event->data->values[2] = roll;
+	push(orientation_event);
+
+	m_azimuth = azimuth;
+	m_pitch = pitch;
+	m_roll = roll;
+	m_time = event.data->timestamp;
+	m_accuracy = event.data->accuracy;
+
+	_D("[orientation] : [%10f] [%10f] [%10f]", m_azimuth, m_pitch, m_roll);
+}
+
+int orientation_sensor::get_data(sensor_data_t **data, int *length)
+{
+	/* if It is batch sensor, remains can be 2+ */
+	int remains = 1;
+
+	sensor_data_t *sensor_data;
+	sensor_data = (sensor_data_t *)malloc(sizeof(sensor_data_t));
+
+	sensor_data->accuracy = m_accuracy;
+	sensor_data->timestamp = m_time;
+	sensor_data->value_count = 3;
+	sensor_data->values[0] = m_azimuth;
+	sensor_data->values[1] = m_pitch;
+	sensor_data->values[2] = m_roll;
+
+	*data = sensor_data;
+	*length = sizeof(sensor_data_t);
+
+	return --remains;
+}
+
+bool orientation_sensor::set_interval(unsigned long interval)
+{
+	m_interval = interval;
+	return true;
+}
+
+bool orientation_sensor::set_batch_latency(unsigned long latency)
+{
+	return false;
 }
 
 bool orientation_sensor::on_start(void)
 {
-	AUTOLOCK(m_mutex);
+	if (m_rotation_vector_sensor)
+		m_rotation_vector_sensor->start();
 
-	if (!m_hardware_fusion) {
-		m_accel_sensor->add_client(ACCELEROMETER_RAW_DATA_EVENT);
-		m_accel_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-		m_accel_sensor->start();
-		m_gyro_sensor->add_client(GYROSCOPE_RAW_DATA_EVENT);
-		m_gyro_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-		m_gyro_sensor->start();
-		m_magnetic_sensor->add_client(GEOMAGNETIC_RAW_DATA_EVENT);
-		m_magnetic_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-		m_magnetic_sensor->start();
-	}
+	m_time = 0;
 
-	m_fusion_sensor->register_supported_event(FUSION_EVENT);
-	m_fusion_sensor->register_supported_event(FUSION_ORIENTATION_ENABLED);
-	m_fusion_sensor->add_client(FUSION_EVENT);
-	m_fusion_sensor->add_interval((intptr_t)this, (m_interval/MS_TO_US), false);
-	m_fusion_sensor->start();
-
-	activate();
-	return true;
+	return activate();
 }
 
 bool orientation_sensor::on_stop(void)
 {
-	AUTOLOCK(m_mutex);
+	if (m_rotation_vector_sensor)
+		m_rotation_vector_sensor->stop();
 
-	if (!m_hardware_fusion) {
-		m_accel_sensor->delete_client(ACCELEROMETER_RAW_DATA_EVENT);
-		m_accel_sensor->delete_interval((intptr_t)this, false);
-		m_accel_sensor->stop();
-		m_gyro_sensor->delete_client(GYROSCOPE_RAW_DATA_EVENT);
-		m_gyro_sensor->delete_interval((intptr_t)this, false);
-		m_gyro_sensor->stop();
-		m_magnetic_sensor->delete_client(GEOMAGNETIC_RAW_DATA_EVENT);
-		m_magnetic_sensor->delete_interval((intptr_t)this, false);
-		m_magnetic_sensor->stop();
-	}
+	m_time = 0;
 
-	m_fusion_sensor->delete_client(FUSION_EVENT);
-	m_fusion_sensor->delete_interval((intptr_t)this, false);
-	m_fusion_sensor->unregister_supported_event(FUSION_EVENT);
-	m_fusion_sensor->unregister_supported_event(FUSION_ORIENTATION_ENABLED);
-	m_fusion_sensor->stop();
-
-	deactivate();
-	return true;
+	return deactivate();
 }
 
-bool orientation_sensor::add_interval(int client_id, unsigned int interval)
+bool orientation_sensor::add_interval(int client_id, unsigned int interval, bool is_processor)
 {
-	AUTOLOCK(m_mutex);
+	if (m_rotation_vector_sensor)
+		m_rotation_vector_sensor->add_interval(client_id, interval, true);
 
-	if (!m_hardware_fusion) {
-		m_accel_sensor->add_interval(client_id, interval, false);
-		m_gyro_sensor->add_interval(client_id, interval, false);
-		m_magnetic_sensor->add_interval(client_id, interval, false);
-	}
-
-	m_fusion_sensor->add_interval(client_id, interval, false);
-
-	return sensor_base::add_interval(client_id, interval, false);
+	return sensor_base::add_interval(client_id, interval, is_processor);
 }
 
-bool orientation_sensor::delete_interval(int client_id)
+bool orientation_sensor::delete_interval(int client_id, bool is_processor)
 {
-	AUTOLOCK(m_mutex);
+	if (m_rotation_vector_sensor)
+		m_rotation_vector_sensor->delete_interval(client_id, true);
 
-	if (!m_hardware_fusion) {
-		m_accel_sensor->delete_interval(client_id, false);
-		m_gyro_sensor->delete_interval(client_id, false);
-		m_magnetic_sensor->delete_interval(client_id, false);
-	}
-
-	m_fusion_sensor->delete_interval(client_id, false);
-
-	return sensor_base::delete_interval(client_id, false);
+	return sensor_base::delete_interval(client_id, is_processor);
 }
-
-void orientation_sensor::synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs)
-{
-	sensor_event_t orientation_event;
-	unsigned long long diff_time;
-	float azimuth_offset;
-
-	if (event.event_type == FUSION_EVENT) {
-		diff_time = event.data.timestamp - m_time;
-
-		if (m_time && (diff_time < m_interval * MIN_DELIVERY_DIFF_FACTOR))
-			return;
-
-		quaternion<float> quat(event.data.values[0], event.data.values[1],
-				event.data.values[2], event.data.values[3]);
-
-		euler_angles<float> euler = quat2euler(quat);
-
-		if(m_raw_data_unit == "DEGREES") {
-			euler = rad2deg(euler);
-			azimuth_offset = AZIMUTH_OFFSET_DEGREES;
-		}
-		else {
-			azimuth_offset = AZIMUTH_OFFSET_RADIANS;
-		}
-
-		euler.m_ang.m_vec[0] *= m_pitch_rotation_compensation;
-		euler.m_ang.m_vec[1] *= m_roll_rotation_compensation;
-		euler.m_ang.m_vec[2] *= m_azimuth_rotation_compensation;
-
-		m_time = get_timestamp();
-		orientation_event.sensor_id = get_id();
-		orientation_event.event_type = ORIENTATION_RAW_DATA_EVENT;
-		orientation_event.data.accuracy = event.data.accuracy;
-		orientation_event.data.timestamp = m_time;
-		orientation_event.data.value_count = 3;
-		orientation_event.data.values[1] = euler.m_ang.m_vec[0];
-		orientation_event.data.values[2] = euler.m_ang.m_vec[1];
-		if (euler.m_ang.m_vec[2] >= 0)
-			orientation_event.data.values[0] = euler.m_ang.m_vec[2];
-		else
-			orientation_event.data.values[0] = euler.m_ang.m_vec[2] + azimuth_offset;
-
-		push(orientation_event);
-	}
-
-	return;
-}
-
-int orientation_sensor::get_sensor_data(const unsigned int event_type, sensor_data_t &data)
-{
-	sensor_data_t fusion_data;
-	float azimuth_offset;
-
-	if (event_type != ORIENTATION_RAW_DATA_EVENT)
-		return -1;
-
-	m_fusion_sensor->get_sensor_data(FUSION_ORIENTATION_ENABLED, fusion_data);
-
-	quaternion<float> quat(fusion_data.values[0], fusion_data.values[1],
-			fusion_data.values[2], fusion_data.values[3]);
-
-	euler_angles<float> euler = quat2euler(quat);
-
-	if(m_raw_data_unit == "DEGREES") {
-		euler = rad2deg(euler);
-		azimuth_offset = AZIMUTH_OFFSET_DEGREES;
-	}
-	else {
-		azimuth_offset = AZIMUTH_OFFSET_RADIANS;
-	}
-
-	data.accuracy = fusion_data.accuracy;
-	data.timestamp = get_timestamp();
-	data.value_count = 3;
-	data.values[1] = euler.m_ang.m_vec[0];
-	data.values[2] = euler.m_ang.m_vec[1];
-	if (euler.m_ang.m_vec[2] >= 0)
-		data.values[0] = euler.m_ang.m_vec[2];
-	else
-		data.values[0] = euler.m_ang.m_vec[2] + azimuth_offset;
-
-	data.values[1] *= m_pitch_rotation_compensation;
-	data.values[2] *= m_roll_rotation_compensation;
-	data.values[0] *= m_azimuth_rotation_compensation;
-
-	return 0;
-}
-
-bool orientation_sensor::get_properties(sensor_type_t sensor_type, sensor_properties_s &properties)
-{
-	if(m_raw_data_unit == "DEGREES") {
-		properties.min_range = -180;
-		properties.max_range = 360;
-	}
-	else {
-		properties.min_range = -PI;
-		properties.max_range = 2 * PI;
-	}
-	properties.resolution = 0.000001;
-	properties.vendor = m_vendor;
-	properties.name = SENSOR_NAME;
-	properties.min_interval = 1;
-	properties.fifo_count = 0;
-	properties.max_batch_count = 0;
-
-	return true;
-}
-

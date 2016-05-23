@@ -75,7 +75,7 @@ typedef struct {
 	float sensor_resolution;
 } sensor_data_properties_t;
 
-DEPRECATED int sf_is_sensor_event_available(sensor_type_t sensor_type , unsigned int event_type);
+DEPRECATED int sf_is_sensor_event_available(sensor_type_t sensor_type, unsigned int event_type);
 
 DEPRECATED int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties);
 
@@ -87,7 +87,7 @@ DEPRECATED int sf_check_rotation(unsigned long *rotation);
  * @fn int sf_connect(sensor_type_t sensor)
  * @brief  This API connects a sensor type to respective sensor. The application calls with the type of the sensor (ex. ACCELEROMETER_SENSOR) and on basis of that server takes decision of which plug-in to be connected. Once sensor connected application can proceed for data processing. This API returns a positive handle which should be used by application to communicate on sensor type.
  * @param[in] sensor_type your desired sensor type
- * @return if it succeed, it return handle value( >=0 ) , otherwise negative value return
+ * @return if it succeed, it return handle value( >=0 ), otherwise negative value return
  */
 DEPRECATED int sf_connect(sensor_type_t sensor_type);
 
@@ -95,57 +95,57 @@ DEPRECATED int sf_connect(sensor_type_t sensor_type);
  * @fn int sf_disconnect(int handle)
  * @brief This API disconnects an attached sensor from an application. Application must use the handle retuned after attaching the sensor. After detaching, the corresponding handle will be released.
  * @param[in] handle received handle value by sf_connect()
- * @return if it succeed, it return zero value , otherwise negative value return
+ * @return if it succeed, it return zero value, otherwise negative value return
  */
 DEPRECATED int sf_disconnect(int handle);
 
 /**
- * @fn int sf_start(int handle , int option)
+ * @fn int sf_start(int handle, int option)
  * @brief This API sends a start command to sensor server. This intimates server that the client side is ready to handle data and start processing. The parameter option should be '0' for current usages.
  * @param[in] handle received handle value by sf_connect()
  * @param[in] option With SENSOR_OPTION_DEFAULT, it stops to sense when LCD is off, and with SENSOR_OPTION_ALWAYS_ON, it continues to sense even when LCD is off
- * @return if it succeed, it return zero value , otherwise negative value return
+ * @return if it succeed, it return zero value, otherwise negative value return
  */
-DEPRECATED int sf_start(int handle , int option);
+DEPRECATED int sf_start(int handle, int option);
 
 /**
  * @fn int sf_stop(int handle)
  * @brief This API sends a stop command to the Sensor server indicating that the data processing is stopped from application side for this time.
  * @param[in] handle received handle value by sf_connect()
- * @return if it succeed, it return zero value , otherwise negative value return
+ * @return if it succeed, it return zero value, otherwise negative value return
  */
 DEPRECATED int sf_stop(int handle);
 
 /**
- * @fn int sf_register_event(int handle , unsigned int event_type , event_conditon_t *event_condition , sensor_callback_func_t cb , void *user_data )
+ * @fn int sf_register_event(int handle, unsigned int event_type, event_conditon_t *event_condition, sensor_callback_func_t cb, void *user_data )
  * @brief This API registers a user defined callback function with a connected sensor for a particular event. This callback function will be called when there is a change in the state of respective sensor. user_data will be the parameter used during the callback call. Callback interval can be adjusted using even_contion_t argument.
  * @param[in] handle received handle value by sf_connect()
  * @param[in] event_type your desired event_type to register it
  * @param[in] event_condition input event_condition for special event. if you want to register without event_condition, just use a NULL value
  * @param[in] cb your define callback function
  * @param[in] user_data	your option data that will be send when your define callback function called. if you don't have any option data, just use a NULL value
- * @return if it succeed, it return zero value , otherwise negative value return
+ * @return if it succeed, it return zero value, otherwise negative value return
  */
-DEPRECATED int sf_register_event(int handle , unsigned int event_type , event_condition_t *event_condition , sensor_callback_func_t cb , void *user_data );
+DEPRECATED int sf_register_event(int handle, unsigned int event_type, event_condition_t *event_condition, sensor_callback_func_t cb, void *user_data);
 
 /**
  * @fn int sf_unregister_event(int handle, unsigned int event_type)
  * @brief This API de-registers a user defined callback function with a sensor registered with the specified handle. After unsubscribe, no event will be sent to the application.
  * @param[in] handle received handle value by sf_connect()
  * @param[in] event_type your desired event_type that you want to unregister event
- * @return if it succeed, it return zero value , otherwise negative value return
+ * @return if it succeed, it return zero value, otherwise negative value return
  */
 DEPRECATED int sf_unregister_event(int handle, unsigned int event_type);
 
 /**
- * @fn int sf_get_data(int handle , unsigned int data_id , sensor_data_t* values)
+ * @fn int sf_get_data(int handle, unsigned int data_id, sensor_data_t* values)
  * @brief This API gets raw data from a sensor with connecting the sensor-server. The type of sensor is supplied and return data is stored in the output parameter values [].
  * @param[in] handle received handle value by sf_connect()
- * @param[in] data_id predefined data_ID as every sensor in own header - sensor_xxx.h , enum xxx_data_id {}
+ * @param[in] data_id predefined data_ID as every sensor in own header - sensor_xxx.h, enum xxx_data_id {}
  * @param[out] values return values
- * @return if it succeed, it return zero value , otherwise negative value return
+ * @return if it succeed, it return zero value, otherwise negative value return
  */
-DEPRECATED int sf_get_data(int handle , unsigned int data_id , sensor_data_t* values);
+DEPRECATED int sf_get_data(int handle, unsigned int data_id, sensor_data_t* values);
 
 /**
  * @fn int sf_change_event_condition(int handle, unsigned int event_type, event_condition_t *event_condition)
@@ -153,7 +153,7 @@ DEPRECATED int sf_get_data(int handle , unsigned int data_id , sensor_data_t* va
  * @param[in] handle received handle value by sf_connect()
  * @param[in] event_type your desired event_type that you want to unregister event
  * @param[in] event_condition your desired event condition that you want to change event
- * @return if it succeed, it return zero value , otherwise negative value return
+ * @return if it succeed, it return zero value, otherwise negative value return
  */
 DEPRECATED int sf_change_event_condition(int handle, unsigned int event_type, event_condition_t *event_condition);
 
@@ -162,7 +162,7 @@ DEPRECATED int sf_change_event_condition(int handle, unsigned int event_type, ev
  * @brief This API change sensor option .
  * @param[in] handle received handle value by sf_connect()
  * @param[in] option your desired option that you want to turn on sensor during LCD OFF
- * @return if it succeed, it return zero value , otherwise negative value return
+ * @return if it succeed, it return zero value, otherwise negative value return
  */
 
 DEPRECATED int sf_change_sensor_option(int handle, int option);
@@ -177,10 +177,8 @@ DEPRECATED int sf_change_sensor_option(int handle, int option);
  */
 DEPRECATED int sf_send_sensorhub_data(int handle, const char* data, int data_len);
 
-
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif

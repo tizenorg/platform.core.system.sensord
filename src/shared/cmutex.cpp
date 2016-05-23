@@ -56,7 +56,6 @@ int cmutex::lock_impl(void)
 int cmutex::try_lock_impl(void)
 {
 	return pthread_mutex_trylock(&m_mutex);
-
 }
 
 int cmutex::unlock_impl()

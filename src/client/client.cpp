@@ -110,7 +110,7 @@ void clean_up(void)
 	}
 }
 
-static int get_power_save_state (void)
+static int get_power_save_state(void)
 {
 	int state = 0;
 	int pm_state;
@@ -155,7 +155,6 @@ static void power_save_state_cb(keynode_t *node, void *data)
 	}
 }
 
-
 void restore_session(void)
 {
 	AUTOLOCK(lock);
@@ -178,7 +177,7 @@ void restore_session(void)
 
 	while (it_sensor != sensors.end()) {
 		cmd_channel = new(std::nothrow) command_channel();
-		retm_if (!cmd_channel, "Failed to allocate memory");
+		retm_if(!cmd_channel, "Failed to allocate memory");
 
 		if (!cmd_channel->create_channel()) {
 			_E("%s failed to create command channel for %s", get_client_name(), get_sensor_name(*it_sensor));
@@ -240,7 +239,6 @@ static bool get_events_diff(event_type_vector &a_vec, event_type_vector &b_vec, 
 	return !(add_vec.empty() && del_vec.empty());
 }
 
-
 static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, sensor_rep &cur_rep)
 {
 	int client_id;
@@ -253,7 +251,7 @@ static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, senso
 	}
 
 	client_id = sensor_client_info::get_instance().get_client_id();
-	retvm_if ((client_id < 0), false, "Invalid client id : %d, %s, %s", client_id, get_sensor_name(sensor_id), get_client_name());
+	retvm_if((client_id < 0), false, "Invalid client id : %d, %s, %s", client_id, get_sensor_name(sensor_id), get_client_name());
 
 	get_events_diff(prev_rep.event_types, cur_rep.event_types, add_event_types, del_event_types);
 
@@ -278,7 +276,6 @@ static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, senso
 				return false;
 			}
 		}
-
 	}
 
 	if (prev_rep.active && !del_event_types.empty()) {
@@ -336,7 +333,7 @@ static bool get_sensor_list(void)
 
 API int sensord_get_sensors(sensor_type_t type, sensor_t **list, int *sensor_count)
 {
-	retvm_if (!get_sensor_list(), -EPERM, "Fail to get sensor list from server");
+	retvm_if(!get_sensor_list(), -EPERM, "Fail to get sensor list from server");
 
 	vector<sensor_info *> sensor_infos = sensor_info_manager::get_instance().get_infos(type);
 
@@ -363,7 +360,7 @@ API int sensord_get_sensors(sensor_type_t type, sensor_t **list, int *sensor_cou
 
 API int sensord_get_default_sensor(sensor_type_t type, sensor_t *sensor)
 {
-	retvm_if (!get_sensor_list(), -EPERM, "Fail to get sensor list from server");
+	retvm_if(!get_sensor_list(), -EPERM, "Fail to get sensor list from server");
 
 	const sensor_info *info;
 
@@ -398,7 +395,7 @@ API bool sensord_get_type(sensor_t sensor, sensor_type_t *type)
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !type,
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info) || !type,
 		NULL, "Invalid param: sensor (%p), type(%p)", sensor, type);
 
 	*type = info->get_type();
@@ -410,7 +407,7 @@ API const char* sensord_get_name(sensor_t sensor)
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info),
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info),
 		NULL, "Invalid param: sensor (%p)", sensor);
 
 	return info->get_name();
@@ -420,7 +417,7 @@ API const char* sensord_get_vendor(sensor_t sensor)
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info),
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info),
 		NULL, "Invalid param: sensor (%p)", sensor);
 
 	return info->get_vendor();
@@ -430,7 +427,7 @@ API bool sensord_get_privilege(sensor_t sensor, sensor_privilege_t *privilege)
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !privilege,
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info) || !privilege,
 		false, "Invalid param: sensor (%p), privilege(%p)", sensor, privilege);
 
 	*privilege = info->get_privilege();
@@ -442,7 +439,7 @@ API bool sensord_get_min_range(sensor_t sensor, float *min_range)
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !min_range,
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info) || !min_range,
 		false, "Invalid param: sensor (%p), min_range(%p)", sensor, min_range);
 
 	*min_range = info->get_min_range();
@@ -454,7 +451,7 @@ API bool sensord_get_max_range(sensor_t sensor, float *max_range)
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !max_range,
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info) || !max_range,
 		false, "Invalid param: sensor (%p), max_range(%p)", sensor, max_range);
 
 	*max_range = info->get_max_range();
@@ -466,7 +463,7 @@ API bool sensord_get_resolution(sensor_t sensor, float *resolution)
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !resolution,
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info) || !resolution,
 		false, "Invalid param: sensor (%p), resolution(%p)", sensor, resolution);
 
 	*resolution = info->get_resolution();
@@ -478,7 +475,7 @@ API bool sensord_get_min_interval(sensor_t sensor, int *min_interval)
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !min_interval,
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info) || !min_interval,
 		false, "Invalid param: sensor (%p), min_interval(%p)", sensor, min_interval);
 
 	*min_interval = info->get_min_interval();
@@ -490,7 +487,7 @@ API bool sensord_get_fifo_count(sensor_t sensor, int *fifo_count)
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !fifo_count,
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info) || !fifo_count,
 		false, "Invalid param: sensor (%p), fifo_count(%p)", sensor, fifo_count);
 
 	*fifo_count = info->get_fifo_count();
@@ -502,7 +499,7 @@ API bool sensord_get_max_batch_count(sensor_t sensor, int *max_batch_count)
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !max_batch_count,
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info) || !max_batch_count,
 		false, "Invalid param: sensor (%p), max_batch_count(%p)", sensor, max_batch_count);
 
 	*max_batch_count = info->get_max_batch_count();
@@ -514,7 +511,7 @@ API bool sensord_get_supported_event_types(sensor_t sensor, unsigned int **event
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !event_types || !count,
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info) || !event_types || !count,
 		false, "Invalid param: sensor (%p), event_types(%p), count(%p)", sensor, event_types, count);
 
 	unsigned int event_type;
@@ -533,7 +530,7 @@ API bool sensord_is_supported_event_type(sensor_t sensor, unsigned int event_typ
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info) || !event_type || !supported,
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info) || !event_type || !supported,
 		false, "Invalid param: sensor (%p), event_type(%p), supported(%p)", sensor, event_type, supported);
 
 	*supported = info->is_supported_event(event_type);
@@ -545,7 +542,7 @@ API bool sensord_is_wakeup_supported(sensor_t sensor)
 {
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info),
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info),
 		false, "Invalid param: sensor (%p)", sensor);
 
 	return info->is_wakeup_supported();
@@ -561,7 +558,7 @@ API int sensord_connect(sensor_t sensor)
 
 	sensor_info* info = sensor_to_sensor_info(sensor);
 
-	retvm_if (!sensor_info_manager::get_instance().is_valid(info),
+	retvm_if(!sensor_info_manager::get_instance().is_valid(info),
 		OP_ERROR, "Invalid param: sensor (%p)", sensor);
 
 	sensor_id_t sensor_id = info->get_id();
@@ -605,7 +602,7 @@ API int sensord_connect(sensor_t sensor)
 
 	if (!sensor_client_info::get_instance().has_client_id()) {
 		first_connection = true;
-		if(!cmd_channel->cmd_get_id(client_id)) {
+		if (!cmd_channel->cmd_get_id(client_id)) {
 			_E("Sending cmd_get_id() failed for %s", get_sensor_name(sensor_id));
 			sensor_client_info::get_instance().close_command_channel(sensor_id);
 			sensor_client_info::get_instance().delete_handle(handle);
@@ -626,7 +623,7 @@ API int sensord_connect(sensor_t sensor)
 	sensor_client_info::get_instance().set_sensor_params(handle, SENSOR_STATE_STOPPED, SENSOR_OPTION_DEFAULT);
 
 	if (!sensor_registered) {
-		if(!cmd_channel->cmd_hello(sensor_id)) {
+		if (!cmd_channel->cmd_hello(sensor_id)) {
 			_E("Sending cmd_hello(%s, %d) failed for %s", get_sensor_name(sensor_id), client_id, get_client_name());
 			sensor_client_info::get_instance().close_command_channel(sensor_id);
 			sensor_client_info::get_instance().delete_handle(handle);
@@ -663,7 +660,7 @@ API bool sensord_disconnect(int handle)
 	}
 
 	client_id = sensor_client_info::get_instance().get_client_id();
-	retvm_if ((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
+	retvm_if((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
 	_I("%s disconnects with %s[%d]", get_client_name(), get_sensor_name(sensor_id), handle);
 
@@ -680,7 +677,7 @@ API bool sensord_disconnect(int handle)
 		sensor_client_info::get_instance().set_client_id(CLIENT_ID_INVALID);
 
 	if (!sensor_client_info::get_instance().is_sensor_registered(sensor_id)) {
-		if(!cmd_channel->cmd_byebye()) {
+		if (!cmd_channel->cmd_byebye()) {
 			_E("Sending cmd_byebye(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
 			return false;
 		}
@@ -697,14 +694,13 @@ API bool sensord_disconnect(int handle)
 	return true;
 }
 
-
 static bool register_event(int handle, unsigned int event_type, unsigned int interval, int max_batch_latency, void* cb, void *user_data)
 {
 	sensor_id_t sensor_id;
 	sensor_rep prev_rep, cur_rep;
 	bool ret;
 
-	retvm_if (!cb, false, "callback is NULL");
+	retvm_if(!cb, false, "callback is NULL");
 
 	AUTOLOCK(lock);
 
@@ -760,7 +756,7 @@ API bool sensord_unregister_event(int handle, unsigned int event_type)
 
 	if (!sensor_client_info::get_instance().unregister_event(handle, event_type)) {
 		_E("%s try to unregister non registered event %s[%#x] for sensor %s[%d]",
-			get_client_name(),get_event_name(event_type), event_type, get_sensor_name(sensor_id), handle);
+			get_client_name(), get_event_name(event_type), event_type, get_sensor_name(sensor_id), handle);
 		return false;
 	}
 
@@ -771,15 +767,13 @@ API bool sensord_unregister_event(int handle, unsigned int event_type)
 		sensor_client_info::get_instance().register_event(handle, event_type, prev_interval, prev_latency, prev_cb, prev_user_data);
 
 	return ret;
-
 }
-
 
 API bool sensord_register_accuracy_cb(int handle, sensor_accuracy_changed_cb_t cb, void *user_data)
 {
 	sensor_id_t sensor_id;
 
-	retvm_if (!cb, false, "callback is NULL");
+	retvm_if(!cb, false, "callback is NULL");
 
 	AUTOLOCK(lock);
 
@@ -788,14 +782,12 @@ API bool sensord_register_accuracy_cb(int handle, sensor_accuracy_changed_cb_t c
 		return false;
 	}
 
-
 	_I("%s registers accuracy_changed_cb for sensor %s[%d] with cb: %#x, user_data: %#x",
 		get_client_name(), get_sensor_name(sensor_id), handle, cb, user_data);
 
 	sensor_client_info::get_instance().register_accuracy_cb(handle, cb , user_data);
 
 	return true;
-
 }
 
 API bool sensord_unregister_accuracy_cb(int handle)
@@ -809,7 +801,6 @@ API bool sensord_unregister_accuracy_cb(int handle)
 		return false;
 	}
 
-
 	_I("%s unregisters accuracy_changed_cb for sensor %s[%d]",
 		get_client_name(), get_sensor_name(sensor_id), handle);
 
@@ -817,7 +808,6 @@ API bool sensord_unregister_accuracy_cb(int handle)
 
 	return true;
 }
-
 
 API bool sensord_start(int handle, int option)
 {
@@ -833,7 +823,7 @@ API bool sensord_start(int handle, int option)
 		return false;
 	}
 
-	retvm_if ((option < 0) || (option >= SENSOR_OPTION_END), false, "Invalid option value : %d, handle: %d, %s, %s",
+	retvm_if((option < 0) || (option >= SENSOR_OPTION_END), false, "Invalid option value : %d, handle: %d, %s, %s",
 		option, handle, get_sensor_name(sensor_id), get_client_name());
 
 	_I("%s starts %s[%d], with option: %d, power save state: %d", get_client_name(), get_sensor_name(sensor_id),
@@ -874,9 +864,8 @@ API bool sensord_stop(int handle)
 		return false;
 	}
 
-	retvm_if ((sensor_state == SENSOR_STATE_STOPPED), true, "%s already stopped with %s[%d]",
+	retvm_if((sensor_state == SENSOR_STATE_STOPPED), true, "%s already stopped with %s[%d]",
 		get_client_name(), get_sensor_name(sensor_id), handle);
-
 
 	_I("%s stops sensor %s[%d]", get_client_name(), get_sensor_name(sensor_id), handle);
 
@@ -892,7 +881,6 @@ API bool sensord_stop(int handle)
 
 	return ret;
 }
-
 
 static bool change_event_batch(int handle, unsigned int event_type, unsigned int interval, unsigned int latency)
 {
@@ -982,9 +970,8 @@ API bool sensord_set_option(int handle, int option)
 		return false;
 	}
 
-	retvm_if ((option < 0) || (option >= SENSOR_OPTION_END), false, "Invalid option value : %d, handle: %d, %s, %s",
+	retvm_if((option < 0) || (option >= SENSOR_OPTION_END), false, "Invalid option value : %d, handle: %d, %s, %s",
 		option, handle, get_sensor_name(sensor_id), get_client_name());
-
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, prev_rep);
 	sensor_client_info::get_instance().get_sensor_params(handle, prev_state, prev_option);
@@ -1004,7 +991,6 @@ API bool sensord_set_option(int handle, int option)
 		sensor_client_info::get_instance().set_sensor_option(handle, prev_option);
 
 	return ret;
-
 }
 
 API int sensord_set_attribute_int(int handle, int attribute, int value)
@@ -1026,7 +1012,7 @@ API int sensord_set_attribute_int(int handle, int attribute, int value)
 	}
 
 	client_id = sensor_client_info::get_instance().get_client_id();
-	retvm_if ((client_id < 0), -EPERM,
+	retvm_if((client_id < 0), -EPERM,
 			"Invalid client id : %d, handle: %d, %s, %s",
 			client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
@@ -1063,7 +1049,7 @@ API int sensord_set_attribute_str(int handle, int attribute, const char *value, 
 			value_len, value, handle, get_sensor_name(sensor_id), get_client_name());
 
 	client_id = sensor_client_info::get_instance().get_client_id();
-	retvm_if ((client_id < 0), -EPERM,
+	retvm_if((client_id < 0), -EPERM,
 			"Invalid client id : %d, handle: %d, %s, %s",
 			client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
@@ -1093,7 +1079,7 @@ API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* senso
 	int sensor_state;
 	int client_id;
 
-	retvm_if ((!sensor_data), false, "sensor_data is NULL");
+	retvm_if((!sensor_data), false, "sensor_data is NULL");
 
 	AUTOLOCK(lock);
 
@@ -1109,7 +1095,7 @@ API bool sensord_get_data(int handle, unsigned int data_id, sensor_data_t* senso
 	}
 
 	client_id = sensor_client_info::get_instance().get_client_id();
-	retvm_if ((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
+	retvm_if((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
 	if (sensor_state != SENSOR_STATE_STARTED) {
 		_E("Sensor %s is not started for client %s with handle: %d, sensor_state: %d", get_sensor_name(sensor_id), get_client_name(), handle, sensor_state);
@@ -1145,7 +1131,7 @@ API bool sensord_flush(int handle)
 	}
 
 	client_id = sensor_client_info::get_instance().get_client_id();
-	retvm_if ((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
+	retvm_if((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
 	if (sensor_state != SENSOR_STATE_STARTED) {
 		_E("Sensor %s is not started for client %s with handle: %d, sensor_state: %d", get_sensor_name(sensor_id), get_client_name(), handle, sensor_state);

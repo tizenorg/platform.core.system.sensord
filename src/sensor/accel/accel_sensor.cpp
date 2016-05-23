@@ -28,7 +28,6 @@ accel_sensor::accel_sensor()
 
 accel_sensor::~accel_sensor()
 {
-
 }
 
 sensor_type_t accel_sensor::get_type(void)

@@ -30,11 +30,13 @@ using std::pair;
 #define MAX_PENDING_CONNECTION 32
 
 sensor_event_dispatcher::sensor_event_dispatcher()
+: m_running(false)
 {
 }
 
-sensor_event_dispatcher::~sensor_event_dispatcher() { }
-
+sensor_event_dispatcher::~sensor_event_dispatcher()
+{
+}
 
 sensor_event_dispatcher& sensor_event_dispatcher::get_instance()
 {
@@ -44,8 +46,17 @@ sensor_event_dispatcher& sensor_event_dispatcher::get_instance()
 
 bool sensor_event_dispatcher::run(void)
 {
+	m_running = true;
+
 	thread dispatcher(&sensor_event_dispatcher::dispatch_event, this);
 	dispatcher.detach();
+
+	return true;
+}
+
+bool sensor_event_dispatcher::stop(void)
+{
+	m_running = false;
 
 	return true;
 }
@@ -65,7 +76,7 @@ void sensor_event_dispatcher::accept_event_channel(csocket client_socket)
 
 	client_socket.set_transfer_mode();
 
-	if(!get_client_info_manager().set_event_socket(client_id, client_socket)) {
+	if (!get_client_info_manager().set_event_socket(client_id, client_socket)) {
 		_E("Failed to store event socket[%d] for %s", client_socket.get_socket_fd(),
 			client_info_manager.get_client_info(client_id));
 		return;
@@ -98,7 +109,7 @@ void sensor_event_dispatcher::dispatch_event(void)
 
 	_I("Event Dispatcher started");
 
-	while (true) {
+	while (m_running) {
 		void *seed_event = get_event_queue().pop();
 
 		vector<void *> sensor_events;
@@ -138,7 +149,6 @@ void sensor_event_dispatcher::dispatch_event(void)
 		send_sensor_events(sensor_events);
 	}
 }
-
 
 void sensor_event_dispatcher::send_sensor_events(vector<void *> &events)
 {
@@ -222,7 +232,6 @@ bool sensor_event_dispatcher::has_active_virtual_sensor(virtual_sensor *sensor)
 	return (it_v_sensor != m_active_virtual_sensors.end());
 }
 
-
 virtual_sensors sensor_event_dispatcher::get_active_virtual_sensors(void)
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
@@ -274,6 +283,9 @@ bool sensor_event_dispatcher::add_active_virtual_sensor(virtual_sensor *sensor)
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 
+	if (!m_running)
+		return true;
+
 	if (has_active_virtual_sensor(sensor)) {
 		_E("[%s] sensor is already added on active virtual sensors", sensor->get_name());
 		return false;
@@ -288,14 +300,11 @@ bool sensor_event_dispatcher::delete_active_virtual_sensor(virtual_sensor *senso
 {
 	AUTOLOCK(m_active_virtual_sensors_mutex);
 
-	auto it_v_sensor = find(m_active_virtual_sensors.begin(), m_active_virtual_sensors.end(), sensor);
+	if (!m_running)
+		return true;
 
-	if (it_v_sensor == m_active_virtual_sensors.end()) {
-		_E("Fail to delete non-existent [%s] sensor on active virtual sensors", sensor->get_name());
-		return false;
-	}
-
-	m_active_virtual_sensors.erase(it_v_sensor);
+	if (sensor)
+		m_active_virtual_sensors.remove(sensor);
 
 	return true;
 }

@@ -44,7 +44,7 @@
 
 typedef std::vector<unsigned int> handle_vector;
 typedef std::vector<sensor_id_t> sensor_id_vector;
-typedef std::unordered_map<int,sensor_handle_info> sensor_handle_info_map;
+typedef std::unordered_map<int, sensor_handle_info> sensor_handle_info_map;
 typedef std::unordered_map<sensor_id_t, command_channel*> sensor_command_channel_map;
 
 typedef struct {
@@ -122,4 +122,5 @@ private:
 
 	void set_thread_state(thread_state state);
 };
+
 #endif /* _SENSOR_EVENT_LISTENER_H_ */
