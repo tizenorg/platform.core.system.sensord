@@ -130,7 +130,7 @@ void sensor_handle_info::get_batch(unsigned int &interval, unsigned int &latency
 {
 	if (m_reg_event_infos.empty()) {
 		_D("No events are registered for client %s", get_client_name());
-		interval = POLL_MAX_HZ_MS;
+		interval = POLL_10HZ_MS;
 		latency = 0;
 		return;
 	}
