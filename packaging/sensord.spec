@@ -1,6 +1,6 @@
 Name:       sensord
 Summary:    Sensor daemon
-Version:    2.0.4
+Version:    2.0.5
 Release:    0
 Group:      System/Sensor Framework
 License:    Apache-2.0
@@ -34,6 +34,10 @@ Requires:   libsensord = %{version}-%{release}
 %define tilt_state OFF
 %define gyroscope_uncal_state OFF
 %define build_test_suite ON
+
+%ifarch %{ix86} x86_64
+%define BUILD_ARCH EMULATOR
+%endif
 
 %description
 Sensor daemon
@@ -81,7 +85,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DMAJORVER=${MAJORVER} -DFULLVER=%{ver
 	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
 	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
 	-DGYROSCOPE_UNCAL=%{gyroscope_uncal_state} -DAUTO_ROTATION=%{auto_rotation_state} \
-	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite}
+	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite} -DARCH=%{BUILD_ARCH}
 
 %build
 make %{?jobs:-j%jobs}

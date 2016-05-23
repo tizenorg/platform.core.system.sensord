@@ -50,4 +50,5 @@ private:
 	id_to_info_map m_id_to_info_map;
 	info_set m_info_set;
 };
+
 #endif /* _SENSOR_INFO_MANAGER_H_ */

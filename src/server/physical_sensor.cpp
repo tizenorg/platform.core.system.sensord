@@ -32,6 +32,7 @@ physical_sensor::physical_sensor()
 
 physical_sensor::~physical_sensor()
 {
+	_I("physical sensor is destroyed");
 }
 
 void physical_sensor::set_sensor_info(const sensor_info_t *info)
@@ -56,8 +57,8 @@ unsigned int physical_sensor::get_event_type(void)
 
 const char* physical_sensor::get_name(void)
 {
-	if (!m_info->name)
-		return UNKNOWN_NAME;
+	retv_if(!m_info, UNKNOWN_NAME);
+	retv_if(!m_info->name, UNKNOWN_NAME);
 
 	return m_info->name;
 }
@@ -215,4 +216,3 @@ bool physical_sensor::get_sensor_info(sensor_info &info)
 
 	return true;
 }
-

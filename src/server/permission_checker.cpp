@@ -25,6 +25,8 @@
 #include <sensor_loader.h>
 #include <sensor_base.h>
 
+#define CACHE_SIZE 16
+
 static cynara *cynara_env = NULL;
 
 static bool check_privilege_by_sockfd(int sock_fd, const char *priv)
@@ -77,6 +79,8 @@ permission_checker& permission_checker::get_instance()
 
 void permission_checker::init()
 {
+	AUTOLOCK(m_mutex);
+
 	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_STANDARD, false, ""));
 	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_BIO, true, "http://tizen.org/privilege/healthinfo"));
 
@@ -88,14 +92,39 @@ void permission_checker::init()
 
 	_I("Permission Set = %d", m_permission_set);
 
-	if (cynara_initialize(&cynara_env, NULL) != CYNARA_API_SUCCESS) {
-		cynara_env = NULL;
-		_E("Cynara initialization failed");
+	init_cynara();
+}
+
+void permission_checker::init_cynara(void)
+{
+	cynara_configuration *conf;
+
+	int err = cynara_configuration_create(&conf);
+	retm_if(err != CYNARA_API_SUCCESS, "Failed to create cynara configuration");
+
+	err = cynara_configuration_set_cache_size(conf, CACHE_SIZE);
+	if (err != CYNARA_API_SUCCESS) {
+		_E("Failed to set cynara cache");
+		cynara_configuration_destroy(conf);
+		return;
 	}
+
+	err = cynara_initialize(&cynara_env, conf);
+	cynara_configuration_destroy(conf);
+
+	if (err != CYNARA_API_SUCCESS) {
+		_E("Failed to initialize cynara");
+		cynara_env = NULL;
+		return;
+	}
+
+	_I("Cynara initialized");
 }
 
 void permission_checker::deinit()
 {
+	AUTOLOCK(m_mutex);
+
 	if (cynara_env)
 		cynara_finish(cynara_env);
 
@@ -104,6 +133,8 @@ void permission_checker::deinit()
 
 int permission_checker::get_permission(int sock_fd)
 {
+	AUTOLOCK(m_mutex);
+
 	int permission = SENSOR_PERMISSION_NONE;
 
 	for (unsigned int i = 0; i < m_permission_infos.size(); ++i) {

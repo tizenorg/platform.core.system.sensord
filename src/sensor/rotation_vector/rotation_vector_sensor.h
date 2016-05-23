@@ -17,17 +17,16 @@
  *
  */
 
-#ifndef _ORIENTATION_SENSOR_H_
-#define _ORIENTATION_SENSOR_H_
+#ifndef _ROTATION_VECTOR_SENSOR_H_
+#define _ROTATION_VECTOR_SENSOR_H_
 
 #include <virtual_sensor.h>
 #include <sensor_types.h>
-#include <sensor_fusion.h>
 
-class orientation_sensor : public virtual_sensor {
+class rotation_vector_sensor : public virtual_sensor {
 public:
-	orientation_sensor();
-	virtual ~orientation_sensor();
+	rotation_vector_sensor();
+	virtual ~rotation_vector_sensor();
 
 	/* initialize sensor */
 	bool init(void);
@@ -48,22 +47,26 @@ public:
 	/* get data */
 	virtual int get_data(sensor_data_t **data, int *length);
 private:
-	sensor_base *m_rotation_vector_sensor;
+	sensor_base *m_accel_sensor;
+	sensor_base *m_mag_sensor;
 
-	float m_azimuth;
-	float m_pitch;
-	float m_roll;
+	float m_x;
+	float m_y;
+	float m_z;
+	float m_w;
 	int m_accuracy;
 	unsigned long long m_time;
 	unsigned long m_interval;
+
+	float m_acc[3];
+	float m_mag[3];
+	int m_state;
 
 	virtual bool set_interval(unsigned long interval);
 	virtual bool set_batch_latency(unsigned long latency);
 
 	virtual bool on_start(void);
 	virtual bool on_stop(void);
-
-	int rotation_to_orientation(const float *rotation, float &azimuth, float &pitch, float &roll);
 };
 
-#endif /* _ORIENTATION_SENSOR_H_ */
+#endif /* _ROTATION_VECTOR_SENSOR_H_ */

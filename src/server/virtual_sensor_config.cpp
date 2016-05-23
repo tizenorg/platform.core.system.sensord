@@ -64,24 +64,24 @@ bool virtual_sensor_config::load_config(const string& config_path)
 	xmlDocPtr doc;
 	xmlNodePtr cur;
 
-	_D("virtual_sensor_config::load_config(\"%s\") is called!\n",config_path.c_str());
+	_D("virtual_sensor_config::load_config(\"%s\") is called!\n", config_path.c_str());
 
 	doc = xmlParseFile(config_path.c_str());
 
 	if (doc == NULL) {
-		_E("There is no %s\n",config_path.c_str());
+		_E("There is no %s\n", config_path.c_str());
 		return false;
 	}
 
 	cur = xmlDocGetRootElement(doc);
-	if(cur == NULL) {
-		_E("There is no root element in %s\n",config_path.c_str());
+	if (cur == NULL) {
+		_E("There is no root element in %s\n", config_path.c_str());
 		xmlFreeDoc(doc);
 		return false;
 	}
 
-	if(xmlStrcmp(cur->name, (const xmlChar *)ROOT_ELEMENT)) {
-		_E("Wrong type document: there is no [%s] root element in %s\n",ROOT_ELEMENT,config_path.c_str());
+	if (xmlStrcmp(cur->name, (const xmlChar *)ROOT_ELEMENT)) {
+		_E("Wrong type document: there is no [%s] root element in %s\n", ROOT_ELEMENT, config_path.c_str());
 		xmlFreeDoc(doc);
 		return false;
 	}
@@ -95,57 +95,55 @@ bool virtual_sensor_config::load_config(const string& config_path)
 	device_node_ptr = cur->xmlChildrenNode;
 	while (device_node_ptr != NULL){
 		//skip garbage element, [text]
-		if (!xmlStrcmp(device_node_ptr->name,(const xmlChar *)TEXT_ELEMENT)) {
+		if (!xmlStrcmp(device_node_ptr->name, (const xmlChar *)TEXT_ELEMENT)) {
 			device_node_ptr = device_node_ptr->next;
 			continue;
 		}
 
-
 		string device_type;
-		prop = (char*)xmlGetProp(device_node_ptr,(const xmlChar*)DEVICE_TYPE_ATTR);
+		prop = (char*)xmlGetProp(device_node_ptr, (const xmlChar*)DEVICE_TYPE_ATTR);
 		device_type = prop;
 		free(prop);
 
 		//insert device to device_list
 		m_virtual_sensor_configs[device_type];
-		_D("<type=\"%s\">\n",device_type.c_str());
+		_D("<type=\"%s\">\n", device_type.c_str());
 
 		virtual_sensor_node_ptr = device_node_ptr->xmlChildrenNode;
 
 		while (virtual_sensor_node_ptr != NULL) {
 			//skip garbage element, [text]
-			if (!xmlStrcmp(virtual_sensor_node_ptr->name,(const xmlChar *)TEXT_ELEMENT)) {
+			if (!xmlStrcmp(virtual_sensor_node_ptr->name, (const xmlChar *)TEXT_ELEMENT)) {
 				virtual_sensor_node_ptr = virtual_sensor_node_ptr->next;
 				continue;
 			}
 
 			m_virtual_sensor_configs[device_type][(const char*)virtual_sensor_node_ptr->name];
-			_D("<type=\"%s\"><%s>\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name);
+			_D("<type=\"%s\"><%s>\n", device_type.c_str(), (const char*)virtual_sensor_node_ptr->name);
 
 			element_node_ptr = virtual_sensor_node_ptr->xmlChildrenNode;
 			while (element_node_ptr != NULL) {
 				//skip garbage element, [text]
-				if (!xmlStrcmp(element_node_ptr->name,(const xmlChar *)TEXT_ELEMENT)) {
+				if (!xmlStrcmp(element_node_ptr->name, (const xmlChar *)TEXT_ELEMENT)) {
 					element_node_ptr = element_node_ptr->next;
 					continue;
 				}
 
 				//insert Element to Model
 				m_virtual_sensor_configs[device_type][(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name];
-				_D("<type=\"%s\"><%s><%s>\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name);
+				_D("<type=\"%s\"><%s><%s>\n", device_type.c_str(), (const char*)virtual_sensor_node_ptr->name, (const char*)element_node_ptr->name);
 
 				attr_ptr = element_node_ptr->properties;
 				while (attr_ptr != NULL) {
-
-					string key,value;
+					string key, value;
 					key = (char*)attr_ptr->name;
-					prop = (char*)xmlGetProp(element_node_ptr,attr_ptr->name);
+					prop = (char*)xmlGetProp(element_node_ptr, attr_ptr->name);
 					value = prop;
 					free(prop);
 
 					//insert attribute to Element
-					m_virtual_sensor_configs[device_type][(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name][key]=value;
-					_D("<type=\"%s\"><%s><%s \"%s\"=\"%s\">\n",device_type.c_str(),(const char*)virtual_sensor_node_ptr->name,(const char*)element_node_ptr->name,key.c_str(),value.c_str());
+					m_virtual_sensor_configs[device_type][(const char*)virtual_sensor_node_ptr->name][(const char*)element_node_ptr->name][key] = value;
+					_D("<type=\"%s\"><%s><%s \"%s\"=\"%s\">\n", device_type.c_str(), (const char*)virtual_sensor_node_ptr->name, (const char*)element_node_ptr->name, key.c_str(), value.c_str());
 					attr_ptr = attr_ptr->next;
 				}
 
@@ -168,7 +166,7 @@ bool virtual_sensor_config::get(const string& sensor_type, const string& element
 	auto it_device_list = m_virtual_sensor_configs.find(m_device_id);
 
 	if (it_device_list == m_virtual_sensor_configs.end())	{
-		_E("There is no <%s> device\n",m_device_id.c_str());
+		_E("There is no <%s> device\n", m_device_id.c_str());
 
 		m_device_id = DEFAULT_DEVICE;
 		it_device_list = m_virtual_sensor_configs.find(m_device_id);
@@ -184,21 +182,21 @@ bool virtual_sensor_config::get(const string& sensor_type, const string& element
 	auto it_virtual_sensor_list = it_device_list->second.find(sensor_type);
 
 	if (it_virtual_sensor_list == it_device_list->second.end())	{
-		_E("There is no <%s> sensor\n",sensor_type.c_str());
+		_E("There is no <%s> sensor\n", sensor_type.c_str());
 		return false;
 	}
 
 	auto it_element = it_virtual_sensor_list->second.find(element);
 
 	if (it_element == it_virtual_sensor_list->second.end()) {
-		_E("There is no <%s><%s> element\n",sensor_type.c_str(),element.c_str());
+		_E("There is no <%s><%s> element\n", sensor_type.c_str(), element.c_str());
 		return false;
 	}
 
 	auto it_attr = it_element->second.find(attr);
 
 	if (it_attr == it_element->second.end()) {
-		_D("There is no <%s><%s \"%s\">\n",sensor_type.c_str(),element.c_str(),attr.c_str());
+		_D("There is no <%s><%s \"%s\">\n", sensor_type.c_str(), element.c_str(), attr.c_str());
 		return false;
 	}
 
@@ -211,7 +209,7 @@ bool virtual_sensor_config::get(const string& sensor_type, const string& element
 {
 	string str_value;
 
-	if (get(sensor_type,element,attr,str_value) == false)
+	if (get(sensor_type, element, attr, str_value) == false)
 		return false;
 
 	stringstream str_stream(str_value);
@@ -225,7 +223,7 @@ bool virtual_sensor_config::get(const string& sensor_type, const string& element
 {
 	string str_value;
 
-	if (get(sensor_type,element,attr,str_value) == false)
+	if (get(sensor_type, element, attr, str_value) == false)
 		return false;
 
 	stringstream str_stream(str_value);
@@ -245,13 +243,12 @@ bool virtual_sensor_config::get(const string& sensor_type, const string& element
 
 bool virtual_sensor_config::get(const string& sensor_type, const string& element, float *value, int count)
 {
-	if (count == 1)
-	{
+	if (count == 1) {
 		if (get(sensor_type, element, DEFAULT_ATTR, value))
 			return true;
 	}
-	else if (count == 3)
-	{
+
+	if (count == 3) {
 		if (!get(sensor_type, element, DEFAULT_ATTR1, value))
 			return false;
 
@@ -267,23 +264,20 @@ bool virtual_sensor_config::get(const string& sensor_type, const string& element
 
 		return true;
 	}
-	else
-	{
-		_D("Count value not supported.\n");
-	}
+
+	_D("Count value not supported.\n");
 
 	return false;
 }
 
 bool virtual_sensor_config::get(const string& sensor_type, const string& element, int *value, int count)
 {
-	if (count == 1)
-	{
+	if (count == 1) {
 		if (get(sensor_type, element, DEFAULT_ATTR, value))
 			return true;
 	}
-	else if (count == 3)
-	{
+
+	if (count == 3) {
 		if (!get(sensor_type, element, DEFAULT_ATTR1, value))
 			return false;
 
@@ -299,10 +293,8 @@ bool virtual_sensor_config::get(const string& sensor_type, const string& element
 
 		return true;
 	}
-	else
-	{
-		_D("Count value not supported.\n");
-	}
+
+	_D("Count value not supported.\n");
 
 	return false;
 }
@@ -321,4 +313,3 @@ bool virtual_sensor_config::is_supported(const string& sensor_type)
 
 	return true;
 }
-

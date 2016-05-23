@@ -17,14 +17,17 @@
  *
  */
 
+#include <sys/epoll.h>
+#include <sys/socket.h>
+
 #include <systemd/sd-daemon.h>
 #include <server.h>
 #include <sensor_loader.h>
 #include <command_common.h>
 #include <command_worker.h>
 #include <thread>
-#include <sys/epoll.h>
 #include <sensor_event_poller.h>
+#include <client_info_manager.h>
 
 #define SYSTEMD_SOCKET_MAX    2
 
@@ -32,13 +35,12 @@ using std::thread;
 
 server::server()
 : m_mainloop(NULL)
+, m_running(false)
 {
-
 }
 
 server::~server()
 {
-	stop();
 }
 
 int server::get_systemd_socket(const char *name)
@@ -74,46 +76,77 @@ int server::get_systemd_socket(const char *name)
 void server::accept_command_channel(void)
 {
 	command_worker *cmd_worker;
+
 	_I("Command channel acceptor is started");
 
-	while (true) {
+	while (m_running) {
 		csocket client_command_socket;
+
+		if (!m_command_channel_accept_socket.is_valid()) {
+			_E("Failed to accept, event_channel_accept_socket is closed");
+			break;
+		}
 
 		if (!m_command_channel_accept_socket.accept(client_command_socket)) {
 			_E("Failed to accept command channel from a client");
 			continue;
 		}
 
+		if (!m_running) {
+			_E("server die");
+			break;
+		}
+
 		_D("New client (socket_fd : %d) connected", client_command_socket.get_socket_fd());
+
+		/* TODO: if socket is closed, it should be erased */
+		client_command_sockets.push_back(client_command_socket);
 
 		cmd_worker = new(std::nothrow) command_worker(client_command_socket);
 
 		if (!cmd_worker) {
 			_E("Failed to allocate memory");
-			continue;
+			break;
 		}
 
 		if (!cmd_worker->start())
 			delete cmd_worker;
 	}
+
+	_I("Command channel acceptor is terminated");
 }
 
 void server::accept_event_channel(void)
 {
-	_I("Event channel acceptor is started");
+	_I("Event channel acceptor is started!");
 
-	while (true) {
+	while (m_running) {
 		csocket client_event_socket;
+
+		if (!m_event_channel_accept_socket.is_valid()) {
+			_E("Failed to accept, event_channel_accept_socket is closed");
+			break;
+		}
 
 		if (!m_event_channel_accept_socket.accept(client_event_socket)) {
 			_E("Failed to accept event channel from a client");
 			continue;
 		}
 
+		if (!m_running) {
+			_E("server die");
+			break;
+		}
+
+		/* TODO: if socket is closed, it should be erased */
+		client_event_sockets.push_back(client_event_socket);
+
 		_D("New client(socket_fd : %d) connected", client_event_socket.get_socket_fd());
 
 		sensor_event_dispatcher::get_instance().accept_event_connections(client_event_socket);
 	}
+
+	_I("Event channel acceptor is terminated");
 }
 
 void server::poll_event(void)
@@ -126,32 +159,6 @@ void server::poll_event(void)
 		_E("Failed to poll event");
 		return;
 	}
-}
-
-void server::run(void)
-{
-	m_mainloop = g_main_loop_new(NULL, false);
-
-	sensor_event_dispatcher::get_instance().run();
-
-	listen_command_channel();
-	listen_event_channel();
-
-	thread event_channel_accepter(&server::accept_event_channel, this);
-	event_channel_accepter.detach();
-
-	thread command_channel_accepter(&server::accept_command_channel, this);
-	command_channel_accepter.detach();
-
-	thread event_poller(&server::poll_event, this);
-	event_poller.detach();
-
-	sd_notify(0, "READY=1");
-
-	g_main_loop_run(m_mainloop);
-	g_main_loop_unref(m_mainloop);
-
-	return;
 }
 
 bool server::listen_command_channel(void)
@@ -222,13 +229,69 @@ bool server::listen_event_channel(void)
 	return true;
 }
 
-void server::stop(void)
+void server::close_socket(void)
 {
-	if (m_mainloop)
-		g_main_loop_quit(m_mainloop);
-
 	m_command_channel_accept_socket.close();
 	m_event_channel_accept_socket.close();
+
+	for (int i = 0; i < client_command_sockets.size(); ++i)
+		client_command_sockets[i].close();
+
+	for (int i = 0; i < client_event_sockets.size(); ++i)
+		client_event_sockets[i].close();
+
+	client_command_sockets.clear();
+	client_event_sockets.clear();
+}
+
+void server::initialize(void)
+{
+	m_running = true;
+	m_mainloop = g_main_loop_new(NULL, false);
+
+	sensor_event_dispatcher::get_instance().run();
+
+	listen_command_channel();
+	listen_event_channel();
+
+	std::thread event_channel_accepter(&server::accept_event_channel, this);
+	event_channel_accepter.detach();
+
+	std::thread command_channel_accepter(&server::accept_command_channel, this);
+	command_channel_accepter.detach();
+
+	std::thread event_poller(&server::poll_event, this);
+	event_poller.detach();
+
+	sd_notify(0, "READY=1");
+
+	g_main_loop_run(m_mainloop);
+}
+
+void server::terminate(void)
+{
+	sensor_event_dispatcher::get_instance().stop();
+
+	close_socket();
+}
+
+void server::run(void)
+{
+	initialize();
+	terminate();
+}
+
+void server::stop(void)
+{
+	_I("Sensord server stopped");
+
+	m_running = false;
+
+	if (m_mainloop) {
+		g_main_loop_quit(m_mainloop);
+		g_main_loop_unref(m_mainloop);
+		m_mainloop = NULL;
+	}
 }
 
 server& server::get_instance()

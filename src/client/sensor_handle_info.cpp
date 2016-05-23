@@ -35,7 +35,6 @@ sensor_handle_info::sensor_handle_info()
 , m_accuracy_cb(NULL)
 , m_accuracy_user_data(NULL)
 {
-
 }
 
 sensor_handle_info::~sensor_handle_info()
@@ -82,7 +81,7 @@ bool sensor_handle_info::add_reg_event_info(unsigned int event_type, unsigned in
 	event_info.m_cb = cb;
 	event_info.m_user_data = user_data;
 
-	m_reg_event_infos.insert(pair<unsigned int,reg_event_info> (event_type, event_info));
+	m_reg_event_infos.insert(pair<unsigned int, reg_event_info> (event_type, event_info));
 
 	return true;
 }
@@ -105,7 +104,6 @@ void sensor_handle_info::clear_all_events(void)
 {
 	m_reg_event_infos.clear();
 }
-
 
 unsigned long long sensor_handle_info::renew_event_id(void)
 {
@@ -162,4 +160,3 @@ unsigned int sensor_handle_info::get_reg_event_count(void)
 {
 	return m_reg_event_infos.size();
 }
-

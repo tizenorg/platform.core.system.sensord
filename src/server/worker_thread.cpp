@@ -40,7 +40,7 @@ worker_thread::~worker_thread()
 bool worker_thread::transition_function(trans_func_index index)
 {
 	if (m_trans_func[index] != NULL) {
-		if(!m_trans_func[index](m_context)) {
+		if (!m_trans_func[index](m_context)) {
 			_E("Transition[%d] function returning false", index);
 			return false;
 		}
@@ -54,7 +54,6 @@ worker_thread::worker_state_t worker_thread::get_state(void)
 	lock l(m_mutex);
 	return m_state;
 }
-
 
 bool worker_thread::start(void)
 {
@@ -73,7 +72,9 @@ bool worker_thread::start(void)
 			th.detach();
 		}
 		return true;
-	} else if (m_state == WORKER_STATE_PAUSED) {
+	}
+
+	if (m_state == WORKER_STATE_PAUSED) {
 		m_state = WORKER_STATE_WORKING;
 		m_cond_working.notify_one();
 		return true;
@@ -94,7 +95,6 @@ bool worker_thread::stop(void)
 	}
 
 	if ((m_state == WORKER_STATE_WORKING) || (m_state == WORKER_STATE_PAUSED)) {
-
 		if (m_state == WORKER_STATE_PAUSED)
 			m_cond_working.notify_one();
 
@@ -123,7 +123,6 @@ bool worker_thread::pause(void)
 	_E("Failed to pause, because current state(%d) is not for PAUSE", m_state);
 
 	return false;
-
 }
 
 bool worker_thread::resume(void)
@@ -144,7 +143,6 @@ bool worker_thread::resume(void)
 	_E("Failed to resume, because current state(%d) is not for RESUME", m_state);
 	return false;
 }
-
 
 /*
  * After state changed to STOPPED, it should not access member fields,

@@ -26,7 +26,7 @@
 #include <string.h>
 #include <unordered_map>
 
-typedef std::unordered_map<unsigned int,reg_event_info> event_info_map;
+typedef std::unordered_map<unsigned int, reg_event_info> event_info_map;
 
 class sensor_handle_info {
 public:
@@ -58,6 +58,5 @@ private:
 	event_info_map m_reg_event_infos;
 	static unsigned long long m_event_id;
 };
-
 
 #endif /* _SENSOR_HANDLE_INFO_H_ */

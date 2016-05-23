@@ -22,23 +22,35 @@
 
 #include <glib.h>
 #include <csocket.h>
+#include <vector>
+#include <thread>
 
 class server {
 public:
+	static server& get_instance();
+
+public:
 	void run(void);
 	void stop(void);
-	static server& get_instance();
 
 private:
 	GMainLoop *m_mainloop;
 	csocket m_command_channel_accept_socket;
 	csocket m_event_channel_accept_socket;
 
+	std::vector<csocket> client_command_sockets;
+	std::vector<csocket> client_event_sockets;
+
+	bool m_running;
+
+private:
 	server();
-	~server();
+	virtual ~server();
+
+	void initialize(void);
+	void terminate(void);
 
 	void poll_event(void);
-	void accept_client(void);
 
 	bool listen_command_channel(void);
 	bool listen_event_channel(void);
@@ -46,6 +58,9 @@ private:
 	void accept_command_channel(void);
 	void accept_event_channel(void);
 
+	void close_socket(void);
+
+	/* TODO: move to socket class */
 	int get_systemd_socket(const char *name);
 };
 

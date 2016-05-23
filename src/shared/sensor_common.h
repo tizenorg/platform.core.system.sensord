@@ -32,7 +32,11 @@
 #define SENSOR_ID_INVALID -1
 
 #define SENSOR_TYPE_SHIFT 32
+#define SENSOR_EVENT_SHIFT 16
 #define SENSOR_INDEX_MASK 0xFFFFFFFF
+
+#define CONVERT_ID_TYPE(id) ((id) >> SENSOR_TYPE_SHIFT)
+#define CONVERT_TYPE_EVENT(type) ((type) << SENSOR_EVENT_SHIFT | 0x1)
 
 #ifndef NAME_MAX
 #define NAME_MAX 256
