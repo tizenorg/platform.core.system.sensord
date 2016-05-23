@@ -231,13 +231,16 @@ bool server::listen_event_channel(void)
 
 void server::close_socket(void)
 {
+	int size;
 	m_command_channel_accept_socket.close();
 	m_event_channel_accept_socket.close();
 
-	for (int i = 0; i < client_command_sockets.size(); ++i)
+	size = client_command_sockets.size();
+	for (int i = 0; i < size; ++i)
 		client_command_sockets[i].close();
 
-	for (int i = 0; i < client_event_sockets.size(); ++i)
+	size = client_event_sockets.size();
+	for (int i = 0; i < size; ++i)
 		client_event_sockets[i].close();
 
 	client_command_sockets.clear();
