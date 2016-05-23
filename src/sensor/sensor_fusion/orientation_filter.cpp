@@ -228,8 +228,8 @@ inline void orientation_filter<TYPE>::time_update()
 
 	m_pred_cov = (m_tran_mat * m_pred_cov * tran(m_tran_mat)) + m_driv_cov;
 
-	for (int j=0; j<M6X6C; ++j) {
-		for (int i=0; i<M6X6R; ++i)	{
+	for (int j = 0; j < M6X6C; ++j) {
+		for (int i = 0; i < M6X6R; ++i) {
 			if (ABS(m_pred_cov.m_mat[i][j]) < NEGLIGIBLE_VAL)
 				m_pred_cov.m_mat[i][j] = NEGLIGIBLE_VAL;
 		}
@@ -248,8 +248,7 @@ inline void orientation_filter<TYPE>::time_update()
 	m_quat_driv = (m_quat_driv * quat_eu_er) * (TYPE) PI;
 	m_quat_driv.quat_normalize();
 
-	if (is_initialized(m_state_new))
-	{
+	if (is_initialized(m_state_new)) {
 		m_state_error.m_vec[0] = m_euler_error.m_ang.m_vec[0];
 		m_state_error.m_vec[1] = m_euler_error.m_ang.m_vec[1];
 		m_state_error.m_vec[2] = m_euler_error.m_ang.m_vec[2];
@@ -288,12 +287,9 @@ inline void orientation_filter<TYPE>::time_update_gaming_rv()
 	euler_aid = quat2euler(m_quat_aid);
 	euler_driv = quat2euler(m_quat_output);
 
-	if ((SQUARE(m_accel.m_data.m_vec[1]) < ACCEL_THRESHOLD) && (SQUARE(m_gyro.m_data.m_vec[0]) < GYRO_THRESHOLD))
-	{
-		if ((SQUARE(m_accel.m_data.m_vec[0]) < ACCEL_THRESHOLD) && (SQUARE(m_gyro.m_data.m_vec[1]) < GYRO_THRESHOLD))
-		{
-			if (SQUARE(m_gyro.m_data.m_vec[2]) < GYRO_THRESHOLD)
-			{
+	if ((SQUARE(m_accel.m_data.m_vec[1]) < ACCEL_THRESHOLD) && (SQUARE(m_gyro.m_data.m_vec[0]) < GYRO_THRESHOLD)) {
+		if ((SQUARE(m_accel.m_data.m_vec[0]) < ACCEL_THRESHOLD) && (SQUARE(m_gyro.m_data.m_vec[1]) < GYRO_THRESHOLD)) {
+			if (SQUARE(m_gyro.m_data.m_vec[2]) < GYRO_THRESHOLD) {
 				euler_angles<TYPE> euler_gaming_rv(euler_aid.m_ang.m_vec[0], euler_aid.m_ang.m_vec[1],
 						euler_driv.m_ang.m_vec[2]);
 				m_quat_gaming_rv = euler2quat(euler_gaming_rv);
@@ -319,22 +315,22 @@ inline void orientation_filter<TYPE>::measurement_update()
 	iden.m_mat[0][0] = iden.m_mat[1][1] = iden.m_mat[2][2] = 1;
 	iden.m_mat[3][3] = iden.m_mat[4][4] = iden.m_mat[5][5] = 1;
 
-	for (int j=0; j<M6X6C; ++j) {
-		for (int i=0; i<M6X6R; ++i) {
+	for (int j = 0; j < M6X6C; ++j) {
+		for (int i = 0; i < M6X6R; ++i) {
 			gain.m_mat[i][j] = m_pred_cov.m_mat[j][i] / (m_pred_cov.m_mat[j][j] + m_aid_cov.m_mat[j][j]);
 			m_state_new.m_vec[i] = m_state_new.m_vec[i] + gain.m_mat[i][j] * m_state_error.m_vec[j];
 		}
 
 		matrix<TYPE, M6X6R, M6X6C> temp = iden;
 
-		for (int i=0; i<M6X6R; ++i)
+		for (int i = 0; i < M6X6R; ++i)
 			temp.m_mat[i][j] = iden.m_mat[i][j] - (gain.m_mat[i][j] * m_measure_mat.m_mat[j][i]);
 
 		m_pred_cov = temp * m_pred_cov;
 	}
 
-	for (int j=0; j<M6X6C; ++j) {
-		for (int i=0; i<M6X6R; ++i) {
+	for (int j = 0; j < M6X6C; ++j) {
+		for (int i = 0; i < M6X6R; ++i) {
 			if (ABS(m_pred_cov.m_mat[i][j]) < NEGLIGIBLE_VAL)
 				m_pred_cov.m_mat[i][j] = NEGLIGIBLE_VAL;
 		}
@@ -357,39 +353,22 @@ void orientation_filter<TYPE>::get_device_orientation(const sensor_data<TYPE> *a
 	initialize_sensor_data(accel, gyro, magnetic);
 
 	if (gyro != NULL && magnetic != NULL) {
-
 		orientation_triad_algorithm();
-
 		compute_covariance();
-
 		time_update();
-
 		measurement_update();
-
 		m_quaternion = m_quat_9axis;
-
 	} else if (!gyro && !magnetic) {
-
 		compute_accel_orientation();
-
 		m_quaternion = m_quat_aid;
-
 	} else if (!gyro) {
-
 		orientation_triad_algorithm();
-
 		m_quaternion = m_quat_aid;
-
 	} else if (!magnetic) {
-
 		compute_accel_orientation();
-
 		compute_covariance();
-
 		time_update_gaming_rv();
-
 		measurement_update();
-
 		m_quaternion = m_quat_gaming_rv;
 	}
 }

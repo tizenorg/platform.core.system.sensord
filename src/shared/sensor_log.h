@@ -33,12 +33,12 @@
 #endif
 #define LOG_TAG	"SENSOR"
 
-#define LOG_DUMP(fp, fmt, arg...) do { if (fp) fprintf(fp, fmt, ##arg); else _E(fmt, ##arg); } while(0)
+#define LOG_DUMP(fp, fmt, arg...) do { if (fp) fprintf(fp, fmt, ##arg); else _E(fmt, ##arg); } while (0)
 
 #ifdef _DEBUG
 #define DBG SLOGD
 #else
-#define DBG(...) do{} while(0)
+#define DBG(...) do {} while (0)
 #endif
 
 #define ERR SLOGE
@@ -61,31 +61,31 @@
 
 #if defined(_DEBUG)
 #  define warn_if(expr, fmt, arg...) do { \
-		if(expr) { \
+		if (expr) { \
 			_D("(%s) -> " fmt, #expr, ##arg); \
 		} \
 	} while (0)
 #  define ret_if(expr) do { \
-		if(expr) { \
+		if (expr) { \
 			_D("(%s) -> %s() return", #expr, __FUNCTION__); \
 			return; \
 		} \
 	} while (0)
 #  define retv_if(expr, val) do { \
-		if(expr) { \
+		if (expr) { \
 			_D("(%s) -> %s() return", #expr, __FUNCTION__); \
 			return (val); \
 		} \
 	} while (0)
 #  define retm_if(expr, fmt, arg...) do { \
-		if(expr) { \
+		if (expr) { \
 			_E(fmt, ##arg); \
 			_D("(%s) -> %s() return", #expr, __FUNCTION__); \
 			return; \
 		} \
 	} while (0)
 #  define retvm_if(expr, val, fmt, arg...) do { \
-		if(expr) { \
+		if (expr) { \
 			_E(fmt, ##arg); \
 			_D("(%s) -> %s() return", #expr, __FUNCTION__); \
 			return (val); \
@@ -94,28 +94,28 @@
 
 #else
 #  define warn_if(expr, fmt, arg...) do { \
-		if(expr) { \
+		if (expr) { \
 			_E(fmt, ##arg); \
 		} \
 	} while (0)
 #  define ret_if(expr) do { \
-		if(expr) { \
+		if (expr) { \
 			return; \
 		} \
 	} while (0)
 #  define retv_if(expr, val) do { \
-		if(expr) { \
+		if (expr) { \
 			return (val); \
 		} \
 	} while (0)
 #  define retm_if(expr, fmt, arg...) do { \
-		if(expr) { \
+		if (expr) { \
 			_E(fmt, ##arg); \
 			return; \
 		} \
 	} while (0)
 #  define retvm_if(expr, val, fmt, arg...) do { \
-		if(expr) { \
+		if (expr) { \
 			_E(fmt, ##arg); \
 			return (val); \
 		} \

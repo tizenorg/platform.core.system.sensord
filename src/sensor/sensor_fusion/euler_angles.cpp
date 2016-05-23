@@ -52,7 +52,6 @@ euler_angles<TYPE>::euler_angles(const euler_angles<TYPE>& e)
 template <typename TYPE>
 euler_angles<TYPE>::~euler_angles()
 {
-
 }
 
 template <typename TYPE>

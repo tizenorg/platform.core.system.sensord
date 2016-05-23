@@ -28,7 +28,6 @@ client_sensor_record::client_sensor_record()
 , m_pid(-1)
 , m_permission(SENSOR_PERMISSION_NONE)
 {
-
 }
 
 client_sensor_record::~client_sensor_record()
@@ -44,7 +43,7 @@ bool client_sensor_record::register_event(sensor_id_t sensor_id, unsigned int ev
 	if (it_usage == m_sensor_usages.end()) {
 		sensor_usage usage;
 		usage.register_event(event_type);
-		m_sensor_usages.insert(pair<sensor_id_t,sensor_usage>(sensor_id, usage));
+		m_sensor_usages.insert(pair<sensor_id_t, sensor_usage>(sensor_id, usage));
 		return true;
 	}
 
@@ -87,7 +86,6 @@ bool client_sensor_record::set_option(sensor_id_t sensor_id, int option)
 
 	return true;
 }
-
 
 bool client_sensor_record::set_start(sensor_id_t sensor_id, bool start)
 {
@@ -169,7 +167,7 @@ bool client_sensor_record::add_sensor_usage(sensor_id_t sensor_id)
 	}
 
 	sensor_usage usage;
-	m_sensor_usages.insert(pair<sensor_id_t,sensor_usage> (sensor_id, usage));
+	m_sensor_usages.insert(pair<sensor_id_t, sensor_usage>(sensor_id, usage));
 	return true;
 }
 
@@ -193,7 +191,6 @@ bool client_sensor_record::has_sensor_usage(void)
 	return true;
 }
 
-
 bool client_sensor_record::has_sensor_usage(sensor_id_t sensor_id)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
@@ -205,7 +202,6 @@ bool client_sensor_record::has_sensor_usage(sensor_id_t sensor_id)
 
 	return true;
 }
-
 
 bool client_sensor_record::get_registered_events(sensor_id_t sensor_id, event_type_vector &event_vec)
 {
@@ -219,7 +215,6 @@ bool client_sensor_record::get_registered_events(sensor_id_t sensor_id, event_ty
 	copy(it_usage->second.m_reg_events.begin(), it_usage->second.m_reg_events.end(), back_inserter(event_vec));
 
 	return true;
-
 }
 
 void client_sensor_record::set_client_id(int client_id)
@@ -251,7 +246,6 @@ int client_sensor_record::get_permission(void)
 	return  m_permission;
 }
 
-
 void client_sensor_record::set_event_socket(const csocket &socket)
 {
 	m_event_socket = socket;
@@ -261,7 +255,6 @@ void client_sensor_record::get_event_socket(csocket &socket)
 {
 	socket = m_event_socket;
 }
-
 
 bool client_sensor_record::close_event_socket(void)
 {

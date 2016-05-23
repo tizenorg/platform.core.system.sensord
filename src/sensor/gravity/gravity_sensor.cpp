@@ -51,7 +51,7 @@
 
 #define DEG2RAD(x) ((x) * M_PI / 180.0)
 #define NORM(x, y, z) sqrt((x)*(x) + (y)*(y) + (z)*(z))
-#define ARCTAN(x, y) ((x) == 0 ? 0 : (y) != 0 ? atan2((x),(y)) : (x) > 0 ? M_PI/2.0 : -M_PI/2.0)
+#define ARCTAN(x, y) ((x) == 0 ? 0 : (y) != 0 ? atan2((x), (y)) : (x) > 0 ? M_PI/2.0 : -M_PI/2.0)
 
 gravity_sensor::gravity_sensor()
 : m_fusion(NULL)
@@ -161,7 +161,10 @@ void gravity_sensor::synthesize_rv(const sensor_event_t& event)
 
 	float rotation[4] = {x, y, z, w};
 
-	rotation_to_gravity(rotation, gravity);
+	if (!rotation_to_gravity(rotation, gravity)) {
+		_D("Invalid rotation_vector: [%10f] [%10f] [%10f] [%10f]", x, y, z, w);
+		return;
+	}
 
 	gravity_event = (sensor_event_t *)malloc(sizeof(sensor_event_t));
 	if (!gravity_event) {

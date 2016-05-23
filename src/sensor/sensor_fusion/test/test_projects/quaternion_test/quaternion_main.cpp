@@ -73,6 +73,5 @@ int main()
 	quaternion<float> q11 = axis2quat(v2, ang1);
 	cout << "output\t" << q11.m_quat << "\n\n";
 	cout << endl;
-
 }
 

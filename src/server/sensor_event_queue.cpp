@@ -34,8 +34,9 @@ void sensor_event_queue::push_internal(void *event)
 	if (m_queue.size() >= QUEUE_FULL_SIZE) {
 		_E("Queue is full, drop it!");
 		free(event);
-	} else
+	} else {
 		m_queue.push(event);
+	}
 
 	if (wake)
 		m_cond_var.notify_one();

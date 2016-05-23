@@ -27,12 +27,10 @@ using std::istringstream;
 
 device_config::device_config(void)
 {
-
 }
 
 device_config::~device_config(void)
 {
-
 }
 
 bool device_config::get_device_id(void)

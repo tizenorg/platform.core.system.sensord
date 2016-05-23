@@ -24,14 +24,14 @@
 
 #define VIRTUAL_SENSOR_CONFIG_FILE_PATH "/usr/etc/virtual_sensors.xml"
 
-typedef std::unordered_map<std::string,std::string> Element;
+typedef std::unordered_map<std::string, std::string> Element;
 /*
 * an Element  is a group of attributes
 * <Element value1 = "10.0", value2 =  "20.0"/>
 *
 */
 
-typedef std::unordered_map<std::string,Element> Virtual_sensor;
+typedef std::unordered_map<std::string, Element> Virtual_sensor;
 /*
 * a Virtual_sensor is a group of elements to consist of one virtual sensor's configuration
 *	<ORIENTATION>
@@ -40,7 +40,7 @@ typedef std::unordered_map<std::string,Element> Virtual_sensor;
 *		...
 */
 
-typedef std::unordered_map<std::string,Virtual_sensor> virtual_sensor_configs;
+typedef std::unordered_map<std::string, Virtual_sensor> virtual_sensor_configs;
 /*
 * a Virtual_sensor_config represents virtual_sensors.xml
 * <ORIENTATION/>
@@ -49,7 +49,7 @@ typedef std::unordered_map<std::string,Virtual_sensor> virtual_sensor_configs;
 *
 */
 
-typedef std::unordered_map<std::string,virtual_sensor_configs> virtual_sensor_device_configs;
+typedef std::unordered_map<std::string, virtual_sensor_configs> virtual_sensor_device_configs;
 /*
 * a virtual_sensor_device_config represents virtual_sensors.xml
 * <emulator/>
@@ -60,7 +60,6 @@ typedef std::unordered_map<std::string,virtual_sensor_configs> virtual_sensor_de
 class virtual_sensor_config : public device_config {
 private:
 	virtual_sensor_config();
-	virtual_sensor_config(virtual_sensor_config const&) {};
 	virtual_sensor_config& operator=(virtual_sensor_config const&);
 
 	bool load_config(const std::string& config_path);
@@ -75,7 +74,7 @@ public:
 	bool get(const std::string& sensor_type, const std::string& element, const std::string& attr, int *value);
 
 	bool get(const std::string& sensor_type, const std::string& element, std::string& value);
-	bool get(const std::string& sensor_type, const std::string& element, float *value, int count =1);
+	bool get(const std::string& sensor_type, const std::string& element, float *value, int count = 1);
 	bool get(const std::string& sensor_type, const std::string& element, int *value, int count = 1);
 
 	bool is_supported(const std::string &sensor_type);

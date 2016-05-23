@@ -37,7 +37,7 @@ public:
 
 	//Server
 	bool create(int sock_type);
-	bool bind (const char *sock_path);
+	bool bind(const char *sock_path);
 	bool listen(const int max_connections);
 	bool accept(csocket& client_socket) const;
 
@@ -69,6 +69,7 @@ private:
 	ssize_t recv_for_seqpacket(void* buffer, size_t size) const;
 	ssize_t recv_for_stream(void* buffer, size_t size) const;
 
+private:
 	int m_sock_fd;
 	int m_sock_type;
 	sockaddr_un m_addr;

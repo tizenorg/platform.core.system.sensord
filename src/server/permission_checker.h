@@ -20,11 +20,17 @@
 #ifndef _PERMISSION_CHECKER_H_
 #define _PERMISSION_CHECKER_H_
 
+#include <cmutex.h>
 #include <string>
 #include <vector>
 #include <memory>
 
 class permission_checker {
+public:
+	static permission_checker& get_instance();
+
+	int get_permission(int sock_fd);
+
 private:
 	class permission_info {
 		public:
@@ -46,16 +52,15 @@ private:
 	permission_checker(permission_checker const&) {};
 	permission_checker& operator=(permission_checker const&);
 
-	void init();
-	void deinit();
+	void init(void);
+	void deinit(void);
 
+private:
 	permission_info_vector m_permission_infos;
 	int m_permission_set;
+	cmutex m_mutex;
 
-public:
-	static permission_checker& get_instance();
-
-	int get_permission(int sock_fd);
+	void init_cynara(void);
 };
 
 #endif /* _PERMISSION_CHECKER_H_ */

@@ -34,7 +34,6 @@ sensor_info_manager::~sensor_info_manager()
 	auto it_info = m_sensor_infos.begin();
 
 	while (it_info != m_sensor_infos.end()) {
-
 		delete it_info->second;
 		++it_info;
 	}
@@ -74,9 +73,8 @@ vector<sensor_info *> sensor_info_manager::get_infos(sensor_type_t type)
 	else
 		ret = m_sensor_infos.equal_range(type);
 
-	for (auto it_info = ret.first; it_info != ret.second; ++it_info) {
+	for (auto it_info = ret.first; it_info != ret.second; ++it_info)
 		sensor_infos.push_back(it_info->second);
-	}
 
 	return sensor_infos;
 }
@@ -90,7 +88,6 @@ const sensor_info* sensor_info_manager::get_info(sensor_id_t id)
 
 	return it_info->second;
 }
-
 
 bool sensor_info_manager::is_valid(sensor_info* info)
 {

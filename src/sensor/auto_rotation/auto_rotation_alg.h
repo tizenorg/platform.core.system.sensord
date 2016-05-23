@@ -31,4 +31,5 @@ public:
 	virtual bool stop(void);
 	virtual bool get_rotation(float acc[3], unsigned long long timestamp, int prev_rotation, int &rotation) = 0;
 };
+
 #endif /* _AUTO_ROTATION_ALG_H_ */

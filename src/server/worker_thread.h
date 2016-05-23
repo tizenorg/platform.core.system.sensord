@@ -17,7 +17,6 @@
  *
  */
 
-
 #ifndef _WORKER_THREAD_H_
 #define _WORKER_THREAD_H_
 

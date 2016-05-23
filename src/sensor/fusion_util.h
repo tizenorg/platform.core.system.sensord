@@ -26,6 +26,9 @@ extern "C"
 #endif
 
 int quat_to_matrix(const float *quat, float *R);
+int matrix_to_quat(const float *R, float *quat);
+int calculate_rotation_matrix(float *accel, float *geo, float *R, float *I);
+int quat_to_orientation(const float *rotation, float &azimuth, float &pitch, float &roll);
 
 #ifdef __cplusplus
 }
