@@ -18,22 +18,10 @@ BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(vconf)
 BuildRequires:  pkgconfig(libsystemd-daemon)
-BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(cynara-creds-socket)
 BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
 Requires:   libsensord = %{version}-%{release}
-
-%define auto_rotation_state ON
-%define orientation_state OFF
-%define gravity_state OFF
-%define linear_accel_state OFF
-%define rv_state OFF
-%define geomagnetic_rv_state OFF
-%define gaming_rv_state OFF
-%define tilt_state OFF
-%define gyroscope_uncal_state OFF
-%define build_test_suite ON
 
 %ifarch %{ix86} x86_64
 %define BUILD_ARCH EMULATOR
@@ -65,7 +53,6 @@ Group:      System/Development
 %description -n sensor-hal-devel
 Sensord HAL interface
 
-%if %{build_test_suite} == "ON"
 %package -n sensor-test
 Summary:    Sensord library
 Group:      System/Testing
@@ -73,19 +60,12 @@ Group:      System/Testing
 %description -n sensor-test
 Sensor functional testing
 
-%endif
-
 %prep
 %setup -q
-
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DMAJORVER=${MAJORVER} -DFULLVER=%{version} \
-	-DORIENTATION=%{orientation_state} -DGRAVITY=%{gravity_state} \
-	-DLINEAR_ACCEL=%{linear_accel_state} -DRV=%{rv_state} \
-	-DGEOMAGNETIC_RV=%{geomagnetic_rv_state} -DGAMING_RV=%{gaming_rv_state} \
-	-DGYROSCOPE_UNCAL=%{gyroscope_uncal_state} -DAUTO_ROTATION=%{auto_rotation_state} \
-	-DTILT=%{tilt_state} -DTEST_SUITE=%{build_test_suite} -DARCH=%{BUILD_ARCH}
+	-DARCH=%{BUILD_ARCH}
 
 %build
 make %{?jobs:-j%jobs}
@@ -153,7 +133,6 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 %{_includedir}/sensor/sensor_hal_types.h
 %license LICENSE.APLv2
 
-%if %{build_test_suite} == "ON"
 %files -n sensor-test
 %defattr(-,root,root,-)
 %{_bindir}/api-test
@@ -162,4 +141,3 @@ ln -sf %{_libdir}/libsensor.so.%{version} %{_libdir}/libsensor.so.1
 %{_bindir}/multi-process-performance-test
 %{_bindir}/fusion-data-collection
 %license LICENSE.APLv2
-%endif
