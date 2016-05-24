@@ -45,6 +45,7 @@ sensor_event_listener::sensor_event_listener()
 , m_thread_state(THREAD_STATE_TERMINATE)
 , m_hup_observer(NULL)
 , m_client_info(sensor_client_info::get_instance())
+, m_display_rotation(AUTO_ROTATION_DEGREE_UNKNOWN)
 {
 }
 
@@ -235,6 +236,36 @@ void sensor_event_listener::post_callback_to_main_loop(client_callback_info* cb_
 bool sensor_event_listener::is_valid_callback(client_callback_info *cb_info)
 {
 	return m_client_info.is_event_active(cb_info->handle, cb_info->event_type, cb_info->event_id);
+}
+
+void sensor_event_listener::align_sensor_axis(sensor_t sensor, sensor_data_t *data)
+{
+	sensor_type_t type = sensor_to_sensor_info(sensor)->get_type();
+
+	if (type != ACCELEROMETER_SENSOR && type != GYROSCOPE_SENSOR && type != GRAVITY_SENSOR)
+		return;
+
+	float x, y;
+
+	switch (m_display_rotation) {
+	case AUTO_ROTATION_DEGREE_90:	/* Landscape Left */
+		x = -data->values[1];
+		y = data->values[0];
+		break;
+	case AUTO_ROTATION_DEGREE_180:	/* Portrait Bottom */
+		x = -data->values[0];
+		y = -data->values[1];
+		break;
+	case AUTO_ROTATION_DEGREE_270:	/* Landscape Right */
+		x = data->values[1];
+		y = -data->values[0];
+		break;
+	default:
+		return;
+	}
+
+	data->values[0] = x;
+	data->values[1] = y;
 }
 
 gboolean sensor_event_listener::callback_dispatcher(gpointer data)
@@ -451,4 +482,14 @@ bool sensor_event_listener::start_event_listener(void)
 	listener.detach();
 
 	return true;
+}
+
+void sensor_event_listener::set_display_rotation(int rt)
+{
+	_D("New display rotation: %d", rt);
+
+	if (rt < AUTO_ROTATION_DEGREE_0 || rt > AUTO_ROTATION_DEGREE_270)
+		return;
+
+	m_display_rotation = rt;
 }

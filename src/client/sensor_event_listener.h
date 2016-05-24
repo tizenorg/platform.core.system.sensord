@@ -77,6 +77,8 @@ public:
 	void clear(void);
 
 	void set_hup_observer(hup_observer_t observer);
+	void set_display_rotation(int rt);
+
 private:
 	enum thread_state {
 		THREAD_STATE_START,
@@ -96,6 +98,9 @@ private:
 	hup_observer_t m_hup_observer;
 
 	sensor_client_info &m_client_info;
+
+	/* WC1's rotation control */
+	int m_display_rotation;
 
 	sensor_event_listener();
 	~sensor_event_listener();
@@ -121,6 +126,9 @@ private:
 	static gboolean callback_dispatcher(gpointer data);
 
 	void set_thread_state(thread_state state);
+
+	/* WC1's sensor axis alignment */
+	void align_sensor_axis(sensor_t sensor, sensor_data_t *data);
 };
 
 #endif /* _SENSOR_EVENT_LISTENER_H_ */

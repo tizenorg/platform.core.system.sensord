@@ -30,6 +30,7 @@
 #include <sensor_info_manager.h>
 #include <vector>
 #include <algorithm>
+#include "dbus_listener.h"
 
 using std::vector;
 
@@ -636,6 +637,7 @@ API int sensord_connect(sensor_t sensor)
 	}
 
 	set_power_save_state_cb();
+	dbus_listener::init();
 	return handle;
 }
 
