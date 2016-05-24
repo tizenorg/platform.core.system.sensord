@@ -294,7 +294,7 @@ void server::stop(void)
 	}
 }
 
-server& server::get_instance()
+server& server::get_instance(void)
 {
 	static server inst;
 	return inst;

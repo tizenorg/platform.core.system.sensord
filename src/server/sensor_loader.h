@@ -57,7 +57,7 @@ private:
 	sensor_device_map_t m_devices;
 	std::vector<void *> m_handles;
 public:
-	static sensor_loader& get_instance();
+	static sensor_loader& get_instance(void);
 	bool load(void);
 
 	sensor_base* get_sensor(sensor_type_t type);

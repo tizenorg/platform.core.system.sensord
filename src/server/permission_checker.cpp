@@ -60,24 +60,24 @@ static bool check_privilege_by_sockfd(int sock_fd, const char *priv)
 	return (ret == CYNARA_API_ACCESS_ALLOWED);
 }
 
-permission_checker::permission_checker()
+permission_checker::permission_checker(void)
 : m_permission_set(0)
 {
 	init();
 }
 
-permission_checker::~permission_checker()
+permission_checker::~permission_checker(void)
 {
 	deinit();
 }
 
-permission_checker& permission_checker::get_instance()
+permission_checker& permission_checker::get_instance(void)
 {
 	static permission_checker inst;
 	return inst;
 }
 
-void permission_checker::init()
+void permission_checker::init(void)
 {
 	AUTOLOCK(m_mutex);
 
@@ -121,7 +121,7 @@ void permission_checker::init_cynara(void)
 	_I("Cynara initialized");
 }
 
-void permission_checker::deinit()
+void permission_checker::deinit(void)
 {
 	AUTOLOCK(m_mutex);
 

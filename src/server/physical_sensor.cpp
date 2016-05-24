@@ -68,7 +68,7 @@ uint32_t physical_sensor::get_hal_id(void)
 	return m_info->id;
 }
 
-int physical_sensor::get_poll_fd()
+int physical_sensor::get_poll_fd(void)
 {
 	AUTOLOCK(m_mutex);
 
@@ -178,7 +178,7 @@ int physical_sensor::set_attribute(int32_t attribute, char *value, int value_len
 	return OP_SUCCESS;
 }
 
-bool physical_sensor::on_start()
+bool physical_sensor::on_start(void)
 {
 	AUTOLOCK(m_mutex);
 
@@ -188,7 +188,7 @@ bool physical_sensor::on_start()
 	return m_sensor_device->enable(m_info->id);
 }
 
-bool physical_sensor::on_stop()
+bool physical_sensor::on_stop(void)
 {
 	AUTOLOCK(m_mutex);
 

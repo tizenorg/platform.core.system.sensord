@@ -34,7 +34,7 @@ cmutex::~cmutex()
 	pthread_mutex_destroy(&m_mutex);
 }
 
-void cmutex::lock()
+void cmutex::lock(void)
 {
 #ifdef _LOCK_DEBUG
 	cbase_lock::lock(LOCK_TYPE_MUTEX, "mutex", __MODULE__, __func__, __LINE__);
@@ -58,7 +58,7 @@ int cmutex::try_lock_impl(void)
 	return pthread_mutex_trylock(&m_mutex);
 }
 
-int cmutex::unlock_impl()
+int cmutex::unlock_impl(void)
 {
 	return pthread_mutex_unlock(&m_mutex);
 }

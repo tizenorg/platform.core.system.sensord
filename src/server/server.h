@@ -27,7 +27,7 @@
 
 class server {
 public:
-	static server& get_instance();
+	static server& get_instance(void);
 
 public:
 	void run(void);

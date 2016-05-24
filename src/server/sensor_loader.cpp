@@ -71,7 +71,7 @@ sensor_loader::~sensor_loader()
 	m_handles.clear();
 }
 
-sensor_loader& sensor_loader::get_instance()
+sensor_loader& sensor_loader::get_instance(void)
 {
 	static sensor_loader inst;
 	return inst;

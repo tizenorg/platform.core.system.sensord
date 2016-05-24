@@ -31,7 +31,7 @@ typedef std::vector<int> client_id_vec;
 
 class client_info_manager {
 public:
-	static client_info_manager& get_instance();
+	static client_info_manager& get_instance(void);
 	int create_client_record(void);
 	bool remove_client_record(int client_id);
 	bool has_client_record(int client_id);

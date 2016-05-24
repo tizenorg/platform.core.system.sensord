@@ -38,7 +38,7 @@ sensor_event_dispatcher::~sensor_event_dispatcher()
 {
 }
 
-sensor_event_dispatcher& sensor_event_dispatcher::get_instance()
+sensor_event_dispatcher& sensor_event_dispatcher::get_instance(void)
 {
 	static sensor_event_dispatcher inst;
 	return inst;

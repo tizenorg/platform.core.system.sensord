@@ -27,7 +27,7 @@
 
 class permission_checker {
 public:
-	static permission_checker& get_instance();
+	static permission_checker& get_instance(void);
 
 	int get_permission(int sock_fd);
 

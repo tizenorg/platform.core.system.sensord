@@ -85,7 +85,7 @@ bool sensor_client_info::delete_handle(int handle)
 	return true;
 }
 
-bool sensor_client_info::is_active()
+bool sensor_client_info::is_active(void)
 {
 	AUTOLOCK(m_handle_info_lock);
 

@@ -33,7 +33,8 @@ public:
 protected:
 	int lock_impl(void);
 	int try_lock_impl(void);
-	int unlock_impl();
+	int unlock_impl(void);
+
 private:
 	pthread_mutex_t m_mutex;
 };

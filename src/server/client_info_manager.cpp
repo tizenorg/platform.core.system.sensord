@@ -36,7 +36,7 @@ client_info_manager::~client_info_manager()
 	m_clients.clear();
 }
 
-client_info_manager& client_info_manager::get_instance()
+client_info_manager& client_info_manager::get_instance(void)
 {
 	static client_info_manager inst;
 	return inst;

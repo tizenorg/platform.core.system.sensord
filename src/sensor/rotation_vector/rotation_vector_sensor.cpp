@@ -59,7 +59,7 @@ rotation_vector_sensor::~rotation_vector_sensor()
 	_I("%s is destroyed!", SENSOR_NAME);
 }
 
-bool rotation_vector_sensor::init()
+bool rotation_vector_sensor::init(void)
 {
 	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
 	m_mag_sensor = sensor_loader::get_instance().get_sensor(GEOMAGNETIC_SENSOR);

@@ -66,7 +66,7 @@ unsigned int sensor_base::get_event_type(void)
 	return -1;
 }
 
-const char* sensor_base::get_name()
+const char* sensor_base::get_name(void)
 {
 	return NULL;
 }
@@ -76,7 +76,7 @@ bool sensor_base::get_sensor_info(sensor_info &info)
 	return false;
 }
 
-bool sensor_base::is_virtual()
+bool sensor_base::is_virtual(void)
 {
 	return false;
 }
@@ -116,7 +116,7 @@ int sensor_base::set_attribute(int32_t attribute, char *value, int value_size)
 	return OP_SUCCESS;
 }
 
-bool sensor_base::start()
+bool sensor_base::start(void)
 {
 	AUTOLOCK(m_client_mutex);
 
@@ -344,12 +344,12 @@ bool sensor_base::set_batch_latency(unsigned long latency)
 	return true;
 }
 
-bool sensor_base::on_start()
+bool sensor_base::on_start(void)
 {
 	return true;
 }
 
-bool sensor_base::on_stop()
+bool sensor_base::on_stop(void)
 {
 	return true;
 }

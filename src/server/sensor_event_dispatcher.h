@@ -34,7 +34,7 @@ typedef std::list<virtual_sensor *> virtual_sensors;
 
 class sensor_event_dispatcher {
 public:
-	static sensor_event_dispatcher& get_instance();
+	static sensor_event_dispatcher& get_instance(void);
 
 	bool run(void);
 	bool stop(void);

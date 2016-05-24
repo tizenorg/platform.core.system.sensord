@@ -81,8 +81,8 @@ private:
 
 	void fusion_set_accel(const sensor_event_t& event);
 	void fusion_set_gyro(const sensor_event_t& event);
-	void fusion_update_angle();
-	void fusion_get_gravity();
+	void fusion_update_angle(void);
+	void fusion_get_gravity(void);
 	double complementary(double angle, double angle_in, double vel, double delta_t, double alpha);
 	void complementary(unsigned long long time_diff);
 };
