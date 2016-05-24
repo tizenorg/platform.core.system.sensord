@@ -79,6 +79,7 @@ bool command_channel::command_handler(cpacket *packet, void **return_payload)
 
 bool command_channel::create_channel(void)
 {
+	const int cllient_type = CLIENT_TYPE_SENSOR_CLIENT;
 	if (!m_command_socket.create(SOCK_STREAM))
 		return false;
 
@@ -88,6 +89,11 @@ bool command_channel::create_channel(void)
 	}
 
 	m_command_socket.set_connection_mode();
+
+	if (m_command_socket.send(&cllient_type, sizeof(cllient_type)) <= 0) {
+		_E("Failed to send client type in client %s, command socket fd[%d]", get_client_name(), m_command_socket.get_socket_fd());
+		return false;
+	}
 
 	return true;
 }

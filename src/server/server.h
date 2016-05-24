@@ -58,6 +58,9 @@ private:
 	void accept_command_channel(void);
 	void accept_event_channel(void);
 
+	void dispatch_worker(csocket socket);
+	void dispatch_event_channel_creator(csocket socket);
+
 	void close_socket(void);
 
 	/* TODO: move to socket class */

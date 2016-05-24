@@ -48,6 +48,7 @@ private:
 	void create_sensors(void);
 	template <typename _sensor> void create_physical_sensors(sensor_type_t type);
 	template <typename _sensor> void create_virtual_sensors(const char *name);
+	template <typename _sensor> void create_external_sensors(const char *name);
 	template <typename _sensor> sensor_base* create_sensor(void);
 
 	void show_sensor_info(void);

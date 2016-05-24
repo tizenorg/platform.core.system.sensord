@@ -22,6 +22,7 @@
 #include <sensor_event_dispatcher.h>
 #include <sensor_log.h>
 #include <thread>
+#include <vector>
 
 using std::thread;
 using std::vector;

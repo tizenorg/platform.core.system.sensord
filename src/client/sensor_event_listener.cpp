@@ -380,6 +380,7 @@ void sensor_event_listener::listen_events(void)
 
 bool sensor_event_listener::create_event_channel(void)
 {
+	const int client_type = CLIENT_TYPE_SENSOR_CLIENT;
 	int client_id;
 	channel_ready_t event_channel_ready;
 
@@ -393,6 +394,11 @@ bool sensor_event_listener::create_event_channel(void)
 
 	if (!m_event_socket.set_connection_mode()) {
 		_E("Failed to set connection mode for client %s", get_client_name());
+		return false;
+	}
+
+	if (m_event_socket.send(&client_type, sizeof(client_type)) <= 0) {
+		_E("Failed to send client type in client %s, event socket fd[%d]", get_client_name(), m_event_socket.get_socket_fd());
 		return false;
 	}
 

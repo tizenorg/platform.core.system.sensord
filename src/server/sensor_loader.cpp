@@ -26,6 +26,7 @@
 #include <sensor_log.h>
 #include <physical_sensor.h>
 #include <virtual_sensor.h>
+#include <external_sensor.h>
 #include <unordered_set>
 #include <algorithm>
 #include <memory>
@@ -239,6 +240,30 @@ void sensor_loader::create_virtual_sensors(const char *name)
 	if (!instance->init()) {
 		_E("Failed to init %s", name);
 		delete instance;
+		return;
+	}
+
+	std::shared_ptr<sensor_base> sensor(instance);
+	type = sensor->get_type();
+	index = (int32_t)(m_sensors.count(type));
+
+	sensor->set_id((int64_t)type << SENSOR_TYPE_SHIFT | index);
+
+	m_sensors.insert(std::make_pair(type, sensor));
+
+	_I("created [%s] sensor", sensor->get_name());
+}
+
+template <typename _sensor>
+void sensor_loader::create_external_sensors(const char *name)
+{
+	int32_t index;
+	sensor_type_t type;
+	external_sensor *instance;
+
+	instance = dynamic_cast<external_sensor *>(create_sensor<_sensor>());
+	if (!instance) {
+		_E("Memory allocation failed[%s]", name);
 		return;
 	}
 

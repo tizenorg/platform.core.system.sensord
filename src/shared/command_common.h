@@ -22,6 +22,8 @@
 
 #include <cpacket.h>
 #include <sensor_common.h>
+#include <string>
+#include <vector>
 
 #define COMMAND_CHANNEL_PATH		"/tmp/sensord_command_socket\0"
 #define EVENT_CHANNEL_PATH			"/tmp/sensord_event_socket\0"
@@ -48,6 +50,16 @@ enum packet_type_t {
 	CMD_SET_ATTRIBUTE_STR,
 	CMD_FLUSH,
 	CMD_CNT,
+};
+
+enum ext_packet_type_t {
+	CMD_EXT_DONE = -1,
+	CMD_EXT_NONE = 0,
+	CMD_EXT_GET_ID,
+	CMD_EXT_CONNECT,
+	CMD_EXT_DISCONNECT,
+	CMD_EXT_POST,
+	CMD_EXT_CNT,
 };
 
 typedef struct {
@@ -127,6 +139,36 @@ typedef struct  {
 typedef struct {
 } cmd_flush_t;
 
+typedef struct {
+	char name[NAME_MAX];
+} cmd_ext_get_id_t;
+
+typedef struct {
+	int client_id;
+	char key[NAME_MAX];
+} cmd_ext_connect_t;
+
+typedef struct {
+} cmd_ext_disconnect_t;
+
+typedef struct {
+	unsigned long long timestamp;
+	int data_cnt;
+	float data[0];
+} cmd_ext_post_t;
+
+typedef struct {
+	long value;
+} cmd_ext_done_t;
+
+typedef struct {
+	int client_id;
+} cmd_ext_get_id_done_t;
+
+typedef struct {
+	sensor_id_t sensor_id;
+} cmd_ext_connect_done_t;
+
 #define CHANNEL_MAGIC_NUM 0xCAFECAFE
 
 typedef struct {
@@ -134,6 +176,19 @@ typedef struct {
 	int client_id;
 } channel_ready_t;
 
+typedef struct external_command_header_t {
+	sensor_id_t sensor_id;
+	int command_len;
+} external_command_header_t;
+
+typedef struct external_command_t {
+	external_command_header_t header;
+	std::vector<char> command;
+} external_command_t;
+
 typedef void *(*cmd_func_t)(void *data, void *cb_data);
+
+#define COMMAND_LEN_MAX 	(10*1024)
+#define POST_DATA_LEN_MAX 	(10*1024)
 
 #endif /* _COMMAND_COMMON_H_ */

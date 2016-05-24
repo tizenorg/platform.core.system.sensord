@@ -116,6 +116,11 @@ enum sensor_permission_t {
 	SENSOR_PERMISSION_BIO = (1 << 1)
 };
 
+enum client_type_t {
+	CLIENT_TYPE_SENSOR_CLIENT	= 1,
+	CLIENT_TYPE_EXTERNAL_SOURCE,
+};
+
 typedef struct sensor_event_t {
 	unsigned int event_type;
 	sensor_id_t sensor_id;
