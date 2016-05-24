@@ -250,10 +250,10 @@ ssize_t csocket::send_for_stream(const void *buffer, size_t size) const
 				len, get_client_name());
 
 			/*
-			* If socket is not available to use it temporarily,
-			* EAGAIN(EWOULDBLOCK) is returned by ::send().
-			* so in order to prevent that data are omitted, retry to send it
-			*/
+			 * If socket is not available to use it temporarily,
+			 * EAGAIN(EWOULDBLOCK) is returned by ::send().
+			 * so in order to prevent that data are omitted, sleep&retry to send it
+			 */
 			if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
 				usleep(1000);
 				continue;
@@ -291,10 +291,10 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 				len, get_client_name());
 
 			/*
-			* If socket is not available to use during for some time,
-			* EAGAIN(EWOULDBLOCK) is returned by ::recv().
-			* so in order to prevent that data are omitted, retry to receive it
-			*/
+			 * If socket is not available to use it temporarily,
+			 * EAGAIN(EWOULDBLOCK) is returned by ::recv().
+			 * so in order to prevent that data are omitted, sleep&retry to receive it
+			 */
 			if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
 				usleep(1000);
 				continue;
@@ -359,7 +359,7 @@ bool csocket::connect(const char *sock_path)
 
 	addr_len = strlen(m_addr.sun_path) + sizeof(m_addr.sun_family);
 
-	if (::connect(m_sock_fd, (sockaddr *) &m_addr, addr_len) < 0) {
+	if (::connect(m_sock_fd, (sockaddr *)&m_addr, addr_len) < 0) {
 		_ERRNO(errno, _E, "Failed to connect sock_fd: %d for %s",
 				m_sock_fd, get_client_name());
 		return false;
