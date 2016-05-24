@@ -306,7 +306,7 @@ void sensor_event_listener::listen_events(void)
 
 		len = sensor_event_poll(buffer, sizeof(sensor_event_t), event);
 		if (len <= 0) {
-			_I("Failed to sensor_event_poll()");
+			_E("Failed to sensor_event_poll()");
 			break;
 		}
 
@@ -316,7 +316,7 @@ void sensor_event_listener::listen_events(void)
 
 		len = sensor_event_poll(buffer_data, data_len, event);
 		if (len <= 0) {
-			_I("Failed to sensor_event_poll() for sensor_data");
+			_E("Failed to sensor_event_poll() for sensor_data");
 			free(buffer_data);
 			break;
 		}
