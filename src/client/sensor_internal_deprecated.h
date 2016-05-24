@@ -117,7 +117,7 @@ DEPRECATED int sf_start(int handle, int option);
 DEPRECATED int sf_stop(int handle);
 
 /**
- * @fn int sf_register_event(int handle, unsigned int event_type, event_conditon_t *event_condition, sensor_callback_func_t cb, void *user_data )
+ * @fn int sf_register_event(int handle, unsigned int event_type, event_conditon_t *event_condition, sensor_callback_func_t cb, void *user_data)
  * @brief This API registers a user defined callback function with a connected sensor for a particular event. This callback function will be called when there is a change in the state of respective sensor. user_data will be the parameter used during the callback call. Callback interval can be adjusted using even_contion_t argument.
  * @param[in] handle received handle value by sf_connect()
  * @param[in] event_type your desired event_type to register it

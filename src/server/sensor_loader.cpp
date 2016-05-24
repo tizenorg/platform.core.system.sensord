@@ -342,7 +342,7 @@ sensor_base* sensor_loader::get_sensor(sensor_id_t id)
 {
 	vector<sensor_base *> sensors;
 
-	sensor_type_t type = static_cast<sensor_type_t> (id >> SENSOR_TYPE_SHIFT);
+	sensor_type_t type = static_cast<sensor_type_t>(id >> SENSOR_TYPE_SHIFT);
 	unsigned int index = (id & SENSOR_INDEX_MASK);
 
 	sensors = get_sensors(type);

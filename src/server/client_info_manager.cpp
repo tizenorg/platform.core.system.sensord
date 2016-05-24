@@ -203,7 +203,7 @@ int client_info_manager::create_client_record(void)
 
 	client_record.set_client_id(client_id);
 
-	m_clients.insert(pair<int, client_sensor_record> (client_id, client_record));
+	m_clients.insert(pair<int, client_sensor_record>(client_id, client_record));
 
 	return client_id;
 }

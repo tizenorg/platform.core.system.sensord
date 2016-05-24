@@ -60,7 +60,9 @@ csocket::csocket(const csocket &sock)
 	memcpy(&m_addr, &sock.m_addr, sizeof(sockaddr_un));
 }
 
-csocket::~csocket() { }
+csocket::~csocket()
+{
+}
 
 bool csocket::create(int sock_type)
 {

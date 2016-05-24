@@ -81,7 +81,7 @@ bool sensor_handle_info::add_reg_event_info(unsigned int event_type, unsigned in
 	event_info.m_cb = cb;
 	event_info.m_user_data = user_data;
 
-	m_reg_event_infos.insert(pair<unsigned int, reg_event_info> (event_type, event_info));
+	m_reg_event_infos.insert(pair<unsigned int, reg_event_info>(event_type, event_info));
 
 	return true;
 }
