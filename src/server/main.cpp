@@ -20,6 +20,7 @@
 #include <signal.h>
 #include <sensor_log.h>
 #include <server.h>
+#include <dbus_util.h>
 #include <sensor_loader.h>
 #include <string>
 
@@ -93,6 +94,8 @@ int main(int argc, char *argv[])
 
 	signal_init();
 
+	init_dbus();
+
 	set_cal_data();
 
 	/* TODO: loading sequence has to be moved to server */
@@ -102,7 +105,8 @@ int main(int argc, char *argv[])
 	server::get_instance().run();
 	server::get_instance().stop();
 
-	_I("Sensord terminated");
+	fini_dbus();
 
+	_I("Sensord terminated");
 	return 0;
 }
