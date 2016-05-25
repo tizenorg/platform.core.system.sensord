@@ -430,6 +430,7 @@ void external_sensor_manager::handle_command(sensor_id_t sensor, char* data, int
 		if (!cb_info) {
 			_E("Failed to allocate memory");
 			delete[] data;
+			return;
 		}
 
 		if (!get_cb_info(sensor, data, data_cnt, *cb_info)) {
