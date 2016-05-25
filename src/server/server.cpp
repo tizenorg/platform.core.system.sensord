@@ -234,18 +234,18 @@ bool server::listen_command_channel(void)
 
 	INFO("Failed to get systemd socket, create it by myself!");
 	if (!m_command_channel_accept_socket.create(SOCK_STREAM)) {
-		ERR("Failed to create command channel");
+		_E("Failed to create command channel");
 		return false;
 	}
 
 	if (!m_command_channel_accept_socket.bind(COMMAND_CHANNEL_PATH)) {
-		ERR("Failed to bind command channel");
+		_E("Failed to bind command channel");
 		m_command_channel_accept_socket.close();
 		return false;
 	}
 
 	if (!m_command_channel_accept_socket.listen(MAX_PENDING_CONNECTION)) {
-		ERR("Failed to listen command channel");
+		_E("Failed to listen command channel");
 		return false;
 	}
 
@@ -268,18 +268,18 @@ bool server::listen_event_channel(void)
 	INFO("Failed to get systemd socket, create it by myself!");
 
 	if (!m_event_channel_accept_socket.create(SOCK_SEQPACKET)) {
-		ERR("Failed to create event channel");
+		_E("Failed to create event channel");
 		return false;
 	}
 
 	if (!m_event_channel_accept_socket.bind(EVENT_CHANNEL_PATH)) {
-		ERR("Failed to bind event channel");
+		_E("Failed to bind event channel");
 		m_event_channel_accept_socket.close();
 		return false;
 	}
 
 	if (!m_event_channel_accept_socket.listen(MAX_PENDING_CONNECTION)) {
-		ERR("Failed to listen event channel");
+		_E("Failed to listen event channel");
 		m_event_channel_accept_socket.close();
 		return false;
 	}
