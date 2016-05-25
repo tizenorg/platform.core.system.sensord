@@ -82,13 +82,3 @@ API int sf_is_sensor_event_available(sensor_type_t sensor_type, unsigned int eve
 {
 	return OP_ERROR;
 }
-
-API int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties)
-{
-	return OP_ERROR;
-}
-
-API int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties)
-{
-	return OP_ERROR;
-}
