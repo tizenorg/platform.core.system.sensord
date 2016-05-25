@@ -38,8 +38,6 @@ extern "C"
 {
 #endif
 
-#define MAX_KEY_LEN 30
-
 typedef struct {
 	condition_op_t cond_op;
 	float cond_value1;
@@ -58,30 +56,6 @@ typedef struct {
 	int y;
 	int z;
 } sensor_panning_data_t;
-
-typedef struct {
-	int sensor_unit_idx;
-	float sensor_min_range;
-	float sensor_max_range;
-	float sensor_resolution;
-	char sensor_name[MAX_KEY_LEN];
-	char sensor_vendor[MAX_KEY_LEN];
-} sensor_properties_t;
-
-typedef struct {
-	int sensor_unit_idx;
-	float sensor_min_range;
-	float sensor_max_range;
-	float sensor_resolution;
-} sensor_data_properties_t;
-
-DEPRECATED int sf_is_sensor_event_available(sensor_type_t sensor_type, unsigned int event_type);
-
-DEPRECATED int sf_get_data_properties(unsigned int data_id, sensor_data_properties_t *return_data_properties);
-
-DEPRECATED int sf_get_properties(sensor_type_t sensor_type, sensor_properties_t *return_properties);
-
-DEPRECATED int sf_check_rotation(unsigned long *rotation);
 
 /**
  * @fn int sf_connect(sensor_type_t sensor)
@@ -176,6 +150,8 @@ DEPRECATED int sf_change_sensor_option(int handle, int option);
  * @return if it succeed, it returns zero, otherwise negative value
  */
 DEPRECATED int sf_send_sensorhub_data(int handle, const char* data, int data_len);
+
+DEPRECATED int sf_check_rotation(unsigned long *rotation);
 
 #ifdef __cplusplus
 }
