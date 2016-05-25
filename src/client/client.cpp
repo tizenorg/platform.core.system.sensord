@@ -38,6 +38,10 @@ using std::vector;
 #define API __attribute__((visibility("default")))
 #endif
 
+#ifndef VCONFKEY_SETAPPL_PSMODE
+#define VCONFKEY_SETAPPL_PSMODE "db/setting/psmode"
+#endif
+
 #define DEFAULT_INTERVAL POLL_10HZ_MS
 
 static cmutex lock;
@@ -81,6 +85,7 @@ static void set_power_save_state_cb(void)
 		g_power_save_state = get_power_save_state();
 		_D("power_save_state = [%d]", g_power_save_state);
 		vconf_notify_key_changed(VCONFKEY_PM_STATE, power_save_state_cb, NULL);
+		vconf_notify_key_changed(VCONFKEY_SETAPPL_PSMODE, power_save_state_cb, NULL);
 	}
 }
 
@@ -94,6 +99,7 @@ static void unset_power_save_state_cb(void)
 	if (g_power_save_state_cb_cnt == 0) {
 		_D("Power save callback is unregistered");
 		vconf_ignore_key_changed(VCONFKEY_PM_STATE, power_save_state_cb);
+		vconf_ignore_key_changed(VCONFKEY_SETAPPL_PSMODE, power_save_state_cb);
 	}
 }
 
@@ -113,13 +119,19 @@ void clean_up(void)
 
 static int get_power_save_state(void)
 {
+	int err;
 	int state = 0;
-	int pm_state;
+	int pm_state, ps_state;
 
-	vconf_get_int(VCONFKEY_PM_STATE, &pm_state);
+	err = vconf_get_int(VCONFKEY_PM_STATE, &pm_state);
 
-	if (pm_state == VCONFKEY_PM_STATE_LCDOFF)
+	if (pm_state == VCONFKEY_PM_STATE_LCDOFF && err >= 0)
 		state |= SENSOR_OPTION_ON_IN_SCREEN_OFF;
+
+	err = vconf_get_int(VCONFKEY_SETAPPL_PSMODE, &ps_state);
+
+	if (ps_state != SETTING_PSMODE_NORMAL && err >= 0)
+		state |= SENSOR_OPTION_ON_IN_POWERSAVE_MODE;
 
 	return state;
 }
