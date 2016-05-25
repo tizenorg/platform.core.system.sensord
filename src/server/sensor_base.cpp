@@ -297,6 +297,9 @@ void sensor_base::set_permission(int permission)
 
 bool sensor_base::push(sensor_event_t *event)
 {
+	if (!event || !(event->data))
+		return false;
+
 	set_cache(event->data);
 
 	AUTOLOCK(m_client_mutex);
