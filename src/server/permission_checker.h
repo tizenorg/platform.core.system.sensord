@@ -34,23 +34,22 @@ public:
 private:
 	class permission_info {
 		public:
-		permission_info(int _permission, bool _need_to_check, std::string _priv)
+		permission_info(int _permission, std::string _priv)
 		: permission(_permission)
-		, need_to_check(_need_to_check)
 		, privilege(_priv)
 		{
 		}
 		int permission;
-		bool need_to_check;
 		std::string privilege;
 	};
 
 	typedef std::vector<std::shared_ptr<permission_info>> permission_info_vector;
 
 	permission_checker();
-	~permission_checker();
 	permission_checker(permission_checker const&) {};
 	permission_checker& operator=(permission_checker const&);
+
+	~permission_checker();
 
 	void init(void);
 	void deinit(void);
@@ -61,6 +60,7 @@ private:
 	cmutex m_mutex;
 
 	void init_cynara(void);
+	void deinit_cynara(void);
 };
 
 #endif /* _PERMISSION_CHECKER_H_ */
