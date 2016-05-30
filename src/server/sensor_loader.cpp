@@ -63,8 +63,8 @@ sensor_loader::~sensor_loader()
 	sensor_device_map_t::iterator it_device;
 	std::vector<void *>::iterator it_handle;
 
-	for (it_device = m_devices.begin(); it_device != m_devices.end();)
-		it_device = m_devices.erase(it_device);
+	for (it_device = m_active_devices.begin(); it_device != m_active_devices.end();)
+		it_device = m_active_devices.erase(it_device);
 
 	for (it_handle = m_handles.begin(); it_handle != m_handles.end(); ++it_handle)
 		dlclose(*it_handle);
@@ -219,6 +219,9 @@ void sensor_loader::create_physical_sensors(sensor_type_t type)
 
 		std::shared_ptr<sensor_base> sensor_ptr(sensor);
 		m_sensors.insert(std::make_pair(_type, sensor_ptr));
+
+		m_active_devices[it->first] = it->second;
+		m_devices.erase(it->first);
 
 		_I("created [%s] sensor", sensor->get_name());
 	}
