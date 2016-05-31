@@ -119,18 +119,18 @@ void clean_up(void)
 
 static int get_power_save_state(void)
 {
-	int err;
+	int ret;
 	int state = 0;
 	int pm_state, ps_state;
 
-	err = vconf_get_int(VCONFKEY_PM_STATE, &pm_state);
+	ret = vconf_get_int(VCONFKEY_PM_STATE, &pm_state);
 
-	if (!err && pm_state == VCONFKEY_PM_STATE_LCDOFF)
+	if (!ret && pm_state == VCONFKEY_PM_STATE_LCDOFF)
 		state |= SENSOR_OPTION_ON_IN_SCREEN_OFF;
 
-	err = vconf_get_int(VCONFKEY_SETAPPL_PSMODE, &ps_state);
+	ret = vconf_get_int(VCONFKEY_SETAPPL_PSMODE, &ps_state);
 
-	if (!err && ps_state == SETTING_PSMODE_NORMAL)
+	if (!ret && ps_state != SETTING_PSMODE_NORMAL)
 		state |= SENSOR_OPTION_ON_IN_POWERSAVE_MODE;
 
 	return state;

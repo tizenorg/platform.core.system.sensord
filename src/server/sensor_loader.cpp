@@ -326,7 +326,7 @@ bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &h
 	struct dirent dir_entry;
 	struct dirent *result;
 	string name;
-	int error;
+	int ret;
 
 	dir = opendir(dir_path.c_str());
 
@@ -336,9 +336,9 @@ bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &h
 	}
 
 	while (true) {
-		error = readdir_r(dir, &dir_entry, &result);
+		ret = readdir_r(dir, &dir_entry, &result);
 
-		if (error != 0)
+		if (ret != 0)
 			continue;
 
 		if (result == NULL)
