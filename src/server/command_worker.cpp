@@ -706,30 +706,28 @@ bool command_worker::cmd_get_data(void *payload)
 
 	state = m_module->get_cache(&data);
 
-	// In case of not getting sensor data, wait short time and retry again
-	// 1. changing interval to be less than 10ms
-	// 2. In case of first time, wait for INIT_WAIT_TIME
-	// 3. at another time, wait for WAIT_TIME
-	// 4. retrying to get data
-	// 5. repeat 2 ~ 4 operations RETRY_CNT times
-	// 6. reverting back to original interval
+	/* if there is no cached data, wait short time and retry to get data again */
 	if (state == -ENODATA) {
-		const int RETRY_CNT	= 10;
+		const int RETRY_CNT = 10;
 		int retry = 0;
 
 		unsigned int interval = m_module->get_interval(m_client_id, false);
 
+		 /* 1. change interval to 10ms. */
 		if (interval > GET_DATA_MIN_INTERVAL) {
 			m_module->add_interval(m_client_id, GET_DATA_MIN_INTERVAL, false);
 			adjusted = true;
 		}
 
+		/* 2. try to get sensor data increasing the waited time(20ms, 40ms, 80ms, 160ms, 160ms...) */
+		/* 3. if data cannot be found in 10 times, stop it. */
 		while ((state == -ENODATA) && (retry++ < RETRY_CNT)) {
 			_I("Wait sensor[%#llx] data updated for client [%d] #%d", m_sensor_id, m_client_id, retry);
 			usleep(WAIT_TIME(retry));
 			state = m_module->get_cache(&data);
 		}
 
+		/* 4. revert to original interval */
 		if (adjusted)
 			m_module->add_interval(m_client_id, interval, false);
 	}
