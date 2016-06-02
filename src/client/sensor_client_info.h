@@ -74,6 +74,10 @@ public:
 	bool set_sensor_params(int handle, int sensor_state, int sensor_pause_policy);
 	bool get_sensor_params(int handle, int &sensor_state, int &sensor_pause_policy);
 	bool set_sensor_state(int handle, int sensor_state);
+
+	bool get_passive_mode(int handle);
+	bool set_passive_mode(int handle, bool passive);
+
 	bool set_sensor_pause_policy(int handle, int pause_policy);
 	bool set_event_batch(int handle, unsigned int event_type, unsigned int interval, unsigned int latency);
 	bool set_accuracy(int handle, int accuracy);

@@ -386,6 +386,7 @@ int sensord_external_connect(const char *key, sensor_external_command_cb_t cb, v
 bool sensord_external_disconnect(int handle);
 bool sensord_external_post(int handle, unsigned long long timestamp, const float* data, int data_cnt);
 
+bool sensord_set_passive_mode(int handle, bool passive);
 /**
   * @}
  */

@@ -682,6 +682,28 @@ API bool sensord_disconnect(int handle)
 
 	_I("%s disconnects with %s[%d]", get_client_name(), get_sensor_name(sensor_id), handle);
 
+	if (sensor_client_info::get_instance().get_passive_mode(handle)) {
+		_W("%s[%d] for %s is on passive mode while disconnecting.",
+			get_sensor_name(sensor_id), handle, get_client_name());
+
+		command_channel *cmd_channel;
+		event_type_vector event_types;
+		sensor_client_info::get_instance().get_active_event_types(sensor_id, event_types);
+
+		for (auto it = event_types.begin(); it != event_types.end(); ++it)
+			sensord_unregister_event(handle, *it);
+
+		if (!sensor_client_info::get_instance().get_command_channel(sensor_id, &cmd_channel)) {
+			_E("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
+			return false;
+		}
+
+		if (!cmd_channel->cmd_unset_batch()) {
+			_E("Sending cmd_unset_interval(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
+			return false;
+		}
+	}
+
 	if (sensor_state != SENSOR_STATE_STOPPED) {
 		_W("%s[%d] for %s is not stopped before disconnecting.",
 			get_sensor_name(sensor_id), handle, get_client_name());
@@ -780,6 +802,9 @@ API bool sensord_unregister_event(int handle, unsigned int event_type)
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, cur_rep);
 	ret =  change_sensor_rep(sensor_id, prev_rep, cur_rep);
+
+	if (sensor_client_info::get_instance().get_passive_mode(handle))
+		sensor_client_info::get_instance().set_passive_mode(handle, false);
 
 	if (!ret)
 		sensor_client_info::get_instance().register_event(handle, event_type, prev_interval, prev_latency, prev_cb, prev_user_data);
@@ -1197,3 +1222,12 @@ API bool sensord_register_hub_event(int handle, unsigned int event_type, unsigne
 	return false;
 }
 
+API bool sensord_set_passive_mode(int handle, bool passive)
+{
+	if (!sensor_client_info::get_instance().set_passive_mode(handle, passive)) {
+		_E("Failed to set passive mode %d", passive);
+		return false;
+	}
+
+	return true;
+}
