@@ -107,6 +107,8 @@ public:
 	void get_sensor_handle_info(sensor_id_t sensor, sensor_handle_info_map &handles_info);
 	void get_all_handle_info(sensor_handle_info_map &handles_info);
 
+	void set_pause_policy(sensor_id_t sensor, int power_save_state);
+
 	void clear(void);
 
 	sensor_client_info();

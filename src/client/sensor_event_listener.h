@@ -66,10 +66,7 @@ typedef void (*hup_observer_t)(void);
 class sensor_event_listener {
 public:
 	static sensor_event_listener& get_instance(void);
-	bool start_handle(int handle);
-	bool stop_handle(int handle);
 
-	void operate_sensor(sensor_id_t sensor, int power_save_state);
 	void get_listening_sensors(sensor_id_vector &sensors);
 
 	bool start_event_listener(void);

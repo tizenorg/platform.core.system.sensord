@@ -60,40 +60,6 @@ sensor_event_listener& sensor_event_listener::get_instance(void)
 	return inst;
 }
 
-bool sensor_event_listener::start_handle(int handle)
-{
-	return m_client_info.set_sensor_state(handle, SENSOR_STATE_STARTED);
-}
-
-bool sensor_event_listener::stop_handle(int handle)
-{
-	return m_client_info.set_sensor_state(handle, SENSOR_STATE_STOPPED);
-}
-
-void sensor_event_listener::operate_sensor(sensor_id_t sensor, int power_save_state)
-{
-	sensor_handle_info_map handles_info;
-
-	m_client_info.get_sensor_handle_info(sensor, handles_info);
-
-	for (auto it_handle = handles_info.begin(); it_handle != handles_info.end(); ++it_handle) {
-		if (it_handle->second.m_sensor_id != sensor)
-			continue;
-
-		if ((it_handle->second.m_sensor_state == SENSOR_STATE_STARTED) &&
-			power_save_state &&
-			(it_handle->second.m_pause_policy & power_save_state)) {
-			m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_PAUSED);
-			_I("%s's %s[%d] is paused", get_client_name(), get_sensor_name(sensor), it_handle->first);
-
-		} else if ((it_handle->second.m_sensor_state == SENSOR_STATE_PAUSED) &&
-			(!power_save_state || !(it_handle->second.m_pause_policy & power_save_state))) {
-			m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_STARTED);
-			_I("%s's %s[%d] is resumed", get_client_name(), get_sensor_name(sensor), it_handle->first);
-		}
-	}
-}
-
 client_callback_info* sensor_event_listener::handle_calibration_cb(sensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy)
 {
 	unsigned int cal_event_type = get_calibration_event_type(event_type);
