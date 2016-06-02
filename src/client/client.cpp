@@ -160,7 +160,7 @@ static void power_save_state_cb(keynode_t *node, void *data)
 
 	while (it_sensor != sensors.end()) {
 		sensor_client_info::get_instance().get_sensor_rep(*it_sensor, prev_rep);
-		sensor_event_listener::get_instance().operate_sensor(*it_sensor, cur_power_save_state);
+		sensor_client_info::get_instance().set_pause_policy(*it_sensor, cur_power_save_state);
 		sensor_client_info::get_instance().get_sensor_rep(*it_sensor, cur_rep);
 		change_sensor_rep(*it_sensor, prev_rep, cur_rep);
 

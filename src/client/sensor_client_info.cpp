@@ -616,6 +616,30 @@ bool sensor_client_info::is_event_active(int handle, unsigned int event_type, un
 	return true;
 }
 
+void sensor_client_info::set_pause_policy(sensor_id_t sensor, int pause_policy)
+{
+	sensor_handle_info_map handles_info;
+
+	get_sensor_handle_info(sensor, handles_info);
+
+	for (auto it_handle = handles_info.begin(); it_handle != handles_info.end(); ++it_handle) {
+		if (it_handle->second.m_sensor_id != sensor)
+			continue;
+
+		if ((it_handle->second.m_sensor_state == SENSOR_STATE_STARTED) &&
+			pause_policy &&
+			!(it_handle->second.m_sensor_option & pause_policy)) {
+			set_sensor_state(it_handle->first, SENSOR_STATE_PAUSED);
+			_I("%s's %s[%d] is paused", get_client_name(), get_sensor_name(sensor), it_handle->first);
+
+		} else if ((it_handle->second.m_sensor_state == SENSOR_STATE_PAUSED) &&
+			(!pause_policy || (it_handle->second.m_sensor_option & pause_policy))) {
+			set_sensor_state(it_handle->first, SENSOR_STATE_STARTED);
+			_I("%s's %s[%d] is resumed", get_client_name(), get_sensor_name(sensor), it_handle->first);
+		}
+	}
+}
+
 void sensor_client_info::clear(void)
 {
 	close_command_channel();
