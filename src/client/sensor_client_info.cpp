@@ -410,7 +410,6 @@ bool sensor_client_info::get_active_batch(sensor_id_t sensor, unsigned int &inte
 	unsigned int min_interval = POLL_MAX_HZ_MS;
 	unsigned int min_latency = std::numeric_limits<unsigned int>::max();
 
-	bool active_sensor_found = false;
 	unsigned int _interval;
 	unsigned int _latency;
 
@@ -420,17 +419,16 @@ bool sensor_client_info::get_active_batch(sensor_id_t sensor, unsigned int &inte
 
 	while (it_handle != m_sensor_handle_infos.end()) {
 		if ((it_handle->second.m_sensor_id == sensor) &&
-			(it_handle->second.m_sensor_state == SENSOR_STATE_STARTED)) {
-				active_sensor_found = true;
-				it_handle->second.get_batch(_interval, _latency);
-				min_interval = (_interval < min_interval) ? _interval : min_interval;
-				min_latency = (_latency < min_latency) ? _latency : min_latency;
+		    it_handle->second.is_started()) {
+			it_handle->second.get_batch(_interval, _latency);
+			min_interval = (_interval < min_interval) ? _interval : min_interval;
+			min_latency = (_latency < min_latency) ? _latency : min_latency;
 		}
 
 		++it_handle;
 	}
 
-	if (!active_sensor_found) {
+	if (!is_sensor_active(sensor)) {
 		_D("Active sensor[%#llx] is not found for client %s", sensor, get_client_name());
 		return false;
 	}
@@ -444,7 +442,6 @@ bool sensor_client_info::get_active_batch(sensor_id_t sensor, unsigned int &inte
 unsigned int sensor_client_info::get_active_option(sensor_id_t sensor)
 {
 	int active_option = SENSOR_OPTION_DEFAULT;
-	bool active_sensor_found = false;
 	int option;
 
 	AUTOLOCK(m_handle_info_lock);
@@ -453,16 +450,15 @@ unsigned int sensor_client_info::get_active_option(sensor_id_t sensor)
 
 	while (it_handle != m_sensor_handle_infos.end()) {
 		if ((it_handle->second.m_sensor_id == sensor) &&
-			(it_handle->second.m_sensor_state == SENSOR_STATE_STARTED)) {
-				active_sensor_found = true;
-				option = it_handle->second.m_sensor_option;
-				active_option = (option > active_option) ? option : active_option;
+		    it_handle->second.is_started()) {
+			option = it_handle->second.m_sensor_option;
+			active_option = (option > active_option) ? option : active_option;
 		}
 
 		++it_handle;
 	}
 
-	if (!active_sensor_found)
+	if (!is_sensor_active(sensor))
 		_D("Active sensor[%#llx] is not found for client %s", sensor, get_client_name());
 
 	return active_option;
@@ -510,8 +506,8 @@ void sensor_client_info::get_active_event_types(sensor_id_t sensor, event_type_v
 
 	while (it_handle != m_sensor_handle_infos.end()) {
 		if ((it_handle->second.m_sensor_id == sensor) &&
-			(it_handle->second.m_sensor_state == SENSOR_STATE_STARTED))
-				it_handle->second.get_reg_event_types(event_types);
+		    it_handle->second.is_started())
+			it_handle->second.get_reg_event_types(event_types);
 
 		++it_handle;
 	}
@@ -586,7 +582,7 @@ bool sensor_client_info::is_sensor_active(sensor_id_t sensor)
 
 	while (it_handle != m_sensor_handle_infos.end()) {
 		if ((it_handle->second.m_sensor_id == sensor) &&
-			(it_handle->second.m_sensor_state == SENSOR_STATE_STARTED))
+		    it_handle->second.is_started())
 			return true;
 
 		++it_handle;

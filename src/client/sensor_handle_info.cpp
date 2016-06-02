@@ -160,3 +160,8 @@ unsigned int sensor_handle_info::get_reg_event_count(void)
 {
 	return m_reg_event_infos.size();
 }
+
+bool sensor_handle_info::is_started(void)
+{
+	return (m_sensor_state == SENSOR_STATE_STARTED);
+}
