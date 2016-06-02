@@ -54,6 +54,9 @@ public:
 
 	void clear_all_events(void);
 	static unsigned long long renew_event_id(void);
+
+	bool is_started(void);
+
 private:
 	event_info_map m_reg_event_infos;
 	static unsigned long long m_event_id;

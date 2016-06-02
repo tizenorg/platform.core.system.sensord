@@ -128,8 +128,8 @@ void sensor_event_listener::handle_events(void* event)
 
 			event_info = sensor_handle_info.get_reg_event_info(event_type);
 			if ((sensor_handle_info.m_sensor_id != sensor_id) ||
-				(sensor_handle_info.m_sensor_state != SENSOR_STATE_STARTED) ||
-				!event_info)
+			    !sensor_handle_info.is_started() ||
+			    !event_info)
 				continue;
 
 			if (event_info->m_fired)
