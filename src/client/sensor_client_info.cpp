@@ -213,6 +213,36 @@ bool sensor_client_info::set_sensor_state(int handle, int sensor_state)
 	return true;
 }
 
+bool sensor_client_info::get_passive_mode(int handle)
+{
+	AUTOLOCK(m_handle_info_lock);
+
+	auto it_handle = m_sensor_handle_infos.find(handle);
+
+	if (it_handle == m_sensor_handle_infos.end()) {
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
+		return false;
+	}
+
+	return it_handle->second.get_passive_mode();
+}
+
+bool sensor_client_info::set_passive_mode(int handle, bool passive)
+{
+	AUTOLOCK(m_handle_info_lock);
+
+	auto it_handle = m_sensor_handle_infos.find(handle);
+
+	if (it_handle == m_sensor_handle_infos.end()) {
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
+		return false;
+	}
+
+	it_handle->second.set_passive_mode(passive);
+
+	return true;
+}
+
 bool sensor_client_info::set_sensor_option(int handle, int sensor_option)
 {
 	AUTOLOCK(m_handle_info_lock);

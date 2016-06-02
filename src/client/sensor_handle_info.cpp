@@ -34,6 +34,7 @@ sensor_handle_info::sensor_handle_info()
 , m_accuracy(-1)
 , m_accuracy_cb(NULL)
 , m_accuracy_user_data(NULL)
+, m_passive(false)
 {
 }
 
@@ -161,7 +162,17 @@ unsigned int sensor_handle_info::get_reg_event_count(void)
 	return m_reg_event_infos.size();
 }
 
+bool sensor_handle_info::get_passive_mode(void)
+{
+	return m_passive;
+}
+
+void sensor_handle_info::set_passive_mode(bool passive)
+{
+	m_passive = passive;
+}
+
 bool sensor_handle_info::is_started(void)
 {
-	return (m_sensor_state == SENSOR_STATE_STARTED);
+	return (m_sensor_state == SENSOR_STATE_STARTED) || m_passive;
 }
