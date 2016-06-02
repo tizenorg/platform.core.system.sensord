@@ -30,15 +30,6 @@ typedef std::unordered_map<unsigned int, reg_event_info> event_info_map;
 
 class sensor_handle_info {
 public:
-	int m_handle;
-	sensor_id_t m_sensor_id;
-	int m_sensor_state;
-	int m_sensor_option;
-	int m_bad_accuracy;
-	int m_accuracy;
-	sensor_accuracy_changed_cb_t m_accuracy_cb;
-	void *m_accuracy_user_data;
-
 	sensor_handle_info();
 	~sensor_handle_info();
 
@@ -55,7 +46,19 @@ public:
 	void clear_all_events(void);
 	static unsigned long long renew_event_id(void);
 
+	bool get_passive_mode(void);
+	void set_passive_mode(bool passive);
 	bool is_started(void);
+
+	int m_handle;
+	sensor_id_t m_sensor_id;
+	int m_sensor_state;
+	int m_sensor_option;
+	int m_bad_accuracy;
+	int m_accuracy;
+	sensor_accuracy_changed_cb_t m_accuracy_cb;
+	void *m_accuracy_user_data;
+	bool m_passive;
 
 private:
 	event_info_map m_reg_event_infos;
