@@ -75,6 +75,24 @@ enum sensor_option_t {
 typedef enum sensor_option_t sensor_option_e;
 #endif
 
+enum sensord_attribute_e {
+	SENSORD_ATTRIBUTE_AXIS_ORIENTATION = 1,
+	SENSORD_ATTRIBUTE_PAUSE_POLICY,
+};
+
+enum sensord_axis_e {
+	SENSORD_AXIS_DEVICE_ORIENTED = 1,
+	SENSORD_AXIS_DISPLAY_ORIENTED,
+};
+
+enum sensord_pause_e {
+	SENSORD_PAUSE_NONE = 0,
+	SENSORD_PAUSE_ON_DISPLAY_OFF = 1,
+	SENSORD_PAUSE_ON_POWERSAVE_MODE = 2,
+	SENSORD_PAUSE_ALL = 3,
+	SENSORD_PAUSE_END,
+};
+
 enum poll_interval_t {
 	POLL_100HZ_MS	= 10,
 	POLL_50HZ_MS	= 20,
