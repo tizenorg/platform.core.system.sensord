@@ -18,6 +18,7 @@
  */
 
 #include <stdint.h>
+#include <limits.h>
 #include <sensor_hal_types.h>
 #include <sensor_event_queue.h>
 #include <sensor_base.h>
@@ -264,10 +265,10 @@ bool sensor_base::delete_batch(int client_id)
 	cur_max = m_sensor_info_list.get_max_batch();
 
 	if (!cur_max) {
-		_I("No latency for sensor[%#llx] by client[%d] deleting latency, so set to default 0 ms",
+		_I("No latency for sensor[%#llx] by client[%d] deleting latency, so set to default count",
 			 get_id(), client_id);
 
-		set_batch_latency(0);
+		set_batch_latency(UINT_MAX);
 	} else if (cur_max != prev_max) {
 		_I("Max latency for sensor[%#llx] is changed from %dms to %dms by client[%d] deleting latency",
 			get_id(), prev_max, cur_max, client_id);
