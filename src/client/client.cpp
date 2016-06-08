@@ -172,6 +172,40 @@ static void power_save_state_cb(keynode_t *node, void *data)
 	}
 }
 
+bool restore_attributes(int client_id, sensor_id_t sensor, command_channel *cmd_channel)
+{
+	sensor_handle_info_map handle_infos;
+
+	sensor_client_info::get_instance().get_sensor_handle_info(sensor, handle_infos);
+
+	for (auto it_handles = handle_infos.begin(); it_handles != handle_infos.end(); ++it_handles) {
+		sensor_handle_info info = it_handles->second;
+
+		for (auto it = info.attributes_int.begin(); it != info.attributes_int.end(); ++it) {
+			int attribute = it->first;
+			int value = it->second;
+			if (!cmd_channel->cmd_set_attribute_int(attribute, value)) {
+				_E("Failed to send cmd_set_attribute_int(%d, %d) for %s",
+				    client_id, value, get_client_name());
+				return false;
+			}
+		}
+
+		for (auto it = info.attributes_str.begin(); it != info.attributes_str.end(); ++it) {
+			int attribute = it->first;
+			const char *value = it->second.c_str();
+			int value_len = it->second.size();
+			if (!cmd_channel->cmd_set_attribute_str(attribute, value, value_len)) {
+				_E("Failed to send cmd_set_attribute_str(%d, %d, %s) for %s",
+				    client_id, value_len, value, get_client_name());
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 void restore_session(void)
 {
 	AUTOLOCK(lock);
@@ -233,6 +267,10 @@ void restore_session(void)
 			goto FAILED;
 		}
 
+		if (!restore_attributes(client_id, *it_sensor, cmd_channel)) {
+			_E("Failed to restore attributes(%s) for %s", get_sensor_name(*it_sensor), get_client_name());
+			goto FAILED;
+		}
 		++it_sensor;
 	}
 
@@ -1074,6 +1112,8 @@ static int change_attribute_int(int handle, int attribute, int value)
 		return -EPERM;
 	}
 
+	sensor_client_info::get_instance().set_attribute(handle, attribute, value);
+
 	return OP_SUCCESS;
 }
 
@@ -1129,6 +1169,8 @@ API int sensord_set_attribute_str(int handle, int attribute, const char *value, 
 			client_id, value_len, value, get_client_name());
 		return -EPERM;
 	}
+
+	sensor_client_info::get_instance().set_attribute(handle, attribute, value);
 
 	return OP_SUCCESS;
 }

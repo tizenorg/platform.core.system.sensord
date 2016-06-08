@@ -666,6 +666,38 @@ void sensor_client_info::set_pause_policy(sensor_id_t sensor, int pause_policy)
 	}
 }
 
+bool sensor_client_info::set_attribute(int handle, int attribute, int value)
+{
+	AUTOLOCK(m_handle_info_lock);
+
+	auto it_handle = m_sensor_handle_infos.find(handle);
+
+	if (it_handle == m_sensor_handle_infos.end()) {
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
+		return false;
+	}
+
+	it_handle->second.attributes_int[attribute] = value;
+
+	return true;
+}
+
+bool sensor_client_info::set_attribute(int handle, int attribute, std::string value)
+{
+	AUTOLOCK(m_handle_info_lock);
+
+	auto it_handle = m_sensor_handle_infos.find(handle);
+
+	if (it_handle == m_sensor_handle_infos.end()) {
+		_E("Handle[%d] is not found for client %s", handle, get_client_name());
+		return false;
+	}
+
+	it_handle->second.attributes_str[attribute] = value;
+
+	return true;
+}
+
 void sensor_client_info::clear(void)
 {
 	close_command_channel();

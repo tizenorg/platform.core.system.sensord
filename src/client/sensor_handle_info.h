@@ -25,8 +25,12 @@
 #include <sensor_log.h>
 #include <string.h>
 #include <unordered_map>
+#include <string>
+#include <map>
 
 typedef std::unordered_map<unsigned int, reg_event_info> event_info_map;
+typedef std::map<int, int> sensor_attribute_int_map;
+typedef std::map<int, std::string> sensor_attribute_str_map;
 
 class sensor_handle_info {
 public:
@@ -59,6 +63,8 @@ public:
 	sensor_accuracy_changed_cb_t m_accuracy_cb;
 	void *m_accuracy_user_data;
 	bool m_passive;
+	sensor_attribute_int_map attributes_int;
+	sensor_attribute_str_map attributes_str;
 
 private:
 	event_info_map m_reg_event_infos;
