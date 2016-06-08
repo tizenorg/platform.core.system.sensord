@@ -25,7 +25,7 @@
 sensor_usage::sensor_usage()
 : m_interval(POLL_1HZ_MS)
 , m_latency(0)
-, m_option(SENSOR_OPTION_DEFAULT)
+, m_pause_policy(SENSORD_PAUSE_ALL)
 , m_start(false)
 {
 }

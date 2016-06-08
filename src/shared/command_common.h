@@ -42,7 +42,7 @@ enum packet_type_t {
 	CMD_STOP,
 	CMD_REG,
 	CMD_UNREG,
-	CMD_SET_OPTION,
+	CMD_SET_PAUSE_POLICY,
 	CMD_SET_BATCH,
 	CMD_UNSET_BATCH,
 	CMD_GET_DATA,
@@ -122,8 +122,8 @@ typedef struct {
 } cmd_unset_batch_t;
 
 typedef struct {
-	int option;
-} cmd_set_option_t;
+	int pause_policy;
+} cmd_set_pause_policy_t;
 
 typedef struct  {
 	int attribute;

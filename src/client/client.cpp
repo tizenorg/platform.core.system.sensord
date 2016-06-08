@@ -224,7 +224,7 @@ void restore_session(void)
 
 		sensor_rep prev_rep, cur_rep;
 		prev_rep.active = false;
-		prev_rep.option = SENSOR_OPTION_DEFAULT;
+		prev_rep.pause_policy = SENSORD_PAUSE_ALL;
 		prev_rep.interval = 0;
 
 		sensor_client_info::get_instance().get_sensor_rep(*it_sensor, cur_rep);
@@ -273,9 +273,9 @@ static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, senso
 	get_events_diff(prev_rep.event_types, cur_rep.event_types, add_event_types, del_event_types);
 
 	if (cur_rep.active) {
-		if (prev_rep.option != cur_rep.option) {
-			if (!cmd_channel->cmd_set_option(cur_rep.option)) {
-				_E("Sending cmd_set_option(%d, %s, %d) failed for %s", client_id, get_sensor_name(sensor_id), cur_rep.option, get_client_name());
+		if (prev_rep.pause_policy != cur_rep.pause_policy) {
+			if (!cmd_channel->cmd_set_pause_policy(cur_rep.pause_policy)) {
+				_E("Sending cmd_set_pause_policy(%d, %s, %d) failed for %s", client_id, get_sensor_name(sensor_id), cur_rep.pause_policy, get_client_name());
 				return false;
 			}
 		}
@@ -832,7 +832,7 @@ API bool sensord_start(int handle, int option)
 	sensor_id_t sensor_id;
 	sensor_rep prev_rep, cur_rep;
 	bool ret;
-	int prev_state, prev_option;
+	int prev_state, prev_pause;
 	int pause;
 
 	AUTOLOCK(lock);
@@ -856,14 +856,14 @@ API bool sensord_start(int handle, int option)
 	}
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, prev_rep);
-	sensor_client_info::get_instance().get_sensor_params(handle, prev_state, prev_option);
+	sensor_client_info::get_instance().get_sensor_params(handle, prev_state, prev_pause);
 	sensor_client_info::get_instance().set_sensor_params(handle, SENSOR_STATE_STARTED, pause);
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, cur_rep);
 
 	ret = change_sensor_rep(sensor_id, prev_rep, cur_rep);
 
 	if (!ret)
-		sensor_client_info::get_instance().set_sensor_params(handle, prev_state, prev_option);
+		sensor_client_info::get_instance().set_sensor_params(handle, prev_state, prev_pause);
 
 	return ret;
 }
@@ -873,7 +873,7 @@ API bool sensord_stop(int handle)
 	sensor_id_t sensor_id;
 	int sensor_state;
 	bool ret;
-	int prev_state, prev_option;
+	int prev_state, prev_pause;
 
 	sensor_rep prev_rep, cur_rep;
 
@@ -891,14 +891,14 @@ API bool sensord_stop(int handle)
 	_I("%s stops sensor %s[%d]", get_client_name(), get_sensor_name(sensor_id), handle);
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, prev_rep);
-	sensor_client_info::get_instance().get_sensor_params(handle, prev_state, prev_option);
+	sensor_client_info::get_instance().get_sensor_params(handle, prev_state, prev_pause);
 	sensor_client_info::get_instance().set_sensor_state(handle, SENSOR_STATE_STOPPED);
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, cur_rep);
 
 	ret = change_sensor_rep(sensor_id, prev_rep, cur_rep);
 
 	if (!ret)
-		sensor_client_info::get_instance().set_sensor_params(handle, prev_state, prev_option);
+		sensor_client_info::get_instance().set_sensor_params(handle, prev_state, prev_pause);
 
 	return ret;
 }
@@ -1004,13 +1004,13 @@ static int change_pause_policy(int handle, int pause)
 		else if (!(pause & g_power_save_state) && (sensor_state == SENSOR_STATE_PAUSED))
 			sensor_client_info::get_instance().set_sensor_state(handle, SENSOR_STATE_STARTED);
 	}
-	sensor_client_info::get_instance().set_sensor_option(handle, pause);
+	sensor_client_info::get_instance().set_sensor_pause_policy(handle, pause);
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, cur_rep);
 	ret =  change_sensor_rep(sensor_id, prev_rep, cur_rep);
 
 	if (!ret)
-		sensor_client_info::get_instance().set_sensor_option(handle, prev_pause);
+		sensor_client_info::get_instance().set_sensor_pause_policy(handle, prev_pause);
 
 	return (ret ? OP_SUCCESS : OP_ERROR);
 }

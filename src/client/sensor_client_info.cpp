@@ -59,7 +59,7 @@ int sensor_client_info::create_handle(sensor_id_t sensor)
 
 	handle_info.m_sensor_id = sensor;
 	handle_info.m_sensor_state = SENSOR_STATE_STOPPED;
-	handle_info.m_sensor_option = SENSOR_OPTION_DEFAULT;
+	handle_info.m_pause_policy = SENSORD_PAUSE_ALL;
 	handle_info.m_handle = handle;
 	handle_info.m_accuracy = -1;
 	handle_info.m_accuracy_cb = NULL;
@@ -163,7 +163,7 @@ bool sensor_client_info::unregister_accuracy_cb(int handle)
 	return true;
 }
 
-bool sensor_client_info::set_sensor_params(int handle, int sensor_state, int sensor_option)
+bool sensor_client_info::set_sensor_params(int handle, int sensor_state, int pause_policy)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -175,12 +175,12 @@ bool sensor_client_info::set_sensor_params(int handle, int sensor_state, int sen
 	}
 
 	it_handle->second.m_sensor_state = sensor_state;
-	it_handle->second.m_sensor_option = sensor_option;
+	it_handle->second.m_pause_policy = pause_policy;
 
 	return true;
 }
 
-bool sensor_client_info::get_sensor_params(int handle, int &sensor_state, int &sensor_option)
+bool sensor_client_info::get_sensor_params(int handle, int &sensor_state, int &pause_policy)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -192,7 +192,7 @@ bool sensor_client_info::get_sensor_params(int handle, int &sensor_state, int &s
 	}
 
 	sensor_state = it_handle->second.m_sensor_state;
-	sensor_option = it_handle->second.m_sensor_option;
+	pause_policy = it_handle->second.m_pause_policy;
 
 	return true;
 }
@@ -213,7 +213,7 @@ bool sensor_client_info::set_sensor_state(int handle, int sensor_state)
 	return true;
 }
 
-bool sensor_client_info::set_sensor_option(int handle, int sensor_option)
+bool sensor_client_info::set_sensor_pause_policy(int handle, int pause_policy)
 {
 	AUTOLOCK(m_handle_info_lock);
 
@@ -224,7 +224,7 @@ bool sensor_client_info::set_sensor_option(int handle, int sensor_option)
 		return false;
 	}
 
-	it_handle->second.m_sensor_option = sensor_option;
+	it_handle->second.m_pause_policy = pause_policy;
 
 	return true;
 }
@@ -323,7 +323,7 @@ void sensor_client_info::get_sensor_rep(sensor_id_t sensor, sensor_rep& rep) {
 	const unsigned int INVALID_BATCH_VALUE = std::numeric_limits<unsigned int>::max();
 
 	rep.active = is_sensor_active(sensor);
-	rep.option = get_active_option(sensor);
+	rep.pause_policy = get_active_pause_policy(sensor);
 	if (!get_active_batch(sensor, rep.interval, rep.latency)) {
 		rep.interval = INVALID_BATCH_VALUE;
 		rep.latency = INVALID_BATCH_VALUE;
@@ -441,11 +441,11 @@ bool sensor_client_info::get_active_batch(sensor_id_t sensor, unsigned int &inte
 	return true;
 }
 
-unsigned int sensor_client_info::get_active_option(sensor_id_t sensor)
+unsigned int sensor_client_info::get_active_pause_policy(sensor_id_t sensor)
 {
-	int active_option = SENSOR_OPTION_DEFAULT;
+	int active_pause = SENSORD_PAUSE_ALL;
 	bool active_sensor_found = false;
-	int option;
+	int pause;
 
 	AUTOLOCK(m_handle_info_lock);
 
@@ -455,8 +455,8 @@ unsigned int sensor_client_info::get_active_option(sensor_id_t sensor)
 		if ((it_handle->second.m_sensor_id == sensor) &&
 			(it_handle->second.m_sensor_state == SENSOR_STATE_STARTED)) {
 				active_sensor_found = true;
-				option = it_handle->second.m_sensor_option;
-				active_option = (option > active_option) ? option : active_option;
+				pause = it_handle->second.m_pause_policy;
+				active_pause = (pause < active_pause) ? pause: active_pause;
 		}
 
 		++it_handle;
@@ -465,7 +465,7 @@ unsigned int sensor_client_info::get_active_option(sensor_id_t sensor)
 	if (!active_sensor_found)
 		_D("Active sensor[%#llx] is not found for client %s", sensor, get_client_name());
 
-	return active_option;
+	return active_pause;
 }
 
 bool sensor_client_info::get_sensor_id(int handle, sensor_id_t &sensor)

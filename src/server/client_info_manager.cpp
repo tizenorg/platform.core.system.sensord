@@ -131,7 +131,7 @@ bool client_info_manager::get_batch(int client_id, sensor_id_t sensor_id, unsign
 	return it_record->second.get_batch(sensor_id, interval, latency);
 }
 
-bool client_info_manager::set_option(int client_id, sensor_id_t sensor_id, int option)
+bool client_info_manager::set_pause_policy(int client_id, sensor_id_t sensor_id, int pause_policy)
 {
 	AUTOLOCK(m_mutex);
 
@@ -144,7 +144,7 @@ bool client_info_manager::set_option(int client_id, sensor_id_t sensor_id, int o
 		return false;
 	}
 
-	if (!it_record->second.set_option(sensor_id, option))
+	if (!it_record->second.set_pause_policy(sensor_id, pause_policy))
 		return false;
 
 	return true;

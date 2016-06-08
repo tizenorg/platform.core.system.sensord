@@ -82,12 +82,12 @@ void sensor_event_listener::operate_sensor(sensor_id_t sensor, int power_save_st
 
 		if ((it_handle->second.m_sensor_state == SENSOR_STATE_STARTED) &&
 			power_save_state &&
-			!(it_handle->second.m_sensor_option & power_save_state)) {
+			(it_handle->second.m_pause_policy & power_save_state)) {
 			m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_PAUSED);
 			_I("%s's %s[%d] is paused", get_client_name(), get_sensor_name(sensor), it_handle->first);
 
 		} else if ((it_handle->second.m_sensor_state == SENSOR_STATE_PAUSED) &&
-			(!power_save_state || (it_handle->second.m_sensor_option & power_save_state))) {
+			(!power_save_state || !(it_handle->second.m_pause_policy & power_save_state))) {
 			m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_STARTED);
 			_I("%s's %s[%d] is resumed", get_client_name(), get_sensor_name(sensor), it_handle->first);
 		}

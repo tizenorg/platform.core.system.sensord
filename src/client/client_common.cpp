@@ -95,9 +95,9 @@ void print_event_occurrence_log(sensor_handle_info &info)
 	if ((count != 1) && (count % log_per_count != 0))
 		return;
 
-	_D("%s receives %s[%d][state: %d, option: %d, count: %d]", get_client_name(),
+	_D("%s receives %s[%d][state: %d, pause policy: %d, count: %d]", get_client_name(),
 			get_sensor_name(info.m_sensor_id), info.m_handle,
-			info.m_sensor_state, info.m_sensor_option, count);
+			info.m_sensor_state, info.m_pause_policy, count);
 }
 
 /*

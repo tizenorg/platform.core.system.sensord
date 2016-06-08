@@ -339,33 +339,33 @@ bool command_channel::cmd_stop(void)
 	return true;
 }
 
-bool command_channel::cmd_set_option(int option)
+bool command_channel::cmd_set_pause_policy(int pause_policy)
 {
 	cpacket *packet;
-	cmd_set_option_t *cmd_set_option;
+	cmd_set_pause_policy_t *cmd_set_pause_policy;
 	cmd_done_t *cmd_done;
 
-	packet = new(std::nothrow) cpacket(sizeof(cmd_set_option_t));
+	packet = new(std::nothrow) cpacket(sizeof(cmd_set_pause_policy_t));
 	retvm_if(!packet, false, "Failed to allocate memory");
 
-	packet->set_cmd(CMD_SET_OPTION);
+	packet->set_cmd(CMD_SET_PAUSE_POLICY);
 
-	cmd_set_option = (cmd_set_option_t*)packet->data();
-	cmd_set_option->option = option;
+	cmd_set_pause_policy = (cmd_set_pause_policy_t*)packet->data();
+	cmd_set_pause_policy->pause_policy = pause_policy;
 
-	_I("%s send cmd_set_option(client_id=%d, %s, option=%d)",
-		get_client_name(), m_client_id, get_sensor_name(m_sensor_id), option);
+	_I("%s send cmd_set_pause_policy(client_id=%d, %s, pause_policy=%d)",
+		get_client_name(), m_client_id, get_sensor_name(m_sensor_id), pause_policy);
 
 	if (!command_handler(packet, (void **)&cmd_done)) {
-		_E("Client %s failed to send/receive command for sensor[%s] with client_id [%d], option[%d]",
-			get_client_name(), get_sensor_name(m_sensor_id), m_client_id, option);
+		_E("Client %s failed to send/receive command for sensor[%s] with client_id [%d], pause_policy[%d]",
+			get_client_name(), get_sensor_name(m_sensor_id), m_client_id, pause_policy);
 		delete packet;
 		return false;
 	}
 
 	if (cmd_done->value < 0) {
-		_E("Client %s got error[%d] from server for sensor[%s] with client_id [%d], option[%d]",
-			get_client_name(), cmd_done->value, get_sensor_name(m_sensor_id), m_client_id, option);
+		_E("Client %s got error[%d] from server for sensor[%s] with client_id [%d], pause_policy[%d]",
+			get_client_name(), cmd_done->value, get_sensor_name(m_sensor_id), m_client_id, pause_policy);
 
 		delete[] (char *)cmd_done;
 		delete packet;
