@@ -196,7 +196,10 @@ bool auto_rotation_sensor::set_wakeup(int wakeup)
 
 bool auto_rotation_sensor::on_start(void)
 {
+	int length;
 	m_rotation = AUTO_ROTATION_DEGREE_UNKNOWN;
+
+	get_data(&m_last_data, &length);
 
 	m_alg->start();
 

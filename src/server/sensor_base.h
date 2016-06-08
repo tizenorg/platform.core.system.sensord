@@ -77,6 +77,8 @@ public:
 	int get_permission(void);
 
 protected:
+	sensor_data_t *m_last_data;
+
 	void set_permission(int permission);
 
 	unsigned long long get_timestamp(void);
@@ -93,7 +95,6 @@ private:
 	unsigned int m_client;
 	cmutex m_client_mutex;
 
-	sensor_data_t *m_last_data;
 	cmutex m_data_cache_mutex;
 
 	virtual int set_attribute(int32_t attribute, int32_t value);

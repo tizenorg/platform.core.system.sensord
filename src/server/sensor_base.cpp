@@ -31,11 +31,11 @@ using std::make_pair;
 using std::vector;
 
 sensor_base::sensor_base()
-: m_id(SENSOR_ID_INVALID)
+: m_last_data(NULL)
+, m_id(SENSOR_ID_INVALID)
 , m_permission(SENSOR_PERMISSION_STANDARD)
 , m_started(false)
 , m_client(0)
-, m_last_data(NULL)
 {
 }
 
