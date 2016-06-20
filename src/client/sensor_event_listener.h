@@ -74,6 +74,8 @@ public:
 	void clear(void);
 
 	void set_hup_observer(hup_observer_t observer);
+
+	void set_sensor_axis(int axis);
 	void set_display_rotation(int rt);
 
 private:
@@ -97,6 +99,8 @@ private:
 	sensor_client_info &m_client_info;
 
 	/* WC1's rotation control */
+	/* SENSORD_AXIS_DEVICE_ORIENTED, SENSORD_AXIS_DISPLAY_ORIENTED */
+	int m_axis;
 	int m_display_rotation;
 
 	sensor_event_listener();

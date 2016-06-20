@@ -45,6 +45,7 @@ sensor_event_listener::sensor_event_listener()
 , m_thread_state(THREAD_STATE_TERMINATE)
 , m_hup_observer(NULL)
 , m_client_info(sensor_client_info::get_instance())
+, m_axis(SENSORD_AXIS_DEVICE_ORIENTED)
 , m_display_rotation(AUTO_ROTATION_DEGREE_UNKNOWN)
 {
 }
@@ -204,11 +205,19 @@ bool sensor_event_listener::is_valid_callback(client_callback_info *cb_info)
 	return m_client_info.is_event_active(cb_info->handle, cb_info->event_type, cb_info->event_id);
 }
 
+void sensor_event_listener::set_sensor_axis(int axis)
+{
+	m_axis = axis;
+}
+
 void sensor_event_listener::align_sensor_axis(sensor_t sensor, sensor_data_t *data)
 {
 	sensor_type_t type = sensor_to_sensor_info(sensor)->get_type();
 
-	if (type != ACCELEROMETER_SENSOR && type != GYROSCOPE_SENSOR && type != GRAVITY_SENSOR)
+	if (m_axis != SENSORD_AXIS_DISPLAY_ORIENTED)
+		return;
+
+	if (type != ACCELEROMETER_SENSOR && type != GYROSCOPE_SENSOR && type != GRAVITY_SENSOR && type != LINEAR_ACCEL_SENSOR)
 		return;
 
 	float x, y;
@@ -250,7 +259,8 @@ gboolean sensor_event_listener::callback_dispatcher(gpointer data)
 	if (cb_info->accuracy_cb)
 		cb_info->accuracy_cb(cb_info->sensor, cb_info->timestamp, cb_info->accuracy, cb_info->accuracy_user_data);
 
-	((sensor_cb_t) cb_info->cb)(cb_info->sensor, cb_info->event_type, (sensor_data_t *) cb_info->sensor_data.get(), cb_info->user_data);
+	sensor_event_listener::get_instance().align_sensor_axis(cb_info->sensor, (sensor_data_t *)cb_info->sensor_data.get());
+	((sensor_cb_t) cb_info->cb)(cb_info->sensor, cb_info->event_type, (sensor_data_t *)cb_info->sensor_data.get(), cb_info->user_data);
 
 	delete cb_info;
 

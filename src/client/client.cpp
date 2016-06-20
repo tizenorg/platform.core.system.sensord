@@ -1080,6 +1080,7 @@ static int change_pause_policy(int handle, int pause)
 
 static int change_axis_orientation(int handle, int axis_orientation)
 {
+	sensor_event_listener::get_instance().set_sensor_axis(axis_orientation);
 	return OP_SUCCESS;
 }
 
