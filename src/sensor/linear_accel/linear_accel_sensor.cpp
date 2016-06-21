@@ -58,7 +58,7 @@ linear_accel_sensor::~linear_accel_sensor()
 	_I("linear_accel_sensor is destroyed!\n");
 }
 
-bool linear_accel_sensor::init()
+bool linear_accel_sensor::init(void)
 {
 	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
 

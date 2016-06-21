@@ -72,16 +72,16 @@ bool client_sensor_record::unregister_event(sensor_id_t sensor_id, unsigned int 
 	return true;
 }
 
-bool client_sensor_record::set_option(sensor_id_t sensor_id, int option)
+bool client_sensor_record::set_pause_policy(sensor_id_t sensor_id, int pause_policy)
 {
 	auto it_usage = m_sensor_usages.find(sensor_id);
 
 	if (it_usage == m_sensor_usages.end()) {
 		sensor_usage usage;
-		usage.m_option = option;
+		usage.m_pause_policy = pause_policy;
 		m_sensor_usages.insert(pair<sensor_id_t, sensor_usage>(sensor_id, usage));
 	} else {
-		it_usage->second.m_option = option;
+		it_usage->second.m_pause_policy = pause_policy;
 	}
 
 	return true;

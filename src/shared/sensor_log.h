@@ -23,9 +23,6 @@
 #include <dlog/dlog.h>
 #include <sys/types.h>
 
-#define EVENT_TYPE_SHIFT 16
-#define SENSOR_TYPE_SHIFT 32
-
 #define MICROSECONDS(tv)        ((tv.tv_sec * 1000000ll) + tv.tv_usec)
 
 #ifdef LOG_TAG

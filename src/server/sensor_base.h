@@ -41,7 +41,7 @@ public:
 	sensor_id_t get_id(void);
 
 	/* sensor info */
-	virtual sensor_type_t get_type();
+	virtual sensor_type_t get_type(void);
 	virtual unsigned int get_event_type(void);
 	virtual const char* get_name(void);
 	virtual bool is_virtual(void);

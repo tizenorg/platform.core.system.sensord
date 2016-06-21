@@ -217,7 +217,7 @@ bool auto_rotation_sensor::on_stop(void)
 	return deactivate();
 }
 
-auto_rotation_alg *auto_rotation_sensor::get_alg()
+auto_rotation_alg *auto_rotation_sensor::get_alg(void)
 {
 	auto_rotation_alg *alg = new(std::nothrow) auto_rotation_alg_emul();
 	retvm_if(!alg, NULL, "Failed to allocate memory");

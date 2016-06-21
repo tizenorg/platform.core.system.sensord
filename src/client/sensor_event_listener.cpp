@@ -45,6 +45,8 @@ sensor_event_listener::sensor_event_listener()
 , m_thread_state(THREAD_STATE_TERMINATE)
 , m_hup_observer(NULL)
 , m_client_info(sensor_client_info::get_instance())
+, m_axis(SENSORD_AXIS_DEVICE_ORIENTED)
+, m_display_rotation(AUTO_ROTATION_DEGREE_UNKNOWN)
 {
 }
 
@@ -57,40 +59,6 @@ sensor_event_listener& sensor_event_listener::get_instance(void)
 {
 	static sensor_event_listener inst;
 	return inst;
-}
-
-bool sensor_event_listener::start_handle(int handle)
-{
-	return m_client_info.set_sensor_state(handle, SENSOR_STATE_STARTED);
-}
-
-bool sensor_event_listener::stop_handle(int handle)
-{
-	return m_client_info.set_sensor_state(handle, SENSOR_STATE_STOPPED);
-}
-
-void sensor_event_listener::operate_sensor(sensor_id_t sensor, int power_save_state)
-{
-	sensor_handle_info_map handles_info;
-
-	m_client_info.get_sensor_handle_info(sensor, handles_info);
-
-	for (auto it_handle = handles_info.begin(); it_handle != handles_info.end(); ++it_handle) {
-		if (it_handle->second.m_sensor_id != sensor)
-			continue;
-
-		if ((it_handle->second.m_sensor_state == SENSOR_STATE_STARTED) &&
-			power_save_state &&
-			!(it_handle->second.m_sensor_option & power_save_state)) {
-			m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_PAUSED);
-			_I("%s's %s[%d] is paused", get_client_name(), get_sensor_name(sensor), it_handle->first);
-
-		} else if ((it_handle->second.m_sensor_state == SENSOR_STATE_PAUSED) &&
-			(!power_save_state || (it_handle->second.m_sensor_option & power_save_state))) {
-			m_client_info.set_sensor_state(it_handle->first, SENSOR_STATE_STARTED);
-			_I("%s's %s[%d] is resumed", get_client_name(), get_sensor_name(sensor), it_handle->first);
-		}
-	}
 }
 
 client_callback_info* sensor_event_listener::handle_calibration_cb(sensor_handle_info &handle_info, unsigned event_type, unsigned long long time, int accuracy)
@@ -161,8 +129,8 @@ void sensor_event_listener::handle_events(void* event)
 
 			event_info = sensor_handle_info.get_reg_event_info(event_type);
 			if ((sensor_handle_info.m_sensor_id != sensor_id) ||
-				(sensor_handle_info.m_sensor_state != SENSOR_STATE_STARTED) ||
-				!event_info)
+			    !sensor_handle_info.is_started() ||
+			    !event_info)
 				continue;
 
 			if (event_info->m_fired)
@@ -237,6 +205,44 @@ bool sensor_event_listener::is_valid_callback(client_callback_info *cb_info)
 	return m_client_info.is_event_active(cb_info->handle, cb_info->event_type, cb_info->event_id);
 }
 
+void sensor_event_listener::set_sensor_axis(int axis)
+{
+	m_axis = axis;
+}
+
+void sensor_event_listener::align_sensor_axis(sensor_t sensor, sensor_data_t *data)
+{
+	sensor_type_t type = sensor_to_sensor_info(sensor)->get_type();
+
+	if (m_axis != SENSORD_AXIS_DISPLAY_ORIENTED)
+		return;
+
+	if (type != ACCELEROMETER_SENSOR && type != GYROSCOPE_SENSOR && type != GRAVITY_SENSOR && type != LINEAR_ACCEL_SENSOR)
+		return;
+
+	float x, y;
+
+	switch (m_display_rotation) {
+	case AUTO_ROTATION_DEGREE_90:	/* Landscape Left */
+		x = -data->values[1];
+		y = data->values[0];
+		break;
+	case AUTO_ROTATION_DEGREE_180:	/* Portrait Bottom */
+		x = -data->values[0];
+		y = -data->values[1];
+		break;
+	case AUTO_ROTATION_DEGREE_270:	/* Landscape Right */
+		x = data->values[1];
+		y = -data->values[0];
+		break;
+	default:
+		return;
+	}
+
+	data->values[0] = x;
+	data->values[1] = y;
+}
+
 gboolean sensor_event_listener::callback_dispatcher(gpointer data)
 {
 	client_callback_info *cb_info = (client_callback_info*) data;
@@ -253,7 +259,8 @@ gboolean sensor_event_listener::callback_dispatcher(gpointer data)
 	if (cb_info->accuracy_cb)
 		cb_info->accuracy_cb(cb_info->sensor, cb_info->timestamp, cb_info->accuracy, cb_info->accuracy_user_data);
 
-	((sensor_cb_t) cb_info->cb)(cb_info->sensor, cb_info->event_type, (sensor_data_t *) cb_info->sensor_data.get(), cb_info->user_data);
+	sensor_event_listener::get_instance().align_sensor_axis(cb_info->sensor, (sensor_data_t *)cb_info->sensor_data.get());
+	((sensor_cb_t) cb_info->cb)(cb_info->sensor, cb_info->event_type, (sensor_data_t *)cb_info->sensor_data.get(), cb_info->user_data);
 
 	delete cb_info;
 
@@ -306,7 +313,7 @@ void sensor_event_listener::listen_events(void)
 
 		len = sensor_event_poll(buffer, sizeof(sensor_event_t), event);
 		if (len <= 0) {
-			_I("Failed to sensor_event_poll()");
+			_E("Failed to sensor_event_poll()");
 			break;
 		}
 
@@ -316,7 +323,7 @@ void sensor_event_listener::listen_events(void)
 
 		len = sensor_event_poll(buffer_data, data_len, event);
 		if (len <= 0) {
-			_I("Failed to sensor_event_poll() for sensor_data");
+			_E("Failed to sensor_event_poll() for sensor_data");
 			free(buffer_data);
 			break;
 		}
@@ -349,6 +356,7 @@ void sensor_event_listener::listen_events(void)
 
 bool sensor_event_listener::create_event_channel(void)
 {
+	const int client_type = CLIENT_TYPE_SENSOR_CLIENT;
 	int client_id;
 	channel_ready_t event_channel_ready;
 
@@ -362,6 +370,11 @@ bool sensor_event_listener::create_event_channel(void)
 
 	if (!m_event_socket.set_connection_mode()) {
 		_E("Failed to set connection mode for client %s", get_client_name());
+		return false;
+	}
+
+	if (m_event_socket.send(&client_type, sizeof(client_type)) <= 0) {
+		_E("Failed to send client type in client %s, event socket fd[%d]", get_client_name(), m_event_socket.get_socket_fd());
 		return false;
 	}
 
@@ -451,4 +464,14 @@ bool sensor_event_listener::start_event_listener(void)
 	listener.detach();
 
 	return true;
+}
+
+void sensor_event_listener::set_display_rotation(int rt)
+{
+	_D("New display rotation: %d", rt);
+
+	if (rt < AUTO_ROTATION_DEGREE_0 || rt > AUTO_ROTATION_DEGREE_270)
+		return;
+
+	m_display_rotation = rt;
 }

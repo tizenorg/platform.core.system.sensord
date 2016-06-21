@@ -40,7 +40,7 @@ sensor_event_poller::~sensor_event_poller()
 		m_poller.del_fd(it->first);
 }
 
-void sensor_event_poller::init_sensor_map()
+void sensor_event_poller::init_sensor_map(void)
 {
 	int fd;
 	physical_sensor *sensor;
@@ -92,7 +92,7 @@ bool sensor_event_poller::add_poll_fd(int fd)
 	return m_poller.add_fd(fd);
 }
 
-bool sensor_event_poller::poll()
+bool sensor_event_poller::poll(void)
 {
 	std::vector<uint32_t> ids;
 	while (true) {

@@ -52,7 +52,7 @@ orientation_sensor::~orientation_sensor()
 	_I("%s is destroyed!", SENSOR_NAME);
 }
 
-bool orientation_sensor::init()
+bool orientation_sensor::init(void)
 {
 	m_rotation_vector_sensor = sensor_loader::get_instance().get_sensor(ROTATION_VECTOR_SENSOR);
 

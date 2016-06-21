@@ -36,7 +36,7 @@ client_info_manager::~client_info_manager()
 	m_clients.clear();
 }
 
-client_info_manager& client_info_manager::get_instance()
+client_info_manager& client_info_manager::get_instance(void)
 {
 	static client_info_manager inst;
 	return inst;
@@ -131,7 +131,7 @@ bool client_info_manager::get_batch(int client_id, sensor_id_t sensor_id, unsign
 	return it_record->second.get_batch(sensor_id, interval, latency);
 }
 
-bool client_info_manager::set_option(int client_id, sensor_id_t sensor_id, int option)
+bool client_info_manager::set_pause_policy(int client_id, sensor_id_t sensor_id, int pause_policy)
 {
 	AUTOLOCK(m_mutex);
 
@@ -144,7 +144,7 @@ bool client_info_manager::set_option(int client_id, sensor_id_t sensor_id, int o
 		return false;
 	}
 
-	if (!it_record->second.set_option(sensor_id, option))
+	if (!it_record->second.set_pause_policy(sensor_id, pause_policy))
 		return false;
 
 	return true;
@@ -203,7 +203,7 @@ int client_info_manager::create_client_record(void)
 
 	client_record.set_client_id(client_id);
 
-	m_clients.insert(pair<int, client_sensor_record> (client_id, client_record));
+	m_clients.insert(pair<int, client_sensor_record>(client_id, client_record));
 
 	return client_id;
 }

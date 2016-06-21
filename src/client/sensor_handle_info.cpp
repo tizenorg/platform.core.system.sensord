@@ -29,11 +29,12 @@ sensor_handle_info::sensor_handle_info()
 : m_handle(0)
 , m_sensor_id(UNKNOWN_SENSOR)
 , m_sensor_state(SENSOR_STATE_UNKNOWN)
-, m_sensor_option(SENSOR_OPTION_DEFAULT)
+, m_pause_policy(SENSORD_PAUSE_ALL)
 , m_bad_accuracy(false)
 , m_accuracy(-1)
 , m_accuracy_cb(NULL)
 , m_accuracy_user_data(NULL)
+, m_passive(false)
 {
 }
 
@@ -81,7 +82,7 @@ bool sensor_handle_info::add_reg_event_info(unsigned int event_type, unsigned in
 	event_info.m_cb = cb;
 	event_info.m_user_data = user_data;
 
-	m_reg_event_infos.insert(pair<unsigned int, reg_event_info> (event_type, event_info));
+	m_reg_event_infos.insert(pair<unsigned int, reg_event_info>(event_type, event_info));
 
 	return true;
 }
@@ -159,4 +160,19 @@ void sensor_handle_info::get_batch(unsigned int &interval, unsigned int &latency
 unsigned int sensor_handle_info::get_reg_event_count(void)
 {
 	return m_reg_event_infos.size();
+}
+
+bool sensor_handle_info::get_passive_mode(void)
+{
+	return m_passive;
+}
+
+void sensor_handle_info::set_passive_mode(bool passive)
+{
+	m_passive = passive;
+}
+
+bool sensor_handle_info::is_started(void)
+{
+	return (m_sensor_state == SENSOR_STATE_STARTED) || m_passive;
 }

@@ -26,6 +26,7 @@
 #include <sensor_log.h>
 #include <physical_sensor.h>
 #include <virtual_sensor.h>
+#include <external_sensor.h>
 #include <unordered_set>
 #include <algorithm>
 #include <memory>
@@ -62,8 +63,8 @@ sensor_loader::~sensor_loader()
 	sensor_device_map_t::iterator it_device;
 	std::vector<void *>::iterator it_handle;
 
-	for (it_device = m_devices.begin(); it_device != m_devices.end();)
-		it_device = m_devices.erase(it_device);
+	for (it_device = m_active_devices.begin(); it_device != m_active_devices.end();)
+		it_device = m_active_devices.erase(it_device);
 
 	for (it_handle = m_handles.begin(); it_handle != m_handles.end(); ++it_handle)
 		dlclose(*it_handle);
@@ -71,7 +72,7 @@ sensor_loader::~sensor_loader()
 	m_handles.clear();
 }
 
-sensor_loader& sensor_loader::get_instance()
+sensor_loader& sensor_loader::get_instance(void)
 {
 	static sensor_loader inst;
 	return inst;
@@ -219,6 +220,9 @@ void sensor_loader::create_physical_sensors(sensor_type_t type)
 		std::shared_ptr<sensor_base> sensor_ptr(sensor);
 		m_sensors.insert(std::make_pair(_type, sensor_ptr));
 
+		m_active_devices[it->first] = it->second;
+		m_devices.erase(it->first);
+
 		_I("created [%s] sensor", sensor->get_name());
 	}
 }
@@ -239,6 +243,30 @@ void sensor_loader::create_virtual_sensors(const char *name)
 	if (!instance->init()) {
 		_E("Failed to init %s", name);
 		delete instance;
+		return;
+	}
+
+	std::shared_ptr<sensor_base> sensor(instance);
+	type = sensor->get_type();
+	index = (int32_t)(m_sensors.count(type));
+
+	sensor->set_id((int64_t)type << SENSOR_TYPE_SHIFT | index);
+
+	m_sensors.insert(std::make_pair(type, sensor));
+
+	_I("created [%s] sensor", sensor->get_name());
+}
+
+template <typename _sensor>
+void sensor_loader::create_external_sensors(const char *name)
+{
+	int32_t index;
+	sensor_type_t type;
+	external_sensor *instance;
+
+	instance = dynamic_cast<external_sensor *>(create_sensor<_sensor>());
+	if (!instance) {
+		_E("Memory allocation failed[%s]", name);
 		return;
 	}
 
@@ -298,7 +326,7 @@ bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &h
 	struct dirent dir_entry;
 	struct dirent *result;
 	string name;
-	int error;
+	int ret;
 
 	dir = opendir(dir_path.c_str());
 
@@ -308,9 +336,9 @@ bool sensor_loader::get_paths_from_dir(const string &dir_path, vector<string> &h
 	}
 
 	while (true) {
-		error = readdir_r(dir, &dir_entry, &result);
+		ret = readdir_r(dir, &dir_entry, &result);
 
-		if (error != 0)
+		if (ret != 0)
 			continue;
 
 		if (result == NULL)
@@ -342,7 +370,7 @@ sensor_base* sensor_loader::get_sensor(sensor_id_t id)
 {
 	vector<sensor_base *> sensors;
 
-	sensor_type_t type = static_cast<sensor_type_t> (id >> SENSOR_TYPE_SHIFT);
+	sensor_type_t type = static_cast<sensor_type_t>(id >> SENSOR_TYPE_SHIFT);
 	unsigned int index = (id & SENSOR_INDEX_MASK);
 
 	sensors = get_sensors(type);

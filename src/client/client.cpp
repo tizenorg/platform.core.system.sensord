@@ -30,6 +30,7 @@
 #include <sensor_info_manager.h>
 #include <vector>
 #include <algorithm>
+#include "dbus_listener.h"
 
 using std::vector;
 
@@ -37,11 +38,19 @@ using std::vector;
 #define API __attribute__((visibility("default")))
 #endif
 
+#ifndef VCONFKEY_SETAPPL_PSMODE
+#define VCONFKEY_SETAPPL_PSMODE "db/setting/psmode"
+#endif
+
 #define DEFAULT_INTERVAL POLL_10HZ_MS
+
+#define CONVERT_OPTION_PAUSE_POLICY(option) \
+	(option == SENSOR_OPTION_DEFAULT || option == SENSOR_OPTION_ALWAYS_ON) ? \
+	(option ^ 0b11) : option
 
 static cmutex lock;
 
-static int g_power_save_state = 0;
+static int g_power_save_state = SENSORD_PAUSE_NONE;
 
 static int get_power_save_state(void);
 static void power_save_state_cb(keynode_t *node, void *data);
@@ -80,6 +89,7 @@ static void set_power_save_state_cb(void)
 		g_power_save_state = get_power_save_state();
 		_D("power_save_state = [%d]", g_power_save_state);
 		vconf_notify_key_changed(VCONFKEY_PM_STATE, power_save_state_cb, NULL);
+		vconf_notify_key_changed(VCONFKEY_SETAPPL_PSMODE, power_save_state_cb, NULL);
 	}
 }
 
@@ -93,6 +103,7 @@ static void unset_power_save_state_cb(void)
 	if (g_power_save_state_cb_cnt == 0) {
 		_D("Power save callback is unregistered");
 		vconf_ignore_key_changed(VCONFKEY_PM_STATE, power_save_state_cb);
+		vconf_ignore_key_changed(VCONFKEY_SETAPPL_PSMODE, power_save_state_cb);
 	}
 }
 
@@ -112,13 +123,19 @@ void clean_up(void)
 
 static int get_power_save_state(void)
 {
+	int ret;
 	int state = 0;
-	int pm_state;
+	int pm_state, ps_state;
 
-	vconf_get_int(VCONFKEY_PM_STATE, &pm_state);
+	ret = vconf_get_int(VCONFKEY_PM_STATE, &pm_state);
 
-	if (pm_state == VCONFKEY_PM_STATE_LCDOFF)
-		state |= SENSOR_OPTION_ON_IN_SCREEN_OFF;
+	if (!ret && pm_state == VCONFKEY_PM_STATE_LCDOFF)
+		state |= SENSORD_PAUSE_ON_DISPLAY_OFF;
+
+	ret = vconf_get_int(VCONFKEY_SETAPPL_PSMODE, &ps_state);
+
+	if (!ret && ps_state != SETTING_PSMODE_NORMAL)
+		state |= SENSORD_PAUSE_ON_POWERSAVE_MODE;
 
 	return state;
 }
@@ -147,12 +164,46 @@ static void power_save_state_cb(keynode_t *node, void *data)
 
 	while (it_sensor != sensors.end()) {
 		sensor_client_info::get_instance().get_sensor_rep(*it_sensor, prev_rep);
-		sensor_event_listener::get_instance().operate_sensor(*it_sensor, cur_power_save_state);
+		sensor_client_info::get_instance().set_pause_policy(*it_sensor, cur_power_save_state);
 		sensor_client_info::get_instance().get_sensor_rep(*it_sensor, cur_rep);
 		change_sensor_rep(*it_sensor, prev_rep, cur_rep);
 
 		++it_sensor;
 	}
+}
+
+bool restore_attributes(int client_id, sensor_id_t sensor, command_channel *cmd_channel)
+{
+	sensor_handle_info_map handle_infos;
+
+	sensor_client_info::get_instance().get_sensor_handle_info(sensor, handle_infos);
+
+	for (auto it_handles = handle_infos.begin(); it_handles != handle_infos.end(); ++it_handles) {
+		sensor_handle_info info = it_handles->second;
+
+		for (auto it = info.attributes_int.begin(); it != info.attributes_int.end(); ++it) {
+			int attribute = it->first;
+			int value = it->second;
+			if (!cmd_channel->cmd_set_attribute_int(attribute, value)) {
+				_E("Failed to send cmd_set_attribute_int(%d, %d) for %s",
+				    client_id, value, get_client_name());
+				return false;
+			}
+		}
+
+		for (auto it = info.attributes_str.begin(); it != info.attributes_str.end(); ++it) {
+			int attribute = it->first;
+			const char *value = it->second.c_str();
+			int value_len = it->second.size();
+			if (!cmd_channel->cmd_set_attribute_str(attribute, value, value_len)) {
+				_E("Failed to send cmd_set_attribute_str(%d, %d, %s) for %s",
+				    client_id, value_len, value, get_client_name());
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 void restore_session(void)
@@ -207,7 +258,7 @@ void restore_session(void)
 
 		sensor_rep prev_rep, cur_rep;
 		prev_rep.active = false;
-		prev_rep.option = SENSOR_OPTION_DEFAULT;
+		prev_rep.pause_policy = SENSORD_PAUSE_ALL;
 		prev_rep.interval = 0;
 
 		sensor_client_info::get_instance().get_sensor_rep(*it_sensor, cur_rep);
@@ -216,6 +267,10 @@ void restore_session(void)
 			goto FAILED;
 		}
 
+		if (!restore_attributes(client_id, *it_sensor, cmd_channel)) {
+			_E("Failed to restore attributes(%s) for %s", get_sensor_name(*it_sensor), get_client_name());
+			goto FAILED;
+		}
 		++it_sensor;
 	}
 
@@ -256,9 +311,9 @@ static bool change_sensor_rep(sensor_id_t sensor_id, sensor_rep &prev_rep, senso
 	get_events_diff(prev_rep.event_types, cur_rep.event_types, add_event_types, del_event_types);
 
 	if (cur_rep.active) {
-		if (prev_rep.option != cur_rep.option) {
-			if (!cmd_channel->cmd_set_option(cur_rep.option)) {
-				_E("Sending cmd_set_option(%d, %s, %d) failed for %s", client_id, get_sensor_name(sensor_id), cur_rep.option, get_client_name());
+		if (prev_rep.pause_policy != cur_rep.pause_policy) {
+			if (!cmd_channel->cmd_set_pause_policy(cur_rep.pause_policy)) {
+				_E("Sending cmd_set_pause_policy(%d, %s, %d) failed for %s", client_id, get_sensor_name(sensor_id), cur_rep.pause_policy, get_client_name());
 				return false;
 			}
 		}
@@ -620,7 +675,7 @@ API int sensord_connect(sensor_t sensor)
 
 	_I("%s[%d] connects with %s[%d]", get_client_name(), client_id, get_sensor_name(sensor_id), handle);
 
-	sensor_client_info::get_instance().set_sensor_params(handle, SENSOR_STATE_STOPPED, SENSOR_OPTION_DEFAULT);
+	sensor_client_info::get_instance().set_sensor_params(handle, SENSOR_STATE_STOPPED, SENSORD_PAUSE_ALL);
 
 	if (!sensor_registered) {
 		if (!cmd_channel->cmd_hello(sensor_id)) {
@@ -636,6 +691,7 @@ API int sensord_connect(sensor_t sensor)
 	}
 
 	set_power_save_state_cb();
+	dbus_listener::init();
 	return handle;
 }
 
@@ -663,6 +719,28 @@ API bool sensord_disconnect(int handle)
 	retvm_if((client_id < 0), false, "Invalid client id : %d, handle: %d, %s, %s", client_id, handle, get_sensor_name(sensor_id), get_client_name());
 
 	_I("%s disconnects with %s[%d]", get_client_name(), get_sensor_name(sensor_id), handle);
+
+	if (sensor_client_info::get_instance().get_passive_mode(handle)) {
+		_W("%s[%d] for %s is on passive mode while disconnecting.",
+			get_sensor_name(sensor_id), handle, get_client_name());
+
+		command_channel *cmd_channel;
+		event_type_vector event_types;
+		sensor_client_info::get_instance().get_active_event_types(sensor_id, event_types);
+
+		for (auto it = event_types.begin(); it != event_types.end(); ++it)
+			sensord_unregister_event(handle, *it);
+
+		if (!sensor_client_info::get_instance().get_command_channel(sensor_id, &cmd_channel)) {
+			_E("client %s failed to get command channel for %s", get_client_name(), get_sensor_name(sensor_id));
+			return false;
+		}
+
+		if (!cmd_channel->cmd_unset_batch()) {
+			_E("Sending cmd_unset_interval(%d, %s) failed for %s", client_id, get_sensor_name(sensor_id), get_client_name());
+			return false;
+		}
+	}
 
 	if (sensor_state != SENSOR_STATE_STOPPED) {
 		_W("%s[%d] for %s is not stopped before disconnecting.",
@@ -763,6 +841,9 @@ API bool sensord_unregister_event(int handle, unsigned int event_type)
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, cur_rep);
 	ret =  change_sensor_rep(sensor_id, prev_rep, cur_rep);
 
+	if (sensor_client_info::get_instance().get_passive_mode(handle))
+		sensor_client_info::get_instance().set_passive_mode(handle, false);
+
 	if (!ret)
 		sensor_client_info::get_instance().register_event(handle, event_type, prev_interval, prev_latency, prev_cb, prev_user_data);
 
@@ -814,7 +895,8 @@ API bool sensord_start(int handle, int option)
 	sensor_id_t sensor_id;
 	sensor_rep prev_rep, cur_rep;
 	bool ret;
-	int prev_state, prev_option;
+	int prev_state, prev_pause;
+	int pause;
 
 	AUTOLOCK(lock);
 
@@ -829,20 +911,22 @@ API bool sensord_start(int handle, int option)
 	_I("%s starts %s[%d], with option: %d, power save state: %d", get_client_name(), get_sensor_name(sensor_id),
 		handle, option, g_power_save_state);
 
-	if (g_power_save_state && !(g_power_save_state & option)) {
-		sensor_client_info::get_instance().set_sensor_params(handle, SENSOR_STATE_PAUSED, option);
+	pause = CONVERT_OPTION_PAUSE_POLICY(option);
+
+	if (g_power_save_state && (g_power_save_state & pause)) {
+		sensor_client_info::get_instance().set_sensor_params(handle, SENSOR_STATE_PAUSED, pause);
 		return true;
 	}
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, prev_rep);
-	sensor_client_info::get_instance().get_sensor_params(handle, prev_state, prev_option);
-	sensor_client_info::get_instance().set_sensor_params(handle, SENSOR_STATE_STARTED, option);
+	sensor_client_info::get_instance().get_sensor_params(handle, prev_state, prev_pause);
+	sensor_client_info::get_instance().set_sensor_params(handle, SENSOR_STATE_STARTED, pause);
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, cur_rep);
 
 	ret = change_sensor_rep(sensor_id, prev_rep, cur_rep);
 
 	if (!ret)
-		sensor_client_info::get_instance().set_sensor_params(handle, prev_state, prev_option);
+		sensor_client_info::get_instance().set_sensor_params(handle, prev_state, prev_pause);
 
 	return ret;
 }
@@ -852,7 +936,7 @@ API bool sensord_stop(int handle)
 	sensor_id_t sensor_id;
 	int sensor_state;
 	bool ret;
-	int prev_state, prev_option;
+	int prev_state, prev_pause;
 
 	sensor_rep prev_rep, cur_rep;
 
@@ -870,14 +954,14 @@ API bool sensord_stop(int handle)
 	_I("%s stops sensor %s[%d]", get_client_name(), get_sensor_name(sensor_id), handle);
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, prev_rep);
-	sensor_client_info::get_instance().get_sensor_params(handle, prev_state, prev_option);
+	sensor_client_info::get_instance().get_sensor_params(handle, prev_state, prev_pause);
 	sensor_client_info::get_instance().set_sensor_state(handle, SENSOR_STATE_STOPPED);
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, cur_rep);
 
 	ret = change_sensor_rep(sensor_id, prev_rep, cur_rep);
 
 	if (!ret)
-		sensor_client_info::get_instance().set_sensor_params(handle, prev_state, prev_option);
+		sensor_client_info::get_instance().set_sensor_params(handle, prev_state, prev_pause);
 
 	return ret;
 }
@@ -954,46 +1038,53 @@ API bool sensord_change_event_max_batch_latency(int handle, unsigned int event_t
 	return change_event_batch(handle, event_type, prev_interval, max_batch_latency);
 }
 
-API bool sensord_set_option(int handle, int option)
+static int change_pause_policy(int handle, int pause)
 {
 	sensor_id_t sensor_id;
 	sensor_rep prev_rep, cur_rep;
 	int sensor_state;
 	bool ret;
-	int prev_state, prev_option;
+	int prev_state, prev_pause;
 
 	AUTOLOCK(lock);
+
+	retvm_if((pause < 0) || (pause >= SENSORD_PAUSE_END), -EINVAL,
+		"Invalid pause value : %d, handle: %d, %s, %s",
+		pause, handle, get_sensor_name(sensor_id), get_client_name());
 
 	if (!sensor_client_info::get_instance().get_sensor_state(handle, sensor_state)||
 		!sensor_client_info::get_instance().get_sensor_id(handle, sensor_id)) {
 		_E("client %s failed to get handle information", get_client_name());
-		return false;
+		return -EPERM;
 	}
-
-	retvm_if((option < 0) || (option >= SENSOR_OPTION_END), false, "Invalid option value : %d, handle: %d, %s, %s",
-		option, handle, get_sensor_name(sensor_id), get_client_name());
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, prev_rep);
-	sensor_client_info::get_instance().get_sensor_params(handle, prev_state, prev_option);
+	sensor_client_info::get_instance().get_sensor_params(handle, prev_state, prev_pause);
 
 	if (g_power_save_state) {
-		if ((option & g_power_save_state) && (sensor_state == SENSOR_STATE_PAUSED))
-			sensor_client_info::get_instance().set_sensor_state(handle, SENSOR_STATE_STARTED);
-		else if (!(option & g_power_save_state) && (sensor_state == SENSOR_STATE_STARTED))
+		if ((pause & g_power_save_state) && (sensor_state == SENSOR_STATE_STARTED))
 			sensor_client_info::get_instance().set_sensor_state(handle, SENSOR_STATE_PAUSED);
+		else if (!(pause & g_power_save_state) && (sensor_state == SENSOR_STATE_PAUSED))
+			sensor_client_info::get_instance().set_sensor_state(handle, SENSOR_STATE_STARTED);
 	}
-	sensor_client_info::get_instance().set_sensor_option(handle, option);
+	sensor_client_info::get_instance().set_sensor_pause_policy(handle, pause);
 
 	sensor_client_info::get_instance().get_sensor_rep(sensor_id, cur_rep);
 	ret =  change_sensor_rep(sensor_id, prev_rep, cur_rep);
 
 	if (!ret)
-		sensor_client_info::get_instance().set_sensor_option(handle, prev_option);
+		sensor_client_info::get_instance().set_sensor_pause_policy(handle, prev_pause);
 
-	return ret;
+	return (ret ? OP_SUCCESS : OP_ERROR);
 }
 
-API int sensord_set_attribute_int(int handle, int attribute, int value)
+static int change_axis_orientation(int handle, int axis_orientation)
+{
+	sensor_event_listener::get_instance().set_sensor_axis(axis_orientation);
+	return OP_SUCCESS;
+}
+
+static int change_attribute_int(int handle, int attribute, int value)
 {
 	sensor_id_t sensor_id;
 	command_channel *cmd_channel;
@@ -1020,6 +1111,27 @@ API int sensord_set_attribute_int(int handle, int attribute, int value)
 		_E("Sending cmd_set_attribute_int(%d, %d) failed for %s",
 			client_id, value, get_client_name());
 		return -EPERM;
+	}
+
+	sensor_client_info::get_instance().set_attribute(handle, attribute, value);
+
+	return OP_SUCCESS;
+}
+
+API bool sensord_set_option(int handle, int option)
+{
+	return (change_pause_policy(handle, CONVERT_OPTION_PAUSE_POLICY(option)) == OP_SUCCESS);
+}
+
+API int sensord_set_attribute_int(int handle, int attribute, int value)
+{
+	switch (attribute) {
+	case SENSORD_ATTRIBUTE_PAUSE_POLICY:
+		return change_pause_policy(handle, value);
+	case SENSORD_ATTRIBUTE_AXIS_ORIENTATION:
+		return change_axis_orientation(handle, value);
+	default:
+		return change_attribute_int(handle, attribute, value);
 	}
 
 	return OP_SUCCESS;
@@ -1058,6 +1170,8 @@ API int sensord_set_attribute_str(int handle, int attribute, const char *value, 
 			client_id, value_len, value, get_client_name());
 		return -EPERM;
 	}
+
+	sensor_client_info::get_instance().set_attribute(handle, attribute, value);
 
 	return OP_SUCCESS;
 }
@@ -1151,3 +1265,12 @@ API bool sensord_register_hub_event(int handle, unsigned int event_type, unsigne
 	return false;
 }
 
+API bool sensord_set_passive_mode(int handle, bool passive)
+{
+	if (!sensor_client_info::get_instance().set_passive_mode(handle, passive)) {
+		_E("Failed to set passive mode %d", passive);
+		return false;
+	}
+
+	return true;
+}

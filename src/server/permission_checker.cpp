@@ -21,15 +21,17 @@
 #include <cynara-creds-socket.h>
 #include <cynara-session.h>
 #include <permission_checker.h>
+#include <sensor_common.h>
 #include <sensor_log.h>
 #include <sensor_loader.h>
 #include <sensor_base.h>
+#include <vector>
 
 #define CACHE_SIZE 16
 
 static cynara *cynara_env = NULL;
 
-static bool check_privilege_by_sockfd(int sock_fd, const char *priv)
+static bool check_privilege_by_sockfd(int sock_fd, const char *priv, const char *access)
 {
 	retvm_if(cynara_env == NULL, false, "Cynara not initialized");
 
@@ -64,25 +66,23 @@ permission_checker::permission_checker()
 : m_permission_set(0)
 {
 	init();
+	init_cynara();
 }
 
 permission_checker::~permission_checker()
 {
-	deinit();
+	deinit_cynara();
 }
 
-permission_checker& permission_checker::get_instance()
+permission_checker& permission_checker::get_instance(void)
 {
 	static permission_checker inst;
 	return inst;
 }
 
-void permission_checker::init()
+void permission_checker::init(void)
 {
-	AUTOLOCK(m_mutex);
-
-	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_STANDARD, false, ""));
-	m_permission_infos.push_back(std::make_shared<permission_info> (SENSOR_PERMISSION_BIO, true, "http://tizen.org/privilege/healthinfo"));
+	m_permission_infos.push_back(std::make_shared<permission_info>(SENSOR_PERMISSION_BIO, "http://tizen.org/privilege/healthinfo", ""));
 
 	std::vector<sensor_base *> sensors;
 	sensors = sensor_loader::get_instance().get_sensors(ALL_SENSOR);
@@ -91,12 +91,12 @@ void permission_checker::init()
 		m_permission_set |= sensors[i]->get_permission();
 
 	_I("Permission Set = %d", m_permission_set);
-
-	init_cynara();
 }
 
 void permission_checker::init_cynara(void)
 {
+	AUTOLOCK(m_mutex);
+
 	cynara_configuration *conf;
 
 	int err = cynara_configuration_create(&conf);
@@ -121,7 +121,7 @@ void permission_checker::init_cynara(void)
 	_I("Cynara initialized");
 }
 
-void permission_checker::deinit()
+void permission_checker::deinit_cynara(void)
 {
 	AUTOLOCK(m_mutex);
 
@@ -135,16 +135,14 @@ int permission_checker::get_permission(int sock_fd)
 {
 	AUTOLOCK(m_mutex);
 
-	int permission = SENSOR_PERMISSION_NONE;
+	int permission = SENSOR_PERMISSION_STANDARD;
 
 	for (unsigned int i = 0; i < m_permission_infos.size(); ++i) {
-		if (!m_permission_infos[i]->need_to_check) {
+		if (!(m_permission_set & m_permission_infos[i]->permission))
+			continue;
+
+		if (check_privilege_by_sockfd(sock_fd, m_permission_infos[i]->privilege.c_str(), m_permission_infos[i]->access.c_str()))
 			permission |= m_permission_infos[i]->permission;
-		} else if (m_permission_set & m_permission_infos[i]->permission) {
-			if (check_privilege_by_sockfd(sock_fd, m_permission_infos[i]->privilege.c_str())) {
-				permission |= m_permission_infos[i]->permission;
-			}
-		}
 	}
 
 	return permission;

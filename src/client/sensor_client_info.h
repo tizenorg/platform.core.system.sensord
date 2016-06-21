@@ -29,31 +29,18 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
-#include <string>
-#include <queue>
-#include <mutex>
-#include <condition_variable>
 #include <cmutex.h>
 #include <sensor_handle_info.h>
 #include <command_channel.h>
 
-using std::unordered_map;
-using std::vector;
-using std::string;
-using std::queue;
-using std::mutex;
-using std::lock_guard;
-using std::unique_lock;
-using std::condition_variable;
-
-typedef vector<unsigned int> handle_vector;
-typedef vector<sensor_id_t> sensor_id_vector;
-typedef unordered_map<int, sensor_handle_info> sensor_handle_info_map;
-typedef unordered_map<sensor_id_t, command_channel *> sensor_command_channel_map;
+typedef std::vector<unsigned int> handle_vector;
+typedef std::vector<sensor_id_t> sensor_id_vector;
+typedef std::unordered_map<int, sensor_handle_info> sensor_handle_info_map;
+typedef std::unordered_map<sensor_id_t, command_channel *> sensor_command_channel_map;
 
 typedef struct sensor_rep {
 	bool active;
-	int option;
+	int pause_policy;
 	unsigned int interval;
 	unsigned int latency;
 	event_type_vector event_types;
@@ -71,10 +58,17 @@ public:
 	bool register_accuracy_cb(int handle, sensor_accuracy_changed_cb_t cb, void* user_data);
 	bool unregister_accuracy_cb(int handle);
 
-	bool set_sensor_params(int handle, int sensor_state, int sensor_option);
-	bool get_sensor_params(int handle, int &sensor_state, int &sensor_option);
+	bool set_sensor_params(int handle, int sensor_state, int sensor_pause_policy);
+	bool get_sensor_params(int handle, int &sensor_state, int &sensor_pause_policy);
 	bool set_sensor_state(int handle, int sensor_state);
-	bool set_sensor_option(int handle, int sensor_option);
+
+	bool get_passive_mode(int handle);
+	bool set_passive_mode(int handle, bool passive);
+
+	bool set_attribute(int handle, int attribute, int value);
+	bool set_attribute(int handle, int attribute, std::string value);
+
+	bool set_sensor_pause_policy(int handle, int pause_policy);
 	bool set_event_batch(int handle, unsigned int event_type, unsigned int interval, unsigned int latency);
 	bool set_accuracy(int handle, int accuracy);
 	bool set_bad_accuracy(int handle, int bad_accuracy);
@@ -83,7 +77,7 @@ public:
 	void get_sensor_rep(sensor_id_t sensor, sensor_rep& rep);
 
 	bool get_active_batch(sensor_id_t sensor, unsigned int &interval, unsigned int &latency);
-	unsigned int get_active_option(sensor_id_t sensor_id);
+	unsigned int get_active_pause_policy(sensor_id_t sensor_id);
 	void get_active_event_types(sensor_id_t sensor_id, event_type_vector &active_event_types);
 
 	bool get_sensor_id(int handle, sensor_id_t &sensor_id);
@@ -106,6 +100,8 @@ public:
 	void get_all_handles(handle_vector &handles);
 	void get_sensor_handle_info(sensor_id_t sensor, sensor_handle_info_map &handles_info);
 	void get_all_handle_info(sensor_handle_info_map &handles_info);
+
+	void set_pause_policy(sensor_id_t sensor, int power_save_state);
 
 	void clear(void);
 

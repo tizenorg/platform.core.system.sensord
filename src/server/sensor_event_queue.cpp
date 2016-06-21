@@ -20,7 +20,7 @@
 #include <sensor_event_queue.h>
 #include <sensor_log.h>
 
-sensor_event_queue& sensor_event_queue::get_instance()
+sensor_event_queue& sensor_event_queue::get_instance(void)
 {
 	static sensor_event_queue inst;
 	return inst;

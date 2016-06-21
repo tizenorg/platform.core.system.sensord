@@ -71,7 +71,7 @@ gravity_sensor::~gravity_sensor()
 	_I("gravity_sensor is destroyed!\n");
 }
 
-bool gravity_sensor::init()
+bool gravity_sensor::init(void)
 {
 	/* Acc (+ Gyro) fusion */
 	m_accel_sensor = sensor_loader::get_instance().get_sensor(ACCELEROMETER_SENSOR);
@@ -323,7 +323,7 @@ void gravity_sensor::fusion_set_gyro(const sensor_event_t& event)
 	m_time_new = event.data->timestamp;
 }
 
-void gravity_sensor::fusion_update_angle()
+void gravity_sensor::fusion_update_angle(void)
 {
 	_D("AngleIn: (%f, %f, %f)", m_angle_n[0], m_angle_n[1], m_angle_n[2]);
 	_D("AngAccl: (%f, %f, %f)", m_velocity[0], m_velocity[1], m_velocity[2]);
@@ -341,7 +341,7 @@ void gravity_sensor::fusion_update_angle()
 	_D("Angle' : (%f, %f, %f)", m_angle[0], m_angle[1], m_angle[2]);
 }
 
-void gravity_sensor::fusion_get_gravity()
+void gravity_sensor::fusion_get_gravity(void)
 {
 	double x = 0, y = 0, z = 0;
 	double norm;

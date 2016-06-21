@@ -82,7 +82,7 @@ void command_worker::init_cmd_handlers(void)
 	m_cmd_handlers[CMD_STOP]				= &command_worker::cmd_stop;
 	m_cmd_handlers[CMD_REG]					= &command_worker::cmd_register_event;
 	m_cmd_handlers[CMD_UNREG]				= &command_worker::cmd_unregister_event;
-	m_cmd_handlers[CMD_SET_OPTION]			= &command_worker::cmd_set_option;
+	m_cmd_handlers[CMD_SET_PAUSE_POLICY]	= &command_worker::cmd_set_pause_policy;
 	m_cmd_handlers[CMD_SET_BATCH]			= &command_worker::cmd_set_batch;
 	m_cmd_handlers[CMD_UNSET_BATCH]			= &command_worker::cmd_unset_batch;
 	m_cmd_handlers[CMD_GET_DATA]			= &command_worker::cmd_get_data;
@@ -658,23 +658,23 @@ out:
 	return true;
 }
 
-bool command_worker::cmd_set_option(void *payload)
+bool command_worker::cmd_set_pause_policy(void *payload)
 {
-	cmd_set_option_t *cmd;
+	cmd_set_pause_policy_t *cmd;
 	long ret_value = OP_ERROR;
 
-	cmd = (cmd_set_option_t*)payload;
+	cmd = (cmd_set_pause_policy_t*)payload;
 
 	if (!is_permission_allowed()) {
-		_E("Permission denied to set interval for client [%d], for sensor [%#llx] with option [%d] to client info manager",
-			m_client_id, m_sensor_id, cmd->option);
+		_E("Permission denied to set interval for client [%d], for sensor [%#llx] with pause_policy [%d] to client info manager",
+			m_client_id, m_sensor_id, cmd->pause_policy);
 		ret_value = OP_ERROR;
 		goto out;
 	}
 
-	if (!get_client_info_manager().set_option(m_client_id, m_sensor_id, cmd->option)) {
-		_E("Failed to set option for client [%d], for sensor [%#llx] with option [%d] to client info manager",
-			m_client_id, m_sensor_id, cmd->option);
+	if (!get_client_info_manager().set_pause_policy(m_client_id, m_sensor_id, cmd->pause_policy)) {
+		_E("Failed to set pause_policy for client [%d], for sensor [%#llx] with pause_policy [%d] to client info manager",
+			m_client_id, m_sensor_id, cmd->pause_policy);
 		ret_value = OP_ERROR;
 		goto out;
 	}
@@ -706,30 +706,28 @@ bool command_worker::cmd_get_data(void *payload)
 
 	state = m_module->get_cache(&data);
 
-	// In case of not getting sensor data, wait short time and retry again
-	// 1. changing interval to be less than 10ms
-	// 2. In case of first time, wait for INIT_WAIT_TIME
-	// 3. at another time, wait for WAIT_TIME
-	// 4. retrying to get data
-	// 5. repeat 2 ~ 4 operations RETRY_CNT times
-	// 6. reverting back to original interval
+	/* if there is no cached data, wait short time and retry to get data again */
 	if (state == -ENODATA) {
-		const int RETRY_CNT	= 10;
+		const int RETRY_CNT = 10;
 		int retry = 0;
 
 		unsigned int interval = m_module->get_interval(m_client_id, false);
 
+		 /* 1. change interval to 10ms. */
 		if (interval > GET_DATA_MIN_INTERVAL) {
 			m_module->add_interval(m_client_id, GET_DATA_MIN_INTERVAL, false);
 			adjusted = true;
 		}
 
+		/* 2. try to get sensor data increasing the waited time(20ms, 40ms, 80ms, 160ms, 160ms...) */
+		/* 3. if data cannot be found in 10 times, stop it. */
 		while ((state == -ENODATA) && (retry++ < RETRY_CNT)) {
 			_I("Wait sensor[%#llx] data updated for client [%d] #%d", m_sensor_id, m_client_id, retry);
 			usleep(WAIT_TIME(retry));
 			state = m_module->get_cache(&data);
 		}
 
+		/* 4. revert to original interval */
 		if (adjusted)
 			m_module->add_interval(m_client_id, interval, false);
 	}

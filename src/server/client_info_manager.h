@@ -31,7 +31,7 @@ typedef std::vector<int> client_id_vec;
 
 class client_info_manager {
 public:
-	static client_info_manager& get_instance();
+	static client_info_manager& get_instance(void);
 	int create_client_record(void);
 	bool remove_client_record(int client_id);
 	bool has_client_record(int client_id);
@@ -52,7 +52,7 @@ public:
 
 	bool set_batch(int client_id, sensor_id_t sensor_id, unsigned int interval, unsigned int latency);
 	bool get_batch(int client_id, sensor_id_t sensor_id, unsigned int &interval, unsigned int &latency);
-	bool set_option(int client_id, sensor_id_t sensor_id, int option);
+	bool set_pause_policy(int client_id, sensor_id_t sensor_id, int pause_policy);
 
 	bool set_start(int client_id, sensor_id_t sensor_id, bool start);
 	bool is_started(int client_id, sensor_id_t sensor_id);

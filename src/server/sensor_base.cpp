@@ -18,6 +18,7 @@
  */
 
 #include <stdint.h>
+#include <limits.h>
 #include <sensor_hal_types.h>
 #include <sensor_event_queue.h>
 #include <sensor_base.h>
@@ -66,7 +67,7 @@ unsigned int sensor_base::get_event_type(void)
 	return -1;
 }
 
-const char* sensor_base::get_name()
+const char* sensor_base::get_name(void)
 {
 	return NULL;
 }
@@ -76,7 +77,7 @@ bool sensor_base::get_sensor_info(sensor_info &info)
 	return false;
 }
 
-bool sensor_base::is_virtual()
+bool sensor_base::is_virtual(void)
 {
 	return false;
 }
@@ -116,7 +117,7 @@ int sensor_base::set_attribute(int32_t attribute, char *value, int value_size)
 	return OP_SUCCESS;
 }
 
-bool sensor_base::start()
+bool sensor_base::start(void)
 {
 	AUTOLOCK(m_client_mutex);
 
@@ -264,10 +265,10 @@ bool sensor_base::delete_batch(int client_id)
 	cur_max = m_sensor_info_list.get_max_batch();
 
 	if (!cur_max) {
-		_I("No latency for sensor[%#llx] by client[%d] deleting latency, so set to default 0 ms",
+		_I("No latency for sensor[%#llx] by client[%d] deleting latency, so set to default count",
 			 get_id(), client_id);
 
-		set_batch_latency(0);
+		set_batch_latency(UINT_MAX);
 	} else if (cur_max != prev_max) {
 		_I("Max latency for sensor[%#llx] is changed from %dms to %dms by client[%d] deleting latency",
 			get_id(), prev_max, cur_max, client_id);
@@ -297,6 +298,9 @@ void sensor_base::set_permission(int permission)
 
 bool sensor_base::push(sensor_event_t *event)
 {
+	if (!event || !(event->data))
+		return false;
+
 	set_cache(event->data);
 
 	AUTOLOCK(m_client_mutex);
@@ -344,12 +348,12 @@ bool sensor_base::set_batch_latency(unsigned long latency)
 	return true;
 }
 
-bool sensor_base::on_start()
+bool sensor_base::on_start(void)
 {
 	return true;
 }
 
-bool sensor_base::on_stop()
+bool sensor_base::on_stop(void)
 {
 	return true;
 }

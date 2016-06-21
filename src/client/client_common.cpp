@@ -17,6 +17,7 @@
  *
  */
 #include <time.h>
+#include <sensor_common.h>
 #include <client_common.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -40,7 +41,7 @@ const char* get_sensor_name(sensor_id_t id)
 
 const char* get_event_name(unsigned int event_type)
 {
-	sensor_type_t type = (sensor_type_t) (event_type >> EVENT_TYPE_SHIFT);
+	sensor_type_t type = (sensor_type_t) (event_type >> SENSOR_EVENT_SHIFT);
 	std::string name(util_sensor_type_t::get_string(type));
 
 	return name.append("_EVENT").c_str();
@@ -48,7 +49,7 @@ const char* get_event_name(unsigned int event_type)
 
 unsigned int get_calibration_event_type(unsigned int event_type)
 {
-	sensor_type_t type = (sensor_type_t)(event_type >> EVENT_TYPE_SHIFT);
+	sensor_type_t type = (sensor_type_t)(event_type >> SENSOR_EVENT_SHIFT);
 
 	switch (type) {
 	case GEOMAGNETIC_SENSOR:
@@ -94,9 +95,9 @@ void print_event_occurrence_log(sensor_handle_info &info)
 	if ((count != 1) && (count % log_per_count != 0))
 		return;
 
-	_D("%s receives %s[%d][state: %d, option: %d, count: %d]", get_client_name(),
+	_D("%s receives %s[%d][state: %d, pause policy: %d, count: %d]", get_client_name(),
 			get_sensor_name(info.m_sensor_id), info.m_handle,
-			info.m_sensor_state, info.m_sensor_option, count);
+			info.m_sensor_state, info.m_pause_policy, count);
 }
 
 /*

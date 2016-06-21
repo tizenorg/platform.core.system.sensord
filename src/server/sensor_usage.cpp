@@ -25,7 +25,7 @@
 sensor_usage::sensor_usage()
 : m_interval(POLL_1HZ_MS)
 , m_latency(0)
-, m_option(SENSOR_OPTION_DEFAULT)
+, m_pause_policy(SENSORD_PAUSE_ALL)
 , m_start(false)
 {
 }
@@ -66,7 +66,7 @@ bool sensor_usage::is_event_registered(unsigned int event_type)
 {
 	auto it_event = find(m_reg_events.begin(), m_reg_events.end(), event_type);
 
-	if (it_event == m_reg_events.end()){
+	if (it_event == m_reg_events.end()) {
 		_D("Event[%#x] is not registered", event_type);
 		return false;
 	}

@@ -48,6 +48,7 @@ private:
 	void create_sensors(void);
 	template <typename _sensor> void create_physical_sensors(sensor_type_t type);
 	template <typename _sensor> void create_virtual_sensors(const char *name);
+	template <typename _sensor> void create_external_sensors(const char *name);
 	template <typename _sensor> sensor_base* create_sensor(void);
 
 	void show_sensor_info(void);
@@ -55,9 +56,10 @@ private:
 
 	sensor_map_t m_sensors;
 	sensor_device_map_t m_devices;
+	sensor_device_map_t m_active_devices;
 	std::vector<void *> m_handles;
 public:
-	static sensor_loader& get_instance();
+	static sensor_loader& get_instance(void);
 	bool load(void);
 
 	sensor_base* get_sensor(sensor_type_t type);

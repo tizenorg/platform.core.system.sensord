@@ -39,7 +39,7 @@ public:
 	bool cmd_byebye(void);
 	bool cmd_start(void);
 	bool cmd_stop(void);
-	bool cmd_set_option(int option);
+	bool cmd_set_pause_policy(int pause_policy);
 	bool cmd_register_event(unsigned int event_type);
 	bool cmd_register_events(event_type_vector &event_vec);
 	bool cmd_unregister_event(unsigned int event_type);

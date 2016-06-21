@@ -75,17 +75,17 @@ public:
 
 	int m_magnetic_alignment_factor;
 
-	orientation_filter();
-	~orientation_filter();
+	orientation_filter(void);
+	~orientation_filter(void);
 
 	inline void initialize_sensor_data(const sensor_data<TYPE> *accel,
 			const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic);
-	inline void orientation_triad_algorithm();
-	inline void compute_accel_orientation();
-	inline void compute_covariance();
-	inline void time_update();
-	inline void time_update_gaming_rv();
-	inline void measurement_update();
+	inline void orientation_triad_algorithm(void);
+	inline void compute_accel_orientation(void);
+	inline void compute_covariance(void);
+	inline void time_update(void);
+	inline void time_update_gaming_rv(void);
+	inline void measurement_update(void);
 
 	void get_device_orientation(const sensor_data<TYPE> *accel,
 			const sensor_data<TYPE> *gyro, const sensor_data<TYPE> *magnetic);

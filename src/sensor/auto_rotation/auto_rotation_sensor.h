@@ -59,7 +59,7 @@ private:
 	virtual bool on_start(void);
 	virtual bool on_stop(void);
 
-	auto_rotation_alg *get_alg();
+	auto_rotation_alg *get_alg(void);
 };
 
 #endif /* _AUTO_ROTATION_SENSOR_H_ */

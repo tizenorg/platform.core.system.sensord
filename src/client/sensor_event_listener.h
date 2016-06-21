@@ -66,10 +66,7 @@ typedef void (*hup_observer_t)(void);
 class sensor_event_listener {
 public:
 	static sensor_event_listener& get_instance(void);
-	bool start_handle(int handle);
-	bool stop_handle(int handle);
 
-	void operate_sensor(sensor_id_t sensor, int power_save_state);
 	void get_listening_sensors(sensor_id_vector &sensors);
 
 	bool start_event_listener(void);
@@ -77,6 +74,10 @@ public:
 	void clear(void);
 
 	void set_hup_observer(hup_observer_t observer);
+
+	void set_sensor_axis(int axis);
+	void set_display_rotation(int rt);
+
 private:
 	enum thread_state {
 		THREAD_STATE_START,
@@ -96,6 +97,11 @@ private:
 	hup_observer_t m_hup_observer;
 
 	sensor_client_info &m_client_info;
+
+	/* WC1's rotation control */
+	/* SENSORD_AXIS_DEVICE_ORIENTED, SENSORD_AXIS_DISPLAY_ORIENTED */
+	int m_axis;
+	int m_display_rotation;
 
 	sensor_event_listener();
 	~sensor_event_listener();
@@ -121,6 +127,9 @@ private:
 	static gboolean callback_dispatcher(gpointer data);
 
 	void set_thread_state(thread_state state);
+
+	/* WC1's sensor axis alignment */
+	void align_sensor_axis(sensor_t sensor, sensor_data_t *data);
 };
 
 #endif /* _SENSOR_EVENT_LISTENER_H_ */

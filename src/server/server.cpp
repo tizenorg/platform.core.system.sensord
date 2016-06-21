@@ -25,11 +25,13 @@
 #include <sensor_loader.h>
 #include <command_common.h>
 #include <command_worker.h>
+#include <external_sensor_worker.h>
+#include <external_sensor_service.h>
 #include <thread>
 #include <sensor_event_poller.h>
 #include <client_info_manager.h>
 
-#define SYSTEMD_SOCKET_MAX    2
+#define SYSTEMD_SOCKET_MAX 2
 
 using std::thread;
 
@@ -75,8 +77,6 @@ int server::get_systemd_socket(const char *name)
 
 void server::accept_command_channel(void)
 {
-	command_worker *cmd_worker;
-
 	_I("Command channel acceptor is started");
 
 	while (m_running) {
@@ -102,15 +102,8 @@ void server::accept_command_channel(void)
 		/* TODO: if socket is closed, it should be erased */
 		client_command_sockets.push_back(client_command_socket);
 
-		cmd_worker = new(std::nothrow) command_worker(client_command_socket);
-
-		if (!cmd_worker) {
-			_E("Failed to allocate memory");
-			break;
-		}
-
-		if (!cmd_worker->start())
-			delete cmd_worker;
+		thread worker_dispatcher(&server::dispatch_worker, this, client_command_socket);
+		worker_dispatcher.detach();
 	}
 
 	_I("Command channel acceptor is terminated");
@@ -143,10 +136,75 @@ void server::accept_event_channel(void)
 
 		_D("New client(socket_fd : %d) connected", client_event_socket.get_socket_fd());
 
-		sensor_event_dispatcher::get_instance().accept_event_connections(client_event_socket);
+		thread event_channel_creator(&server::dispatch_event_channel_creator, this, client_event_socket);
+		event_channel_creator.detach();
 	}
 
 	_I("Event channel acceptor is terminated");
+}
+
+void server::dispatch_worker(csocket socket)
+{
+	int worker_type;
+
+	if (socket.recv(&worker_type, sizeof(worker_type)) <= 0) {
+		_E("Failed to get worker type");
+		socket.close();
+		return;
+	}
+
+	if (worker_type == CLIENT_TYPE_SENSOR_CLIENT) {
+		command_worker *worker;
+		worker = new(std::nothrow) command_worker(socket);
+
+		if (!worker) {
+			_E("Failed to allocate memory");
+			socket.close();
+			return;
+		}
+
+		if (!worker->start()) {
+			_E("Failed to start command worker");
+			delete worker;
+		}
+	} else if (worker_type == CLIENT_TYPE_EXTERNAL_SOURCE) {
+		external_sensor_worker *worker;
+		worker = new(std::nothrow) external_sensor_worker(socket);
+
+		if (!worker) {
+			_E("Failed to allocate memory");
+			socket.close();
+			return;
+		}
+
+		if (!worker->start()) {
+			_E("Failed to start external worker");
+			delete worker;
+		}
+	} else {
+		_E("Not supported worker type: %d", worker_type);
+		socket.close();
+	}
+}
+
+void server::dispatch_event_channel_creator(csocket socket)
+{
+	int client_type;
+
+	if (socket.recv(&client_type, sizeof(client_type)) <= 0) {
+		_E("Failed to get client type");
+		socket.close();
+		return;
+	}
+
+	if (client_type == CLIENT_TYPE_SENSOR_CLIENT) {
+		sensor_event_dispatcher::get_instance().accept_event_connections(socket);
+	} else if (client_type == CLIENT_TYPE_EXTERNAL_SOURCE) {
+		external_sensor_service::get_instance().accept_command_channel(socket);
+	} else {
+		_E("Not supported client type: %d", client_type);
+		socket.close();
+	}
 }
 
 void server::poll_event(void)
@@ -176,18 +234,18 @@ bool server::listen_command_channel(void)
 
 	INFO("Failed to get systemd socket, create it by myself!");
 	if (!m_command_channel_accept_socket.create(SOCK_STREAM)) {
-		ERR("Failed to create command channel");
+		_E("Failed to create command channel");
 		return false;
 	}
 
 	if (!m_command_channel_accept_socket.bind(COMMAND_CHANNEL_PATH)) {
-		ERR("Failed to bind command channel");
+		_E("Failed to bind command channel");
 		m_command_channel_accept_socket.close();
 		return false;
 	}
 
 	if (!m_command_channel_accept_socket.listen(MAX_PENDING_CONNECTION)) {
-		ERR("Failed to listen command channel");
+		_E("Failed to listen command channel");
 		return false;
 	}
 
@@ -210,18 +268,18 @@ bool server::listen_event_channel(void)
 	INFO("Failed to get systemd socket, create it by myself!");
 
 	if (!m_event_channel_accept_socket.create(SOCK_SEQPACKET)) {
-		ERR("Failed to create event channel");
+		_E("Failed to create event channel");
 		return false;
 	}
 
 	if (!m_event_channel_accept_socket.bind(EVENT_CHANNEL_PATH)) {
-		ERR("Failed to bind event channel");
+		_E("Failed to bind event channel");
 		m_event_channel_accept_socket.close();
 		return false;
 	}
 
 	if (!m_event_channel_accept_socket.listen(MAX_PENDING_CONNECTION)) {
-		ERR("Failed to listen event channel");
+		_E("Failed to listen event channel");
 		m_event_channel_accept_socket.close();
 		return false;
 	}
@@ -294,7 +352,7 @@ void server::stop(void)
 	}
 }
 
-server& server::get_instance()
+server& server::get_instance(void)
 {
 	static server inst;
 	return inst;

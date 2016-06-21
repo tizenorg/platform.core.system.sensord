@@ -27,7 +27,7 @@
 
 class sensor_event_queue {
 public:
-	static sensor_event_queue& get_instance();
+	static sensor_event_queue& get_instance(void);
 
 	void push(sensor_event_t *event);
 	void* pop(void);

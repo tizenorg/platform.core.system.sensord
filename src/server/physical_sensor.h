@@ -39,7 +39,7 @@ public:
 	virtual const char* get_name(void);
 	virtual uint32_t get_hal_id(void);
 
-	int get_poll_fd();
+	int get_poll_fd(void);
 
 	virtual bool on_event(const sensor_data_t *data, int data_len, int remains);
 
