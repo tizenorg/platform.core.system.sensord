@@ -44,9 +44,7 @@ using std::vector;
 
 #define DEFAULT_INTERVAL POLL_10HZ_MS
 
-#define CONVERT_OPTION_PAUSE_POLICY(option) \
-	(option == SENSOR_OPTION_DEFAULT || option == SENSOR_OPTION_ALWAYS_ON) ? \
-	(option ^ 0b11) : option
+#define CONVERT_OPTION_PAUSE_POLICY(option) ((option) ^ 0b11)
 
 static cmutex lock;
 
