@@ -241,29 +241,27 @@ ssize_t csocket::send_for_stream(const void *buffer, size_t size) const
 	do {
 		len = ::send(m_sock_fd, (const void *)((uint8_t *)buffer + total_sent_size), size - total_sent_size, m_send_flags);
 
-		if (len >= 0) {
-			total_sent_size += len;
-			err = 0;
-		} else {
-			_ERRNO(errno, _E, "Failed to send(%d, %#p + %d, %d - %d) = %d for %s",
-				m_sock_fd, buffer, total_sent_size, size, total_sent_size,
-				len, get_client_name());
-
+		if (len < 0) {
 			/*
 			 * If socket is not available to use it temporarily,
-			 * EAGAIN(EWOULDBLOCK) is returned by ::send().
+			 * EAGAIN(EWOULDBLOCK) or EINTR is returned by ::send().
 			 * so in order to prevent that data are omitted, sleep&retry to send it
 			 */
-			if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-				usleep(1000);
+			if ((errno == EINTR) || (errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+				usleep(10000);
 				continue;
 			}
 
-			if (errno != EINTR) {
-				err = errno;
-				break;
-			}
+			_ERRNO(errno, _E, "Failed to send(%d, %#p + %d, %d - %d) = %d for %s",
+					m_sock_fd, buffer, total_sent_size, size, total_sent_size,
+					len, get_client_name());
+
+			err = errno;
+			break;
 		}
+
+		total_sent_size += len;
+		err = 0;
 	} while (total_sent_size < size);
 
 	return err == 0 ? total_sent_size : -err;
@@ -286,10 +284,6 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 			err = 1;
 			break;
 		} else {
-			_ERRNO(errno, _E, "Failed to recv(%d, %#p + %d, %d - %d) = %d for %s",
-				m_sock_fd, buffer, total_recv_size, size, total_recv_size,
-				len, get_client_name());
-
 			/*
 			 * If socket is not available to use it temporarily,
 			 * EAGAIN(EWOULDBLOCK) is returned by ::recv().
@@ -301,6 +295,10 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 			}
 
 			if (errno != EINTR) {
+				_ERRNO(errno, _E, "Failed to recv(%d, %#p + %d, %d - %d) = %d for %s",
+						m_sock_fd, buffer, total_recv_size, size, total_recv_size,
+						len, get_client_name());
+
 				err = errno;
 				break;
 			}
