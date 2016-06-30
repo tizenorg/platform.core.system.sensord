@@ -1129,10 +1129,10 @@ API int sensord_set_attribute_int(int handle, int attribute, int value)
 	case SENSORD_ATTRIBUTE_AXIS_ORIENTATION:
 		return change_axis_orientation(handle, value);
 	default:
-		return change_attribute_int(handle, attribute, value);
+		break;
 	}
 
-	return OP_SUCCESS;
+	return change_attribute_int(handle, attribute, value);
 }
 
 API int sensord_set_attribute_str(int handle, int attribute, const char *value, int value_len)

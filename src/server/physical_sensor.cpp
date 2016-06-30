@@ -147,7 +147,7 @@ bool physical_sensor::set_batch_latency(unsigned long latency)
 	if (!m_sensor_device)
 		return false;
 
-	_I("Polling interval is set to %dms", latency);
+	_I("Batch latency is set to %dms", latency);
 
 	return m_sensor_device->set_batch_latency(m_info->id, latency);
 }
