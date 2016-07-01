@@ -241,29 +241,26 @@ ssize_t csocket::send_for_stream(const void *buffer, size_t size) const
 	do {
 		len = ::send(m_sock_fd, (const void *)((uint8_t *)buffer + total_sent_size), size - total_sent_size, m_send_flags);
 
-		if (len >= 0) {
-			total_sent_size += len;
-			err = 0;
-		} else {
-			_ERRNO(errno, _E, "Failed to send(%d, %#p + %d, %d - %d) = %d for %s",
-				m_sock_fd, buffer, total_sent_size, size, total_sent_size,
-				len, get_client_name());
-
+		if (len < 0) {
 			/*
 			 * If socket is not available to use it temporarily,
-			 * EAGAIN(EWOULDBLOCK) is returned by ::send().
+			 * EAGAIN(EWOULDBLOCK) or EINTR is returned by ::send().
 			 * so in order to prevent that data are omitted, sleep&retry to send it
 			 */
-			if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-				usleep(1000);
+			if ((errno == EINTR) || (errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+				usleep(10000);
 				continue;
 			}
 
-			if (errno != EINTR) {
-				err = errno;
-				break;
-			}
+			_ERRNO(errno, _E, "Failed to send(%d, %#p + %d, %d - %d) = %d for %s",
+					m_sock_fd, buffer, total_sent_size, size, total_sent_size,
+					len, get_client_name());
+
+			err = errno;
+			break;
 		}
+
+		total_sent_size += len;
 	} while (total_sent_size < size);
 
 	return err == 0 ? total_sent_size : -err;
@@ -278,33 +275,33 @@ ssize_t csocket::recv_for_stream(void* buffer, size_t size) const
 	do {
 		len = ::recv(m_sock_fd, (void *)((uint8_t *)buffer + total_recv_size), size - total_recv_size, m_recv_flags);
 
-		if (len > 0) {
-			total_recv_size += len;
-		} else if (len == 0) {
+		if (len == 0) {
 			_E("recv(%d, %#p + %d, %d - %d) = %d, because the peer of %s performed shutdown!",
 				m_sock_fd, buffer, total_recv_size, size, total_recv_size, len, get_client_name());
 			err = 1;
 			break;
-		} else {
-			_ERRNO(errno, _E, "Failed to recv(%d, %#p + %d, %d - %d) = %d for %s",
-				m_sock_fd, buffer, total_recv_size, size, total_recv_size,
-				len, get_client_name());
+		}
 
+		if (len < 0) {
 			/*
 			 * If socket is not available to use it temporarily,
 			 * EAGAIN(EWOULDBLOCK) is returned by ::recv().
 			 * so in order to prevent that data are omitted, sleep&retry to receive it
 			 */
-			if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-				usleep(1000);
+			if ((errno != EINTR) || (errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+				usleep(10000);
 				continue;
 			}
 
-			if (errno != EINTR) {
-				err = errno;
-				break;
-			}
+			_ERRNO(errno, _E, "Failed to recv(%d, %#p + %d, %d - %d) = %d for %s",
+					m_sock_fd, buffer, total_recv_size, size, total_recv_size,
+					len, get_client_name());
+
+			err = errno;
+			break;
 		}
+
+		total_recv_size += len;
 	} while (total_recv_size < size);
 
 	return err == 0 ? total_recv_size : -err;

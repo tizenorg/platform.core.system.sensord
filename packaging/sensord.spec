@@ -1,6 +1,6 @@
 Name:       sensord
 Summary:    Sensor daemon
-Version:    2.0.5
+Version:    2.0.6
 Release:    0
 Group:      System/Sensor Framework
 License:    Apache-2.0
@@ -12,7 +12,6 @@ Source3:    sensord_event.socket
 BuildRequires:  cmake
 BuildRequires:  libattr-devel
 BuildRequires:  pkgconfig(dlog)
-BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(vconf)
 BuildRequires:  pkgconfig(libsystemd-daemon)
