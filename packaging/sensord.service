@@ -5,6 +5,7 @@ Description=Sensor Daemon
 User=sensor
 Group=input
 Type=notify
+SmackProcessLabel=System
 ExecStart=/usr/bin/sensord
 MemoryLimit=20M
 Sockets=sensord_command.socket
