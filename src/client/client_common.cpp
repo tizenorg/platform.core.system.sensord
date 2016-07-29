@@ -56,6 +56,7 @@ unsigned int get_calibration_event_type(unsigned int event_type)
 	case ROTATION_VECTOR_SENSOR:
 	case RV_RAW_SENSOR:
 	case ORIENTATION_SENSOR:
+	case FACE_DOWN_SENSOR:
 		return CALIBRATION_EVENT(type);
 	default:
 		return 0;
