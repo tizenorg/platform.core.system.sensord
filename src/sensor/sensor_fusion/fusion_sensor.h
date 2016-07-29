@@ -1,7 +1,7 @@
 /*
  * sensord
  *
- * Copyright (c) 2015 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,24 @@
  * limitations under the License.
  *
  */
+#ifndef _fusion_sensor_H
+#define _fusion_sensor_H
 
-#ifndef _FUSION_SENSOR_H_
-#define _FUSION_SENSOR_H_
-
-#include <sensor_internal.h>
-#include <virtual_sensor.h>
+#include <fusion.h>
 #include <orientation_filter.h>
 
-class fusion_sensor : public virtual_sensor {
+class fusion_sensor : public virtual fusion {
 public:
 	fusion_sensor();
+	fusion_sensor(fusion_type FUSION_TYPE);
 	virtual ~fusion_sensor();
 
-	bool init(void);
-
-	void synthesize(const sensor_event_t &event, vector<sensor_event_t> &outs);
-
-	bool add_interval(int client_id, unsigned int interval);
-	bool delete_interval(int client_id);
-	virtual bool get_properties(sensor_type_t sensor_type, sensor_properties_s &properties);
-	virtual void get_types(std::vector<sensor_type_t> &types);
-
-	int get_sensor_data(const unsigned int data_id, sensor_data_t &data);
+	virtual bool push_accel(sensor_data_t &data);
+	virtual bool push_gyro(sensor_data_t &data);
+	virtual bool push_mag(sensor_data_t &data);
+	virtual bool get_rv(unsigned long long timestamp, float &w, float &x, float &y, float &z);
 
 private:
-	sensor_base *m_accel_sensor;
-	sensor_base *m_gyro_sensor;
-	sensor_base *m_magnetic_sensor;
 
 	sensor_data<float> m_accel;
 	sensor_data<float> m_gyro;
@@ -53,19 +43,19 @@ private:
 	sensor_data<float> *m_gyro_ptr;
 	sensor_data<float> *m_magnetic_ptr;
 
-	cmutex m_value_mutex;
-
 	orientation_filter<float> m_orientation_filter;
-	orientation_filter<float> m_orientation_filter_poll;
 
-	unsigned int m_enable_fusion;
+	bool m_enable_accel;
+	bool m_enable_gyro;
+	bool m_enable_magnetic;
 
-	unsigned long long m_time;
-	unsigned int m_interval;
+	fusion_type M_FUSION_TYPE;
+	float m_x;
+	float m_y;
+	float m_z;
+	float m_w;
+	float m_timestamp;
 
-	std::string m_vendor;
-	std::string m_raw_data_unit;
-	int m_default_sampling_time;
 	float m_accel_static_bias[3];
 	float m_gyro_static_bias[3];
 	float m_geomagnetic_static_bias[3];
@@ -74,8 +64,11 @@ private:
 	int m_geomagnetic_rotation_direction_compensation[3];
 	int m_magnetic_alignment_factor;
 
-	bool on_start(void);
-	bool on_stop(void);
+	void init(fusion_type FUSION_TYPE);
+	void clear();
+	void get_orientation();
 };
 
-#endif
+
+
+#endif /* _fusion_sensor_H */
